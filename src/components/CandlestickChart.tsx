@@ -86,12 +86,12 @@ export function CandlestickChart() {
     });
 
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
-      upColor: 'hsl(var(--success))',
-      downColor: 'hsl(var(--danger))',
-      borderUpColor: 'hsl(var(--success))',
-      borderDownColor: 'hsl(var(--danger))',
-      wickUpColor: 'hsl(var(--success))',
-      wickDownColor: 'hsl(var(--danger))',
+      upColor: '#00C851',        // Vert classique pour hausse
+      downColor: '#FF4444',      // Rouge classique pour baisse
+      borderUpColor: '#00C851',   // Bordure verte
+      borderDownColor: '#FF4444', // Bordure rouge
+      wickUpColor: '#00C851',     // Mèche verte
+      wickDownColor: '#FF4444',   // Mèche rouge
     });
 
     chartRef.current = chart;
