@@ -26,6 +26,8 @@ interface WebhookResponse {
   sources?: Array<{
     title: string;
     url: string;
+    date?: string;
+    last_updated?: string;
   }>;
 }
 
@@ -59,7 +61,23 @@ export function MacroCommentary() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: WebhookResponse = await response.json();
+      const rawData = await response.json();
+      
+      // Extract data from the webhook response array
+      const responseData = rawData[0];
+      const content = responseData.choices[0].message.content;
+      const sources = responseData.search_results?.map((result: any) => ({
+        title: result.title,
+        url: result.url,
+        date: result.date,
+        last_updated: result.last_updated
+      }));
+
+      const data: WebhookResponse = {
+        content,
+        sources
+      };
+      
       setCommentary(data);
       
       toast({
