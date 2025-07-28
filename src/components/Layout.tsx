@@ -38,7 +38,7 @@ const modules = [
 ];
 
 export function Layout({ children, activeModule, onModuleChange }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -50,7 +50,7 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden"
+              className="hover:bg-accent/50"
             >
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -79,8 +79,8 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
       <div className="flex">
         {/* Sidebar */}
         <aside className={cn(
-          "h-[calc(100vh-4rem)] border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300",
-          sidebarOpen ? "w-80" : "w-0 md:w-20",
+          "h-[calc(100vh-4rem)] border-r border-border bg-card/30 backdrop-blur-sm transition-all duration-300 fixed md:relative z-30",
+          sidebarOpen ? "w-80" : "w-0",
           "overflow-hidden"
         )}>
           <div className="p-6">
@@ -123,6 +123,14 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
             </nav>
           </div>
         </aside>
+
+        {/* Backdrop for mobile */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-20 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

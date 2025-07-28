@@ -249,12 +249,118 @@ export function TradingDashboard() {
         </CardContent>
       </Card>
 
-      {/* Live Chart */}
-      <CandlestickChart 
-        asset={selectedAsset} 
-        title={`Live Chart - ${selectedAsset}`}
-        height={400}
-      />
+      {/* Chart and Trade Generator Section */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Live Chart */}
+        <div className="lg:col-span-2">
+          <CandlestickChart 
+            asset={selectedAsset} 
+            title={`Live Chart - ${selectedAsset}`}
+            height={400}
+          />
+        </div>
+
+        {/* AI Trade Idea Generator */}
+        <div className="lg:col-span-1">
+          <Card className="gradient-card border-border-light shadow-medium h-fit sticky top-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                AI Trade Generator
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Risk Preference
+                  </label>
+                  <Select value={riskLevel} onValueChange={setRiskLevel}>
+                    <SelectTrigger className="bg-background/50 border-border-light">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {riskLevels.map((level) => (
+                        <SelectItem key={level.value} value={level.value}>
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              "w-2 h-2 rounded-full",
+                              level.color === "success" ? "bg-success" :
+                              level.color === "warning" ? "bg-warning" : "bg-danger"
+                            )} />
+                            {level.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Time Horizon
+                  </label>
+                  <Select value={timeframe} onValueChange={setTimeframe}>
+                    <SelectTrigger className="bg-background/50 border-border-light">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeframes.map((tf) => (
+                        <SelectItem key={tf.value} value={tf.value}>
+                          {tf.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Button 
+                onClick={generateTradeIdea}
+                disabled={isGenerating}
+                className="w-full"
+                size="lg"
+              >
+                {isGenerating ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Target className="h-4 w-4 mr-2" />
+                    Generate Idea
+                  </>
+                )}
+              </Button>
+
+              {/* Quick Stats */}
+              <div className="space-y-3 pt-4 border-t border-border-light">
+                <h4 className="text-sm font-medium text-muted-foreground">Quick Stats</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Trend</span>
+                    <div className="flex items-center gap-1">
+                      {getTrendIcon(currentData.trend)}
+                      <span className={cn("font-medium", getTrendColor(currentData.trend))}>
+                        {currentData.trend}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Momentum</span>
+                    <span className="font-medium">{currentData.momentum}%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Volatility</span>
+                    <span className="font-medium">{currentData.volatility}%</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Technical Analysis */}
       <div className="grid md:grid-cols-3 gap-6">
@@ -379,80 +485,6 @@ export function TradingDashboard() {
         </Card>
       </div>
 
-      {/* Trade Idea Generator */}
-      <Card className="gradient-card border-border-light shadow-medium">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            AI Trade Idea Generator
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Risk Preference
-              </label>
-              <Select value={riskLevel} onValueChange={setRiskLevel}>
-                <SelectTrigger className="bg-background/50 border-border-light">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {riskLevels.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      <div className="flex items-center gap-2">
-                        <div className={cn(
-                          "w-2 h-2 rounded-full",
-                          level.color === "success" ? "bg-success" :
-                          level.color === "warning" ? "bg-warning" : "bg-danger"
-                        )} />
-                        {level.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Time Horizon
-              </label>
-              <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger className="bg-background/50 border-border-light">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeframes.map((tf) => (
-                    <SelectItem key={tf.value} value={tf.value}>
-                      {tf.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <Button 
-            onClick={generateTradeIdea}
-            disabled={isGenerating}
-            className="w-full"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                Generating Trade Idea...
-              </>
-            ) : (
-              <>
-                <Target className="h-4 w-4 mr-2" />
-                Generate Trade Idea for {selectedAsset}
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Trade Card */}
       {currentIdea && (
