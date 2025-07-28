@@ -70,23 +70,15 @@ export function MacroCommentary() {
       
       const rawData = JSON.parse(text);
       console.log('Parsed JSON:', rawData);
-      console.log('Array length:', rawData.length);
-      console.log('First item:', rawData[0]);
       
-      // Extract data from the webhook response array
-      const responseData = rawData[0];
-      
-      if (!responseData) {
-        throw new Error('No data in response array');
+      // The response is directly an object, not an array
+      if (!rawData.content || !rawData.content.content) {
+        console.log('Response data structure:', rawData);
+        throw new Error('Invalid response structure - missing content');
       }
       
-      if (!responseData.message) {
-        console.log('Response data structure:', responseData);
-        throw new Error('No message property in response data');
-      }
-      
-      const content = responseData.message.content.content;
-      const sources = responseData.message.citations?.map((url: string) => ({
+      const content = rawData.content.content;
+      const sources = rawData.citations?.map((url: string) => ({
         title: url.split('/').pop() || url,
         url: url
       }));
