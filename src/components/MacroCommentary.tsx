@@ -72,12 +72,10 @@ export function MacroCommentary() {
       
       // Extract data from the webhook response array
       const responseData = rawData[0];
-      const content = responseData.choices[0].message.content;
-      const sources = responseData.search_results?.map((result: any) => ({
-        title: result.title,
-        url: result.url,
-        date: result.date,
-        last_updated: result.last_updated
+      const content = responseData.message.content.content;
+      const sources = responseData.message.citations?.map((url: string) => ({
+        title: url.split('/').pop() || url,
+        url: url
       }));
 
       const data: WebhookResponse = {
