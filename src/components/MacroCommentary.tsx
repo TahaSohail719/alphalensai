@@ -61,7 +61,14 @@ export function MacroCommentary() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const rawData = await response.json();
+      const text = await response.text();
+      console.log('Raw response:', text);
+      
+      if (!text.trim()) {
+        throw new Error('Empty response from webhook');
+      }
+      
+      const rawData = JSON.parse(text);
       
       // Extract data from the webhook response array
       const responseData = rawData[0];
