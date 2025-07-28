@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { BarChart3, TrendingUp, TrendingDown, Minus, RefreshCw, Eye, AlertCircle, Target, Shield, DollarSign, Clock, Save, Share2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { BarChart3, TrendingUp, TrendingDown, Minus, RefreshCw, Eye, AlertCircle, Target, Shield, DollarSign, Clock, Save, Share2, Brain, PieChart, Calculator, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CandlestickChart } from "./CandlestickChart";
 const assets = [{
@@ -66,6 +68,24 @@ const timeframes = [{
 }, {
   value: "long",
   label: "Long-term (1+ months)"
+}];
+
+const tradeSizes = [{
+  value: "small",
+  label: "Small ($1K - $5K)",
+  multiplier: 0.5
+}, {
+  value: "medium", 
+  label: "Medium ($5K - $25K)",
+  multiplier: 1
+}, {
+  value: "large",
+  label: "Large ($25K+)",
+  multiplier: 2
+}, {
+  value: "custom",
+  label: "Custom Amount",
+  multiplier: 1
 }];
 const mockTechnicalData = {
   "EUR/USD": {
@@ -144,12 +164,26 @@ const mockTradeIdeas = {
     riskReward: "1:1.4",
     confidence: 78,
     timeframe: "Short-term",
-    reasoning: "Technical breakdown below 1.0850 support, bearish momentum confirmed by RSI divergence and MACD crossover.",
-    keyFactors: ["Technical breakdown", "RSI divergence", "ECB dovish policy", "USD strength"]
+    duration: "3-5 days",
+    expectedReturn: 6.4,
+    confidenceInterval: { min: 2.1, max: 8.9 },
+    successProbability: 72,
+    reasoning: "🔎 Strategy Rationale:\nBased on ECB dovish pivot and strong DXY momentum, this EUR/USD short setup aligns with macro divergence signals. Technical breakdown below 1.0850 support confirms bearish momentum with RSI divergence pattern. The AI estimates a 72% probability of successful 6.4% move within 3-5 trading days.",
+    macroFactors: "ECB dovish policy stance vs Fed hawkish outlook creating yield differential pressure on EUR. Economic data divergence supporting USD strength.",
+    technicalTrigger: "Clean break below 1.0850 support with volume confirmation. RSI bearish divergence and MACD negative crossover.",
+    riskAssessment: "Main risk: ECB surprise hawkish pivot or major USD weakness from geopolitical events. Low correlation with other positions.",
+    alternativesTrade: "Considered GBP/USD short but Brexit uncertainty adds noise. USD/CHF long rejected due to SNB intervention risk.",
+    keyFactors: ["Technical breakdown", "RSI divergence", "ECB dovish policy", "USD strength"],
+    performance: {
+      estimatedPnL: 640,
+      roi: 6.4,
+      duration: "3-5 days",
+      riskAmount: 500
+    }
   },
   "BTC": {
     instrument: "Bitcoin",
-    direction: "Long",
+    direction: "Long", 
     setup: "Breakout above resistance with volume confirmation",
     entry: "$42,500",
     stopLoss: "$40,000",
@@ -157,8 +191,22 @@ const mockTradeIdeas = {
     riskReward: "1:2.4",
     confidence: 85,
     timeframe: "Medium-term",
-    reasoning: "BTC breaking above key resistance with strong volume. Institutional adoption and risk-on sentiment improving.",
-    keyFactors: ["Volume breakout", "Institutional flows", "ETF demand", "Risk-on sentiment"]
+    duration: "7-12 days",
+    expectedReturn: 14.1,
+    confidenceInterval: { min: 8.2, max: 18.7 },
+    successProbability: 81,
+    reasoning: "🔎 Strategy Rationale:\nInstitutional accumulation patterns and ETF inflow momentum suggest strong bullish continuation. On-chain metrics showing reduced selling pressure while whale accumulation accelerates. The AI estimates 81% probability of 14.1% upside within 7-12 days based on historical breakout patterns.",
+    macroFactors: "Risk-on sentiment improving with Fed pivot expectations. Institutional crypto adoption accelerating through ETF channels.",
+    technicalTrigger: "Volume breakout above $42K resistance with RSI momentum divergence. Order flow showing institutional accumulation patterns.",
+    riskAssessment: "Main risk: Macro sentiment reversal or regulatory headwinds. Correlation with tech stocks moderate but manageable.",
+    alternativesTrade: "ETH long considered but BTC shows stronger momentum. SOL rejected due to higher beta and regulatory uncertainty.",
+    keyFactors: ["Volume breakout", "Institutional flows", "ETF demand", "Risk-on sentiment"],
+    performance: {
+      estimatedPnL: 1410,
+      roi: 14.1,
+      duration: "7-12 days",
+      riskAmount: 1000
+    }
   }
 };
 interface TechnicalIndicator {
@@ -184,8 +232,12 @@ export function TradingDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [riskLevel, setRiskLevel] = useState("medium");
   const [timeframe, setTimeframe] = useState("short");
+  const [tradeSize, setTradeSize] = useState("medium");
+  const [customAmount, setCustomAmount] = useState(10000);
+  const [confidenceThreshold, setConfidenceThreshold] = useState([70]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentIdea, setCurrentIdea] = useState<any>(null);
+  const [showRationale, setShowRationale] = useState(false);
   const currentData = mockTechnicalData[selectedAsset as keyof typeof mockTechnicalData] || mockTechnicalData["EUR/USD"];
   const refreshData = () => {
     setIsLoading(true);
@@ -194,10 +246,32 @@ export function TradingDashboard() {
   const generateTradeIdea = () => {
     setIsGenerating(true);
     setTimeout(() => {
-      const idea = mockTradeIdeas[selectedAsset as keyof typeof mockTradeIdeas] || mockTradeIdeas["EUR/USD"];
-      setCurrentIdea(idea);
+      const baseIdea = mockTradeIdeas[selectedAsset as keyof typeof mockTradeIdeas] || mockTradeIdeas["EUR/USD"];
+      const sizeMultiplier = tradeSizes.find(s => s.value === tradeSize)?.multiplier || 1;
+      const finalAmount = tradeSize === "custom" ? customAmount : 10000 * sizeMultiplier;
+      
+      // Calculate performance based on trade size and risk level
+      const riskMultiplier = riskLevel === "low" ? 0.5 : riskLevel === "high" ? 1.5 : 1;
+      const adjustedReturn = baseIdea.expectedReturn * riskMultiplier;
+      const estimatedPnL = (finalAmount * adjustedReturn) / 100;
+      const riskAmount = (finalAmount * (riskLevel === "low" ? 1 : riskLevel === "high" ? 4 : 2.5)) / 100;
+      
+      const enhancedIdea = {
+        ...baseIdea,
+        expectedReturn: adjustedReturn,
+        performance: {
+          ...baseIdea.performance,
+          estimatedPnL: Math.round(estimatedPnL),
+          roi: adjustedReturn,
+          riskAmount: Math.round(riskAmount),
+          tradeAmount: finalAmount
+        }
+      };
+      
+      setCurrentIdea(enhancedIdea);
       setIsGenerating(false);
-    }, 1500);
+      setShowRationale(false);
+    }, 2500);
   };
   const getTrendIcon = (trend: string) => {
     switch (trend.toLowerCase()) {
@@ -284,7 +358,7 @@ export function TradingDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
-                    Risk Preference
+                    Risk Appetite
                   </label>
                   <Select value={riskLevel} onValueChange={setRiskLevel}>
                     <SelectTrigger className="bg-background/50 border-border-light">
@@ -303,6 +377,37 @@ export function TradingDashboard() {
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
+                    Trade Size
+                  </label>
+                  <Select value={tradeSize} onValueChange={setTradeSize}>
+                    <SelectTrigger className="bg-background/50 border-border-light">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tradeSizes.map(size => <SelectItem key={size.value} value={size.value}>
+                          {size.label}
+                        </SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {tradeSize === "custom" && (
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">
+                      Custom Amount ($)
+                    </label>
+                    <Input
+                      type="number"
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(Number(e.target.value))}
+                      className="bg-background/50 border-border-light"
+                      placeholder="Enter amount"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
                     Time Horizon
                   </label>
                   <Select value={timeframe} onValueChange={setTimeframe}>
@@ -316,15 +421,29 @@ export function TradingDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Min Confidence: {confidenceThreshold[0]}%
+                  </label>
+                  <Slider
+                    value={confidenceThreshold}
+                    onValueChange={setConfidenceThreshold}
+                    max={95}
+                    min={50}
+                    step={5}
+                    className="py-2"
+                  />
+                </div>
               </div>
 
               <Button onClick={generateTradeIdea} disabled={isGenerating} className="w-full" size="lg">
                 {isGenerating ? <>
-                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                    Generating...
+                    <Brain className="h-4 w-4 animate-spin mr-2" />
+                    AI Analyzing...
                   </> : <>
-                    <Target className="h-4 w-4 mr-2" />
-                    Generate Idea
+                    <Brain className="h-4 w-4 mr-2" />
+                    Generate Trade Setup
                   </>}
               </Button>
 
@@ -452,12 +571,12 @@ export function TradingDashboard() {
       </div>
 
 
-      {/* Trade Card */}
+      {/* Enhanced Professional Trade Card */}
       {currentIdea && <Card className="gradient-card border-border-light shadow-strong">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-3">
-                <div className={cn("p-2 rounded-lg", currentIdea.direction.toLowerCase() === "long" ? "bg-success/10 text-success" : "bg-danger/10 text-danger")}>
+                <div className={cn("p-3 rounded-lg", currentIdea.direction.toLowerCase() === "long" ? "bg-success/10 text-success" : "bg-danger/10 text-danger")}>
                   {getDirectionIcon(currentIdea.direction)}
                 </div>
                 <div>
@@ -465,6 +584,9 @@ export function TradingDashboard() {
                     <span className="text-xl font-bold">{currentIdea.instrument}</span>
                     <Badge variant="secondary" className={cn(currentIdea.direction.toLowerCase() === "long" ? "bg-success/10 text-success border-success/20" : "bg-danger/10 text-danger border-danger/20")}>
                       {currentIdea.direction}
+                    </Badge>
+                    <Badge variant="outline" className="border-primary/20 text-primary">
+                      {currentIdea.confidence}% confidence
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -484,7 +606,7 @@ export function TradingDashboard() {
           </CardHeader>
           
           <CardContent className="space-y-6">
-            {/* Key Metrics */}
+            {/* Trade Setup Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-accent/30 rounded-lg p-4 border border-border-light">
                 <div className="flex items-center gap-2 mb-1">
@@ -527,38 +649,118 @@ export function TradingDashboard() {
               </div>
             </div>
 
+            {/* Performance Estimation */}
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Calculator className="h-4 w-4 text-primary" />
+                <h4 className="font-semibold text-foreground">Performance Forecast</h4>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Projected Return</p>
+                  <p className="text-lg font-bold text-success">+{currentIdea.performance.roi.toFixed(1)}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Est. P&L</p>
+                  <p className="text-lg font-bold text-foreground">${currentIdea.performance.estimatedPnL.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Duration</p>
+                  <p className="text-sm font-medium text-foreground">{currentIdea.duration}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Risk Amount</p>
+                  <p className="text-sm font-medium text-danger">${currentIdea.performance.riskAmount.toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-border-light">
+                <p className="text-xs text-muted-foreground">
+                  95% CI: +{currentIdea.confidenceInterval.min}% to +{currentIdea.confidenceInterval.max}% • 
+                  Success Probability: {currentIdea.successProbability}% • 
+                  Position Size: ${currentIdea.performance.tradeAmount.toLocaleString()}
+                </p>
+              </div>
+            </div>
+
             <Separator className="bg-border-light" />
 
-            {/* Analysis */}
+            {/* AI Strategy Rationale */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-foreground">Trade Analysis</h4>
+                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-primary" />
+                  AI Strategy Analysis
+                </h4>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {currentIdea.timeframe}
+                    {currentIdea.timeframe} • {currentIdea.duration}
                   </span>
-                  <div className="flex items-center gap-1 ml-2">
-                    <span className="text-sm text-muted-foreground">Confidence:</span>
-                    <Badge variant="outline" className="border-primary/20 text-primary">
-                      {currentIdea.confidence}%
-                    </Badge>
-                  </div>
                 </div>
               </div>
 
-              <p className="text-muted-foreground leading-relaxed">
-                {currentIdea.reasoning}
-              </p>
+              <div className="bg-accent/20 rounded-lg p-4 border border-border-light">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {currentIdea.reasoning}
+                </p>
+              </div>
+
+              <Button 
+                variant="outline" 
+                onClick={() => setShowRationale(!showRationale)}
+                className="w-full"
+              >
+                <Info className="h-4 w-4 mr-2" />
+                {showRationale ? "Hide" : "Show"} Detailed Rationale
+              </Button>
+
+              {showRationale && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-accent/20 rounded-lg p-4 border border-border-light">
+                      <h5 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                        <PieChart className="h-4 w-4 text-primary" />
+                        Macro Context
+                      </h5>
+                      <p className="text-sm text-muted-foreground">{currentIdea.macroFactors}</p>
+                    </div>
+                    <div className="bg-accent/20 rounded-lg p-4 border border-border-light">
+                      <h5 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-primary" />
+                        Technical Trigger
+                      </h5>
+                      <p className="text-sm text-muted-foreground">{currentIdea.technicalTrigger}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-accent/20 rounded-lg p-4 border border-border-light">
+                    <h5 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-warning" />
+                      Risk Assessment
+                    </h5>
+                    <p className="text-sm text-muted-foreground">{currentIdea.riskAssessment}</p>
+                  </div>
+
+                  <div className="bg-accent/20 rounded-lg p-4 border border-border-light">
+                    <h5 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      Alternative Analysis
+                    </h5>
+                    <p className="text-sm text-muted-foreground">{currentIdea.alternativesTrade}</p>
+                  </div>
+                </div>
+              )}
 
               <div>
-                <h5 className="font-medium text-foreground mb-2">Key Factors</h5>
+                <h5 className="font-medium text-foreground mb-2">Key Catalysts</h5>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {currentIdea.keyFactors.map((factor: string, index: number) => <div key={index} className="bg-primary/5 border border-primary/20 rounded-lg p-2">
+                  {currentIdea.keyFactors.map((factor: string, index: number) => (
+                    <div key={index} className="bg-primary/5 border border-primary/20 rounded-lg p-2">
                       <span className="text-xs text-primary font-medium">
                         {factor}
                       </span>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -567,9 +769,18 @@ export function TradingDashboard() {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3">
-              
-              
-              
+              <Button className="flex-1">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Execute Trade
+              </Button>
+              <Button variant="outline">
+                <Save className="h-4 w-4 mr-2" />
+                Save to Watchlist
+              </Button>
+              <Button variant="outline" onClick={generateTradeIdea}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Generate New
+              </Button>
             </div>
           </CardContent>
         </Card>}
