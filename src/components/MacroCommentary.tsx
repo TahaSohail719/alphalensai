@@ -44,13 +44,6 @@ export function MacroCommentary() {
     setError(null);
     
     try {
-      // Extract instrument from query
-      const instrument = sampleAssets.find(asset => 
-        query.toLowerCase().includes(asset.toLowerCase().replace(/[/\s]/g, ""))
-      ) || query.split(" ").find(word => 
-        word.length > 2 && !["the", "on", "for", "view", "analysis", "macro"].includes(word.toLowerCase())
-      ) || "EUR/USD";
-
       const response = await fetch('https://dorian68.app.n8n.cloud/webhook-test/4572387f-700e-4987-b768-d98b347bd7f1', {
         method: 'POST',
         headers: {
@@ -58,7 +51,7 @@ export function MacroCommentary() {
         },
         body: JSON.stringify({
           type: "RAG",
-          instrument: instrument
+          question: query.trim()
         })
       });
 
@@ -71,7 +64,7 @@ export function MacroCommentary() {
       
       toast({
         title: "Analysis Generated",
-        description: `Successfully generated macro commentary for ${instrument}`,
+        description: "Successfully generated macro commentary",
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate commentary';
