@@ -220,10 +220,108 @@ export function MacroCommentary() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Main Content */}
-              <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-                  {commentary.content}
-                </div>
+              <div className="space-y-6">
+                {commentary.content.split('\n\n').map((section, index) => {
+                  // Check if this is a title/heading
+                  if (section.includes('Weekly Outlook') || section.includes('Executive Summary') || 
+                      section.includes('Fundamental Analysis') || section.includes('Directional Bias') ||
+                      section.includes('Key Levels') || section.includes('AI Insights Breakdown') ||
+                      section.includes('Toggle GPT') || section.includes('Toggle Curated')) {
+                    return (
+                      <div key={index} className="space-y-3">
+                        {section.split('\n').map((line, lineIndex) => {
+                          if (lineIndex === 0 && (line.includes('Weekly Outlook') || 
+                              line.includes('Executive Summary') || 
+                              line.includes('Fundamental Analysis') ||
+                              line.includes('Directional Bias') ||
+                              line.includes('Key Levels') ||
+                              line.includes('AI Insights Breakdown') ||
+                              line.includes('Toggle GPT') ||
+                              line.includes('Toggle Curated'))) {
+                            return (
+                              <h3 key={lineIndex} className="text-lg font-bold text-primary border-b border-border pb-2">
+                                {line}
+                              </h3>
+                            );
+                          }
+                          
+                          if (line.startsWith('**') && line.endsWith('**')) {
+                            return (
+                              <p key={lineIndex} className="font-semibold text-foreground text-base leading-relaxed">
+                                {line.replace(/\*\*/g, '')}
+                              </p>
+                            );
+                          }
+                          
+                          if (line.startsWith('- **')) {
+                            const boldText = line.match(/\*\*(.*?)\*\*/)?.[1] || '';
+                            const remainingText = line.replace(/- \*\*(.*?)\*\*:?/, '').trim();
+                            return (
+                              <div key={lineIndex} className="flex gap-3 text-sm leading-relaxed">
+                                <span className="text-primary mt-1">•</span>
+                                <div>
+                                  <span className="font-semibold text-foreground">{boldText}</span>
+                                  {remainingText && <span className="text-muted-foreground">: {remainingText}</span>}
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          if (line.startsWith('Support') || line.startsWith('Resistance')) {
+                            return (
+                              <h4 key={lineIndex} className="font-semibold text-foreground text-sm mt-3 mb-1">
+                                {line}
+                              </h4>
+                            );
+                          }
+                          
+                          if (line.startsWith('- **$') || line.startsWith('- **€') || line.startsWith('- **£')) {
+                            const levelText = line.replace(/- \*\*(.*?)\*\*/, '$1');
+                            const description = line.includes('(') ? line.match(/\((.*?)\)/)?.[1] : '';
+                            return (
+                              <div key={lineIndex} className="flex items-center gap-2 text-sm ml-4">
+                                <span className="w-2 h-2 bg-primary rounded-full"></span>
+                                <span className="font-mono font-semibold text-primary">{levelText.split('**')[0]}</span>
+                                {description && <span className="text-muted-foreground">({description})</span>}
+                              </div>
+                            );
+                          }
+                          
+                          if (line.includes('Bullish') || line.includes('Bearish') || line.includes('Neutral')) {
+                            return (
+                              <div key={lineIndex} className="flex items-center gap-2 text-sm">
+                                <Badge variant={line.includes('Bullish') ? 'default' : line.includes('Bearish') ? 'destructive' : 'secondary'} className="text-xs">
+                                  {line.trim()}
+                                </Badge>
+                              </div>
+                            );
+                          }
+                          
+                          if (line.includes('Confidence:')) {
+                            return (
+                              <div key={lineIndex} className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">Confidence:</span>
+                                <span className="font-semibold text-primary">{line.replace('Confidence:', '').trim()}</span>
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <p key={lineIndex} className="text-sm text-muted-foreground leading-relaxed">
+                              {line.replace(/\[(\d+)\]/g, (match, num) => `[${num}]`)}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <p key={index} className="text-sm text-muted-foreground leading-relaxed">
+                      {section.replace(/\[(\d+)\]/g, (match, num) => `[${num}]`)}
+                    </p>
+                  );
+                })}
               </div>
 
               {/* Sources */}
