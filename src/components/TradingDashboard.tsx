@@ -2,591 +2,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { BarChart3, TrendingUp, TrendingDown, Minus, RefreshCw, Eye, AlertCircle, Target, Shield, DollarSign, Clock, Save, Share2, Brain, PieChart, Calculator, CheckCircle, Info } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Zap, Target, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CandlestickChart } from "./CandlestickChart";
 
-const assets = [{
-  symbol: "EUR/USD",
-  name: "Euro / US Dollar",
-  type: "FX"
-}, {
-  symbol: "GBP/USD",
-  name: "British Pound / US Dollar",
-  type: "FX"
-}, {
-  symbol: "USD/JPY",
-  name: "US Dollar / Japanese Yen",
-  type: "FX"
-}, {
-  symbol: "GOLD",
-  name: "Gold Spot",
-  type: "Commodity"
-}, {
-  symbol: "SILVER",
-  name: "Silver Spot",
-  type: "Commodity"
-}, {
-  symbol: "CRUDE",
-  name: "Crude Oil WTI",
-  type: "Commodity"
-}, {
-  symbol: "BTC",
-  name: "Bitcoin",
-  type: "Crypto"
-}, {
-  symbol: "ETH",
-  name: "Ethereum",
-  type: "Crypto"
-}];
+const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "GOLD", "SILVER", "CRUDE", "BTC", "ETH"];
+const timeframes = ["1h", "4h", "1d"];
 
-const riskLevels = [{
-  value: "low",
-  label: "Low Risk (1-2%)",
-  color: "success"
-}, {
-  value: "medium",
-  label: "Medium Risk (2-3%)",
-  color: "warning"
-}, {
-  value: "high",
-  label: "High Risk (3-5%)",
-  color: "danger"
-}];
-
-const timeframes = [{
-  value: "intraday",
-  label: "Intraday (1-4 hours)"
-}, {
-  value: "short",
-  label: "Short-term (1-3 days)"
-}, {
-  value: "medium",
-  label: "Medium-term (1-2 weeks)"
-}, {
-  value: "long",
-  label: "Long-term (1+ months)"
-}];
-
-const tradeSizes = [{
-  value: "small",
-  label: "Small ($1K - $5K)",
-  multiplier: 0.5
-}, {
-  value: "medium", 
-  label: "Medium ($5K - $25K)",
-  multiplier: 1
-}, {
-  value: "large",
-  label: "Large ($25K+)",
-  multiplier: 2
-}, {
-  value: "custom",
-  label: "Custom Amount",
-  multiplier: 1
-}];
-
-const mockTechnicalData = {
-  "EUR/USD": {
-    trend: "Bearish",
-    momentum: 35,
-    strength: 68,
-    volatility: 42,
-    signals: [{
-      name: "RSI",
-      value: 34,
-      status: "oversold",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: -0.0015,
-      status: "bearish",
-      color: "danger"
-    }, {
-      name: "SMA 50",
-      value: 1.0892,
-      status: "below",
-      color: "danger"
-    }, {
-      name: "SMA 200",
-      value: 1.0945,
-      status: "below",
-      color: "danger"
-    }],
-    keyLevels: {
-      resistance: ["1.0950", "1.0985", "1.1020"],
-      support: ["1.0850", "1.0810", "1.0775"]
-    },
-    lastUpdate: "2 minutes ago"
-  },
-  "GBP/USD": {
-    trend: "Bearish",
-    momentum: 28,
-    strength: 62,
-    volatility: 58,
-    signals: [{
-      name: "RSI",
-      value: 31,
-      status: "oversold",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: -0.0022,
-      status: "bearish",
-      color: "danger"
-    }, {
-      name: "SMA 50",
-      value: 1.2654,
-      status: "below",
-      color: "danger"
-    }, {
-      name: "SMA 200",
-      value: 1.2789,
-      status: "below",
-      color: "danger"
-    }],
-    keyLevels: {
-      resistance: ["1.2650", "1.2700", "1.2780"],
-      support: ["1.2580", "1.2520", "1.2450"]
-    },
-    lastUpdate: "3 minutes ago"
-  },
-  "USD/JPY": {
-    trend: "Bullish",
-    momentum: 72,
-    strength: 81,
-    volatility: 45,
-    signals: [{
-      name: "RSI",
-      value: 68,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: 0.85,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "SMA 50",
-      value: 148.25,
-      status: "above",
-      color: "success"
-    }, {
-      name: "SMA 200",
-      value: 146.80,
-      status: "above",
-      color: "success"
-    }],
-    keyLevels: {
-      resistance: ["150.50", "152.00", "154.25"],
-      support: ["148.00", "146.50", "144.80"]
-    },
-    lastUpdate: "1 minute ago"
-  },
-  "GOLD": {
-    trend: "Bullish",
-    momentum: 65,
-    strength: 74,
-    volatility: 38,
-    signals: [{
-      name: "RSI",
-      value: 62,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: 12.5,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "SMA 50",
-      value: 2045.20,
-      status: "above",
-      color: "success"
-    }, {
-      name: "SMA 200",
-      value: 2015.80,
-      status: "above",
-      color: "success"
-    }],
-    keyLevels: {
-      resistance: ["2080.00", "2095.00", "2110.00"],
-      support: ["2045.00", "2025.00", "2000.00"]
-    },
-    lastUpdate: "2 minutes ago"
-  },
-  "SILVER": {
-    trend: "Bullish",
-    momentum: 58,
-    strength: 69,
-    volatility: 52,
-    signals: [{
-      name: "RSI",
-      value: 59,
-      status: "neutral",
-      color: "warning"
-    }, {
-      name: "MACD",
-      value: 0.35,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "SMA 50",
-      value: 25.45,
-      status: "above",
-      color: "success"
-    }, {
-      name: "SMA 200",
-      value: 24.80,
-      status: "above",
-      color: "success"
-    }],
-    keyLevels: {
-      resistance: ["26.50", "27.20", "28.00"],
-      support: ["25.20", "24.60", "23.80"]
-    },
-    lastUpdate: "4 minutes ago"
-  },
-  "CRUDE": {
-    trend: "Neutral",
-    momentum: 45,
-    strength: 56,
-    volatility: 48,
-    signals: [{
-      name: "RSI",
-      value: 48,
-      status: "neutral",
-      color: "warning"
-    }, {
-      name: "MACD",
-      value: -0.25,
-      status: "bearish",
-      color: "danger"
-    }, {
-      name: "SMA 50",
-      value: 78.50,
-      status: "below",
-      color: "danger"
-    }, {
-      name: "SMA 200",
-      value: 82.20,
-      status: "below",
-      color: "danger"
-    }],
-    keyLevels: {
-      resistance: ["82.00", "85.50", "88.00"],
-      support: ["75.00", "72.50", "69.80"]
-    },
-    lastUpdate: "5 minutes ago"
-  },
-  "BTC": {
-    trend: "Bullish",
-    momentum: 78,
-    strength: 85,
-    volatility: 65,
-    signals: [{
-      name: "RSI",
-      value: 68,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: 1250.5,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "SMA 50",
-      value: 41200,
-      status: "above",
-      color: "success"
-    }, {
-      name: "SMA 200",
-      value: 39800,
-      status: "above",
-      color: "success"
-    }],
-    keyLevels: {
-      resistance: ["45000", "47500", "50000"],
-      support: ["41000", "39500", "37000"]
-    },
-    lastUpdate: "1 minute ago"
-  },
-  "ETH": {
-    trend: "Bullish",
-    momentum: 73,
-    strength: 79,
-    volatility: 71,
-    signals: [{
-      name: "RSI",
-      value: 64,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "MACD",
-      value: 85.2,
-      status: "bullish",
-      color: "success"
-    }, {
-      name: "SMA 50",
-      value: 2580,
-      status: "above",
-      color: "success"
-    }, {
-      name: "SMA 200",
-      value: 2420,
-      status: "above",
-      color: "success"
-    }],
-    keyLevels: {
-      resistance: ["2750", "2900", "3100"],
-      support: ["2500", "2350", "2200"]
-    },
-    lastUpdate: "2 minutes ago"
-  }
-};
-
-const mockTradeIdeas = {
-  "EUR/USD": {
-    instrument: "EUR/USD",
-    direction: "Short",
-    setup: "Break below key support level with confirmation",
-    entry: "1.0845",
-    stopLoss: "1.0895",
-    takeProfit: "1.0775",
-    riskReward: "1:1.4",
-    confidence: 78,
-    timeframe: "Short-term",
-    duration: "3-5 days",
-    expectedReturn: 6.4,
-    confidenceInterval: { min: 2.1, max: 8.9 },
-    successProbability: 72,
-    reasoning: "🔎 Strategy Rationale:\nBased on ECB dovish pivot and strong DXY momentum, this EUR/USD short setup aligns with macro divergence signals. Technical breakdown below 1.0850 support confirms bearish momentum with RSI divergence pattern. The AI estimates a 72% probability of successful 6.4% move within 3-5 trading days.",
-    macroFactors: "ECB dovish policy stance vs Fed hawkish outlook creating yield differential pressure on EUR. Economic data divergence supporting USD strength.",
-    technicalTrigger: "Clean break below 1.0850 support with volume confirmation. RSI bearish divergence and MACD negative crossover.",
-    riskAssessment: "Main risk: ECB surprise hawkish pivot or major USD weakness from geopolitical events. Low correlation with other positions.",
-    alternativesTrade: "Considered GBP/USD short but Brexit uncertainty adds noise. USD/CHF long rejected due to SNB intervention risk.",
-    keyFactors: ["Technical breakdown", "RSI divergence", "ECB dovish policy", "USD strength"],
-    performance: {
-      estimatedPnL: 640,
-      roi: 6.4,
-      duration: "3-5 days",
-      riskAmount: 500
-    }
-  },
-  "GBP/USD": {
-    instrument: "GBP/USD",
-    direction: "Short",
-    setup: "Brexit uncertainty driving continued weakness",
-    entry: "1.2590",
-    stopLoss: "1.2650",
-    takeProfit: "1.2480",
-    riskReward: "1:1.8",
-    confidence: 74,
-    timeframe: "Medium-term",
-    duration: "5-8 days",
-    expectedReturn: 8.7,
-    confidenceInterval: { min: 4.2, max: 12.1 },
-    successProbability: 69,
-    reasoning: "🔎 Strategy Rationale:\nBrexit uncertainty combined with BoE dovish stance creates persistent GBP weakness. Technical breakdown confirmed with volume selling. The AI estimates 69% probability of 8.7% downside within 5-8 trading days.",
-    macroFactors: "Brexit trade negotiations stalling, BoE dovish pivot, UK inflation concerns creating Sterling weakness vs USD strength.",
-    technicalTrigger: "Break below 1.2600 support level with RSI oversold bounce failure. Volume confirmation on selling pressure.",
-    riskAssessment: "Main risk: Surprise Brexit breakthrough or BoE hawkish pivot. Correlation with EUR/USD moderate.",
-    alternativesTrade: "EUR/GBP long considered but cross-currency volatility too high. GBP/JPY short rejected due to BoJ intervention risk.",
-    keyFactors: ["Brexit uncertainty", "BoE dovish stance", "Technical breakdown", "USD strength"],
-    performance: {
-      estimatedPnL: 870,
-      roi: 8.7,
-      duration: "5-8 days",
-      riskAmount: 600
-    }
-  },
-  "USD/JPY": {
-    instrument: "USD/JPY",
-    direction: "Long",
-    setup: "BoJ intervention fears vs Fed hawkishness",
-    entry: "149.20",
-    stopLoss: "147.80",
-    takeProfit: "152.50",
-    riskReward: "1:2.4",
-    confidence: 82,
-    timeframe: "Short-term",
-    duration: "2-4 days",
-    expectedReturn: 10.3,
-    confidenceInterval: { min: 6.8, max: 14.2 },
-    successProbability: 78,
-    reasoning: "🔎 Strategy Rationale:\nFed-BoJ policy divergence at extreme levels with USD strength momentum intact. Despite intervention risks, technical momentum favors continued upside. The AI estimates 78% probability of 10.3% upside within 2-4 trading days.",
-    macroFactors: "Fed maintaining hawkish stance vs BoJ ultra-dovish policy. US-Japan yield differentials supporting USD/JPY strength despite intervention threats.",
-    technicalTrigger: "Breakout above 149 resistance with momentum confirmation. Volume supporting upside move despite intervention concerns.",
-    riskAssessment: "Main risk: Surprise BoJ intervention above 150 level. Geopolitical tensions could trigger safe-haven JPY demand.",
-    alternativesTrade: "USD/CHF long considered but SNB intervention risk higher. EUR/JPY long rejected due to EUR weakness.",
-    keyFactors: ["Fed-BoJ divergence", "Yield differentials", "Technical momentum", "Intervention resistance"],
-    performance: {
-      estimatedPnL: 1030,
-      roi: 10.3,
-      duration: "2-4 days",
-      riskAmount: 700
-    }
-  },
-  "GOLD": {
-    instrument: "Gold",
-    direction: "Long",
-    setup: "Safe-haven demand amid global uncertainty",
-    entry: "$2,065",
-    stopLoss: "$2,040",
-    takeProfit: "$2,110",
-    riskReward: "1:1.8",
-    confidence: 79,
-    timeframe: "Medium-term",
-    duration: "7-10 days",
-    expectedReturn: 7.8,
-    confidenceInterval: { min: 4.5, max: 11.2 },
-    successProbability: 75,
-    reasoning: "🔎 Strategy Rationale:\nGeopolitical tensions and inflation concerns supporting gold's safe-haven appeal. Technical breakout above key resistance with institutional buying. The AI estimates 75% probability of 7.8% upside within 7-10 trading days.",
-    macroFactors: "Global uncertainty driving safe-haven demand. Central bank gold purchases accelerating. Dollar weakness expectations supporting precious metals.",
-    technicalTrigger: "Breakout above $2060 resistance with volume confirmation. RSI momentum supporting continued upside move.",
-    riskAssessment: "Main risk: Strong USD rally or aggressive Fed tightening. Risk-on sentiment could reduce safe-haven demand.",
-    alternativesTrade: "Silver long considered but higher volatility. Platinum rejected due to industrial demand concerns.",
-    keyFactors: ["Safe-haven demand", "Central bank buying", "Technical breakout", "Inflation hedge"],
-    performance: {
-      estimatedPnL: 780,
-      roi: 7.8,
-      duration: "7-10 days",
-      riskAmount: 250
-    }
-  },
-  "SILVER": {
-    instrument: "Silver",
-    direction: "Long",
-    setup: "Industrial demand recovery with precious metals momentum",
-    entry: "$25.80",
-    stopLoss: "$25.20",
-    takeProfit: "$27.40",
-    riskReward: "1:2.7",
-    confidence: 76,
-    timeframe: "Medium-term",
-    duration: "8-12 days",
-    expectedReturn: 12.4,
-    confidenceInterval: { min: 7.8, max: 16.9 },
-    successProbability: 71,
-    reasoning: "🔎 Strategy Rationale:\nSilver benefiting from dual demand - industrial recovery and precious metals safe-haven flow. Technical momentum accelerating with gold strength. The AI estimates 71% probability of 12.4% upside within 8-12 trading days.",
-    macroFactors: "Industrial demand recovery supporting silver. Green energy transition increasing industrial silver consumption. Precious metals complex strength.",
-    technicalTrigger: "Breakout above $25.50 resistance with volume expansion. RSI momentum supporting continued rally.",
-    riskAssessment: "Main risk: Industrial demand slowdown or strong USD rally. Higher volatility than gold increases risk.",
-    alternativesTrade: "Gold long considered but silver offers better risk-reward. Copper rejected due to China demand concerns.",
-    keyFactors: ["Industrial demand", "Green energy transition", "Precious metals strength", "Technical momentum"],
-    performance: {
-      estimatedPnL: 1240,
-      roi: 12.4,
-      duration: "8-12 days",
-      riskAmount: 600
-    }
-  },
-  "CRUDE": {
-    instrument: "Crude Oil",
-    direction: "Short",
-    setup: "Supply concerns easing with demand uncertainty",
-    entry: "$78.50",
-    stopLoss: "$82.00",
-    takeProfit: "$72.80",
-    riskReward: "1:1.6",
-    confidence: 68,
-    timeframe: "Short-term",
-    duration: "4-7 days",
-    expectedReturn: 7.3,
-    confidenceInterval: { min: 3.1, max: 11.8 },
-    successProbability: 64,
-    reasoning: "🔎 Strategy Rationale:\nOPEC+ production increases and China demand concerns weighing on crude. Technical breakdown below key support confirms bearish momentum. The AI estimates 64% probability of 7.3% downside within 4-7 trading days.",
-    macroFactors: "OPEC+ increasing production quotas. China economic slowdown reducing demand outlook. SPR releases adding supply pressure.",
-    technicalTrigger: "Break below $78 support with volume confirmation. RSI breakdown supporting continued selling pressure.",
-    riskAssessment: "Main risk: Geopolitical supply disruption or surprise OPEC+ cuts. Winter demand could provide support.",
-    alternativesTrade: "Natural gas short considered but higher volatility. Heating oil rejected due to seasonal demand factors.",
-    keyFactors: ["OPEC+ production", "China demand concerns", "Technical breakdown", "Supply increase"],
-    performance: {
-      estimatedPnL: 730,
-      roi: 7.3,
-      duration: "4-7 days",
-      riskAmount: 450
-    }
-  },
-  "BTC": {
-    instrument: "Bitcoin",
-    direction: "Long", 
-    setup: "Institutional adoption driving renewed momentum",
-    entry: "$42,500",
-    stopLoss: "$40,000",
-    takeProfit: "$48,500",
-    riskReward: "1:2.4",
-    confidence: 85,
-    timeframe: "Medium-term",
-    duration: "7-12 days",
-    expectedReturn: 14.1,
-    confidenceInterval: { min: 8.2, max: 18.7 },
-    successProbability: 81,
-    reasoning: "🔎 Strategy Rationale:\nInstitutional accumulation patterns and ETF inflow momentum suggest strong bullish continuation. On-chain metrics showing reduced selling pressure while whale accumulation accelerates. The AI estimates 81% probability of 14.1% upside within 7-12 days based on historical breakout patterns.",
-    macroFactors: "Risk-on sentiment improving with Fed pivot expectations. Institutional crypto adoption accelerating through ETF channels.",
-    technicalTrigger: "Volume breakout above $42K resistance with RSI momentum divergence. Order flow showing institutional accumulation patterns.",
-    riskAssessment: "Main risk: Macro sentiment reversal or regulatory headwinds. Correlation with tech stocks moderate but manageable.",
-    alternativesTrade: "ETH long considered but BTC shows stronger momentum. SOL rejected due to higher beta and regulatory uncertainty.",
-    keyFactors: ["Institutional adoption", "ETF inflows", "Technical breakout", "Risk-on sentiment"],
-    performance: {
-      estimatedPnL: 1410,
-      roi: 14.1,
-      duration: "7-12 days",
-      riskAmount: 1000
-    }
-  },
-  "ETH": {
-    instrument: "Ethereum",
-    direction: "Long",
-    setup: "DeFi revival and institutional interest",
-    entry: "$2,650",
-    stopLoss: "$2,500",
-    takeProfit: "$2,950",
-    riskReward: "1:2.0",
-    confidence: 81,
-    timeframe: "Medium-term",
-    duration: "6-10 days",
-    expectedReturn: 11.3,
-    confidenceInterval: { min: 6.9, max: 15.8 },
-    successProbability: 77,
-    reasoning: "🔎 Strategy Rationale:\nEthereum ecosystem growth with DeFi revival and staking yields attracting institutional interest. Technical momentum following Bitcoin strength with ETH-specific catalysts. The AI estimates 77% probability of 11.3% upside within 6-10 trading days.",
-    macroFactors: "DeFi total value locked increasing. Ethereum staking yields attracting institutional capital. Layer 2 scaling solutions gaining adoption.",
-    technicalTrigger: "Breakout above $2600 resistance with volume confirmation. ETH/BTC ratio showing relative strength.",
-    riskAssessment: "Main risk: Crypto regulatory concerns or broader risk-off sentiment. Higher volatility than BTC increases position risk.",
-    alternativesTrade: "BTC long considered but ETH offers better technical setup. SOL rejected due to regulatory uncertainty.",
-    keyFactors: ["DeFi revival", "Staking yields", "Technical breakout", "Institutional interest"],
-    performance: {
-      estimatedPnL: 1130,
-      roi: 11.3,
-      duration: "6-10 days",
-      riskAmount: 800
-    }
-  }
-};
-
-interface TechnicalIndicator {
-  name: string;
-  value: number | string;
-  status: string;
-  color: "success" | "danger" | "warning";
-}
-
-interface AssetTechnical {
-  trend: string;
-  momentum: number;
-  strength: number;
-  volatility: number;
-  signals: TechnicalIndicator[];
-  keyLevels: {
-    resistance: string[];
-    support: string[];
-  };
-  lastUpdate: string;
+interface TradeIdea {
+  instrument: string;
+  direction: "buy" | "sell";
+  reasoning: string;
+  confidence: number;
+  risk_reward: number;
 }
 
 interface TradeLevels {
@@ -600,55 +30,32 @@ interface TradeLevels {
 
 export function TradingDashboard() {
   const [selectedAsset, setSelectedAsset] = useState("EUR/USD");
-  const [isLoading, setIsLoading] = useState(false);
-  const [riskLevel, setRiskLevel] = useState("medium");
-  const [timeframe, setTimeframe] = useState("short");
-  const [tradeSize, setTradeSize] = useState("medium");
-  const [customAmount, setCustomAmount] = useState(10000);
-  const [confidenceThreshold, setConfidenceThreshold] = useState([70]);
+  const [timeframe, setTimeframe] = useState("4h");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentIdea, setCurrentIdea] = useState<any>(null);
-  const [showRationale, setShowRationale] = useState(false);
+  const [tradeIdea, setTradeIdea] = useState<TradeIdea | null>(null);
   const [tradeLevels, setTradeLevels] = useState<TradeLevels | null>(null);
   const [showLevels, setShowLevels] = useState(false);
   const [isGeneratingLevels, setIsGeneratingLevels] = useState(false);
 
-  const currentData = mockTechnicalData[selectedAsset as keyof typeof mockTechnicalData];
-
-  const refreshData = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
-  };
-
   const generateTradeIdea = () => {
     setIsGenerating(true);
+    
+    // Simulate API call delay
     setTimeout(() => {
-      const baseIdea = mockTradeIdeas[selectedAsset as keyof typeof mockTradeIdeas];
-      const sizeMultiplier = tradeSizes.find(s => s.value === tradeSize)?.multiplier || 1;
-      const finalAmount = tradeSize === "custom" ? customAmount : 10000 * sizeMultiplier;
+      const directions: ("buy" | "sell")[] = ["buy", "sell"];
+      const direction = directions[Math.floor(Math.random() * directions.length)];
       
-      // Calculate performance based on trade size and risk level
-      const riskMultiplier = riskLevel === "low" ? 0.5 : riskLevel === "high" ? 1.5 : 1;
-      const adjustedReturn = baseIdea.expectedReturn * riskMultiplier;
-      const estimatedPnL = (finalAmount * adjustedReturn) / 100;
-      const riskAmount = (finalAmount * (riskLevel === "low" ? 1 : riskLevel === "high" ? 4 : 2.5)) / 100;
-      
-      const enhancedIdea = {
-        ...baseIdea,
-        expectedReturn: adjustedReturn,
-        performance: {
-          ...baseIdea.performance,
-          estimatedPnL: Math.round(estimatedPnL),
-          roi: adjustedReturn,
-          riskAmount: Math.round(riskAmount),
-          tradeAmount: finalAmount
-        }
+      const mockIdea: TradeIdea = {
+        instrument: selectedAsset,
+        direction,
+        reasoning: `AI analysis suggests a ${direction} opportunity based on technical indicators and market sentiment for ${selectedAsset}.`,
+        confidence: Math.floor(Math.random() * 20) + 70, // 70-90%
+        risk_reward: parseFloat((Math.random() * 2 + 1.5).toFixed(1)) // 1.5-3.5
       };
       
-      setCurrentIdea(enhancedIdea);
+      setTradeIdea(mockIdea);
       setIsGenerating(false);
-      setShowRationale(false);
-    }, 2500);
+    }, 2000);
   };
 
   const generateTechnicalLevels = () => {
@@ -656,38 +63,31 @@ export function TradingDashboard() {
     
     // Simulate API call delay
     setTimeout(() => {
-      const currentPrice = parseFloat(mockTechnicalData[selectedAsset]?.keyLevels.resistance[0] || "100");
-      const direction = mockTechnicalData[selectedAsset]?.trend === "Bullish" ? "buy" : "sell";
+      if (!tradeIdea) return;
+      
+      const basePrice = 1.0900; // Mock current price
+      const direction = tradeIdea.direction;
       
       let entry, stopLoss, takeProfit;
       
       if (direction === "buy") {
-        entry = currentPrice * 0.995; // Enter slightly below current
-        stopLoss = entry * 0.98; // 2% stop loss
-        takeProfit = entry * 1.06; // 6% take profit (3:1 R:R)
+        entry = basePrice * 0.998;
+        stopLoss = entry * 0.985;
+        takeProfit = entry * 1.045;
       } else {
-        entry = currentPrice * 1.005; // Enter slightly above current
-        stopLoss = entry * 1.02; // 2% stop loss
-        takeProfit = entry * 0.94; // 6% take profit (3:1 R:R)
+        entry = basePrice * 1.002;
+        stopLoss = entry * 1.015;
+        takeProfit = entry * 0.955;
       }
       
       const riskReward = Math.abs(takeProfit - entry) / Math.abs(entry - stopLoss);
-      
-      const taSummaries = [
-        "Bullish breakout above key resistance with strong volume confirmation",
-        "Bearish reversal at resistance with RSI divergence",
-        "Support retest with hammer candlestick pattern",
-        "Trend continuation after pullback to 20 EMA",
-        "Double bottom formation with bullish divergence",
-        "Bearish flag pattern breakdown below support"
-      ];
       
       const levels: TradeLevels = {
         entry: parseFloat(entry.toFixed(4)),
         stopLoss: parseFloat(stopLoss.toFixed(4)),
         takeProfit: parseFloat(takeProfit.toFixed(4)),
         riskReward: parseFloat(riskReward.toFixed(2)),
-        taSummary: taSummaries[Math.floor(Math.random() * taSummaries.length)],
+        taSummary: "Technical analysis shows strong momentum with key level confirmation.",
         direction
       };
       
@@ -697,525 +97,171 @@ export function TradingDashboard() {
     }, 1500);
   };
 
-  const handleLevelUpdate = (type: 'entry' | 'stopLoss' | 'takeProfit', value: number) => {
-    if (!tradeLevels) return;
-    
-    const updatedLevels = { ...tradeLevels, [type]: value };
-    
-    // Recalculate risk/reward
-    const riskReward = Math.abs(updatedLevels.takeProfit - updatedLevels.entry) / 
-                      Math.abs(updatedLevels.entry - updatedLevels.stopLoss);
-    updatedLevels.riskReward = parseFloat(riskReward.toFixed(2));
-    
-    setTradeLevels(updatedLevels);
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend.toLowerCase()) {
-      case "bullish":
-        return <TrendingUp className="h-4 w-4 text-success" />;
-      case "bearish":
-        return <TrendingDown className="h-4 w-4 text-danger" />;
-      default:
-        return <Minus className="h-4 w-4 text-warning" />;
-    }
-  };
-
-  const getTrendColor = (trend: string) => {
-    switch (trend.toLowerCase()) {
-      case "bullish":
-        return "text-success";
-      case "bearish":
-        return "text-danger";
-      default:
-        return "text-warning";
-    }
-  };
-
-  const getDirectionColor = (direction: string) => {
-    return direction.toLowerCase() === "long" ? "text-success" : "text-danger";
-  };
-
-  const getDirectionIcon = (direction: string) => {
-    return direction.toLowerCase() === "long" ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />;
-  };
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border-light pb-6">
+    <div className="space-y-6">
+      {/* Header with Market Selection */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-foreground tracking-tight">Trading Dashboard</h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            AI-powered technical analysis and trade generation
-          </p>
+          <h1 className="text-3xl font-bold text-foreground">Trading Dashboard</h1>
+          <p className="text-muted-foreground">AI-powered trade analysis and execution</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-3 py-1">
-            <Brain className="h-4 w-4 mr-2" />
-            AI Copilot Active
-          </Badge>
-          <Button variant="outline" onClick={refreshData} disabled={isLoading} className="px-4">
-            {isLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            Refresh Data
-          </Button>
-        </div>
-      </div>
-
-      {/* Asset Selector - Compact horizontal layout */}
-      <div className="bg-card/30 backdrop-blur-sm rounded-xl border border-border-light p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Market Selection
-          </h3>
-          <Badge variant="outline" className="text-sm">
-            {assets.find(a => a.symbol === selectedAsset)?.type}
-          </Badge>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {assets.map(asset => (
-            <button 
-              key={asset.symbol} 
-              onClick={() => setSelectedAsset(asset.symbol)}
-              className={cn(
-                "px-4 py-2 rounded-lg border transition-all duration-200 text-sm font-medium",
-                selectedAsset === asset.symbol 
-                  ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105" 
-                  : "bg-background/50 border-border-light hover:bg-accent/50 hover:border-primary/30"
-              )}
-            >
-              {asset.symbol}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         
-        {/* Chart Section - Takes more space */}
-        <div className="xl:col-span-3 space-y-6">
-          {/* Live Chart */}
-          <Card className="border-border-light shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <PieChart className="h-5 w-5 text-primary" />
-                  {selectedAsset} Live Chart
-                </CardTitle>
-                {tradeLevels && (
-                  <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-                    <Target className="h-3 w-3 mr-1" />
-                    Levels Active
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <CandlestickChart 
-                asset={selectedAsset} 
-                title={`${selectedAsset} Technical Analysis`} 
-                height={500}
-                tradeLevels={showLevels ? tradeLevels : null}
-                onLevelUpdate={handleLevelUpdate}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Technical Levels Generation */}
-          {currentIdea && (
-            <Card className="border-border-light shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5 text-primary" />
-                  Technical Level Generation
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={generateTechnicalLevels} 
-                  disabled={isGeneratingLevels}
-                  className="w-full lg:w-auto"
-                  size="lg"
-                >
-                  {isGeneratingLevels ? (
-                    <>
-                      <Brain className="h-4 w-4 animate-spin mr-2" />
-                      Calculating Levels...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="h-4 w-4 mr-2" />
-                      Generate Technical Levels
-                    </>
-                  )}
-                </Button>
-                
-                {tradeLevels && (
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-card/50 rounded-lg p-4 border border-border-light">
-                      <div className="text-sm text-muted-foreground mb-1">Entry Level</div>
-                      <div className="text-lg font-bold text-primary">{tradeLevels.entry}</div>
-                    </div>
-                    <div className="bg-card/50 rounded-lg p-4 border border-border-light">
-                      <div className="text-sm text-muted-foreground mb-1">Stop Loss</div>
-                      <div className="text-lg font-bold text-danger">{tradeLevels.stopLoss}</div>
-                    </div>
-                    <div className="bg-card/50 rounded-lg p-4 border border-border-light">
-                      <div className="text-sm text-muted-foreground mb-1">Take Profit</div>
-                      <div className="text-lg font-bold text-success">{tradeLevels.takeProfit}</div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Technical Analysis Bottom Section */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Trend Analysis */}
-            <Card className="border-border-light shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Trend Analysis</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Current Trend</span>
-                  <div className="flex items-center gap-2">
-                    {getTrendIcon(currentData.trend)}
-                    <span className={cn("font-medium", getTrendColor(currentData.trend))}>
-                      {currentData.trend}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Momentum</span>
-                      <span>{currentData.momentum}%</span>
-                    </div>
-                    <Progress value={currentData.momentum} className="h-2" />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Strength</span>
-                      <span>{currentData.strength}%</span>
-                    </div>
-                    <Progress value={currentData.strength} className="h-2" />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Volatility</span>
-                      <span>{currentData.volatility}%</span>
-                    </div>
-                    <Progress value={currentData.volatility} className="h-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Key Levels */}
-            <Card className="border-border-light shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Key Levels</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-danger mb-2">Resistance Levels</h4>
-                  <div className="space-y-2">
-                    {currentData.keyLevels.resistance.map((level, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-danger/5 border border-danger/20 rounded">
-                        <span className="text-sm">R{index + 1}</span>
-                        <span className="font-mono text-sm text-danger">{level}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-success mb-2">Support Levels</h4>
-                  <div className="space-y-2">
-                    {currentData.keyLevels.support.map((level, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-success/5 border border-success/20 rounded">
-                        <span className="text-sm">S{index + 1}</span>
-                        <span className="font-mono text-sm text-success">{level}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Technical Signals */}
-            <Card className="border-border-light shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Technical Signals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {currentData.signals.map((signal, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-accent/30 rounded-lg border border-border-light">
-                    <div>
-                      <div className="font-medium text-sm">{signal.name}</div>
-                      <div className="text-xs text-muted-foreground">{signal.status}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className={cn("font-mono text-sm", signal.color === "success" ? "text-success" : signal.color === "danger" ? "text-danger" : "text-warning")}>
-                        {typeof signal.value === 'number' ? signal.value.toFixed(4) : signal.value}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Sidebar - Controls and Results */}
-        <div className="xl:col-span-1 space-y-6">
+        {/* Compact Market Selection */}
+        <div className="flex gap-3">
+          <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Asset" />
+            </SelectTrigger>
+            <SelectContent>
+              {assets.map((asset) => (
+                <SelectItem key={asset} value={asset}>
+                  {asset}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           
-          {/* AI Trade Generator - Compact */}
-          <Card className="border-border-light shadow-lg sticky top-6">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Brain className="h-5 w-5 text-primary" />
+          <Select value={timeframe} onValueChange={setTimeframe}>
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1h">1H</SelectItem>
+              <SelectItem value="4h">4H</SelectItem>
+              <SelectItem value="1d">1D</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Main Layout - Chart Focused */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* AI Trade Setup - Prominent */}
+        <div className="lg:order-2">
+          <Card className="border-primary shadow-lg">
+            <CardHeader className="bg-primary/5">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Zap className="h-6 w-6 text-primary" />
                 AI Trade Setup
               </CardTitle>
+              <p className="text-sm text-muted-foreground">Generate intelligent trade ideas</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              
-              {/* Risk Level */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Risk Level</label>
-                <Select value={riskLevel} onValueChange={setRiskLevel}>
-                  <SelectTrigger className="bg-background/50 border-border-light">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {riskLevels.map(level => (
-                      <SelectItem key={level.value} value={level.value}>
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            "w-2 h-2 rounded-full", 
-                            level.color === "success" ? "bg-success" : 
-                            level.color === "warning" ? "bg-warning" : "bg-danger"
-                          )} />
-                          {level.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Trade Size */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Position Size</label>
-                <Select value={tradeSize} onValueChange={setTradeSize}>
-                  <SelectTrigger className="bg-background/50 border-border-light">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tradeSizes.map(size => (
-                      <SelectItem key={size.value} value={size.value}>
-                        {size.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {tradeSize === "custom" && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Amount ($)</label>
-                  <Input
-                    type="number"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(Number(e.target.value))}
-                    className="bg-background/50 border-border-light"
-                    placeholder="Enter amount"
-                  />
-                </div>
-              )}
-
-              {/* Time Horizon */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Time Horizon</label>
-                <Select value={timeframe} onValueChange={setTimeframe}>
-                  <SelectTrigger className="bg-background/50 border-border-light">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeframes.map(tf => (
-                      <SelectItem key={tf.value} value={tf.value}>
-                        {tf.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Confidence Threshold */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Min Confidence: {confidenceThreshold[0]}%
-                </label>
-                <Slider
-                  value={confidenceThreshold}
-                  onValueChange={setConfidenceThreshold}
-                  max={95}
-                  min={50}
-                  step={5}
-                  className="py-2"
-                />
-              </div>
-
-              {/* Generate Button */}
+            <CardContent className="space-y-4 pt-6">
               <Button 
                 onClick={generateTradeIdea} 
-                disabled={isGenerating} 
-                className="w-full" 
+                disabled={isGenerating}
+                className="w-full h-12 text-base"
                 size="lg"
               >
                 {isGenerating ? (
                   <>
-                    <Brain className="h-4 w-4 animate-spin mr-2" />
-                    Analyzing...
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Generating Trade Idea...
                   </>
                 ) : (
                   <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Generate Trade
+                    <Zap className="mr-2 h-5 w-5" />
+                    Generate Trade Idea
                   </>
                 )}
               </Button>
-            </CardContent>
-          </Card>
-
-          {/* Trade Result - Clean Display */}
-          {currentIdea && (
-            <Card className="border-border-light shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <CheckCircle className="h-5 w-5 text-success" />
-                    AI Recommendation
-                  </CardTitle>
-                  <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-                    {currentIdea.confidence}%
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                
-                {/* Direction & Symbol */}
-                <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border-light">
-                  <div className="flex items-center gap-2">
-                    <span className={cn("font-bold text-lg", getDirectionColor(currentIdea.direction))}>
-                      {currentIdea.direction}
-                    </span>
-                    <span className="text-muted-foreground">{currentIdea.instrument}</span>
-                  </div>
-                  {getDirectionIcon(currentIdea.direction)}
-                </div>
-
-                {/* Key Levels */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Entry:</span>
-                    <span className="font-medium">{currentIdea.entry}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Stop Loss:</span>
-                    <span className="font-medium text-danger">{currentIdea.stopLoss}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Take Profit:</span>
-                    <span className="font-medium text-success">{currentIdea.takeProfit}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-border-light pt-2">
-                    <span className="text-muted-foreground">R:R Ratio:</span>
-                    <Badge variant="outline" className="text-xs font-bold">
-                      {currentIdea.riskReward}
+              
+              {tradeIdea && (
+                <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-lg">{tradeIdea.instrument}</span>
+                    <Badge 
+                      variant={tradeIdea.direction === "buy" ? "default" : "destructive"}
+                      className="text-sm px-3 py-1"
+                    >
+                      {tradeIdea.direction.toUpperCase()}
                     </Badge>
                   </div>
-                </div>
-
-                {/* Performance Metrics */}
-                <div className="space-y-2 p-3 bg-success/5 rounded-lg border border-success/20">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Expected Return:</span>
-                    <span className="font-bold text-success">
-                      +{currentIdea.performance?.estimatedPnL ? `$${currentIdea.performance.estimatedPnL.toLocaleString()}` : 'N/A'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">ROI:</span>
-                    <span className="font-medium text-success">
-                      {currentIdea.expectedReturn?.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Duration:</span>
-                    <span className="font-medium">{currentIdea.duration}</span>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {tradeIdea.reasoning}
+                  </p>
+                  <div className="flex items-center justify-between text-sm font-medium">
+                    <span className="text-green-600">Confidence: {tradeIdea.confidence}%</span>
+                    <span className="text-blue-600">R:R: {tradeIdea.risk_reward}</span>
                   </div>
                 </div>
+              )}
+              
+              {tradeIdea && (
+                <Button 
+                  onClick={generateTechnicalLevels}
+                  disabled={isGeneratingLevels}
+                  variant="outline"
+                  className="w-full h-11"
+                >
+                  {isGeneratingLevels ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating Levels...
+                    </>
+                  ) : (
+                    <>
+                      <Target className="mr-2 h-4 w-4" />
+                      Generate Technical Levels
+                    </>
+                  )}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-                {/* Quick Actions */}
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => setShowRationale(!showRationale)}
-                  >
-                    <Info className="h-3 w-3 mr-1" />
-                    Details
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Save className="h-3 w-3 mr-1" />
-                    Save
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Share2 className="h-3 w-3 mr-1" />
-                    Share
-                  </Button>
-                </div>
-
-                {/* Detailed Rationale - Expandable */}
-                {showRationale && (
-                  <div className="mt-4 p-4 bg-card/30 rounded-lg border border-border-light space-y-3">
-                    <h5 className="font-semibold text-sm text-foreground">Trade Rationale</h5>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {currentIdea.reasoning}
-                    </p>
-                    
-                    <div className="space-y-2">
-                      <div>
-                        <span className="font-medium text-xs text-foreground">Macro Factors:</span>
-                        <p className="text-xs text-muted-foreground mt-1">{currentIdea.macroFactors}</p>
-                      </div>
-                      
-                      <div>
-                        <span className="font-medium text-xs text-foreground">Technical Trigger:</span>
-                        <p className="text-xs text-muted-foreground mt-1">{currentIdea.technicalTrigger}</p>
-                      </div>
-                      
-                      <div>
-                        <span className="font-medium text-xs text-foreground">Risk Assessment:</span>
-                        <p className="text-xs text-muted-foreground mt-1">{currentIdea.riskAssessment}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+        {/* Live Chart - Main Focus */}
+        <div className="lg:col-span-2 lg:order-1">
+          <Card className="h-[700px]">
+            <CardHeader>
+              <CardTitle className="text-xl">Live Chart - {selectedAsset}</CardTitle>
+            </CardHeader>
+            <CardContent className="h-full p-0">
+              <CandlestickChart 
+                asset={selectedAsset} 
+                tradeLevels={showLevels ? tradeLevels : undefined}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* Technical Analysis Section */}
+      {showLevels && tradeLevels && (
+        <Card className="border-green-200 bg-green-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-800">
+              <Target className="h-5 w-5" />
+              Technical Analysis Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide">Entry</Label>
+                <p className="text-2xl font-bold text-blue-600 mt-1">{tradeLevels.entry}</p>
+              </div>
+              <div className="text-center">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide">Stop Loss</Label>
+                <p className="text-2xl font-bold text-red-600 mt-1">{tradeLevels.stopLoss}</p>
+              </div>
+              <div className="text-center">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide">Take Profit</Label>
+                <p className="text-2xl font-bold text-green-600 mt-1">{tradeLevels.takeProfit}</p>
+              </div>
+              <div className="text-center">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide">Risk/Reward</Label>
+                <p className="text-2xl font-bold text-orange-600 mt-1">{tradeLevels.riskReward}</p>
+              </div>
+            </div>
+            <div className="mt-6 p-4 bg-white/70 rounded-lg border">
+              <h4 className="font-semibold text-green-800 mb-2">Analysis Summary</h4>
+              <p className="text-sm leading-relaxed">{tradeLevels.taSummary}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
