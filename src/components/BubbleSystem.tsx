@@ -41,10 +41,6 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
   ] as const;
 
   const handleBubbleClick = (bubbleId: "macro" | "reports" | "tradesetup") => {
-    if (bubbleId === "tradesetup" && onTradeSetupClick) {
-      onTradeSetupClick();
-      return;
-    }
     setActiveBubble(bubbleId);
   };
 
