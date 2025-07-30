@@ -62,7 +62,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       {!activeBubble && (
         <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
           {/* Debug info */}
-          <div className="text-xs bg-red-500 text-white p-1 rounded">
+          <div className="text-xs bg-red-500 text-white p-2 rounded font-mono">
             Active: {activeBubble || "none"}
           </div>
           {bubbles.map((bubble) => {
@@ -70,27 +70,24 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
             
             return (
               <div key={bubble.id} className="group relative">
-                {/* Enhanced Tooltip with Widget Effect */}
+                {/* Enhanced Tooltip */}
                 <div className="absolute right-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:scale-105">
                   <div className="bg-card/95 backdrop-blur-xl text-card-foreground px-4 py-3 rounded-xl shadow-2xl border border-border/50 text-sm whitespace-nowrap">
                     <div className="font-semibold">{bubble.label}</div>
                     <div className="text-xs text-muted-foreground mt-1">{bubble.description}</div>
                     <div className="text-xs text-primary mt-1 font-medium">Click to open widget</div>
-                    {/* Enhanced Arrow */}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full border-8 border-transparent border-l-card/95"></div>
                   </div>
                 </div>
 
-                {/* Enhanced Bubble Button with Widget Effect */}
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("🔥 DIRECT CLICK on bubble:", bubble.id);
+                {/* SIMPLIFIED CLICKABLE BUTTON */}
+                <button
+                  onClick={() => {
+                    console.log("🔥 BUBBLE CLICKED:", bubble.id);
                     handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
                   }}
                   className={cn(
-                    "h-16 w-16 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-110 cursor-pointer border-2 border-white/20",
+                    "h-16 w-16 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-110 cursor-pointer border-2 border-white/20 flex items-center justify-center",
                     bubble.color,
                     bubble.glow,
                     "hover:shadow-3xl hover:border-white/40 relative overflow-hidden"
@@ -99,19 +96,19 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
                 >
                   <IconComponent className="h-7 w-7 text-white drop-shadow-lg" />
                   
-                  {/* Shimmer effect for widget look */}
+                  {/* Shimmer effect */}
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                </Button>
+                </button>
 
                 {/* Enhanced Pulse animation */}
                 <div className={cn(
-                  "absolute inset-0 rounded-full animate-ping opacity-30",
+                  "absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none",
                   bubble.color.split(' ')[0]
                 )} />
                 
-                {/* Secondary pulse for widget effect */}
+                {/* Secondary pulse */}
                 <div className={cn(
-                  "absolute inset-0 rounded-full animate-pulse opacity-20 scale-110",
+                  "absolute inset-0 rounded-full animate-pulse opacity-20 scale-110 pointer-events-none",
                   bubble.color.split(' ')[0]
                 )} />
               </div>
