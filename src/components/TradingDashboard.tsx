@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Zap, Target, Loader2 } from "lucide-react";
+import { Zap, Target, Loader2, MessageCircle, Brain, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CandlestickChart } from "./CandlestickChart";
+import { BubbleSystem } from "./BubbleSystem";
 
 const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "GOLD", "SILVER", "CRUDE", "BTC", "ETH"];
 const timeframes = ["1h", "4h", "1d"];
@@ -98,12 +99,12 @@ export function TradingDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Header with Market Selection */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Trading Dashboard</h1>
-          <p className="text-muted-foreground">AI-powered trade analysis and execution</p>
+          <p className="text-muted-foreground">AI-powered trade analysis and execution with integrated insights</p>
         </div>
         
         {/* Compact Market Selection */}
@@ -262,6 +263,9 @@ export function TradingDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Conversational Bubble System */}
+      <BubbleSystem instrument={selectedAsset} timeframe={timeframe} />
     </div>
   );
 }
