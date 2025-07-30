@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Brain, FileText, MessageCircle, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ConversationalBubble } from "./ConversationalBubble";
+import { TradeSetupBubble } from "./TradeSetupBubble";
+import { MacroCommentaryBubble } from "./MacroCommentaryBubble";
+import { ReportsBubble } from "./ReportsBubble";
 
 interface BubbleSystemProps {
   instrument: string;
@@ -102,10 +104,25 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
         </div>
       )}
 
-      {/* Active Conversational Bubble */}
-      {activeBubble && (
-        <ConversationalBubble
-          mode={activeBubble}
+      {/* Active Specialized Bubbles */}
+      {activeBubble === "tradesetup" && (
+        <TradeSetupBubble
+          instrument={instrument}
+          timeframe={timeframe}
+          onClose={handleCloseBubble}
+        />
+      )}
+      
+      {activeBubble === "macro" && (
+        <MacroCommentaryBubble
+          instrument={instrument}
+          timeframe={timeframe}
+          onClose={handleCloseBubble}
+        />
+      )}
+      
+      {activeBubble === "reports" && (
+        <ReportsBubble
           instrument={instrument}
           timeframe={timeframe}
           onClose={handleCloseBubble}
