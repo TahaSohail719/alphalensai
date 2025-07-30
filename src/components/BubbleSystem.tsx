@@ -60,7 +60,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
     <>
       {/* Floating Access Bubbles - Always visible */}
       {!activeBubble && (
-        <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] flex flex-col gap-2 sm:gap-3">
           {bubbles.map((bubble) => {
             const IconComponent = bubble.icon;
             
@@ -72,7 +72,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
                   handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
                 }}
                 className={cn(
-                  "h-16 w-16 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer border-0",
+                  "h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer border-0",
                   "flex items-center justify-center relative overflow-hidden",
                   bubble.color,
                   bubble.glow,
@@ -84,7 +84,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
                 type="button"
                 title={bubble.label}
               >
-                <IconComponent className="h-6 w-6 text-white drop-shadow-sm relative z-10" />
+                <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white drop-shadow-sm relative z-10" />
                 
                 {/* Circle bubble shine */}
                 <div className="absolute top-3 left-3 w-3 h-3 bg-white/40 rounded-full blur-sm" />
@@ -95,10 +95,11 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
 
           {/* Enhanced System Status Indicator */}
           <div className="flex items-center justify-center mt-2">
-            <div className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-full px-4 py-2 shadow-xl">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-muted-foreground font-medium">AI Widgets</span>
+            <div className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-xl">
+              <div className="flex items-center gap-1 sm:gap-2 text-xs">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-muted-foreground font-medium hidden sm:inline">AI Widgets</span>
+                <span className="text-muted-foreground font-medium sm:hidden">AI</span>
                 <div className="w-1 h-1 bg-primary rounded-full animate-ping" />
               </div>
             </div>
@@ -107,9 +108,8 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
 
       {/* Active Specialized Bubbles */}
-      
       {activeBubble === "tradesetup" && (
-        <div className="fixed top-4 right-4 z-[10000] max-w-md w-full">
+        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
           <TradeSetupBubble
             instrument={instrument}
             timeframe={timeframe}
@@ -119,7 +119,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
       
       {activeBubble === "macro" && (
-        <div className="fixed top-4 right-4 z-[10000] max-w-md w-full">
+        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
           <MacroCommentaryBubble
             instrument={instrument}
             timeframe={timeframe}
@@ -129,7 +129,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
       
       {activeBubble === "reports" && (
-        <div className="fixed top-4 right-4 z-[10000] max-w-md w-full">
+        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
           <ReportsBubble
             instrument={instrument}
             timeframe={timeframe}
