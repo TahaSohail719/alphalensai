@@ -46,11 +46,13 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
   ] as const;
 
   const handleBubbleClick = (bubbleId: "macro" | "reports" | "tradesetup") => {
-    console.log("Bubble clicked:", bubbleId);
+    console.log("🎯 Bubble clicked:", bubbleId, "Current state:", activeBubble);
     setActiveBubble(bubbleId);
+    console.log("🔄 State should change to:", bubbleId);
   };
 
   const handleCloseBubble = () => {
+    console.log("🚪 Closing bubble, was:", activeBubble);
     setActiveBubble(null);
   };
 
@@ -59,6 +61,10 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       {/* Floating Access Bubbles - Always visible */}
       {!activeBubble && (
         <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
+          {/* Debug info */}
+          <div className="text-xs bg-red-500 text-white p-1 rounded">
+            Active: {activeBubble || "none"}
+          </div>
           {bubbles.map((bubble) => {
             const IconComponent = bubble.icon;
             
@@ -80,7 +86,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log("Widget bubble clicked!", bubble.id);
+                    console.log("🔥 DIRECT CLICK on bubble:", bubble.id);
                     handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
                   }}
                   className={cn(
@@ -126,6 +132,13 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
 
       {/* Active Specialized Bubbles - 1/3 Page Width Drawers */}
+      {/* Debug overlay */}
+      {activeBubble && (
+        <div className="fixed top-4 right-4 z-[10001] bg-green-500 text-white p-2 rounded text-xs">
+          Showing: {activeBubble}
+        </div>
+      )}
+      
       {activeBubble === "tradesetup" && (
         <div className="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-sm">
           <div className="fixed right-0 top-0 bottom-0 w-1/3 min-w-[400px] max-w-[600px] bg-card/95 backdrop-blur-xl border-l border-border/50 shadow-2xl overflow-hidden">
