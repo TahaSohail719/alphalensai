@@ -91,6 +91,15 @@ export function CandlestickChart({
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
+    // Clean up previous chart if it exists
+    if (chartRef.current) {
+      try {
+        chartRef.current.remove();
+      } catch (error) {
+        console.warn('Chart cleanup warning:', error);
+      }
+    }
+
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'hsl(var(--background))' },
