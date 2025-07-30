@@ -59,10 +59,6 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       {/* Floating Access Bubbles */}
       {!activeBubble && (
         <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
-          {/* Debug indicator */}
-          <div className="bg-red-500 text-white px-2 py-1 text-xs rounded">
-            BULLES ACTIVES - {instrument}
-          </div>
           {bubbles.map((bubble) => {
             const IconComponent = bubble.icon;
             
