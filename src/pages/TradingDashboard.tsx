@@ -104,7 +104,7 @@ export default function TradingDashboard() {
     <Layout activeModule="trading" onModuleChange={() => {}}>
       <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
         {/* Header moderne avec prix en temps réel */}
-        <div className="flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="gradient-primary p-2 md:p-3 rounded-lg md:rounded-xl shadow-glow-primary">
@@ -117,21 +117,21 @@ export default function TradingDashboard() {
             </div>
           </div>
 
-          {/* Prix en temps réel - Responsive */}
+          {/* Prix en temps réel - Coin supérieur droit */}
           {priceData && (
-            <Card className="gradient-card border-primary/20 shadow-glow-primary w-full">
-              <CardContent className="p-3 md:p-4">
+            <Card className="gradient-card border-primary/20 shadow-glow-primary min-w-[300px] shrink-0">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <span className="text-xl md:text-2xl">{currentAsset?.icon}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{currentAsset?.icon}</span>
                     <div>
-                      <h3 className="font-semibold text-sm md:text-base text-foreground">{selectedAsset}</h3>
-                      <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-none">{currentAsset?.name}</p>
+                      <h3 className="font-semibold text-foreground">{selectedAsset}</h3>
+                      <p className="text-xs text-muted-foreground">{currentAsset?.name}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      <span className="text-lg md:text-xl lg:text-2xl font-bold text-foreground">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-foreground">
                         ${priceData.price.toFixed(selectedAsset.includes('JPY') ? 2 : 4)}
                       </span>
                       <div className={cn(
@@ -140,7 +140,7 @@ export default function TradingDashboard() {
                       )} />
                     </div>
                     <div className={cn(
-                      "flex items-center gap-1 text-xs md:text-sm font-medium",
+                      "flex items-center gap-1 text-sm font-medium",
                       priceData.change24h >= 0 ? "text-success" : "text-danger"
                     )}>
                       {priceData.change24h >= 0 ? 
