@@ -125,10 +125,10 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
         </div>
       )}
 
-      {/* Active Specialized Bubbles - Rendered as Floating Modals */}
+      {/* Active Specialized Bubbles - 1/3 Page Width Drawers */}
       {activeBubble === "tradesetup" && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-sm">
+          <div className="fixed right-0 top-0 bottom-0 w-1/3 min-w-[400px] max-w-[600px] bg-card/95 backdrop-blur-xl border-l border-border/50 shadow-2xl overflow-hidden">
             <TradeSetupBubble
               instrument={instrument}
               timeframe={timeframe}
@@ -139,8 +139,8 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
       
       {activeBubble === "macro" && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-sm">
+          <div className="fixed right-0 top-0 bottom-0 w-1/3 min-w-[400px] max-w-[600px] bg-card/95 backdrop-blur-xl border-l border-border/50 shadow-2xl overflow-hidden">
             <MacroCommentaryBubble
               instrument={instrument}
               timeframe={timeframe}
@@ -151,8 +151,8 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
       )}
       
       {activeBubble === "reports" && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-sm">
+          <div className="fixed right-0 top-0 bottom-0 w-1/3 min-w-[400px] max-w-[600px] bg-card/95 backdrop-blur-xl border-l border-border/50 shadow-2xl overflow-hidden">
             <ReportsBubble
               instrument={instrument}
               timeframe={timeframe}

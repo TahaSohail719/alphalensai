@@ -154,68 +154,72 @@ export default function TradingDashboard() {
           )}
         </div>
 
-        {/* Sélection d'actifs moderne */}
-        <Card className="gradient-card border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Search className="h-5 w-5" />
-              Sélection d'actifs
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Recherche */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Rechercher un actif..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth"
-              />
-            </div>
+        {/* Sélection d'actifs épurée */}
+        <div className="flex items-center justify-between gap-4 p-4 bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl">
+          {/* Recherche compacte */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Rechercher un actif..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-input/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth text-sm"
+            />
+            
+            {/* Suggestions discrètes */}
+            {searchTerm && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
+                {filteredAssets.slice(0, 6).map((asset) => (
+                  <button
+                    key={asset.symbol}
+                    onClick={() => {
+                      setSelectedAsset(asset.symbol);
+                      setSearchTerm("");
+                    }}
+                    className="w-full px-3 py-2 text-left hover:bg-primary/10 transition-smooth flex items-center gap-2 first:rounded-t-lg last:rounded-b-lg"
+                  >
+                    <span className="text-sm">{asset.icon}</span>
+                    <span className="text-sm font-medium text-foreground">{asset.symbol}</span>
+                    <span className="text-xs text-muted-foreground truncate">{asset.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {/* Grille d'actifs */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-              {filteredAssets.map((asset) => (
-                <button
-                  key={asset.symbol}
-                  onClick={() => setSelectedAsset(asset.symbol)}
-                  className={cn(
-                    "p-4 rounded-xl border text-left transition-smooth hover:scale-105",
-                    selectedAsset === asset.symbol
-                      ? "border-primary bg-primary/10 shadow-glow-primary"
-                      : "border-border hover:border-primary/50 bg-card/50"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{asset.icon}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm text-foreground truncate">{asset.symbol}</p>
-                      <p className="text-xs text-muted-foreground truncate">{asset.name}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+          {/* Actifs populaires */}
+          <div className="flex items-center gap-2">
+            {allAssets.slice(0, 5).map((asset) => (
+              <button
+                key={asset.symbol}
+                onClick={() => setSelectedAsset(asset.symbol)}
+                className={cn(
+                  "px-3 py-2 rounded-lg text-sm font-medium transition-smooth flex items-center gap-2",
+                  selectedAsset === asset.symbol
+                    ? "bg-primary text-primary-foreground shadow-glow-primary"
+                    : "bg-card/50 hover:bg-primary/10 text-foreground"
+                )}
+              >
+                <span className="text-xs">{asset.icon}</span>
+                {asset.symbol}
+              </button>
+            ))}
+          </div>
 
-            {/* Timeframe */}
-            <div className="flex items-center gap-2 pt-2">
-              <span className="text-sm font-medium text-foreground">Période:</span>
-              <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1h">1H</SelectItem>
-                  <SelectItem value="4h">4H</SelectItem>
-                  <SelectItem value="1d">1D</SelectItem>
-                  <SelectItem value="1w">1W</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Timeframe */}
+          <Select value={timeframe} onValueChange={setTimeframe}>
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1h">1H</SelectItem>
+              <SelectItem value="4h">4H</SelectItem>
+              <SelectItem value="1d">1D</SelectItem>
+              <SelectItem value="1w">1W</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Graphique principal */}
         <Card className="gradient-card border-border/50 shadow-medium">
