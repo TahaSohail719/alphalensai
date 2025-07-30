@@ -65,54 +65,31 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
             const IconComponent = bubble.icon;
             
             return (
-              <div key={bubble.id} className="group relative">
-                {/* Enhanced Tooltip */}
-                <div className="absolute right-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:scale-105">
-                  <div className="bg-card/95 backdrop-blur-xl text-card-foreground px-4 py-3 rounded-xl shadow-2xl border border-border/50 text-sm whitespace-nowrap">
-                    <div className="font-semibold">{bubble.label}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{bubble.description}</div>
-                    <div className="text-xs text-primary mt-1 font-medium">Click to open widget</div>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full border-8 border-transparent border-l-card/95"></div>
-                  </div>
-                </div>
-
-                {/* PERFECT CIRCLE BUBBLE */}
-                <button
-                  onClick={() => {
-                    console.log("🔥 BUBBLE CLICKED:", bubble.id);
-                    handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
-                  }}
-                  className={cn(
-                    "h-16 w-16 rounded-full shadow-lg transition-all duration-300 group-hover:scale-110 cursor-pointer border-0",
-                    "flex items-center justify-center relative overflow-hidden",
-                    bubble.color,
-                    bubble.glow,
-                    "hover:shadow-xl transform hover:-translate-y-1"
-                  )}
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, ${bubble.color.includes('primary') ? 'hsl(var(--primary-glow))' : bubble.color.includes('blue') ? '#60a5fa' : '#34d399'}, ${bubble.color.includes('primary') ? 'hsl(var(--primary))' : bubble.color.includes('blue') ? '#3b82f6' : '#10b981'})`
-                  }}
-                  type="button"
-                >
-                  <IconComponent className="h-6 w-6 text-white drop-shadow-sm relative z-10" />
-                  
-                  {/* Perfect circle bubble shine */}
-                  <div className="absolute top-3 left-3 w-3 h-3 bg-white/40 rounded-full blur-sm" />
-                  <div className="absolute top-2 left-2 w-2 h-2 bg-white/60 rounded-full" />
-                </button>
-
-                {/* Enhanced Pulse animation */}
-                <div className={cn(
-                  "absolute inset-0 rounded-full animate-ping opacity-30 pointer-events-none",
-                  bubble.color.split(' ')[0]
-                )} />
+              <button
+                key={bubble.id}
+                onClick={() => {
+                  console.log("🔥 BUBBLE CLICKED:", bubble.id);
+                  handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
+                }}
+                className={cn(
+                  "h-16 w-16 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer border-0",
+                  "flex items-center justify-center relative overflow-hidden",
+                  bubble.color,
+                  bubble.glow,
+                  "hover:shadow-xl transform hover:-translate-y-1"
+                )}
+                style={{
+                  background: `radial-gradient(circle at 30% 30%, ${bubble.color.includes('primary') ? 'hsl(var(--primary-glow))' : bubble.color.includes('blue') ? '#60a5fa' : '#34d399'}, ${bubble.color.includes('primary') ? 'hsl(var(--primary))' : bubble.color.includes('blue') ? '#3b82f6' : '#10b981'})`
+                }}
+                type="button"
+                title={bubble.label}
+              >
+                <IconComponent className="h-6 w-6 text-white drop-shadow-sm relative z-10" />
                 
-                {/* Secondary pulse */}
-                <div className={cn(
-                  "absolute inset-0 rounded-full animate-pulse opacity-20 scale-110 pointer-events-none",
-                  bubble.color.split(' ')[0]
-                )} />
-              </div>
+                {/* Circle bubble shine */}
+                <div className="absolute top-3 left-3 w-3 h-3 bg-white/40 rounded-full blur-sm" />
+                <div className="absolute top-2 left-2 w-2 h-2 bg-white/60 rounded-full" />
+              </button>
             );
           })}
 
