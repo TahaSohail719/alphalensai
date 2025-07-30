@@ -125,29 +125,41 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick }: Bubbl
         </div>
       )}
 
-      {/* Active Specialized Bubbles */}
+      {/* Active Specialized Bubbles - Rendered as Floating Modals */}
       {activeBubble === "tradesetup" && (
-        <TradeSetupBubble
-          instrument={instrument}
-          timeframe={timeframe}
-          onClose={handleCloseBubble}
-        />
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <TradeSetupBubble
+              instrument={instrument}
+              timeframe={timeframe}
+              onClose={handleCloseBubble}
+            />
+          </div>
+        </div>
       )}
       
       {activeBubble === "macro" && (
-        <MacroCommentaryBubble
-          instrument={instrument}
-          timeframe={timeframe}
-          onClose={handleCloseBubble}
-        />
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <MacroCommentaryBubble
+              instrument={instrument}
+              timeframe={timeframe}
+              onClose={handleCloseBubble}
+            />
+          </div>
+        </div>
       )}
       
       {activeBubble === "reports" && (
-        <ReportsBubble
-          instrument={instrument}
-          timeframe={timeframe}
-          onClose={handleCloseBubble}
-        />
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <ReportsBubble
+              instrument={instrument}
+              timeframe={timeframe}
+              onClose={handleCloseBubble}
+            />
+          </div>
+        </div>
       )}
     </>
   );
