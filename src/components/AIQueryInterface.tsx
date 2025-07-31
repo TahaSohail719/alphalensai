@@ -33,7 +33,6 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const [queryType, setQueryType] = useState("general");
   const [results, setResults] = useState<QueryResult[]>([]);
   const { toast } = useToast();
 
@@ -49,7 +48,7 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: queryType,
+          type: "RAG",
           question: query,
           instrument: instrument,
           timeframe: timeframe
@@ -65,7 +64,7 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
       const newResult: QueryResult = {
         id: Date.now().toString(),
         query: query,
-        type: queryType,
+        type: "RAG",
         timestamp: new Date(),
         response: data.content?.content || data.content || "No response received"
       };
@@ -90,7 +89,7 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
   };
 
   const copyResult = (result: QueryResult) => {
-    const content = `Query: ${result.query}\nType: ${result.type}\nInstrument: ${instrument}\nResponse: ${result.response}`;
+    const content = `Query: ${result.query}\nResponse: ${result.response}`;
     navigator.clipboard.writeText(content);
     toast({
       title: "Copied",
@@ -115,9 +114,9 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg text-foreground">AI Query Interface</CardTitle>
+            <CardTitle className="text-lg text-foreground">AI Assistant</CardTitle>
             <Badge variant="outline" className="text-xs border-primary/30">
-              Direct Access
+              Chat with AI
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -142,45 +141,15 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
 
       {isExpanded && (
         <CardContent className="space-y-4">
-          {/* Query Form */}
+          {/* Query Form - Simplifié */}
           <div className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Query Type</label>
-                <Select value={queryType} onValueChange={setQueryType}>
-                  <SelectTrigger className="bg-input/50 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General Analysis</SelectItem>
-                    <SelectItem value="tradesetup">Trade Setup</SelectItem>
-                    <SelectItem value="macro">Macro Commentary</SelectItem>
-                    <SelectItem value="reports">Custom Report</SelectItem>
-                    <SelectItem value="technical">Technical Analysis</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Context</label>
-                <div className="flex gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {instrument}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {timeframe}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Your Query</label>
+              <label className="text-sm font-medium text-foreground">Ask the AI anything</label>
               <Textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter your analysis request here..."
-                className="h-20 bg-input/50 border-border/50 focus:ring-primary/50 resize-none"
+                placeholder="Type your question here... (e.g., 'What's the outlook for EUR/USD?', 'Analyze Bitcoin momentum')"
+                className="h-24 bg-input/50 border-border/50 focus:ring-primary/50 resize-none"
               />
             </div>
 
@@ -193,12 +162,12 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
+                    Asking AI...
                   </>
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Submit Query
+                    Ask AI
                   </>
                 )}
               </Button>
@@ -219,7 +188,7 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
           {results.length > 0 && (
             <div className="space-y-3 max-h-96 overflow-y-auto">
               <h4 className="text-sm font-semibold text-foreground border-b border-border/30 pb-1">
-                Query Results
+                Conversation History
               </h4>
               {results.map((result) => (
                 <Card key={result.id} className="bg-card/30 border-border/30">
@@ -227,23 +196,14 @@ export function AIQueryInterface({ instrument, timeframe }: AIQueryInterfaceProp
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "text-xs",
-                              result.type === "tradesetup" && "border-primary/50 text-primary bg-primary/10",
-                              result.type === "macro" && "border-success/50 text-success bg-success/10",
-                              result.type === "reports" && "border-warning/50 text-warning bg-warning/10",
-                              result.type === "general" && "border-muted/50 text-muted-foreground bg-muted/10"
-                            )}
-                          >
-                            {result.type}
+                          <Badge variant="secondary" className="text-xs">
+                            AI Response
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {result.timestamp.toLocaleTimeString()}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-foreground line-clamp-1">
+                        <p className="text-sm font-medium text-foreground line-clamp-2">
                           {result.query}
                         </p>
                       </div>
