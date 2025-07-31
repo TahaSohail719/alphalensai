@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Brain, Send, Loader2, Copy, Trash2 } from "lucide-react";
+import { Search, Brain, Send, Loader2, Copy, Trash2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,8 @@ interface AIResponse {
   query: string;
   timestamp: Date;
   response: string;
+  conversationId: string;
+  showReplyInput?: boolean;
 }
 
 interface HybridSearchBarProps {
@@ -39,6 +41,8 @@ export function HybridSearchBar({
   const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAIResults, setShowAIResults] = useState(false);
+  const [replyInputs, setReplyInputs] = useState<{[key: string]: string}>({});
+  const [replyLoading, setReplyLoading] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -97,11 +101,13 @@ export function HybridSearchBar({
 
       const data = await response.json();
       
+      const conversationId = Date.now().toString();
       const newResponse: AIResponse = {
-        id: Date.now().toString(),
+        id: conversationId,
         query: searchTerm,
         timestamp: new Date(),
-        response: data.content?.content || data.content || "No response received"
+        response: data.content?.content || data.content || "No response received",
+        conversationId: conversationId
       };
 
       setAiResponses(prev => [newResponse, ...prev]);
@@ -142,6 +148,75 @@ export function HybridSearchBar({
     });
   };
 
+  const handleReply = async (conversationId: string, replyText: string) => {
+    if (!replyText.trim()) return;
+
+    setReplyLoading(prev => ({ ...prev, [conversationId]: true }));
+    
+    try {
+      // Récupérer le contexte de la conversation
+      const conversationContext = aiResponses
+        .filter(r => r.conversationId === conversationId)
+        .reverse()
+        .map(r => `Q: ${r.query}\nA: ${r.response}`)
+        .join('\n\n');
+
+      const contextualQuestion = `Context:\n${conversationContext}\n\nFollow-up question: ${replyText}`;
+
+      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: "RAG",
+          question: contextualQuestion,
+          instrument: instrument,
+          timeframe: timeframe
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      const newResponse: AIResponse = {
+        id: Date.now().toString(),
+        query: replyText,
+        timestamp: new Date(),
+        response: data.content?.content || data.content || "No response received",
+        conversationId: conversationId
+      };
+
+      setAiResponses(prev => [newResponse, ...prev]);
+      setReplyInputs(prev => ({ ...prev, [conversationId]: "" }));
+      
+      toast({
+        title: "AI Response",
+        description: "Follow-up question answered successfully"
+      });
+    } catch (error) {
+      console.error('AI Reply error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process reply. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setReplyLoading(prev => ({ ...prev, [conversationId]: false }));
+    }
+  };
+
+  const toggleReplyInput = (responseId: string) => {
+    setAiResponses(prev => prev.map(response => 
+      response.id === responseId 
+        ? { ...response, showReplyInput: !response.showReplyInput }
+        : response
+    ));
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       if (isAIQuery) {
@@ -149,6 +224,13 @@ export function HybridSearchBar({
       } else if (filteredAssets.length > 0) {
         handleAssetSelect(filteredAssets[0]);
       }
+    }
+  };
+
+  const handleReplyKeyPress = (e: React.KeyboardEvent, conversationId: string) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleReply(conversationId, replyInputs[conversationId] || "");
     }
   };
 
@@ -311,11 +393,66 @@ export function HybridSearchBar({
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="bg-muted/20 rounded-md p-3">
+                    <div className="bg-muted/20 rounded-md p-3 mb-3">
                       <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                         {response.response}
                       </p>
                     </div>
+                    
+                    {/* Reply Section */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleReplyInput(response.id)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        {response.showReplyInput ? 'Cancel' : 'Reply'}
+                      </Button>
+                      
+                      {/* Indicateur de conversation */}
+                      {aiResponses.filter(r => r.conversationId === response.conversationId).length > 1 && (
+                        <Badge variant="secondary" className="text-xs">
+                          Conversation ({aiResponses.filter(r => r.conversationId === response.conversationId).length})
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Reply Input */}
+                    {response.showReplyInput && (
+                      <div className="mt-3 space-y-2">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Continue the conversation..."
+                            value={replyInputs[response.conversationId] || ""}
+                            onChange={(e) => setReplyInputs(prev => ({ 
+                              ...prev, 
+                              [response.conversationId]: e.target.value 
+                            }))}
+                            onKeyPress={(e) => handleReplyKeyPress(e, response.conversationId)}
+                            className="w-full px-3 py-2 pr-10 bg-input/50 border border-border/50 rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth"
+                            disabled={replyLoading[response.conversationId]}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleReply(response.conversationId, replyInputs[response.conversationId] || "")}
+                            disabled={replyLoading[response.conversationId] || !replyInputs[response.conversationId]?.trim()}
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2"
+                          >
+                            {replyLoading[response.conversationId] ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Send className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Press Enter to send • Shift+Enter for new line
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
