@@ -312,10 +312,10 @@ export function ConversationalBubble({ mode, instrument, timeframe, onClose }: C
                                 <div className="flex items-center gap-2">
                                   <div className={cn(
                                     "w-2 h-2 rounded-full",
-                                    section.type === "summary" && "bg-blue-500",
-                                    section.type === "analysis" && "bg-green-500",
-                                    section.type === "levels" && "bg-orange-500",
-                                    section.type === "insight" && "bg-purple-500"
+                                    section.type === "summary" && "bg-primary",
+                                    section.type === "analysis" && "bg-success",
+                                    section.type === "levels" && "bg-warning",
+                                    section.type === "insight" && "bg-primary-light"
                                   )} />
                                   <span className="font-medium text-sm">{section.title}</span>
                                 </div>
