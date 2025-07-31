@@ -75,66 +75,92 @@ export function ConversationalBubble({ mode, instrument, timeframe, onClose }: C
     setInput("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-        const aiMessage: Message = {
+    try {
+      // Call n8n webhook with the appropriate type
+      const webhookType = mode === "macro" ? "macro" : mode === "reports" ? "reports" : "tradesetup";
+      
+      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: webhookType,
+          question: input.trim(),
+          instrument: instrument,
+          timeframe: timeframe || "1H"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const text = await response.text();
+      console.log('Raw webhook response:', text);
+      
+      if (!text.trim()) {
+        throw new Error('Empty response from webhook');
+      }
+      
+      const rawData = JSON.parse(text);
+      console.log('Parsed webhook JSON:', rawData);
+
+      // Create AI message with webhook response
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "ai",
-        content: mode === "macro" 
-          ? "Based on current market conditions for " + instrument + ", here's my analysis:"
-          : mode === "reports"
-          ? "I'll help you generate a comprehensive report for " + instrument + ". Let me structure this for you:"
-          : "I'll generate an AI trade setup for " + instrument + ". Here's my analysis:",
+        content: rawData.content?.content || "Analysis completed successfully",
         timestamp: new Date(),
         sections: mode === "macro" ? [
           {
-            title: "Executive Summary",
-            content: `Current ${instrument} outlook shows mixed signals with key support at 1.0850 and resistance at 1.1200. Market sentiment remains cautiously optimistic pending upcoming economic data releases.`,
-            type: "summary"
-          },
-          {
-            title: "Technical Analysis",
-            content: `The pair is consolidating within a defined range. RSI indicates neutral momentum while moving averages suggest a slight bullish bias on the ${timeframe} timeframe.`,
+            title: "AI Analysis",
+            content: rawData.content?.content || `Current ${instrument} analysis based on market conditions and your query.`,
             type: "analysis"
-          },
-          {
-            title: "Key Levels",
-            content: `Support: 1.0850, 1.0780 | Resistance: 1.1200, 1.1350. Watch for breakout signals above/below these levels for directional momentum.`,
-            type: "levels"
           }
         ] : mode === "reports" ? [
           {
-            title: "Report Structure",
-            content: "I'll create a comprehensive trading report including market overview, technical analysis, and trade recommendations.",
+            title: "Generated Report",
+            content: rawData.content?.content || `Comprehensive report for ${instrument} based on your request.`,
             type: "summary"
-          },
-          {
-            title: "Key Sections",
-            content: "• Market Overview\n• Technical Analysis\n• Trade Ideas\n• Risk Assessment\n• Economic Calendar Impact",
-            type: "insight"
           }
         ] : [
           {
-            title: "Trade Analysis",
-            content: `Current ${instrument} setup shows strong potential for a directional move. Technical indicators align with fundamental drivers.`,
+            title: "Trade Setup",
+            content: rawData.content?.content || `AI-generated trade setup for ${instrument} based on current market conditions.`,
             type: "analysis"
-          },
-          {
-            title: "Entry Strategy",
-            content: "Recommended entry at current levels with defined risk parameters. Entry: 1.0950 | Stop: 1.0890 | Target: 1.1080",
-            type: "levels"
-          },
-          {
-            title: "Risk Assessment",
-            content: "Risk/Reward ratio of 2.1:1 with 85% confidence based on current market structure and momentum indicators.",
-            type: "insight"
           }
         ]
       };
 
       setMessages(prev => [...prev, aiMessage]);
+      
+      toast({
+        title: "Analysis Completed",
+        description: `Successfully generated ${mode} analysis`,
+      });
+
+    } catch (error) {
+      console.error('Webhook error:', error);
+      
+      // Fallback AI message in case of error
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "ai",
+        content: "I encountered an issue processing your request. Please try again.",
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const toggleSection = (sectionId: string) => {
