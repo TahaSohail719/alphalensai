@@ -63,10 +63,10 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
   });
 
   const quickQueries = [
-    "Analyse macro EUR/USD pour cette semaine",
-    "Impact des données NFP sur le Dollar",
-    "Outlook Bitcoin macro conditions",
-    "Analyse sentiment risque global"
+    "EUR/USD macro analysis for this week",
+    "NFP data impact on USD",
+    "Bitcoin macro conditions outlook",
+    "Global risk sentiment analysis"
   ];
 
   const generateAnalysis = async () => {
@@ -81,26 +81,26 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         timestamp: new Date(),
         sections: [
           {
-            title: "Vue d'ensemble du marché",
-            content: `L'analyse macro actuelle pour ${instrument} révèle un environnement complexe avec des signaux mixtes. Les banques centrales maintiennent une position prudente face aux pressions inflationnistes persistantes. Les indicateurs économiques récents suggèrent un ralentissement modéré de la croissance dans les principales économies développées.`,
+            title: "Market Overview",
+            content: `Current macro analysis for ${instrument} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`,
             type: "overview",
             expanded: true
           },
           {
-            title: "Analyse technique",
-            content: `Sur le plan technique, ${instrument} évolue dans une zone de consolidation avec des niveaux de support et résistance bien définis. Les indicateurs de momentum montrent une divergence baissière à court terme, tandis que la tendance de fond reste intact. Le RSI se situe en zone neutre, laissant place à une évolution dans les deux sens.`,
+            title: "Technical Analysis",
+            content: `On the technical front, ${instrument} is trading within a consolidation zone with well-defined support and resistance levels. Momentum indicators show short-term bearish divergence, while the underlying trend remains intact. RSI is in neutral territory, allowing for movement in both directions.`,
             type: "technical",
             expanded: false
           },
           {
-            title: "Facteurs fondamentaux",
-            content: `Les facteurs fondamentaux clés incluent :\n• Politique monétaire: Attente d'un maintien des taux directeurs\n• Inflation: Stabilisation autour des objectifs centraux\n• Croissance: Ralentissement modéré mais contrôlé\n• Géopolitique: Tensions persistantes créant de la volatilité\n• Sentiment de marché: Prudence des investisseurs`,
+            title: "Fundamental Factors",
+            content: `Key fundamental factors include:\n• Monetary policy: Expectation of maintaining current rates\n• Inflation: Stabilization around central targets\n• Growth: Moderate but controlled slowdown\n• Geopolitics: Persistent tensions creating volatility\n• Market sentiment: Investor caution`,
             type: "fundamental",
             expanded: false
           },
           {
-            title: "Perspectives et recommandations",
-            content: `Pour la période à venir, nous anticipons une volatilité modérée avec des opportunités sur les mouvements directionnels. Recommandations:\n• Surveillance des annonces de banques centrales\n• Attention aux données d'emploi et d'inflation\n• Suivi des indicateurs de sentiment de marché\n• Opportunités sur les retracements techniques`,
+            title: "Outlook and Recommendations",
+            content: `For the upcoming period, we anticipate moderate volatility with opportunities on directional moves. Recommendations:\n• Monitor central bank announcements\n• Watch employment and inflation data\n• Track market sentiment indicators\n• Opportunities on technical retracements`,
             type: "outlook",
             expanded: false
           }
@@ -118,8 +118,8 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       setIsGenerating(false);
       
       toast({
-        title: "Analyse générée",
-        description: "Nouvelle analyse macro disponible"
+        title: "Analysis Generated",
+        description: "New macro analysis available"
       });
     }, 3000);
   };
@@ -138,11 +138,11 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
   };
 
   const copyAnalysis = (analysis: MacroAnalysis) => {
-    const content = `Analyse Macro - ${analysis.query}\n\n${analysis.sections.map(s => `${s.title}:\n${s.content}`).join('\n\n')}`;
+    const content = `Macro Analysis - ${analysis.query}\n\n${analysis.sections.map(s => `${s.title}:\n${s.content}`).join('\n\n')}`;
     navigator.clipboard.writeText(content);
     toast({
-      title: "Copié",
-      description: "Analyse copiée dans le presse-papier"
+      title: "Copied",
+      description: "Analysis copied to clipboard"
     });
   };
 
@@ -202,12 +202,12 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           {/* Query Interface */}
           <div className="space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="query">Demande d'analyse</Label>
+              <Label htmlFor="query">Analysis Request</Label>
               <Textarea
                 id="query"
                 value={queryParams.query}
                 onChange={(e) => setQueryParams(prev => ({ ...prev, query: e.target.value }))}
-                placeholder="Ex: Analyse macro EUR/USD pour cette semaine"
+                placeholder="Ex: EUR/USD macro analysis for this week"
                 className="h-20"
               />
             </div>
@@ -220,10 +220,10 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="currency">Devise</SelectItem>
-                  <SelectItem value="commodity">Matière 1ère</SelectItem>
+                  <SelectItem value="currency">Currency</SelectItem>
+                  <SelectItem value="commodity">Commodity</SelectItem>
                   <SelectItem value="crypto">Crypto</SelectItem>
-                  <SelectItem value="equity">Actions</SelectItem>
+                  <SelectItem value="equity">Equity</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -234,8 +234,8 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="summary">Résumé</SelectItem>
-                  <SelectItem value="detailed">Détaillé</SelectItem>
+                  <SelectItem value="summary">Summary</SelectItem>
+                  <SelectItem value="detailed">Detailed</SelectItem>
                   <SelectItem value="expert">Expert</SelectItem>
                 </SelectContent>
               </Select>
@@ -247,9 +247,9 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Quotidien</SelectItem>
-                  <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                  <SelectItem value="monthly">Mensuel</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -277,12 +277,12 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Génération en cours...
+                  Generating...
                 </>
               ) : (
                 <>
                   <Search className="h-4 w-4 mr-2" />
-                  Générer l'analyse
+                  Generate Analysis
                 </>
               )}
             </Button>
@@ -381,7 +381,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
             <div className="text-center py-8 text-muted-foreground">
               <Brain className="h-8 w-8 mx-auto mb-3 text-blue-500/30" />
               <p className="text-sm">
-                Demandez une analyse macro personnalisée
+                Request a personalized macro analysis
               </p>
             </div>
           )}

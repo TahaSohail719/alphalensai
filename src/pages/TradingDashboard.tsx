@@ -11,7 +11,7 @@ import { BubbleSystem } from "@/components/BubbleSystem";
 import { Layout } from "@/components/Layout";
 import { getSymbolForAsset } from "@/lib/assetMapping";
 
-// Assets populaires avec leurs catégories
+// Popular assets with their categories
 const assetCategories = {
   forex: [
     { symbol: "EUR/USD", name: "Euro / US Dollar", icon: "💶" },
@@ -50,7 +50,7 @@ export default function TradingDashboard() {
   const [isConnected, setIsConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // WebSocket pour les prix en temps réel
+  // WebSocket for real-time prices
   useEffect(() => {
     const symbol = getSymbolForAsset(selectedAsset);
     let ws: WebSocket;
@@ -103,7 +103,7 @@ export default function TradingDashboard() {
   return (
     <Layout activeModule="trading" onModuleChange={() => {}}>
       <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
-        {/* Header moderne avec prix en temps réel */}
+        {/* Modern header with real-time price */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 md:gap-3">
@@ -112,12 +112,12 @@ export default function TradingDashboard() {
               </div>
               <div>
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Trading Dashboard</h1>
-                <p className="text-sm md:text-base text-muted-foreground hidden sm:block">Analyse IA en temps réel et exécution de trades</p>
+                <p className="text-sm md:text-base text-muted-foreground hidden sm:block">Real-time AI analysis and trade execution</p>
               </div>
             </div>
           </div>
 
-          {/* Prix en temps réel - Coin supérieur droit */}
+          {/* Real-time price - Top right corner */}
           {priceData && (
             <Card className="gradient-card border-primary/20 shadow-glow-primary min-w-[300px] shrink-0">
               <CardContent className="p-4">
@@ -156,20 +156,20 @@ export default function TradingDashboard() {
           )}
         </div>
 
-        {/* Sélection d'actifs mobile-first */}
+        {/* Asset selection mobile-first */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 md:p-4 bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl">
-          {/* Recherche responsive */}
+          {/* Responsive search */}
           <div className="relative flex-1 w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-input/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth text-sm"
             />
             
-            {/* Suggestions discrètes */}
+            {/* Discrete suggestions */}
             {searchTerm && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto">
                 {filteredAssets.slice(0, 6).map((asset) => (
@@ -190,7 +190,7 @@ export default function TradingDashboard() {
             )}
           </div>
 
-          {/* Actifs populaires - responsive grid */}
+          {/* Popular assets - responsive grid */}
           <div className="flex gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
             {allAssets.slice(0, 5).map((asset) => (
               <button
@@ -210,18 +210,18 @@ export default function TradingDashboard() {
           </div>
         </div>
 
-        {/* Graphique principal responsive */}
+        {/* Main responsive chart */}
         <Card className="gradient-card border-border/50 shadow-medium">
           <CardHeader className="border-b border-border/50 p-3 md:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <CardTitle className="text-lg md:text-xl text-foreground">
-                Graphique - {selectedAsset} ({timeframe})
+                Chart - {selectedAsset} ({timeframe})
               </CardTitle>
               <Badge variant="outline" className={cn(
                 "border-success/50 text-success bg-success/10 w-fit",
                 !isConnected && "border-danger/50 text-danger bg-danger/10"
               )}>
-                {isConnected ? "Connecté" : "Déconnecté"}
+                {isConnected ? "Connected" : "Disconnected"}
               </Badge>
             </div>
           </CardHeader>
@@ -245,8 +245,8 @@ export default function TradingDashboard() {
               <div className="gradient-primary p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
                 <Zap className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Trade Setup IA</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Analysez et trouvez des opportunités</p>
+              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">AI Trade Setup</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">Analyze and find opportunities</p>
             </CardContent>
           </Card>
 
@@ -258,8 +258,8 @@ export default function TradingDashboard() {
               <div className="gradient-success p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
                 <Activity className="h-5 w-5 md:h-6 md:w-6 text-success-foreground" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Analyse Macro</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Commentaires et analyses des marchés</p>
+              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Macro Analysis</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">Market commentary and analysis</p>
             </CardContent>
           </Card>
 
@@ -271,14 +271,14 @@ export default function TradingDashboard() {
               <div className="bg-warning/20 border border-warning/30 p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
                 <ArrowRight className="h-5 w-5 md:h-6 md:w-6 text-warning" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Rapports</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Consultez vos performances détaillées</p>
+              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Reports</h3>
+              <p className="text-xs md:text-sm text-muted-foreground">View your detailed performance</p>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Système de bulles flottantes */}
+      {/* Floating bubble system */}
       <BubbleSystem 
         instrument={selectedAsset} 
         timeframe={timeframe} 

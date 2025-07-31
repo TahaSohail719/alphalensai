@@ -42,7 +42,7 @@ export default function Reports() {
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
 
   const [reportConfig, setReportConfig] = useState({
-    title: "Rapport de Trading Mensuel",
+    title: "Monthly Trading Report",
     customNotes: "",
     exportFormat: "pdf"
   });
@@ -50,43 +50,43 @@ export default function Reports() {
   const [availableSections, setAvailableSections] = useState<ReportSection[]>([
     {
       id: "performance",
-      title: "Performance Globale",
-      description: "Résumé des performances avec métriques clés",
+      title: "Overall Performance",
+      description: "Performance summary with key metrics",
       included: true,
       order: 1
     },
     {
       id: "trades",
-      title: "Historique des Trades",
-      description: "Liste détaillée de tous les trades exécutés",
+      title: "Trade History",
+      description: "Detailed list of all executed trades",
       included: true,
       order: 2
     },
     {
       id: "analysis",
-      title: "Analyse Technique",
-      description: "Analyse des patterns et signaux identifiés",
+      title: "Technical Analysis",
+      description: "Analysis of identified patterns and signals",
       included: false,
       order: 3
     },
     {
       id: "risk",
-      title: "Gestion des Risques",
-      description: "Évaluation du risque et exposition du portefeuille",
+      title: "Risk Management",
+      description: "Risk assessment and portfolio exposure",
       included: true,
       order: 4
     },
     {
       id: "market",
-      title: "Conditions de Marché",
-      description: "Contexte macro et conditions de trading",
+      title: "Market Conditions",
+      description: "Macro context and trading conditions",
       included: false,
       order: 5
     },
     {
       id: "recommendations",
-      title: "Recommandations",
-      description: "Suggestions d'amélioration et stratégies futures",
+      title: "Recommendations",
+      description: "Improvement suggestions and future strategies",
       included: true,
       order: 6
     }
@@ -140,7 +140,7 @@ export default function Reports() {
 
       const generatedSections = includedSections.map(section => ({
         title: section.title,
-        content: `Contenu généré pour la section "${section.title}". Cette section contient une analyse détaillée basée sur vos données de trading récentes et les conditions de marché actuelles.`
+        content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`
       }));
 
       const newReport: GeneratedReport = {
@@ -158,8 +158,8 @@ export default function Reports() {
       setIsGenerating(false);
 
       toast({
-        title: "Rapport généré",
-        description: "Votre rapport a été généré avec succès.",
+        title: "Report Generated",
+        description: "Your report has been successfully generated.",
       });
     }, 3000);
   };
@@ -167,8 +167,8 @@ export default function Reports() {
   const exportReport = () => {
     // Simulate export
     toast({
-      title: "Rapport exporté",
-      description: `Votre rapport a été exporté en format ${reportConfig.exportFormat.toUpperCase()}.`,
+      title: "Report Exported",
+      description: `Your report has been exported in ${reportConfig.exportFormat.toUpperCase()} format.`,
     });
   };
 
@@ -191,8 +191,8 @@ export default function Reports() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Rapports</h1>
-            <p className="text-muted-foreground">Génération et export de rapports de trading détaillés</p>
+            <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+            <p className="text-muted-foreground">Generate and export detailed trading reports</p>
           </div>
         </div>
 
@@ -201,22 +201,22 @@ export default function Reports() {
             {/* Report Configuration */}
             <Card className="gradient-card">
               <CardHeader>
-                <CardTitle>Configuration du Rapport</CardTitle>
+                <CardTitle>Report Configuration</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reportTitle">Titre du rapport</Label>
+                    <Label htmlFor="reportTitle">Report Title</Label>
                     <Input
                       id="reportTitle"
                       value={reportConfig.title}
                       onChange={(e) => setReportConfig({ ...reportConfig, title: e.target.value })}
-                      placeholder="Nom de votre rapport"
+                      placeholder="Your report name"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="exportFormat">Format d'export</Label>
+                    <Label htmlFor="exportFormat">Export Format</Label>
                     <Select 
                       value={reportConfig.exportFormat} 
                       onValueChange={(value) => setReportConfig({ ...reportConfig, exportFormat: value })}
@@ -235,12 +235,12 @@ export default function Reports() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customNotes">Notes personnalisées</Label>
+                  <Label htmlFor="customNotes">Custom Notes</Label>
                   <Textarea
                     id="customNotes"
                     value={reportConfig.customNotes}
                     onChange={(e) => setReportConfig({ ...reportConfig, customNotes: e.target.value })}
-                    placeholder="Ajoutez des notes ou instructions spécifiques pour le rapport..."
+                    placeholder="Add specific notes or instructions for the report..."
                     rows={3}
                   />
                 </div>
@@ -250,7 +250,7 @@ export default function Reports() {
             {/* Sections Selection */}
             <Card className="gradient-card">
               <CardHeader>
-                <CardTitle>Sections du Rapport</CardTitle>
+                <CardTitle>Report Sections</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -309,12 +309,12 @@ export default function Reports() {
                   {isGenerating ? (
                     <>
                       <FileText className="mr-2 h-4 w-4 animate-pulse" />
-                      Génération en cours...
+                      Generating Report...
                     </>
                   ) : (
                     <>
                       <Plus className="mr-2 h-4 w-4" />
-                      Générer le Rapport
+                      Generate Report
                     </>
                   )}
                 </Button>
@@ -332,13 +332,13 @@ export default function Reports() {
                   <div>
                     <CardTitle>{currentReport.title}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Généré le {currentReport.createdAt.toLocaleDateString()} à{" "}
+                      Generated on {currentReport.createdAt.toLocaleDateString()} at{" "}
                       {currentReport.createdAt.toLocaleTimeString()}
                     </p>
                   </div>
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                     <Check className="w-3 h-3 mr-1" />
-                    Généré
+                    Generated
                   </Badge>
                 </div>
               </CardHeader>
@@ -352,7 +352,7 @@ export default function Reports() {
 
                 {currentReport.customNotes && (
                   <div className="border-l-4 border-warning/30 pl-4 bg-warning/5 p-4 rounded-r-lg">
-                    <h3 className="font-semibold text-lg mb-2">Notes Personnalisées</h3>
+                    <h3 className="font-semibold text-lg mb-2">Custom Notes</h3>
                     <p className="text-muted-foreground leading-relaxed">{currentReport.customNotes}</p>
                   </div>
                 )}
@@ -360,11 +360,11 @@ export default function Reports() {
                 <div className="flex gap-3 pt-4">
                   <Button onClick={resetComposer} variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
-                    Nouveau Rapport
+                    New Report
                   </Button>
                   <Button onClick={exportReport} className="flex-1">
                     <Download className="mr-2 h-4 w-4" />
-                    Exporter en {currentReport.exportFormat.toUpperCase()}
+                    Export as {currentReport.exportFormat.toUpperCase()}
                   </Button>
                 </div>
               </CardContent>

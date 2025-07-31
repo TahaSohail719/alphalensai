@@ -56,26 +56,26 @@ export default function MacroAnalysis() {
         timestamp: new Date(),
         sections: [
           {
-            title: "Vue d'ensemble du marché",
-            content: `L'analyse macro actuelle révèle des tendances importantes dans le contexte de "${queryParams.query}". Les indicateurs économiques montrent une convergence vers une nouvelle phase de stabilisation avec des opportunités émergentes dans les actifs ${queryParams.assetType}.`,
+            title: "Market Overview",
+            content: `Current macro analysis reveals important trends in the context of "${queryParams.query}". Economic indicators show convergence toward a new stabilization phase with emerging opportunities in ${queryParams.assetType} assets.`,
             type: "overview",
             expanded: true
           },
           {
-            title: "Analyse technique",
-            content: "Les niveaux de support et résistance indiquent une consolidation en cours. Les moyennes mobiles convergent vers un point de décision critique qui pourrait déterminer la direction à moyen terme.",
+            title: "Technical Analysis",
+            content: "Support and resistance levels indicate ongoing consolidation. Moving averages are converging toward a critical decision point that could determine medium-term direction.",
             type: "technical",
             expanded: false
           },
           {
-            title: "Facteurs fondamentaux",
-            content: "Les données macroéconomiques récentes suggèrent un environnement favorable aux investissements défensifs. L'inflation reste contenue tandis que la politique monétaire maintient un ton accommodant.",
+            title: "Fundamental Factors",
+            content: "Recent macroeconomic data suggests an environment favorable for defensive investments. Inflation remains contained while monetary policy maintains an accommodative tone.",
             type: "fundamental",
             expanded: false
           },
           {
-            title: "Sentiment du marché",
-            content: "Le sentiment général des investisseurs montre une prudence optimiste. Les flux de capitaux institutionnels restent positifs malgré une volatilité accrue dans certains segments.",
+            title: "Market Sentiment",
+            content: "Overall investor sentiment shows cautious optimism. Institutional capital flows remain positive despite increased volatility in certain segments.",
             type: "sentiment",
             expanded: false
           }
@@ -92,8 +92,8 @@ export default function MacroAnalysis() {
       setIsGenerating(false);
       
       toast({
-        title: "Analyse générée",
-        description: "Votre analyse macro a été générée avec succès.",
+        title: "Analysis Generated",
+        description: "Your macro analysis has been successfully generated.",
       });
     }, 3000);
   };
@@ -118,16 +118,16 @@ export default function MacroAnalysis() {
     
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copié",
-      description: "L'analyse a été copiée dans le presse-papiers.",
+      title: "Copied",
+      description: "The analysis has been copied to clipboard.",
     });
   };
 
   const quickQueries = [
-    "Impact de l'inflation sur les devises majeures",
-    "Analyse des politiques monétaires BCE vs Fed",
-    "Tendances crypto face aux marchés traditionnels",
-    "Opportunités dans les matières premières"
+    "Impact of inflation on major currencies",
+    "Analysis of ECB vs Fed monetary policies",
+    "Crypto trends vs traditional markets",
+    "Opportunities in commodities"
   ];
 
   return (
@@ -144,8 +144,8 @@ export default function MacroAnalysis() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Analyse Macro</h1>
-            <p className="text-muted-foreground">Analyses économiques et insights de marchés alimentés par l'IA</p>
+            <h1 className="text-3xl font-bold text-foreground">Macro Analysis</h1>
+            <p className="text-muted-foreground">AI-powered economic analysis and market insights</p>
           </div>
         </div>
 
@@ -154,7 +154,7 @@ export default function MacroAnalysis() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5" />
-              Générateur d'Analyses
+              Analysis Generator
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -162,53 +162,53 @@ export default function MacroAnalysis() {
               <Textarea
                 value={queryParams.query}
                 onChange={(e) => setQueryParams({ ...queryParams, query: e.target.value })}
-                placeholder="Posez votre question macro ou décrivez le contexte à analyser..."
+                placeholder="Ask your macro question or describe the context to analyze..."
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Type d'actif</label>
+                <label className="text-sm font-medium">Asset Type</label>
                 <Select value={queryParams.assetType} onValueChange={(value) => setQueryParams({ ...queryParams, assetType: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="forex">Devises (Forex)</SelectItem>
-                    <SelectItem value="crypto">Cryptomonnaies</SelectItem>
-                    <SelectItem value="commodities">Matières premières</SelectItem>
-                    <SelectItem value="equities">Actions</SelectItem>
-                    <SelectItem value="bonds">Obligations</SelectItem>
+                    <SelectItem value="forex">Currencies (Forex)</SelectItem>
+                    <SelectItem value="crypto">Cryptocurrencies</SelectItem>
+                    <SelectItem value="commodities">Commodities</SelectItem>
+                    <SelectItem value="equities">Stocks</SelectItem>
+                    <SelectItem value="bonds">Bonds</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Profondeur d'analyse</label>
+                <label className="text-sm font-medium">Analysis Depth</label>
                 <Select value={queryParams.depth} onValueChange={(value) => setQueryParams({ ...queryParams, depth: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="quick">Rapide</SelectItem>
-                    <SelectItem value="detailed">Détaillée</SelectItem>
-                    <SelectItem value="comprehensive">Complète</SelectItem>
+                    <SelectItem value="quick">Quick</SelectItem>
+                    <SelectItem value="detailed">Detailed</SelectItem>
+                    <SelectItem value="comprehensive">Comprehensive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Période</label>
+                <label className="text-sm font-medium">Period</label>
                 <Select value={queryParams.period} onValueChange={(value) => setQueryParams({ ...queryParams, period: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="current">Actuelle</SelectItem>
-                    <SelectItem value="week">Cette semaine</SelectItem>
-                    <SelectItem value="month">Ce mois</SelectItem>
-                    <SelectItem value="quarter">Ce trimestre</SelectItem>
+                    <SelectItem value="current">Current</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="quarter">This Quarter</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -237,12 +237,12 @@ export default function MacroAnalysis() {
               {isGenerating ? (
                 <>
                   <Brain className="mr-2 h-4 w-4 animate-pulse" />
-                  Analyse en cours...
+                  Analysis in progress...
                 </>
               ) : (
                 <>
                   <Globe className="mr-2 h-4 w-4" />
-                  Générer l'Analyse
+                  Generate Analysis
                 </>
               )}
             </Button>
@@ -255,8 +255,8 @@ export default function MacroAnalysis() {
             <Card className="gradient-card">
               <CardContent className="p-8 text-center">
                 <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Aucune analyse disponible</h3>
-                <p className="text-muted-foreground">Posez une question pour commencer à générer des analyses macro.</p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No analysis available</h3>
+                <p className="text-muted-foreground">Ask a question to start generating macro analyses.</p>
               </CardContent>
             </Card>
           ) : (
@@ -269,7 +269,7 @@ export default function MacroAnalysis() {
                       <div className="flex items-center gap-2 mt-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          {analysis.timestamp.toLocaleDateString()} à {analysis.timestamp.toLocaleTimeString()}
+                          {analysis.timestamp.toLocaleDateString()} at {analysis.timestamp.toLocaleTimeString()}
                         </span>
                       </div>
                     </div>

@@ -157,7 +157,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="timeframe">Horizon Temporel</Label>
+                  <Label htmlFor="timeframe">Time Horizon</Label>
                   <Select value={parameters.timeframe} onValueChange={(value) => 
                     setParameters(prev => ({ ...prev, timeframe: value }))
                   }>
@@ -165,16 +165,16 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="15M">Court terme (15M)</SelectItem>
-                      <SelectItem value="1H">Moyen terme (1H)</SelectItem>
-                      <SelectItem value="4H">Long terme (4H)</SelectItem>
-                      <SelectItem value="1D">Très long terme (1D)</SelectItem>
+                      <SelectItem value="15M">Short term (15M)</SelectItem>
+                      <SelectItem value="1H">Medium term (1H)</SelectItem>
+                      <SelectItem value="4H">Long term (4H)</SelectItem>
+                      <SelectItem value="1D">Very long term (1D)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="risk">Appétit au Risque</Label>
+                  <Label htmlFor="risk">Risk Appetite</Label>
                   <Select value={parameters.riskAppetite} onValueChange={(value) => 
                     setParameters(prev => ({ ...prev, riskAppetite: value }))
                   }>
@@ -182,9 +182,9 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Faible</SelectItem>
-                      <SelectItem value="moderate">Modéré</SelectItem>
-                      <SelectItem value="high">Élevé</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="moderate">Moderate</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -192,7 +192,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="position">Taille Position (USD)</Label>
+                  <Label htmlFor="position">Position Size (USD)</Label>
                   <Input
                     id="position"
                     type="number"
@@ -203,7 +203,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="strategy">Stratégie</Label>
+                  <Label htmlFor="strategy">Strategy</Label>
                   <Select value={parameters.strategy} onValueChange={(value) => 
                     setParameters(prev => ({ ...prev, strategy: value }))
                   }>
@@ -221,12 +221,12 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes Personnalisées</Label>
+                <Label htmlFor="notes">Custom Notes</Label>
                 <Textarea
                   id="notes"
                   value={parameters.customNotes}
                   onChange={(e) => setParameters(prev => ({ ...prev, customNotes: e.target.value }))}
-                  placeholder="Ajoutez vos critères spécifiques..."
+                  placeholder="Add your specific criteria..."
                   className="h-20"
                 />
               </div>
@@ -239,12 +239,12 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
                 {isGenerating ? (
                   <>
                     <Settings className="h-4 w-4 mr-2 animate-spin" />
-                    Génération en cours...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Générer le Trade Setup
+                    Generate Trade Setup
                   </>
                 )}
               </Button>
@@ -315,7 +315,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
 
               {/* Reasoning */}
               <div className="p-3 border rounded-lg bg-muted/50">
-                <div className="text-xs text-muted-foreground mb-2">Analyse IA</div>
+                <div className="text-xs text-muted-foreground mb-2">AI Analysis</div>
                 <p className="text-sm leading-relaxed">{tradeSetup.reasoning}</p>
               </div>
 
@@ -323,15 +323,15 @@ export function TradeSetupBubble({ instrument, timeframe, onClose }: TradeSetupB
               <div className="grid grid-cols-3 gap-2">
                 <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
                   <Edit3 className="h-4 w-4 mr-2" />
-                  {isEditing ? "Valider" : "Modifier"}
+                  {isEditing ? "Validate" : "Edit"}
                 </Button>
                 <Button variant="outline" onClick={regenerateSetup}>
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  Régénérer
+                  Regenerate
                 </Button>
                 <Button onClick={saveSetup}>
                   <Save className="h-4 w-4 mr-2" />
-                  Sauvegarder
+                  Save
                 </Button>
               </div>
             </div>

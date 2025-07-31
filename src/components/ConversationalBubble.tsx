@@ -364,7 +364,7 @@ export function ConversationalBubble({ mode, instrument, timeframe, onClose }: C
                 <div className="flex justify-start">
                   <div className="bg-muted p-3 rounded-lg flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">Analyzing...</span>
+                   <span className="text-sm text-muted-foreground">Analyzing...</span>
                   </div>
                 </div>
               )}

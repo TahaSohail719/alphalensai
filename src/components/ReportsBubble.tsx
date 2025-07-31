@@ -58,18 +58,18 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
   // Report composition state
   const [reportConfig, setReportConfig] = useState({
-    title: `Rapport ${instrument} - ${new Date().toLocaleDateString()}`,
+    title: `${instrument} Report - ${new Date().toLocaleDateString()}`,
     customNotes: "",
     exportFormat: "pdf"
   });
 
   const [availableSections, setAvailableSections] = useState<ReportSection[]>([
-    { id: "overview", title: "Vue d'ensemble du marché", description: "Analyse générale et contexte", included: true, order: 1 },
-    { id: "technical", title: "Analyse technique", description: "Indicateurs et niveaux clés", included: true, order: 2 },
-    { id: "macro", title: "Commentary macro", description: "Facteurs fondamentaux", included: true, order: 3 },
-    { id: "trades", title: "Idées de trading", description: "Setups et recommandations", included: false, order: 4 },
-    { id: "calendar", title: "Calendrier économique", description: "Événements à venir", included: false, order: 5 },
-    { id: "risk", title: "Gestion des risques", description: "Recommandations risk management", included: false, order: 6 }
+    { id: "overview", title: "Market Overview", description: "General analysis and context", included: true, order: 1 },
+    { id: "technical", title: "Technical Analysis", description: "Indicators and key levels", included: true, order: 2 },
+    { id: "macro", title: "Macro Commentary", description: "Fundamental factors", included: true, order: 3 },
+    { id: "trades", title: "Trading Ideas", description: "Setups and recommendations", included: false, order: 4 },
+    { id: "calendar", title: "Economic Calendar", description: "Upcoming events", included: false, order: 5 },
+    { id: "risk", title: "Risk Management", description: "Risk management recommendations", included: false, order: 6 }
   ]);
 
   const exportFormats = [
@@ -136,8 +136,8 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
       setIsGenerating(false);
       
       toast({
-        title: "Rapport généré",
-        description: "Votre rapport est prêt à être exporté"
+        title: "Report Generated",
+        description: "Your report is ready for export"
       });
     }, 3500);
   };
@@ -146,15 +146,15 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
     if (!currentReport) return;
     
     toast({
-      title: "Export en cours",
-      description: `Génération du fichier ${currentReport.exportFormat.toUpperCase()}`
+      title: "Export in Progress",
+      description: `Generating ${currentReport.exportFormat.toUpperCase()} file`
     });
     
     // Simulate export
     setTimeout(() => {
       toast({
-        title: "Rapport exporté",
-        description: "Le fichier a été téléchargé avec succès"
+        title: "Report Exported",
+        description: "File has been downloaded successfully"
       });
     }, 2000);
   };
@@ -211,7 +211,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               {instrument}
             </Badge>
             <Badge variant="secondary" className="text-xs border-green-500/20">
-              {step === "compose" ? "Composition" : step === "preview" ? "Aperçu" : "Généré"}
+              {step === "compose" ? "Composition" : step === "preview" ? "Preview" : "Generated"}
             </Badge>
           </div>
         </CardHeader>
@@ -221,18 +221,18 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
             <>
               {/* Report Title */}
               <div className="space-y-2">
-                <Label htmlFor="title">Titre du rapport</Label>
+                <Label htmlFor="title">Report Title</Label>
                 <Input
                   id="title"
                   value={reportConfig.title}
                   onChange={(e) => setReportConfig(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Nom de votre rapport"
+                  placeholder="Your report name"
                 />
               </div>
 
               {/* Export Format */}
               <div className="space-y-2">
-                <Label>Format d'export</Label>
+                <Label>Export Format</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {exportFormats.map((format) => {
                     const IconComponent = format.icon;
@@ -254,7 +254,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
               {/* Sections Selection */}
               <div className="space-y-2">
-                <Label>Sections à inclure</Label>
+                <Label>Sections to Include</Label>
                 <ScrollArea className="h-48 border rounded-md p-2">
                   <div className="space-y-2">
                     {availableSections.map((section) => (
@@ -296,12 +296,12 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
               {/* Custom Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes personnalisées</Label>
+                <Label htmlFor="notes">Custom Notes</Label>
                 <Textarea
                   id="notes"
                   value={reportConfig.customNotes}
                   onChange={(e) => setReportConfig(prev => ({ ...prev, customNotes: e.target.value }))}
-                  placeholder="Ajoutez vos commentaires personnalisés..."
+                  placeholder="Add your custom comments..."
                   className="h-20"
                 />
               </div>
@@ -315,12 +315,12 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
                 {isGenerating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Génération en cours...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <Settings className="h-4 w-4 mr-2" />
-                    Générer le rapport
+                    Generate Report
                   </>
                 )}
               </Button>
@@ -333,11 +333,11 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               <div className="border rounded-lg p-4 bg-muted/50">
                 <h3 className="font-semibold mb-2">{currentReport.title}</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Généré le {currentReport.createdAt.toLocaleString()}
+                  Generated on {currentReport.createdAt.toLocaleString()}
                 </p>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Sections incluses:</h4>
+                  <h4 className="text-sm font-medium">Included sections:</h4>
                   <ul className="text-sm space-y-1">
                     {currentReport.sections.map((section, index) => (
                       <li key={section.id} className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
                 {currentReport.customNotes && (
                   <div className="mt-3 pt-3 border-t">
-                    <h4 className="text-sm font-medium mb-1">Notes personnalisées:</h4>
+                    <h4 className="text-sm font-medium mb-1">Custom Notes:</h4>
                     <p className="text-sm text-muted-foreground">{currentReport.customNotes}</p>
                   </div>
                 )}
@@ -362,11 +362,11 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" onClick={resetComposer}>
                   <Edit3 className="h-4 w-4 mr-2" />
-                  Modifier
+                  Edit
                 </Button>
                 <Button onClick={exportReport}>
                   <Download className="h-4 w-4 mr-2" />
-                  Exporter {currentReport.exportFormat.toUpperCase()}
+                  Export {currentReport.exportFormat.toUpperCase()}
                 </Button>
               </div>
             </div>

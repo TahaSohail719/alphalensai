@@ -76,8 +76,8 @@ export default function AISetup() {
 
   const saveSetup = () => {
     toast({
-      title: "Setup sauvegardé",
-      description: "Votre configuration de trade a été enregistrée avec succès.",
+      title: "Setup Saved",
+      description: "Your trade configuration has been saved successfully.",
     });
   };
 
@@ -95,8 +95,8 @@ export default function AISetup() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Trade Setup IA</h1>
-            <p className="text-muted-foreground">Configuration et génération de trades automatisés</p>
+            <h1 className="text-3xl font-bold text-foreground">AI Trade Setup</h1>
+            <p className="text-muted-foreground">Automated trade configuration and generation</p>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export default function AISetup() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Paramètres de Trading
+                Trading Parameters
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -134,30 +134,30 @@ export default function AISetup() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1h">1 Heure</SelectItem>
-                      <SelectItem value="4h">4 Heures</SelectItem>
-                      <SelectItem value="1d">1 Jour</SelectItem>
-                      <SelectItem value="1w">1 Semaine</SelectItem>
+                      <SelectItem value="1h">1 Hour</SelectItem>
+                      <SelectItem value="4h">4 Hours</SelectItem>
+                      <SelectItem value="1d">1 Day</SelectItem>
+                      <SelectItem value="1w">1 Week</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="riskLevel">Niveau de Risque</Label>
+                  <Label htmlFor="riskLevel">Risk Level</Label>
                   <Select value={parameters.riskLevel} onValueChange={(value) => setParameters({...parameters, riskLevel: value})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Conservateur</SelectItem>
-                      <SelectItem value="medium">Modéré</SelectItem>
-                      <SelectItem value="high">Agressif</SelectItem>
+                      <SelectItem value="low">Conservative</SelectItem>
+                      <SelectItem value="medium">Moderate</SelectItem>
+                      <SelectItem value="high">Aggressive</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="positionSize">Taille Position (%)</Label>
+                  <Label htmlFor="positionSize">Position Size (%)</Label>
                   <Input 
                     id="positionSize"
                     type="number"
@@ -168,7 +168,7 @@ export default function AISetup() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="strategy">Stratégie</Label>
+                  <Label htmlFor="strategy">Strategy</Label>
                   <Select value={parameters.strategy} onValueChange={(value) => setParameters({...parameters, strategy: value})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -184,12 +184,12 @@ export default function AISetup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="customNotes">Notes Personnalisées</Label>
+                <Label htmlFor="customNotes">Custom Notes</Label>
                 <Textarea 
                   id="customNotes"
                   value={parameters.customNotes}
                   onChange={(e) => setParameters({...parameters, customNotes: e.target.value})}
-                  placeholder="Ajoutez des instructions spécifiques pour l'IA..."
+                  placeholder="Add specific instructions for the AI..."
                   rows={3}
                 />
               </div>
@@ -203,12 +203,12 @@ export default function AISetup() {
                 {isGenerating ? (
                   <>
                     <RotateCcw className="mr-2 h-4 w-4 animate-spin" />
-                    Génération en cours...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <Zap className="mr-2 h-4 w-4" />
-                    Générer Trade Setup
+                    Generate Trade Setup
                   </>
                 )}
               </Button>
@@ -222,9 +222,9 @@ export default function AISetup() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-800">
                   <Target className="h-5 w-5" />
-                  Trade Setup Généré
+                  Generated Trade Setup
                   <Badge variant="outline" className="ml-auto">
-                    Confiance: {tradeSetup.confidence}%
+                    Confidence: {tradeSetup.confidence}%
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -249,18 +249,18 @@ export default function AISetup() {
                 </div>
 
                 <div className="p-4 bg-white/70 rounded-lg border mb-6">
-                  <h4 className="font-semibold text-green-800 mb-2">Analyse IA</h4>
+                  <h4 className="font-semibold text-green-800 mb-2">AI Analysis</h4>
                   <p className="text-sm leading-relaxed">{tradeSetup.reasoning}</p>
                 </div>
 
                 <div className="flex gap-3">
                   <Button onClick={() => setStep("parameters")} variant="outline">
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Régénérer
+                    Regenerate
                   </Button>
                   <Button onClick={saveSetup} className="flex-1">
                     <Save className="mr-2 h-4 w-4" />
-                    Sauvegarder Setup
+                    Save Setup
                   </Button>
                 </div>
               </CardContent>
