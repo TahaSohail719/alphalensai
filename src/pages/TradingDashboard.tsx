@@ -110,39 +110,45 @@ export default function TradingDashboard() {
   return (
     <Layout activeModule="trading" onModuleChange={() => {}}>
       <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
-        {/* Modern header with real-time price */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="gradient-primary p-2 md:p-3 rounded-lg md:rounded-xl shadow-glow-primary">
-                <Activity className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Trading Dashboard</h1>
-                <p className="text-sm md:text-base text-muted-foreground hidden sm:block">Real-time AI analysis and trade execution</p>
-              </div>
+        {/* Mobile-first header with real-time price */}
+        <div className="space-y-4">
+          {/* Title section - Mobile optimized */}
+          <div className="flex items-center gap-3">
+            <div className="gradient-primary p-3 rounded-xl shadow-glow-primary shrink-0">
+              <Activity className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+                Trading Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Real-time AI analysis and trade execution
+              </p>
             </div>
           </div>
 
-          {/* Real-time price - Top right corner */}
+          {/* Price widget - Mobile responsive */}
           {priceData && (
-            <Card className="gradient-card border-primary/20 shadow-glow-primary min-w-[300px] shrink-0">
+            <Card className="gradient-card border-primary/20 shadow-glow-primary w-full">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{currentAsset?.icon}</span>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{selectedAsset}</h3>
-                      <p className="text-xs text-muted-foreground">{currentAsset?.name}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  {/* Asset info */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-2xl shrink-0">{currentAsset?.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-foreground text-lg">{selectedAsset}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{currentAsset?.name}</p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  
+                  {/* Price and change */}
+                  <div className="flex items-center justify-between sm:justify-end sm:text-right gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-foreground">
+                      <span className="text-xl sm:text-2xl font-bold text-foreground">
                         ${priceData.price.toFixed(selectedAsset.includes('JPY') ? 2 : 4)}
                       </span>
                       <div className={cn(
-                        "w-2 h-2 rounded-full animate-pulse",
+                        "w-2 h-2 rounded-full animate-pulse shrink-0",
                         isConnected ? "bg-success" : "bg-danger"
                       )} />
                     </div>
@@ -172,31 +178,34 @@ export default function TradingDashboard() {
           timeframe={timeframe}
         />
 
-        {/* Popular assets - responsive grid */}
-        <div className="flex gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 px-2">
-          {allAssets.slice(0, 5).map((asset) => (
-            <button
-              key={asset.symbol}
-              onClick={() => setSelectedAsset(asset.symbol)}
-              className={cn(
-                "px-3 py-2 rounded-lg text-sm font-medium transition-smooth flex items-center gap-1 whitespace-nowrap shrink-0",
-                selectedAsset === asset.symbol
-                  ? "bg-primary text-primary-foreground shadow-glow-primary"
-                  : "bg-card/50 hover:bg-primary/10 text-foreground"
-              )}
-            >
-              <span className="text-xs">{asset.icon}</span>
-              {asset.symbol}
-            </button>
-          ))}
+        {/* Popular assets - Mobile-first horizontal scroll */}
+        <div className="w-full">
+          <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {allAssets.slice(0, 6).map((asset) => (
+              <button
+                key={asset.symbol}
+                onClick={() => setSelectedAsset(asset.symbol)}
+                className={cn(
+                  "px-4 py-2.5 rounded-lg text-sm font-medium transition-smooth flex items-center gap-2 whitespace-nowrap shrink-0 snap-start min-w-fit",
+                  selectedAsset === asset.symbol
+                    ? "bg-primary text-primary-foreground shadow-glow-primary"
+                    : "bg-card/50 hover:bg-primary/10 text-foreground border border-border/30"
+                )}
+              >
+                <span className="text-base">{asset.icon}</span>
+                <span className="font-semibold">{asset.symbol}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Main responsive chart */}
+        {/* Mobile-first responsive chart */}
         <Card className="gradient-card border-border/50 shadow-medium">
-          <CardHeader className="border-b border-border/50 p-3 md:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <CardTitle className="text-lg md:text-xl text-foreground">
-                Chart - {selectedAsset} ({timeframe})
+          <CardHeader className="border-b border-border/50 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="text-lg sm:text-xl text-foreground">
+                Chart - {selectedAsset}
+                <span className="text-sm font-normal text-muted-foreground ml-2">({timeframe})</span>
               </CardTitle>
               <Badge variant="outline" className={cn(
                 "border-success/50 text-success bg-success/10 w-fit",
@@ -207,7 +216,8 @@ export default function TradingDashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+            {/* Dynamic height based on screen size */}
+            <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
               <CandlestickChart 
                 asset={selectedAsset} 
                 tradeLevels={activeTradeLevels}
@@ -224,44 +234,44 @@ export default function TradingDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+        {/* Mobile-first Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card 
             onClick={() => navigate('/ai-setup')}
-            className="gradient-card border-border/50 hover:shadow-glow-primary transition-smooth cursor-pointer group"
+            className="gradient-card border-border/50 hover:shadow-glow-primary transition-smooth cursor-pointer group active:scale-95"
           >
-            <CardContent className="p-4 md:p-6 text-center">
-              <div className="gradient-primary p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
-                <Zap className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
+            <CardContent className="p-5 text-center">
+              <div className="gradient-primary p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
+                <Zap className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">AI Trade Setup</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Analyze and find opportunities</p>
+              <h3 className="font-semibold text-base text-foreground mb-2">AI Trade Setup</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Analyze market conditions and find trading opportunities</p>
             </CardContent>
           </Card>
 
           <Card 
             onClick={() => navigate('/macro-analysis')}
-            className="gradient-card border-border/50 hover:shadow-glow-success transition-smooth cursor-pointer group"
+            className="gradient-card border-border/50 hover:shadow-glow-success transition-smooth cursor-pointer group active:scale-95"
           >
-            <CardContent className="p-4 md:p-6 text-center">
-              <div className="gradient-success p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
-                <Activity className="h-5 w-5 md:h-6 md:w-6 text-success-foreground" />
+            <CardContent className="p-5 text-center">
+              <div className="gradient-success p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
+                <Activity className="h-6 w-6 text-success-foreground" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Macro Analysis</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Market commentary and analysis</p>
+              <h3 className="font-semibold text-base text-foreground mb-2">Macro Analysis</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Get comprehensive market commentary and insights</p>
             </CardContent>
           </Card>
 
           <Card 
             onClick={() => navigate('/reports')}
-            className="gradient-card border-border/50 hover:shadow-medium transition-smooth cursor-pointer group"
+            className="gradient-card border-border/50 hover:shadow-medium transition-smooth cursor-pointer group active:scale-95 sm:col-span-2 lg:col-span-1"
           >
-            <CardContent className="p-4 md:p-6 text-center">
-              <div className="bg-warning/20 border border-warning/30 p-2 md:p-3 rounded-lg md:rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-smooth">
-                <ArrowRight className="h-5 w-5 md:h-6 md:w-6 text-warning" />
+            <CardContent className="p-5 text-center">
+              <div className="bg-warning/20 border border-warning/30 p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
+                <ArrowRight className="h-6 w-6 text-warning" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base text-foreground mb-2">Reports</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">View your detailed performance</p>
+              <h3 className="font-semibold text-base text-foreground mb-2">Performance Reports</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">View detailed trading performance and analytics</p>
             </CardContent>
           </Card>
         </div>

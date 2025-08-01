@@ -59,9 +59,9 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
 
   return (
     <>
-      {/* Floating Access Bubbles - Always visible */}
+      {/* Mobile-optimized Floating Access Bubbles */}
       {!activeBubble && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] flex flex-col gap-2 sm:gap-3">
+        <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-3">
           {bubbles.map((bubble) => {
             const IconComponent = bubble.icon;
             
@@ -73,7 +73,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
                   handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
                 }}
                 className={cn(
-                  "h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer border-0",
+                  "h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer border-0",
                   "flex items-center justify-center relative overflow-hidden",
                   bubble.color,
                   bubble.glow,
@@ -84,23 +84,23 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
                 }}
                 type="button"
                 title={bubble.label}
+                aria-label={bubble.label}
               >
-                <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white drop-shadow-sm relative z-10" />
+                <IconComponent className="h-5 w-5 text-white drop-shadow-sm relative z-10" />
                 
-                {/* Circle bubble shine */}
+                {/* Circle bubble shine effect */}
                 <div className="absolute top-3 left-3 w-3 h-3 bg-white/40 rounded-full blur-sm" />
                 <div className="absolute top-2 left-2 w-2 h-2 bg-white/60 rounded-full" />
               </button>
             );
           })}
 
-          {/* Enhanced System Status Indicator */}
+          {/* Mobile-optimized System Status Indicator */}
           <div className="flex items-center justify-center mt-2">
-            <div className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-xl">
-              <div className="flex items-center gap-1 sm:gap-2 text-xs">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-muted-foreground font-medium hidden sm:inline">AI Widgets</span>
-                <span className="text-muted-foreground font-medium sm:hidden">AI</span>
+            <div className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-full px-3 py-1.5 shadow-xl">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-muted-foreground font-medium">AI</span>
                 <div className="w-1 h-1 bg-primary rounded-full animate-ping" />
               </div>
             </div>
@@ -108,9 +108,9 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
         </div>
       )}
 
-      {/* Active Specialized Bubbles */}
+      {/* Mobile-responsive Active Specialized Bubbles */}
       {activeBubble === "tradesetup" && (
-        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
+        <div className="fixed inset-x-4 top-4 sm:inset-x-auto sm:right-4 z-[10000] sm:w-auto sm:max-w-md">
           <TradeSetupBubble
             instrument={instrument}
             timeframe={timeframe}
@@ -121,7 +121,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
       )}
       
       {activeBubble === "macro" && (
-        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
+        <div className="fixed inset-x-4 top-4 sm:inset-x-auto sm:right-4 z-[10000] sm:w-auto sm:max-w-md">
           <MacroCommentaryBubble
             instrument={instrument}
             timeframe={timeframe}
@@ -131,7 +131,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
       )}
       
       {activeBubble === "reports" && (
-        <div className="fixed top-4 right-4 z-[10000] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-md">
+        <div className="fixed inset-x-4 top-4 sm:inset-x-auto sm:right-4 z-[10000] sm:w-auto sm:max-w-md">
           <ReportsBubble
             instrument={instrument}
             timeframe={timeframe}

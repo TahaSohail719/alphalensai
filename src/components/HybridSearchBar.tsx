@@ -236,14 +236,14 @@ export function HybridSearchBar({
 
   return (
     <div className="space-y-4">
-      {/* Hybrid Search Bar */}
+      {/* Mobile-first Hybrid Search Bar */}
       <div className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search instruments or ask AI anything..."
+            placeholder="Search instruments or ask AI..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -251,31 +251,32 @@ export function HybridSearchBar({
             }}
             onKeyPress={handleKeyPress}
             onFocus={() => searchTerm && setShowDropdown(true)}
-            className="w-full pl-10 pr-20 py-3 bg-input/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth"
+            className="w-full pl-10 pr-16 sm:pr-20 py-3 sm:py-4 bg-input/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth text-sm sm:text-base"
           />
           
-          {/* AI Query Button */}
+          {/* AI Query Button - Mobile optimized */}
           {isAIQuery && searchTerm && (
             <Button
               onClick={handleAIQuery}
               disabled={isLoading}
               size="sm"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 px-3"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2"
             >
               {isLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
                 <Send className="h-3 w-3" />
               )}
+              <span className="hidden sm:inline ml-1">Ask</span>
             </Button>
           )}
         </div>
 
-        {/* Dropdown with hybrid suggestions */}
+        {/* Mobile-first dropdown with hybrid suggestions */}
         {showDropdown && searchTerm && (
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-lg shadow-xl z-50 max-h-[70vh] sm:max-h-80 overflow-y-auto"
           >
             {/* Instrument Results */}
             {!isAIQuery && filteredAssets.length > 0 && (
@@ -308,17 +309,17 @@ export function HybridSearchBar({
                 <button
                   onClick={handleAIQuery}
                   disabled={isLoading}
-                  className="w-full px-3 py-3 text-left hover:bg-primary/10 transition-smooth flex items-center gap-3 rounded-md border border-primary/20 bg-primary/5"
+                  className="w-full px-3 py-4 sm:py-3 text-left hover:bg-primary/10 transition-smooth flex items-center gap-3 rounded-md border border-primary/20 bg-primary/5 min-h-[44px]"
                 >
-                  <Brain className="h-4 w-4 text-primary shrink-0" />
+                  <Brain className="h-5 w-5 sm:h-4 sm:w-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-foreground">Ask AI:</div>
-                    <div className="text-xs text-muted-foreground truncate">"{searchTerm}"</div>
+                    <div className="text-xs text-muted-foreground truncate line-clamp-2">"{searchTerm}"</div>
                   </div>
                   {isLoading ? (
-                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                    <Loader2 className="h-4 w-4 sm:h-3 sm:w-3 animate-spin text-primary" />
                   ) : (
-                    <Send className="h-3 w-3 text-primary" />
+                    <Send className="h-4 w-4 sm:h-3 sm:w-3 text-primary" />
                   )}
                 </button>
               </div>
@@ -334,10 +335,10 @@ export function HybridSearchBar({
         )}
       </div>
 
-      {/* AI Responses Panel */}
+      {/* Mobile-optimized AI Responses Panel */}
       {showAIResults && aiResponses.length > 0 && (
         <Card className="bg-card/50 backdrop-blur-sm border-primary/20 shadow-medium">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Brain className="h-4 w-4 text-primary" />
@@ -366,10 +367,10 @@ export function HybridSearchBar({
               </div>
             </div>
 
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-3 max-h-[60vh] sm:max-h-96 overflow-y-auto">
               {aiResponses.map((response) => (
                 <Card key={response.id} className="bg-card/30 border-border/30">
-                  <CardContent className="p-3">
+                  <CardContent className="p-3 sm:p-4">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -432,7 +433,7 @@ export function HybridSearchBar({
                               [response.conversationId]: e.target.value 
                             }))}
                             onKeyPress={(e) => handleReplyKeyPress(e, response.conversationId)}
-                            className="w-full px-3 py-2 pr-10 bg-input/50 border border-border/50 rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth"
+                            className="w-full px-3 py-3 sm:py-2 pr-12 bg-input/50 border border-border/50 rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition-smooth"
                             disabled={replyLoading[response.conversationId]}
                           />
                           <Button

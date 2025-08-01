@@ -376,9 +376,9 @@ export function CandlestickChart({
             style={{ height: `${height}px` }}
           />
           
-          {/* Enhanced Trade Levels Overlay */}
+          {/* Mobile-responsive Trade Levels Overlay */}
           {tradeLevels && (
-            <div className="absolute top-3 left-3 bg-card/95 backdrop-blur-lg border border-border/50 rounded-xl p-4 shadow-xl min-w-[240px] max-w-[300px]">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-card/95 backdrop-blur-lg border border-border/50 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl w-[calc(100%-1rem)] sm:min-w-[240px] sm:max-w-[300px] sm:w-auto">
               <div className="flex items-center gap-2 mb-3">
                 <div className={cn(
                   "w-3 h-3 rounded-full animate-pulse",

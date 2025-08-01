@@ -157,6 +157,41 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
+
+  /* Mobile-specific improvements */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Better tap targets for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    button, [role="button"], input[type="button"], input[type="submit"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Custom responsive breakpoints */
+  @media (max-width: 374px) {
+    .xs\:block {
+      display: block;
+    }
+    .xs\:hidden {
+      display: none;
+    }
+    .xs\:h-\[320px\] {
+      height: 320px;
+    }
+  }
+
+  /* Active states for mobile */
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
 }
 
 @layer utilities {
