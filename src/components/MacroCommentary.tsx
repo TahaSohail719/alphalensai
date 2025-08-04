@@ -151,11 +151,11 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
       let payload;
       
       if (activeMode === "article_analysis") {
-        // Send EXACTLY the specified JSON structure for Article Analysis
+        // Send EXACTLY the specified JSON structure for Article Analysis - NOTHING ELSE
         payload = {
           type: "article_analysis",
           query: inputText,
-          user_id: "12345" // Using fixed user_id as specified
+          user_id: "12345"
         };
       } else {
         // Keep existing structure for other modes
