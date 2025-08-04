@@ -225,8 +225,17 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
             region: Array.isArray(analysisContent.region) ? analysisContent.region.join(', ') : analysisContent.region,
             products: analysisContent.products || [],
             categories: analysisContent.categories || [],
-            impacts: analysisContent.impacts || [],
-            sentiment: analysisContent.sentiment,
+            impacts: analysisContent.impacts?.map((impact: any) => ({
+              ...impact,
+              // Convert 0-1 values to percentages for display
+              confidence: impact.confidence ? Math.round(impact.confidence * 100) : impact.confidence,
+              intensity_score: impact.intensity_score ? Math.round(impact.intensity_score * 100) : impact.intensity_score
+            })) || [],
+            sentiment: analysisContent.sentiment ? {
+              ...analysisContent.sentiment,
+              // Convert 0-1 score to percentage for display  
+              score: analysisContent.sentiment.score ? analysisContent.sentiment.score : analysisContent.sentiment.score
+            } : analysisContent.sentiment,
             themes: analysisContent.themes || [],
             sources: [{
               title: analysisContent.source || 'Article Analysis',
