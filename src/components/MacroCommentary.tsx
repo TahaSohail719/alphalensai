@@ -68,6 +68,19 @@ interface WebhookResponse {
     date?: string;
     last_updated?: string;
   }>;
+  summary?: string;
+  region?: string;
+  products?: string[];
+  categories?: string[];
+  impacts?: Array<{
+    cause: string;
+    effect: string;
+  }>;
+  sentiment?: {
+    tone: string;
+    score: number;
+  };
+  themes?: string[];
 }
 
 export function MacroCommentary({ instrument, timeframe, onClose }: MacroCommentaryProps = {}) {
@@ -76,6 +89,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
   const [commentary, setCommentary] = useState<WebhookResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isTwoThirdsWidth, setIsTwoThirdsWidth] = useState(false);
   const [activeMode, setActiveMode] = useState<AnalysisMode>("custom_analysis");
   const [articleText, setArticleText] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("All");
@@ -94,7 +108,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
     try {
       // Build enriched JSON payload while preserving existing structure
       const basePayload = {
-        type: "RAG",
+        type: activeMode === "article_analysis" ? "article_analysis" : "RAG",
         question: inputText
       };
 
@@ -111,7 +125,8 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
           query: inputText,
           timestamp: new Date().toISOString(),
           impact_mapping: activeMode !== "custom_analysis" ? impactMapping : undefined
-        }
+        },
+        user_id: "default_user" // Add user_id as requested
       };
 
       const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
@@ -201,7 +216,11 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
   };
 
   return (
-    <div className="bg-card/95 backdrop-blur-xl rounded-xl border border-border/50 shadow-2xl transition-all duration-300 flex flex-col h-full max-h-[calc(100vh-8rem)]">
+    <div className={cn(
+      "bg-card/95 backdrop-blur-xl rounded-xl border border-border/50 shadow-2xl transition-all duration-300 flex flex-col h-full max-h-[calc(100vh-8rem)]",
+      isFullscreen && "fixed inset-4 z-[10001] max-h-[calc(100vh-2rem)]",
+      isTwoThirdsWidth && !isFullscreen && "w-2/3"
+    )}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border/20 flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -214,6 +233,24 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsTwoThirdsWidth(!isTwoThirdsWidth)}
+            className="h-6 w-6 p-0 hover:bg-primary/10"
+            title={isTwoThirdsWidth ? "Expand to full width" : "Resize to 2/3 width"}
+          >
+            {isTwoThirdsWidth ? <Maximize className="h-3 w-3" /> : <Minimize className="h-3 w-3" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="h-6 w-6 p-0 hover:bg-primary/10"
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+          </Button>
           {onClose && (
             <Button
               variant="ghost"
@@ -420,36 +457,44 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         </Card>
       )}
 
-      {/* Commentary Display */}
+      {/* Commentary Display with Sidebar for Article Analysis */}
       {commentary && (
-        <div className="space-y-4">
-          <Card className="gradient-card border-border-light shadow-medium">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Macro Commentary
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => navigator.clipboard.writeText(commentary.content)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}>
-                  <RefreshCw className="h-4 w-4" />
-                  Regenerate
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Main Content */}
-              <div className="space-y-6">
-                {commentary.content.split('\n\n').map((section, index) => {
-                  // Check if this is a title/heading
-                  if (section.includes('Weekly Outlook') || section.includes('Executive Summary') || 
-                      section.includes('Fundamental Analysis') || section.includes('Directional Bias') ||
+        <div className={cn(
+          "space-y-4",
+          activeMode === "article_analysis" && "grid grid-cols-1 lg:grid-cols-3 gap-4"
+        )}>
+          {/* Main Content Area */}
+          <div className={cn(
+            "space-y-4",
+            activeMode === "article_analysis" && "lg:col-span-2"
+          )}>
+            <Card className="gradient-card border-border-light shadow-medium">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  {activeMode === "article_analysis" ? "Article Analysis" : "Macro Commentary"}
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigator.clipboard.writeText(commentary.content)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}>
+                    <RefreshCw className="h-4 w-4" />
+                    Regenerate
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Main Content */}
+                <div className="space-y-6 max-h-96 overflow-y-auto">
+                  {(commentary.summary || commentary.content).split('\n\n').map((section, index) => {
+                    // Check if this is a title/heading
+                    if (section.includes('Weekly Outlook') || section.includes('Executive Summary') || 
+                        section.includes('Fundamental Analysis') || section.includes('Directional Bias') ||
                       section.includes('Key Levels') || section.includes('AI Insights Breakdown') ||
                       section.includes('Toggle GPT') || section.includes('Toggle Curated')) {
                     return (
@@ -546,8 +591,8 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
                       {section.replace(/\[(\d+)\]/g, (match, num) => `[${num}]`)}
                     </p>
                   );
-                })}
-              </div>
+                 })}
+               </div>
 
               {/* Sources */}
               {commentary.sources && commentary.sources.length > 0 && (
@@ -578,6 +623,133 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
             </CardContent>
           </Card>
         </div>
+
+        {/* Article Analysis Sidebar */}
+        {activeMode === "article_analysis" && (
+          <div className="lg:col-span-1 space-y-4">
+            <Card className="gradient-card border-border-light shadow-medium sticky top-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Brain className="h-4 w-4 text-primary" />
+                  Analysis Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Detected Regions */}
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                    Detected Regions
+                  </h5>
+                  <div className="flex flex-wrap gap-1">
+                    {commentary.region ? (
+                      <Badge variant="outline" className="text-xs">
+                        {commentary.region}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Global</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Detected Products */}
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                    Detected Products
+                  </h5>
+                  <div className="flex flex-wrap gap-1">
+                    {commentary.products && commentary.products.length > 0 ? (
+                      commentary.products.map((product, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {product}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Mixed Assets</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Detected Categories */}
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                    Detected Categories
+                  </h5>
+                  <div className="flex flex-wrap gap-1">
+                    {commentary.categories && commentary.categories.length > 0 ? (
+                      commentary.categories.map((category, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {category}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">General Market</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sentiment Gauge */}
+                {commentary.sentiment && (
+                  <div>
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Sentiment Gauge
+                    </h5>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{commentary.sentiment.tone}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {(commentary.sentiment.score * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${commentary.sentiment.score * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cause → Effect List */}
+                {commentary.impacts && commentary.impacts.length > 0 && (
+                  <div>
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Cause → Effect
+                    </h5>
+                    <div className="space-y-2">
+                      {commentary.impacts.map((impact, index) => (
+                        <div key={index} className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">{impact.cause}</span>
+                            <span className="text-primary">→</span>
+                            <span className="font-medium">{impact.effect}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Themes */}
+                {commentary.themes && commentary.themes.length > 0 && (
+                  <div>
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Key Themes
+                    </h5>
+                    <div className="flex flex-wrap gap-1">
+                      {commentary.themes.map((theme, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {theme}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
       )}
       </div>
     </div>
