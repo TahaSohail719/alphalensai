@@ -121,7 +121,7 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
       )}
       
       {activeBubble === "macro" && (
-        <div className="fixed bottom-20 right-4 z-[10000] w-80 max-h-[calc(100vh-8rem)]">
+        <div className="fixed inset-x-4 bottom-4 top-4 sm:top-20 z-[10000] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-6rem)]">
           <MacroCommentary
             instrument={instrument}
             timeframe={timeframe}
