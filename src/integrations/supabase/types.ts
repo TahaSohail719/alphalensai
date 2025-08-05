@@ -14,6 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_profiles: {
+        Row: {
+          address: string | null
+          beta: number | null
+          book_value: number | null
+          city: string | null
+          country: string | null
+          currency: string | null
+          debt_to_equity: number | null
+          description: string | null
+          dividend_rate: number | null
+          dividend_yield: number | null
+          enterprise_value: number | null
+          eps: number | null
+          ex_dividend_date: string | null
+          exchange: string | null
+          forward_eps: number | null
+          forward_pe: number | null
+          free_cash_flow: number | null
+          gross_margins: number | null
+          id: number
+          inception_date: string | null
+          industry: string | null
+          last_fiscal_year_end: string | null
+          last_updated: string | null
+          market: string | null
+          market_cap: number | null
+          most_recent_quarter: string | null
+          name: string | null
+          net_income: number | null
+          next_fiscal_year_end: string | null
+          operating_margins: number | null
+          phone: string | null
+          price_to_book: number | null
+          quote_type: string | null
+          return_on_assets: number | null
+          return_on_equity: number | null
+          revenue: number | null
+          revenue_per_share: number | null
+          sector: string | null
+          short_name: string | null
+          state: string | null
+          symbol: string
+          trailing_pe: number | null
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          beta?: number | null
+          book_value?: number | null
+          city?: string | null
+          country?: string | null
+          currency?: string | null
+          debt_to_equity?: number | null
+          description?: string | null
+          dividend_rate?: number | null
+          dividend_yield?: number | null
+          enterprise_value?: number | null
+          eps?: number | null
+          ex_dividend_date?: string | null
+          exchange?: string | null
+          forward_eps?: number | null
+          forward_pe?: number | null
+          free_cash_flow?: number | null
+          gross_margins?: number | null
+          id?: number
+          inception_date?: string | null
+          industry?: string | null
+          last_fiscal_year_end?: string | null
+          last_updated?: string | null
+          market?: string | null
+          market_cap?: number | null
+          most_recent_quarter?: string | null
+          name?: string | null
+          net_income?: number | null
+          next_fiscal_year_end?: string | null
+          operating_margins?: number | null
+          phone?: string | null
+          price_to_book?: number | null
+          quote_type?: string | null
+          return_on_assets?: number | null
+          return_on_equity?: number | null
+          revenue?: number | null
+          revenue_per_share?: number | null
+          sector?: string | null
+          short_name?: string | null
+          state?: string | null
+          symbol: string
+          trailing_pe?: number | null
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          beta?: number | null
+          book_value?: number | null
+          city?: string | null
+          country?: string | null
+          currency?: string | null
+          debt_to_equity?: number | null
+          description?: string | null
+          dividend_rate?: number | null
+          dividend_yield?: number | null
+          enterprise_value?: number | null
+          eps?: number | null
+          ex_dividend_date?: string | null
+          exchange?: string | null
+          forward_eps?: number | null
+          forward_pe?: number | null
+          free_cash_flow?: number | null
+          gross_margins?: number | null
+          id?: number
+          inception_date?: string | null
+          industry?: string | null
+          last_fiscal_year_end?: string | null
+          last_updated?: string | null
+          market?: string | null
+          market_cap?: number | null
+          most_recent_quarter?: string | null
+          name?: string | null
+          net_income?: number | null
+          next_fiscal_year_end?: string | null
+          operating_margins?: number | null
+          phone?: string | null
+          price_to_book?: number | null
+          quote_type?: string | null
+          return_on_assets?: number | null
+          return_on_equity?: number | null
+          revenue?: number | null
+          revenue_per_share?: number | null
+          sector?: string | null
+          short_name?: string | null
+          state?: string | null
+          symbol?: string
+          trailing_pe?: number | null
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
       instruments: {
         Row: {
           asset_type: string | null
@@ -74,9 +215,9 @@ export type Database = {
           date: string
           high: number | null
           id: number
-          instrument_id: number
           low: number | null
           open: number | null
+          symbol: string | null
           volume: number | null
         }
         Insert: {
@@ -84,9 +225,9 @@ export type Database = {
           date: string
           high?: number | null
           id?: number
-          instrument_id: number
           low?: number | null
           open?: number | null
+          symbol?: string | null
           volume?: number | null
         }
         Update: {
@@ -94,20 +235,12 @@ export type Database = {
           date?: string
           high?: number | null
           id?: number
-          instrument_id?: number
           low?: number | null
           open?: number | null
+          symbol?: string | null
           volume?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "prices_instrument_id_fkey"
-            columns: ["instrument_id"]
-            isOneToOne: false
-            referencedRelation: "instruments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
