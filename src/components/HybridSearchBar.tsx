@@ -89,7 +89,7 @@ export function HybridSearchBar({
         const { data, error } = await supabase
           .from('asset_profiles' as any)
           .select('id, symbol, name, short_name, sector, industry, country, market_cap, currency, exchange')
-          .or(`symbol.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%,short_name.ilike.%${searchTerm}%`)
+          .or(`symbol.ilike.'%${searchTerm}%',name.ilike.'%${searchTerm}%',short_name.ilike.'%${searchTerm}%'`)
           .order('market_cap', { ascending: false, nullsFirst: false })
           .limit(5);
 
