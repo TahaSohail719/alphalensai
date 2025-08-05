@@ -27,6 +27,7 @@ interface AssetProfile {
   id: number;
   symbol: string;
   name: string | null;
+  short_name: string | null;
   sector: string | null;
   industry: string | null;
   country: string | null;
@@ -87,8 +88,8 @@ export function HybridSearchBar({
       try {
         const { data, error } = await supabase
           .from('asset_profiles' as any)
-          .select('id, symbol, name, sector, industry, country, market_cap, currency, exchange')
-          .or(`symbol.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`)
+          .select('id, symbol, name, short_name, sector, industry, country, market_cap, currency, exchange')
+          .or(`symbol.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%,short_name.ilike.%${searchTerm}%`)
           .order('market_cap', { ascending: false, nullsFirst: false })
           .limit(5);
 
@@ -318,7 +319,7 @@ export function HybridSearchBar({
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search instruments or ask AI..."
+            placeholder="Search instruments, ask AI, or search financial assets..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -416,7 +417,7 @@ export function HybridSearchBar({
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground truncate">
-                              {asset.name || 'Nom non disponible'}
+                              {asset.name || asset.short_name || 'Nom non disponible'}
                             </p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                               {asset.exchange && (
