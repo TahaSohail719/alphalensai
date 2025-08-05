@@ -281,20 +281,20 @@ export default function TradingDashboard() {
           </CardHeader>
           <CardContent className="p-0">
             {/* Dynamic height based on screen size */}
-            <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
-              <CandlestickChart 
-                asset={selectedAsset} 
-                tradeLevels={activeTradeLevels}
-                onLevelUpdate={(type, value) => {
-                  if (activeTradeLevels) {
-                    setActiveTradeLevels({
-                      ...activeTradeLevels,
-                      [type === 'stopLoss' ? 'stopLoss' : type]: value
-                    });
-                  }
-                }}
-              />
-            </div>
+          <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+            <CandlestickChart 
+              asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
+              tradeLevels={activeTradeLevels}
+              onLevelUpdate={(type, value) => {
+                if (activeTradeLevels) {
+                  setActiveTradeLevels({
+                    ...activeTradeLevels,
+                    [type === 'stopLoss' ? 'stopLoss' : type]: value
+                  });
+                }
+              }}
+            />
+          </div>
           </CardContent>
         </Card>
 

@@ -57,7 +57,8 @@ export function CandlestickChart({
   showHeader = true, 
   height = 400,
   tradeLevels,
-  onLevelUpdate
+  onLevelUpdate,
+  historicalData
 }: CandlestickChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -72,8 +73,20 @@ export function CandlestickChart({
   const binanceSymbol = getSymbolForAsset(asset);
   const hasRealTimeData = supportsRealTimeData(asset);
 
-  // Fetch historical data
+  // Fetch historical data from Supabase prices table or Binance API
   const fetchHistoricalData = async (interval: string) => {
+    // Si on a des données historiques passées en props, les utiliser
+    if (historicalData && historicalData.length > 0) {
+      return historicalData.map((price: any) => ({
+        time: (new Date(price.date).getTime() / 1000) as Time,
+        open: parseFloat(price.open || price.close),
+        high: parseFloat(price.high || price.close),
+        low: parseFloat(price.low || price.close),
+        close: parseFloat(price.close),
+      }));
+    }
+
+    // Sinon, utiliser l'API Binance pour les données temps réel
     try {
       const response = await fetch(
         `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=100`
