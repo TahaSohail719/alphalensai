@@ -138,19 +138,19 @@ export default function TradingDashboard() {
 
   return (
     <Layout activeModule="trading" onModuleChange={() => {}}>
-      <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Mobile-first header with real-time price */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Title section - Mobile optimized */}
-          <div className="flex items-center gap-3">
-            <div className="gradient-primary p-3 rounded-xl shadow-glow-primary shrink-0">
-              <Activity className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="gradient-primary p-2 sm:p-3 rounded-xl shadow-glow-primary shrink-0">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground tracking-tight">
                 Trading Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground hidden sm:block">
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                 Real-time AI analysis and trade execution
               </p>
             </div>
@@ -208,20 +208,20 @@ export default function TradingDashboard() {
         />
 
         {/* Popular assets - Mobile-first horizontal scroll */}
-        <div className="w-full">
-          <div className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="w-full -mx-3 sm:mx-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 px-3 sm:px-0 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {allAssets.slice(0, 6).map((asset) => (
               <button
                 key={asset.symbol}
                 onClick={() => setSelectedAsset(asset.symbol)}
                 className={cn(
-                  "px-4 py-2.5 rounded-lg text-sm font-medium transition-smooth flex items-center gap-2 whitespace-nowrap shrink-0 snap-start min-w-fit",
+                  "px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-smooth flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0 snap-start min-w-fit",
                   selectedAsset === asset.symbol
                     ? "bg-primary text-primary-foreground shadow-glow-primary"
                     : "bg-card/50 hover:bg-primary/10 text-foreground border border-border/30"
                 )}
               >
-                <span className="text-base">{asset.icon}</span>
+                <span className="text-sm sm:text-base">{asset.icon}</span>
                 <span className="font-semibold">{asset.symbol}</span>
               </button>
             ))}
