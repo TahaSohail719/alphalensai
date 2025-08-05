@@ -78,7 +78,7 @@ export default function AssetDetail() {
       try {
         setLoading(true);
         const { data, error } = await supabase
-          .from('asset_profiles')
+          .from('asset_profiles' as any)
           .select('*')
           .eq('symbol', symbol)
           .maybeSingle();
@@ -95,7 +95,7 @@ export default function AssetDetail() {
           return;
         }
 
-        setAsset(data);
+        setAsset(data as unknown as AssetProfile);
       } catch (error) {
         console.error('Erreur lors du chargement de l\'actif:', error);
         toast({

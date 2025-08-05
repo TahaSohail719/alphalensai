@@ -50,14 +50,14 @@ export function AssetSearchBar({
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from('asset_profiles')
+          .from('asset_profiles' as any)
           .select('id, symbol, name, sector, industry, country, market_cap, currency, exchange')
           .or(`symbol.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`)
-          .order('market_cap', { ascending: false, nullsLast: true })
+          .order('market_cap', { ascending: false, nullsFirst: false })
           .limit(8);
 
         if (error) throw error;
-        setSuggestions(data || []);
+        setSuggestions((data as unknown as AssetProfile[]) || []);
       } catch (error) {
         console.error('Erreur de recherche:', error);
         setSuggestions([]);
