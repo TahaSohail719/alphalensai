@@ -10,7 +10,6 @@ import { CandlestickChart } from "@/components/CandlestickChart";
 import { BubbleSystem } from "@/components/BubbleSystem";
 import { Layout } from "@/components/Layout";
 import { HybridSearchBar } from "@/components/HybridSearchBar";
-import { AssetSearchBar } from "@/components/AssetSearchBar";
 import { AssetSummaryBanner } from "@/components/AssetSummaryBanner";
 import { getSymbolForAsset } from "@/lib/assetMapping";
 import AssetInfoCard from "@/components/AssetInfoCard";
@@ -207,15 +206,15 @@ export default function TradingDashboard() {
           <AssetInfoCard symbol={selectedAsset} className="w-full" />
         </div>
 
-        {/* Asset Search Bar - Couche 1 */}
-        <div className="w-full">
-          <AssetSearchBar 
-            onAssetSelect={setSelectedAssetProfile}
-            selectedAsset={selectedAssetProfile}
-            placeholder="Rechercher un actif financier..."
-            className="w-full"
-          />
-        </div>
+        {/* Hybrid Search + AI Interface */}
+        <HybridSearchBar
+          assets={allAssets}
+          selectedAsset={selectedAsset}
+          onAssetSelect={setSelectedAsset}
+          onAssetProfileSelect={setSelectedAssetProfile}
+          instrument={selectedAsset}
+          timeframe={timeframe}
+        />
 
         {/* Asset Summary Banner - Couche 2 */}
         {selectedAssetProfile && (
@@ -225,15 +224,6 @@ export default function TradingDashboard() {
             className="w-full"
           />
         )}
-
-        {/* Hybrid Search + AI Interface */}
-        <HybridSearchBar
-          assets={allAssets}
-          selectedAsset={selectedAsset}
-          onAssetSelect={setSelectedAsset}
-          instrument={selectedAsset}
-          timeframe={timeframe}
-        />
 
         {/* Popular assets - Mobile-first horizontal scroll */}
         <div className="w-full -mx-3 sm:mx-0">

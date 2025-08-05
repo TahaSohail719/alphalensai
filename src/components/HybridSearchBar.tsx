@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Brain, Send, Loader2, Copy, Trash2, MessageCircle } from "lucide-react";
+import { Search, Brain, Send, Loader2, Copy, Trash2, MessageCircle, TrendingUp, Building, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import AssetInfoCard from "@/components/AssetInfoCard";
 
 interface Asset {
@@ -22,10 +23,23 @@ interface AIResponse {
   showReplyInput?: boolean;
 }
 
+interface AssetProfile {
+  id: number;
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  industry: string | null;
+  country: string | null;
+  market_cap: number | null;
+  currency: string | null;
+  exchange: string | null;
+}
+
 interface HybridSearchBarProps {
   assets: Asset[];
   selectedAsset: string;
   onAssetSelect: (asset: string) => void;
+  onAssetProfileSelect?: (asset: AssetProfile) => void;
   instrument: string;
   timeframe: string;
 }
@@ -34,6 +48,7 @@ export function HybridSearchBar({
   assets,
   selectedAsset,
   onAssetSelect,
+  onAssetProfileSelect,
   instrument,
   timeframe
 }: HybridSearchBarProps) {
@@ -45,6 +60,8 @@ export function HybridSearchBar({
   const [replyInputs, setReplyInputs] = useState<{[key: string]: string}>({});
   const [replyLoading, setReplyLoading] = useState<{[key: string]: boolean}>({});
   const [selectedAssetForPreview, setSelectedAssetForPreview] = useState<string | null>(null);
+  const [assetSuggestions, setAssetSuggestions] = useState<AssetProfile[]>([]);
+  const [isAssetLoading, setIsAssetLoading] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,6 +74,37 @@ export function HybridSearchBar({
     asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Recherche temps réel dans asset_profiles
+  useEffect(() => {
+    const searchAssets = async () => {
+      if (searchTerm.trim().length < 2 || isAIQuery) {
+        setAssetSuggestions([]);
+        return;
+      }
+
+      setIsAssetLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('asset_profiles' as any)
+          .select('id, symbol, name, sector, industry, country, market_cap, currency, exchange')
+          .or(`symbol.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`)
+          .order('market_cap', { ascending: false, nullsFirst: false })
+          .limit(5);
+
+        if (error) throw error;
+        setAssetSuggestions((data as unknown as AssetProfile[]) || []);
+      } catch (error) {
+        console.error('Erreur de recherche:', error);
+        setAssetSuggestions([]);
+      } finally {
+        setIsAssetLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchAssets, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, isAIQuery]);
 
   // Fermer le dropdown quand on clique dehors
   useEffect(() => {
@@ -75,6 +123,31 @@ export function HybridSearchBar({
     onAssetSelect(asset.symbol);
     setSearchTerm("");
     setShowDropdown(false);
+  };
+
+  const handleAssetProfileSelect = (asset: AssetProfile) => {
+    if (onAssetProfileSelect) {
+      onAssetProfileSelect(asset);
+    }
+    setSearchTerm("");
+    setShowDropdown(false);
+  };
+
+  const formatMarketCap = (value: number | null) => {
+    if (!value) return null;
+    if (value >= 1e12) return `${(value / 1e12).toFixed(1)}T`;
+    if (value >= 1e9) return `${(value / 1e9).toFixed(1)}B`;
+    if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
+    return `${(value / 1e3).toFixed(1)}K`;
+  };
+
+  const getCountryFlag = (countryCode: string | null) => {
+    if (!countryCode) return null;
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
   };
 
   const handleAIQuery = async () => {
@@ -310,6 +383,72 @@ export function HybridSearchBar({
               </div>
             )}
 
+            {/* Asset Profiles Results */}
+            {!isAIQuery && assetSuggestions.length > 0 && (
+              <div className="p-2">
+                <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
+                  <TrendingUp className="h-3 w-3" />
+                  Actifs financiers
+                </div>
+                {isAssetLoading ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Recherche en cours...
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {assetSuggestions.map((asset) => (
+                      <button
+                        key={asset.id}
+                        onClick={() => handleAssetProfileSelect(asset)}
+                        className="w-full p-3 text-left rounded-lg transition-smooth border border-transparent hover:bg-primary/10 hover:border-primary/30"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              {getCountryFlag(asset.country) && (
+                                <span className="text-sm">{getCountryFlag(asset.country)}</span>
+                              )}
+                              <span className="font-semibold text-foreground">{asset.symbol}</span>
+                              {asset.sector && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {asset.sector}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {asset.name || 'Nom non disponible'}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              {asset.exchange && (
+                                <div className="flex items-center gap-1">
+                                  <Building className="h-3 w-3" />
+                                  {asset.exchange}
+                                </div>
+                              )}
+                              {asset.currency && (
+                                <div className="flex items-center gap-1">
+                                  <Globe className="h-3 w-3" />
+                                  {asset.currency}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            {asset.market_cap && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <TrendingUp className="h-3 w-3" />
+                                {formatMarketCap(asset.market_cap)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* AI Query Option */}
             {isAIQuery && (
               <div className="p-2">
@@ -337,9 +476,9 @@ export function HybridSearchBar({
             )}
 
             {/* No results */}
-            {!isAIQuery && filteredAssets.length === 0 && (
+            {!isAIQuery && filteredAssets.length === 0 && assetSuggestions.length === 0 && searchTerm.trim().length >= 2 && !isAssetLoading && (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                No instruments found
+                Aucun résultat trouvé pour "{searchTerm}"
               </div>
             )}
           </div>
