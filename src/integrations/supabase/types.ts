@@ -14,7 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      instruments: {
+        Row: {
+          asset_type: string | null
+          bloomberg_code: string | null
+          country: string | null
+          currency: string | null
+          description: string | null
+          exchange: string | null
+          id: number
+          inception_date: string | null
+          industry: string | null
+          isin: string | null
+          last_updated: string | null
+          name: string | null
+          sector: string | null
+          symbol: string
+          website: string | null
+        }
+        Insert: {
+          asset_type?: string | null
+          bloomberg_code?: string | null
+          country?: string | null
+          currency?: string | null
+          description?: string | null
+          exchange?: string | null
+          id?: number
+          inception_date?: string | null
+          industry?: string | null
+          isin?: string | null
+          last_updated?: string | null
+          name?: string | null
+          sector?: string | null
+          symbol: string
+          website?: string | null
+        }
+        Update: {
+          asset_type?: string | null
+          bloomberg_code?: string | null
+          country?: string | null
+          currency?: string | null
+          description?: string | null
+          exchange?: string | null
+          id?: number
+          inception_date?: string | null
+          industry?: string | null
+          isin?: string | null
+          last_updated?: string | null
+          name?: string | null
+          sector?: string | null
+          symbol?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      prices: {
+        Row: {
+          close: number | null
+          date: string
+          high: number | null
+          id: number
+          instrument_id: number
+          low: number | null
+          open: number | null
+          volume: number | null
+        }
+        Insert: {
+          close?: number | null
+          date: string
+          high?: number | null
+          id?: number
+          instrument_id: number
+          low?: number | null
+          open?: number | null
+          volume?: number | null
+        }
+        Update: {
+          close?: number | null
+          date?: string
+          high?: number | null
+          id?: number
+          instrument_id?: number
+          low?: number | null
+          open?: number | null
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_instrument_id_fkey"
+            columns: ["instrument_id"]
+            isOneToOne: false
+            referencedRelation: "instruments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
