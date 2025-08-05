@@ -66,7 +66,7 @@ export default function InstrumentSearch({ onSelect }: InstrumentSearchProps) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Rechercher un actif (symbole ou nom)..."
+          placeholder="Search for an asset (symbol or name)..."
           className="pl-10"
           onFocus={() => query.length > 1 && setShowResults(true)}
         />
@@ -77,7 +77,7 @@ export default function InstrumentSearch({ onSelect }: InstrumentSearchProps) {
           <CardContent className="p-0">
             {loading ? (
               <div className="p-4 text-center text-muted-foreground">
-                Recherche en cours...
+                Searching...
               </div>
             ) : instruments.length > 0 ? (
               <div className="divide-y">
@@ -112,7 +112,7 @@ export default function InstrumentSearch({ onSelect }: InstrumentSearchProps) {
               </div>
             ) : (
               <div className="p-4 text-center text-muted-foreground">
-                Aucun actif trouvé
+                No assets found
               </div>
             )}
           </CardContent>

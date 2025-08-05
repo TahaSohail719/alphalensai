@@ -81,9 +81,9 @@ export default function PortfolioHeader({ portfolio, totalValue, totalPnL, total
         </div>
       ) : (
         <div className="bg-card rounded-lg p-6 border">
-          <h1 className="text-2xl font-bold mb-2">Mes Portefeuilles</h1>
+          <h1 className="text-2xl font-bold mb-2">My Portfolios</h1>
           <p className="text-muted-foreground">
-            Sélectionnez un portefeuille pour voir ses détails et le gérer
+            Select a portfolio to view its details and manage it
           </p>
         </div>
       )}

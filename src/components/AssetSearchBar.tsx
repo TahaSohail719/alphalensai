@@ -27,7 +27,7 @@ interface AssetSearchBarProps {
 export function AssetSearchBar({ 
   onAssetSelect, 
   selectedAsset, 
-  placeholder = "Rechercher un actif...",
+  placeholder = "Search for an asset...",
   className 
 }: AssetSearchBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +39,7 @@ export function AssetSearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Recherche temps réel avec debouncing
+  // Real-time search with debouncing
   useEffect(() => {
     const searchAssets = async () => {
       if (searchTerm.trim().length < 2) {
@@ -59,7 +59,7 @@ export function AssetSearchBar({
         if (error) throw error;
         setSuggestions((data as unknown as AssetProfile[]) || []);
       } catch (error) {
-        console.error('Erreur de recherche:', error);
+        console.error('Search error:', error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
@@ -70,7 +70,7 @@ export function AssetSearchBar({
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  // Fermer dropdown quand on clique dehors
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
@@ -161,7 +161,7 @@ export function AssetSearchBar({
         >
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              Recherche en cours...
+              Searching...
             </div>
           ) : suggestions.length > 0 ? (
             <div className="p-2 space-y-1">
@@ -190,7 +190,7 @@ export function AssetSearchBar({
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground truncate">
-                        {asset.name || 'Nom non disponible'}
+                        {asset.name || 'Name not available'}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         {asset.exchange && (
@@ -221,7 +221,7 @@ export function AssetSearchBar({
             </div>
           ) : searchTerm.trim().length >= 2 && (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              Aucun actif trouvé pour "{searchTerm}"
+              No assets found for "{searchTerm}"
             </div>
           )}
         </div>

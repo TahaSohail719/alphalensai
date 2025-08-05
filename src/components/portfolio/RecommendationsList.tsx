@@ -45,8 +45,8 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les recommandations",
+        title: "Error",
+        description: "Failed to load recommendations",
         variant: "destructive",
       });
     } finally {
@@ -64,16 +64,16 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Recommandation marquée comme appliquée",
+        title: "Success",
+        description: "Recommendation marked as applied",
       });
 
       fetchRecommendations();
     } catch (error) {
       console.error('Error updating recommendation:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour la recommandation",
+        title: "Error",
+        description: "Failed to update recommendation",
         variant: "destructive",
       });
     }
@@ -114,15 +114,15 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recommandations IA</CardTitle>
+        <CardTitle>AI Recommendations</CardTitle>
       </CardHeader>
       <CardContent>
         {recommendations.length === 0 ? (
           <div className="text-center py-12">
             <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Aucune recommandation</h3>
+            <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
             <p className="text-muted-foreground">
-              Les recommandations IA apparaîtront ici quand vous utiliserez "Apply to Portfolio"
+              AI recommendations will appear here when you use "Apply to Portfolio"
             </p>
           </div>
         ) : (
@@ -146,12 +146,12 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
                         {rec.is_applied && (
                           <Badge variant="default" className="text-xs">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Appliquée
+                            Applied
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Confiance: {(rec.confidence_score * 100).toFixed(0)}%
+                        Confidence: {(rec.confidence_score * 100).toFixed(0)}%
                       </p>
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
                     </p>
                     {rec.target_price && (
                       <p className="text-sm font-medium">
-                        Cible: ${rec.target_price}
+                        Target: ${rec.target_price}
                       </p>
                     )}
                   </div>
@@ -179,7 +179,7 @@ export default function RecommendationsList({ portfolioId }: RecommendationsList
                       onClick={() => markAsApplied(rec.id)}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Marquer comme appliquée
+                      Mark as Applied
                     </Button>
                   </div>
                 )}

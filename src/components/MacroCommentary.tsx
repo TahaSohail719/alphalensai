@@ -830,7 +830,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
                     <DialogTrigger asChild>
                       <Button variant="default" size="sm" className="bg-primary text-primary-foreground">
                         <Target className="h-4 w-4 mr-2" />
-                        Apply on Portfolio
+                        Apply to Portfolio
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto z-[10005]">

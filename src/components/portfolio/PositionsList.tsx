@@ -111,8 +111,8 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
     } catch (error) {
       console.error('Error deleting position:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer la position",
+        title: "Error",
+        description: "Failed to delete position",
         variant: "destructive",
       });
     }
@@ -135,7 +135,7 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
           <CardTitle>Positions</CardTitle>
           <Button onClick={() => setAddDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Ajouter Position
+            Add Position
           </Button>
         </div>
       </CardHeader>
@@ -143,13 +143,13 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
         {positions.length === 0 ? (
           <div className="text-center py-12">
             <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Aucune position</h3>
+            <h3 className="text-lg font-semibold mb-2">No Positions</h3>
             <p className="text-muted-foreground mb-4">
-              Commencez par ajouter votre première position
+              Start by adding your first position
             </p>
             <Button onClick={() => setAddDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter Position
+              Add Position
             </Button>
           </div>
         ) : (
@@ -159,9 +159,9 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
                 <TableRow>
                   <TableHead>Symbole</TableHead>
                   <TableHead className="text-right">Quantité</TableHead>
-                  <TableHead className="text-right">Prix Moyen</TableHead>
-                  <TableHead className="text-right">Prix Actuel</TableHead>
-                  <TableHead className="text-right">Valeur</TableHead>
+                  <TableHead className="text-right">Avg Price</TableHead>
+                  <TableHead className="text-right">Current Price</TableHead>
+                  <TableHead className="text-right">Value</TableHead>
                   <TableHead className="text-right">P&L</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>

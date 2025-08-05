@@ -67,16 +67,16 @@ export function HybridSearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Détecter si c'est une question IA (phrase longue) ou recherche d'instrument
+  // Detect if it's an AI question (long sentence) or instrument search
   const isAIQuery = searchTerm.trim().split(' ').length > 6;
   
-  // Filtrer les instruments qui correspondent
+  // Filter matching instruments
   const filteredAssets = assets.filter(asset =>
     asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Recherche temps réel dans asset_profiles
+  // Real-time search in asset_profiles
   useEffect(() => {
     const searchAssets = async () => {
       if (searchTerm.trim().length < 2 || isAIQuery) {
@@ -96,7 +96,7 @@ export function HybridSearchBar({
         if (error) throw error;
         setAssetSuggestions((data as unknown as AssetProfile[]) || []);
       } catch (error) {
-        console.error('Erreur de recherche:', error);
+        console.error('Search error:', error);
         setAssetSuggestions([]);
       } finally {
         setIsAssetLoading(false);
@@ -107,7 +107,7 @@ export function HybridSearchBar({
     return () => clearTimeout(timeoutId);
   }, [searchTerm, isAIQuery]);
 
-  // Fermer le dropdown quand on clique dehors
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
@@ -230,7 +230,7 @@ export function HybridSearchBar({
     setReplyLoading(prev => ({ ...prev, [conversationId]: true }));
     
     try {
-      // Récupérer le contexte de la conversation
+      // Get conversation context
       const conversationContext = aiResponses
         .filter(r => r.conversationId === conversationId)
         .reverse()
@@ -389,11 +389,11 @@ export function HybridSearchBar({
               <div className="p-2">
                 <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
                   <TrendingUp className="h-3 w-3" />
-                  Actifs financiers
+                  Financial Assets
                 </div>
                 {isAssetLoading ? (
                   <div className="p-4 text-center text-sm text-muted-foreground">
-                    Recherche en cours...
+                    Searching...
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -417,7 +417,7 @@ export function HybridSearchBar({
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground truncate">
-                              {asset.name || asset.short_name || 'Nom non disponible'}
+                              {asset.name || asset.short_name || 'Name not available'}
                             </p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                               {asset.exchange && (
@@ -479,7 +479,7 @@ export function HybridSearchBar({
             {/* No results */}
             {!isAIQuery && filteredAssets.length === 0 && assetSuggestions.length === 0 && searchTerm.trim().length >= 2 && !isAssetLoading && (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                Aucun résultat trouvé pour "{searchTerm}"
+                No results found for "{searchTerm}"
               </div>
             )}
           </div>

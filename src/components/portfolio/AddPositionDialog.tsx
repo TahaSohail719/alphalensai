@@ -46,8 +46,8 @@ export default function AddPositionDialog({
   const handleSubmit = async () => {
     if (!selectedInstrument || !quantity || !averagePrice) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
+        title: "Error",
+        description: "Please fill in all fields",
         variant: "destructive",
       });
       return;
@@ -96,8 +96,8 @@ export default function AddPositionDialog({
       }
 
       toast({
-        title: "Succès",
-        description: "Position ajoutée avec succès",
+        title: "Success",
+        description: "Position added successfully",
       });
 
       // Reset form
@@ -109,8 +109,8 @@ export default function AddPositionDialog({
     } catch (error) {
       console.error('Error adding position:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter la position",
+        title: "Error",
+        description: "Failed to add position",
         variant: "destructive",
       });
     } finally {
@@ -122,15 +122,15 @@ export default function AddPositionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Ajouter une Position</DialogTitle>
+          <DialogTitle>Add Position</DialogTitle>
           <DialogDescription>
-            Recherchez un actif et définissez votre position
+            Search for an asset and define your position
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>Actif</Label>
+            <Label>Asset</Label>
             {selectedInstrument ? (
               <div className="p-3 bg-muted rounded-md">
                 <div className="flex items-center justify-between">
@@ -143,7 +143,7 @@ export default function AddPositionDialog({
                     size="sm"
                     onClick={() => setSelectedInstrument(null)}
                   >
-                    Changer
+                    Change
                   </Button>
                 </div>
               </div>
@@ -153,36 +153,36 @@ export default function AddPositionDialog({
           </div>
 
           <div>
-            <Label htmlFor="quantity">Quantité</Label>
+            <Label htmlFor="quantity">Quantity</Label>
             <Input
               id="quantity"
               type="number"
               step="0.0001"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Ex: 100"
+              placeholder="e.g., 100"
             />
           </div>
 
           <div>
-            <Label htmlFor="price">Prix d'achat moyen</Label>
+            <Label htmlFor="price">Average Purchase Price</Label>
             <Input
               id="price"
               type="number"
               step="0.01"
               value={averagePrice}
               onChange={(e) => setAveragePrice(e.target.value)}
-              placeholder="Ex: 150.25"
+              placeholder="e.g., 150.25"
             />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
+            Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Ajout..." : "Ajouter Position"}
+            {loading ? "Adding..." : "Add Position"}
           </Button>
         </DialogFooter>
       </DialogContent>

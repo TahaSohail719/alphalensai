@@ -94,8 +94,8 @@ export default function ApplyToPortfolioButton({
   const createPortfolio = async () => {
     if (!newPortfolioName.trim()) {
       toast({
-        title: "Nom requis",
-        description: "Veuillez entrer un nom pour le portefeuille",
+        title: "Name Required",
+        description: "Please enter a portfolio name",
         variant: "destructive",
       });
       return;
@@ -124,14 +124,14 @@ export default function ApplyToPortfolioButton({
       setNewPortfolioDescription('');
       
       toast({
-        title: "Succès",
-        description: "Portefeuille créé avec succès",
+        title: "Success",
+        description: "Portfolio created successfully",
       });
     } catch (error) {
       console.error('Error creating portfolio:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de créer le portefeuille",
+        title: "Error",
+        description: "Failed to create portfolio",
         variant: "destructive",
       });
     } finally {
@@ -160,8 +160,8 @@ export default function ApplyToPortfolioButton({
   const runAnalysis = async () => {
     if (!selectedPortfolio) {
       toast({
-        title: "Sélectionner un portefeuille",
-        description: "Veuillez sélectionner un portefeuille pour l'analyse",
+        title: "Select a Portfolio",
+        description: "Please select a portfolio for analysis",
         variant: "destructive",
       });
       return;
@@ -199,8 +199,8 @@ export default function ApplyToPortfolioButton({
       if (!response.ok) throw new Error('Failed to run analysis');
 
       toast({
-        title: "Succès",
-        description: "Analyse lancée avec succès",
+        title: "Success",
+        description: "Analysis launched successfully",
       });
       
       setDialogOpen(false);
@@ -209,8 +209,8 @@ export default function ApplyToPortfolioButton({
     } catch (error) {
       console.error('Error running analysis:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de lancer l'analyse",
+        title: "Error",
+        description: "Failed to launch analysis",
         variant: "destructive",
       });
     } finally {
@@ -228,10 +228,10 @@ export default function ApplyToPortfolioButton({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Analyser avec le Portefeuille</DialogTitle>
+            <DialogTitle>Analyze with Portfolio</DialogTitle>
             <DialogDescription>
-              Sélectionnez un portefeuille pour analyser cette {analysisType}
-              {assetSymbol && ` sur ${assetSymbol}`}
+              Select a portfolio to analyze this {analysisType}
+              {assetSymbol && ` on ${assetSymbol}`}
             </DialogDescription>
           </DialogHeader>
           
@@ -239,11 +239,11 @@ export default function ApplyToPortfolioButton({
             {portfolios.length === 0 && !showCreateForm ? (
               <div className="text-center py-4">
                 <p className="text-muted-foreground mb-4">
-                  Vous n'avez encore aucun portefeuille. Créez-en un pour commencer l'analyse.
+                  You don't have any portfolios yet. Create one to start the analysis.
                 </p>
                 <Button onClick={() => setShowCreateForm(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Créer un Portefeuille
+                  Create Portfolio
                 </Button>
               </div>
             ) : (
@@ -251,19 +251,19 @@ export default function ApplyToPortfolioButton({
                 {!showCreateForm && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium">Sélectionner un Portefeuille</Label>
+                      <Label className="text-sm font-medium">Select a Portfolio</Label>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => setShowCreateForm(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Nouveau
+                        New
                       </Button>
                     </div>
                     <Select value={selectedPortfolio} onValueChange={handlePortfolioSelect}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choisir un portefeuille" />
+                        <SelectValue placeholder="Choose a portfolio" />
                       </SelectTrigger>
                       <SelectContent>
                         {portfolios.map((portfolio) => (
@@ -271,7 +271,7 @@ export default function ApplyToPortfolioButton({
                             <div className="flex flex-col">
                               <span>{portfolio.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                Valeur: {portfolio.total_value?.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }) || '0 €'}
+                                Value: {portfolio.total_value?.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) || '$0'}
                               </span>
                             </div>
                           </SelectItem>
@@ -283,32 +283,32 @@ export default function ApplyToPortfolioButton({
 
                 {showCreateForm && (
                   <div className="space-y-4 border rounded-lg p-4">
-                    <h4 className="font-medium">Créer un Nouveau Portefeuille</h4>
+                    <h4 className="font-medium">Create New Portfolio</h4>
                     <div className="space-y-3">
                       <div>
-                        <Label htmlFor="portfolio-name">Nom du Portefeuille</Label>
+                        <Label htmlFor="portfolio-name">Portfolio Name</Label>
                         <Input
                           id="portfolio-name"
                           value={newPortfolioName}
                           onChange={(e) => setNewPortfolioName(e.target.value)}
-                          placeholder="Ex: Mon Portefeuille Principal"
+                          placeholder="e.g., My Main Portfolio"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="portfolio-description">Description (optionnel)</Label>
+                        <Label htmlFor="portfolio-description">Description (optional)</Label>
                         <Input
                           id="portfolio-description"
                           value={newPortfolioDescription}
                           onChange={(e) => setNewPortfolioDescription(e.target.value)}
-                          placeholder="Ex: Portefeuille de croissance long terme"
+                          placeholder="e.g., Long-term growth portfolio"
                         />
                       </div>
                       <div className="flex gap-2">
                         <Button onClick={createPortfolio} disabled={loading}>
-                          {loading ? "Création..." : "Créer"}
+                          {loading ? "Creating..." : "Create"}
                         </Button>
                         <Button variant="outline" onClick={() => setShowCreateForm(false)}>
-                          Annuler
+                          Cancel
                         </Button>
                       </div>
                     </div>
@@ -317,12 +317,12 @@ export default function ApplyToPortfolioButton({
 
                 {selectedPortfolio && portfolioPositions.length > 0 && (
                   <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-3">Composition du Portefeuille</h4>
+                    <h4 className="font-medium mb-3">Portfolio Composition</h4>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
                       {portfolioPositions.map((position) => (
                         <div key={position.id} className="flex justify-between text-sm">
                           <span>{position.symbol}</span>
-                          <span>{position.quantity} @ {position.average_price.toFixed(2)}€</span>
+                          <span>{position.quantity} @ ${position.average_price.toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
@@ -334,11 +334,11 @@ export default function ApplyToPortfolioButton({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Annuler
+              Cancel
             </Button>
             {selectedPortfolio && (
               <Button onClick={runAnalysis} disabled={analysisLoading}>
-                {analysisLoading ? "Analyse en cours..." : "Lancer l'Analyse"}
+                {analysisLoading ? "Running Analysis..." : "Run Analysis"}
               </Button>
             )}
           </DialogFooter>

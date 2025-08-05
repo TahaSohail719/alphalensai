@@ -166,7 +166,7 @@ export default function TradingDashboard() {
             <Card className="gradient-card border-primary/20 shadow-glow-primary w-full">
               <CardContent className="p-4">
                 {selectedAssetProfile ? (
-                  // Affichage de l'actif sélectionné dans la recherche (priorité)
+                  // Display selected asset from search (priority)
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
