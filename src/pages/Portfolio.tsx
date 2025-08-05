@@ -3,6 +3,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PortfolioManager from '@/components/PortfolioManager';
+import PortfolioHeader from '@/components/portfolio/PortfolioHeader';
+import PositionsList from '@/components/portfolio/PositionsList';
+import RecommendationsList from '@/components/portfolio/RecommendationsList';
 
 interface Portfolio {
   id: string;
@@ -15,6 +18,15 @@ interface Portfolio {
 export default function Portfolio() {
   const { user, loading } = useAuth();
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
+  const [totalValue, setTotalValue] = useState(0);
+  const [totalPnL, setTotalPnL] = useState(0);
+  const [totalPnLPercent, setTotalPnLPercent] = useState(0);
+
+  const handleValuationChange = (value: number, pnl: number, pnlPercent: number) => {
+    setTotalValue(value);
+    setTotalPnL(pnl);
+    setTotalPnLPercent(pnlPercent);
+  };
 
   if (loading) {
     return (
@@ -36,17 +48,27 @@ export default function Portfolio() {
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">My Portfolios</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your investments and receive personalized recommendations
-          </p>
-        </div>
-
-        <PortfolioManager 
-          onPortfolioSelect={setSelectedPortfolio}
-          selectedPortfolio={selectedPortfolio}
+        <PortfolioHeader 
+          portfolio={selectedPortfolio}
+          totalValue={totalValue}
+          totalPnL={totalPnL}
+          totalPnLPercent={totalPnLPercent}
         />
+
+        {selectedPortfolio ? (
+          <div className="space-y-6">
+            <PositionsList 
+              portfolioId={selectedPortfolio.id}
+              onValuationChange={handleValuationChange}
+            />
+            <RecommendationsList portfolioId={selectedPortfolio.id} />
+          </div>
+        ) : (
+          <PortfolioManager 
+            onPortfolioSelect={setSelectedPortfolio}
+            selectedPortfolio={selectedPortfolio}
+          />
+        )}
       </div>
     </Layout>
   );

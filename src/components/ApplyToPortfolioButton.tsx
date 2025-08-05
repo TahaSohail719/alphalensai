@@ -76,8 +76,8 @@ export default function ApplyToPortfolioButton({
   const handleApply = async () => {
     if (!selectedPortfolio) {
       toast({
-        title: "Select Portfolio",
-        description: "Please select a portfolio to add this recommendation",
+        title: "Sélectionner un portefeuille",
+        description: "Veuillez sélectionner un portefeuille pour ajouter cette recommandation",
         variant: "destructive",
       });
       return;
@@ -85,15 +85,25 @@ export default function ApplyToPortfolioButton({
 
     setLoading(true);
     try {
+      // Determine recommendation type based on analysis content
+      let recommendationType = 'HOLD';
+      const analysisLower = analysisContent.toLowerCase();
+      
+      if (analysisLower.includes('buy') || analysisLower.includes('achat') || analysisLower.includes('acheter')) {
+        recommendationType = 'BUY';
+      } else if (analysisLower.includes('sell') || analysisLower.includes('vente') || analysisLower.includes('vendre')) {
+        recommendationType = 'SELL';
+      }
+
       const { error } = await supabase
         .from('ai_recommendations')
         .insert([
           {
             portfolio_id: selectedPortfolio,
             symbol: assetSymbol || 'GENERAL',
-            recommendation_type: 'BUY',
+            recommendation_type: recommendationType,
             confidence_score: 0.8,
-            reasoning: `${analysisType} analysis: ${analysisContent.substring(0, 500)}...`,
+            reasoning: `Analyse ${analysisType}: ${analysisContent.substring(0, 500)}${analysisContent.length > 500 ? '...' : ''}`,
             is_applied: false,
           }
         ]);
@@ -101,8 +111,8 @@ export default function ApplyToPortfolioButton({
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Recommendation added to your portfolio`,
+        title: "Succès",
+        description: `Recommandation ajoutée à votre portefeuille`,
       });
       
       setDialogOpen(false);
@@ -110,8 +120,8 @@ export default function ApplyToPortfolioButton({
     } catch (error) {
       console.error('Error adding recommendation:', error);
       toast({
-        title: "Error",
-        description: "Failed to add recommendation to portfolio",
+        title: "Erreur",
+        description: "Impossible d'ajouter la recommandation au portefeuille",
         variant: "destructive",
       });
     } finally {
@@ -129,29 +139,29 @@ export default function ApplyToPortfolioButton({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add to Portfolio</DialogTitle>
+            <DialogTitle>Ajouter au Portefeuille</DialogTitle>
             <DialogDescription>
-              Add this {analysisType} analysis to one of your portfolios
-              {assetSymbol && ` for ${assetSymbol}`}
+              Ajouter cette analyse {analysisType} à l'un de vos portefeuilles
+              {assetSymbol && ` pour ${assetSymbol}`}
             </DialogDescription>
           </DialogHeader>
           
           {portfolios.length === 0 ? (
             <div className="text-center py-4">
               <p className="text-muted-foreground mb-4">
-                You don't have any portfolios yet. Create one first to add recommendations.
+                Vous n'avez encore aucun portefeuille. Créez-en un d'abord pour ajouter des recommandations.
               </p>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Go to Portfolios
+                Aller aux Portefeuilles
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Select Portfolio</label>
+                <label className="text-sm font-medium">Sélectionner un Portefeuille</label>
                 <Select value={selectedPortfolio} onValueChange={setSelectedPortfolio}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a portfolio" />
+                    <SelectValue placeholder="Choisir un portefeuille" />
                   </SelectTrigger>
                   <SelectContent>
                     {portfolios.map((portfolio) => (
@@ -167,11 +177,11 @@ export default function ApplyToPortfolioButton({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              Annuler
             </Button>
             {portfolios.length > 0 && (
               <Button onClick={handleApply} disabled={loading || !selectedPortfolio}>
-                {loading ? "Adding..." : "Add Recommendation"}
+                {loading ? "Ajout..." : "Ajouter Recommandation"}
               </Button>
             )}
           </DialogFooter>
