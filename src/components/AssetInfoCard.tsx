@@ -103,16 +103,7 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ symbol, className }) => {
   }
 
   if (error || !assetInfo) {
-    return (
-      <Card className={`border-destructive/50 ${className || ''}`}>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-destructive">
-            <Info className="h-5 w-5" />
-            <p>{error || 'Asset non trouvé'}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
