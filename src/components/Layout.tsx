@@ -7,21 +7,26 @@ import {
   X,
   ChevronRight,
   Activity,
-  Zap
+  Zap,
+  User,
+  LogOut
 } from "lucide-react";
 import { BubbleSystem } from "./BubbleSystem";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeModule: string;
-  onModuleChange: (module: string) => void;
+  activeModule?: string;
+  onModuleChange?: (module: string) => void;
 }
 
-
-export function Layout({ children, activeModule, onModuleChange }: LayoutProps) {
+export default function Layout({ children, activeModule, onModuleChange }: LayoutProps) {
   const [selectedAsset, setSelectedAsset] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("4h");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
@@ -45,8 +50,42 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
               </div>
             </button>
 
-            {/* Mobile Navigation + Status */}
+            {/* Mobile Navigation + Auth + Status */}
             <div className="flex items-center gap-2">
+              {/* Auth Section */}
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/portfolio')}
+                    className="hidden sm:flex items-center gap-2 h-8 px-3"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="text-sm">Portfolio</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={signOut}
+                    className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="hidden sm:inline ml-2">Déconnexion</span>
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="h-8 px-3"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="text-sm">Connexion</span>
+                </Button>
+              )}
+
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
@@ -79,7 +118,7 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      onModuleChange("trading");
+                      navigate('/');
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
@@ -87,11 +126,25 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
                     <Activity className="h-4 w-4 mr-2" />
                     Trading Dashboard
                   </Button>
+                  {user && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate('/portfolio');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="justify-start text-sm"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Mes Portefeuilles
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      onModuleChange("ai-setup");
+                      onModuleChange?.("ai-setup");
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
@@ -123,7 +176,7 @@ export function Layout({ children, activeModule, onModuleChange }: LayoutProps) 
       <BubbleSystem 
         instrument={selectedAsset} 
         timeframe={timeframe} 
-        onTradeSetupClick={() => onModuleChange("trading")}
+        onTradeSetupClick={() => onModuleChange?.("trading")}
       />
     </div>
   );

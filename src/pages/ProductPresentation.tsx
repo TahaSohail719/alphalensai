@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/Layout";
 import { DemoWelcome } from "@/components/DemoWelcome";
 import { MacroCommentary } from "@/components/MacroCommentary";
 import { Reports } from "@/components/Reports";

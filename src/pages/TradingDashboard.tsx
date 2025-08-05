@@ -8,7 +8,7 @@ import { TrendingUp, TrendingDown, Activity, Zap, ArrowRight } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { CandlestickChart } from "@/components/CandlestickChart";
 import { BubbleSystem } from "@/components/BubbleSystem";
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/Layout";
 import { HybridSearchBar } from "@/components/HybridSearchBar";
 import { AssetSummaryBanner } from "@/components/AssetSummaryBanner";
 import { getSymbolForAsset } from "@/lib/assetMapping";
