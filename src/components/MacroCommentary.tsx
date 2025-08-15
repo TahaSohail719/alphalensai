@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -450,6 +451,48 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
     }
   };
 
+  const handleGeneratePDFReport = async () => {
+    if (!commentary) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-macro-report', {
+        body: {
+          content: commentary.content,
+          summary: commentary.summary,
+          sources: commentary.sources,
+          timestamp: new Date().toISOString(),
+          analysisType: activeMode === "article_analysis" ? "Article Analysis" : "Macro Commentary",
+          metadata: {
+            region: commentary.region,
+            products: commentary.products,
+            categories: commentary.categories,
+            sentiment: commentary.sentiment,
+            themes: commentary.themes
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "PDF Report Generated",
+        description: "Your macro analysis report has been generated and sent via email.",
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate PDF report';
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Component to render text with tooltips for defined terms
   const TextWithDefinitions = ({ text, definitions }: { text: string; definitions?: Definition[] }) => {
     if (!definitions || definitions.length === 0) {
@@ -832,6 +875,15 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
                     analysisType="macro"
                     className="bg-primary text-primary-foreground"
                   />
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleGeneratePDFReport}
+                    disabled={isLoading}
+                  >
+                    <FileText className="h-4 w-4" />
+                    PDF Report
+                  </Button>
                   <Button 
                     variant="ghost" 
                     size="sm"
