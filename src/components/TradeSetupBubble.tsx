@@ -100,7 +100,10 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
         riskReward: 2.1,
         confidence: parameters.riskAppetite === "low" ? 75 : 
                    parameters.riskAppetite === "high" ? 90 : 82,
-        reasoning: rawData.content?.content || `Based on ${parameters.strategy} strategy with ${parameters.riskAppetite} risk profile. Technical indicators align with current market structure on ${parameters.timeframe} timeframe.`
+        reasoning: typeof rawData.content?.content === 'string' ? rawData.content.content
+                 : typeof rawData.content === 'string' ? rawData.content
+                 : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+                 : `Based on ${parameters.strategy} strategy with ${parameters.riskAppetite} risk profile. Technical indicators align with current market structure on ${parameters.timeframe} timeframe.`
       };
       
       setTradeSetup(mockSetup);

@@ -110,24 +110,36 @@ export function ConversationalBubble({ mode, instrument, timeframe, onClose }: C
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "ai",
-        content: rawData.content?.content || "Analysis completed successfully",
+        content: typeof rawData.content?.content === 'string' ? rawData.content.content
+               : typeof rawData.content === 'string' ? rawData.content
+               : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+               : "Analysis completed successfully",
         timestamp: new Date(),
         sections: mode === "macro" ? [
           {
             title: "AI Analysis",
-            content: rawData.content?.content || `Current ${instrument} analysis based on market conditions and your query.`,
+            content: typeof rawData.content?.content === 'string' ? rawData.content.content
+                   : typeof rawData.content === 'string' ? rawData.content
+                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+                   : `Current ${instrument} analysis based on market conditions and your query.`,
             type: "analysis"
           }
         ] : mode === "reports" ? [
           {
             title: "Generated Report",
-            content: rawData.content?.content || `Comprehensive report for ${instrument} based on your request.`,
+            content: typeof rawData.content?.content === 'string' ? rawData.content.content
+                   : typeof rawData.content === 'string' ? rawData.content
+                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+                   : `Comprehensive report for ${instrument} based on your request.`,
             type: "summary"
           }
         ] : [
           {
             title: "Trade Setup",
-            content: rawData.content?.content || `AI-generated trade setup for ${instrument} based on current market conditions.`,
+            content: typeof rawData.content?.content === 'string' ? rawData.content.content
+                   : typeof rawData.content === 'string' ? rawData.content
+                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+                   : `AI-generated trade setup for ${instrument} based on current market conditions.`,
             type: "analysis"
           }
         ]

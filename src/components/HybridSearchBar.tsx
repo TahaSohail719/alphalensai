@@ -182,7 +182,10 @@ export function HybridSearchBar({
         id: conversationId,
         query: searchTerm,
         timestamp: new Date(),
-        response: data.content?.content || data.content || "No response received",
+        response: typeof data.content?.content === 'string' ? data.content.content 
+                : typeof data.content === 'string' ? data.content 
+                : typeof data.content === 'object' ? JSON.stringify(data.content, null, 2)
+                : "No response received",
         conversationId: conversationId
       };
 
@@ -262,7 +265,10 @@ export function HybridSearchBar({
         id: Date.now().toString(),
         query: replyText,
         timestamp: new Date(),
-        response: data.content?.content || data.content || "No response received",
+        response: typeof data.content?.content === 'string' ? data.content.content 
+                : typeof data.content === 'string' ? data.content 
+                : typeof data.content === 'object' ? JSON.stringify(data.content, null, 2)
+                : "No response received",
         conversationId: conversationId
       };
 

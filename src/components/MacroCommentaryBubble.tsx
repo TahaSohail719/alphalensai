@@ -102,7 +102,10 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         sections: [
           {
             title: "Market Overview",
-            content: rawData.content?.content || `Current macro analysis for ${instrument} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`,
+            content: typeof rawData.content?.content === 'string' ? rawData.content.content
+                   : typeof rawData.content === 'string' ? rawData.content
+                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+                   : `Current macro analysis for ${instrument} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`,
             type: "overview",
             expanded: true
           },
