@@ -7,6 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { AssetSearchBar } from "./AssetSearchBar";
+
+interface AssetProfile {
+  id: number;
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  industry: string | null;
+  country: string | null;
+  market_cap: number | null;
+  currency: string | null;
+  exchange: string | null;
+}
 import { 
   FileText, 
   Download, 
@@ -87,6 +100,7 @@ export function Reports() {
   const [reportType, setReportType] = useState("daily");
   const [exportFormat, setExportFormat] = useState("pdf");
   const [reportTitle, setReportTitle] = useState("");
+  const [selectedAsset, setSelectedAsset] = useState<AssetProfile | null>(null);
   const [sections, setSections] = useState(
     includedSections.reduce((acc, section) => ({
       ...acc,
@@ -109,8 +123,8 @@ export function Reports() {
       // Call n8n webhook
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "reports",
-        question: `Generate report "${reportTitle || `${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}" with sections: ${sectionsText}.`,
-        instrument: "Multi-Asset", // Default since no specific instrument in this component
+        question: `Generate report "${reportTitle || `${getSelectedReportType()?.label} - ${selectedAsset?.symbol || "Multi-Asset"} - ${new Date().toLocaleDateString()}`}" with sections: ${sectionsText}.`,
+        instrument: selectedAsset?.symbol || "Multi-Asset",
         timeframe: "1D",
         exportFormat: exportFormat,
         sections: includedSectionsList.map((section, index) => ({
@@ -196,12 +210,29 @@ export function Reports() {
 
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
+                  Target Asset
+                </label>
+                <AssetSearchBar
+                  onAssetSelect={setSelectedAsset}
+                  selectedAsset={selectedAsset}
+                  placeholder="Select an asset for the report..."
+                  className="mb-2"
+                />
+                {selectedAsset && (
+                  <Badge variant="outline" className="text-xs">
+                    Selected: {selectedAsset.symbol} - {selectedAsset.name}
+                  </Badge>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">
                   Report Title
                 </label>
                 <Input
                   value={reportTitle}
                   onChange={(e) => setReportTitle(e.target.value)}
-                  placeholder={`${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}
+                  placeholder={`${getSelectedReportType()?.label} - ${selectedAsset?.symbol || "Multi-Asset"} - ${new Date().toLocaleDateString()}`}
                   className="bg-background/50 border-border-light"
                 />
               </div>
@@ -293,8 +324,15 @@ export function Reports() {
             <CardContent className="space-y-4">
               <div className="bg-accent/30 rounded-lg p-4 border border-border-light">
                 <h4 className="font-medium text-foreground mb-2">
-                  {reportTitle || `${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}
+                  {reportTitle || `${getSelectedReportType()?.label} - ${selectedAsset?.symbol || "Multi-Asset"} - ${new Date().toLocaleDateString()}`}
                 </h4>
+                {selectedAsset && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      Target: {selectedAsset.symbol} - {selectedAsset.name}
+                    </Badge>
+                  </div>
+                )}
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3 w-3" />
