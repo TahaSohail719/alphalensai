@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AssetSearchBar } from "@/components/AssetSearchBar";
 import { 
   FileText, 
   X, 
@@ -26,6 +27,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+
+interface AssetProfile {
+  id: number;
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  industry: string | null;
+  country: string | null;
+  market_cap: number | null;
+  currency: string | null;
+  exchange: string | null;
+}
 
 interface ReportsBubbleProps {
   instrument: string;
@@ -56,6 +69,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
   const [step, setStep] = useState<"compose" | "preview" | "generated">("compose");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetProfile | null>(null);
   const { toast } = useToast();
 
   // Report composition state
@@ -129,7 +143,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "reports",
         question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
-        instrument: instrument,
+        instrument: selectedAsset?.symbol || instrument,
         timeframe: timeframe || "1H",
         exportFormat: reportConfig.exportFormat,
         sections: includedSections.map(section => ({
@@ -243,7 +257,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">
-              {instrument}
+              {selectedAsset?.symbol || instrument}
             </Badge>
             <Badge variant="secondary" className="text-xs border-green-500/20">
               {step === "compose" ? "Composition" : step === "preview" ? "Preview" : "Generated"}
@@ -263,6 +277,22 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
                   onChange={(e) => setReportConfig(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Your report name"
                 />
+              </div>
+
+              {/* Target Asset */}
+              <div className="space-y-2">
+                <Label>Target Asset</Label>
+                <AssetSearchBar
+                  onAssetSelect={setSelectedAsset}
+                  selectedAsset={selectedAsset}
+                  placeholder="Select an asset for the report..."
+                  className="mb-2"
+                />
+                {selectedAsset && (
+                  <Badge variant="outline" className="text-xs">
+                    Selected: {selectedAsset.symbol} - {selectedAsset.name}
+                  </Badge>
+                )}
               </div>
 
               {/* Export Format */}
