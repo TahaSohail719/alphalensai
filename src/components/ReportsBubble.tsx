@@ -134,7 +134,15 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
           type: "reports",
           question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
           instrument: instrument,
-          timeframe: timeframe || "1H"
+          timeframe: timeframe || "1H",
+          exportFormat: reportConfig.exportFormat,
+          sections: includedSections.map(section => ({
+            id: section.id,
+            title: section.title,
+            description: section.description,
+            order: section.order
+          })),
+          customNotes: reportConfig.customNotes
         })
       });
 

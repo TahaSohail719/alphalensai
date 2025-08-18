@@ -98,12 +98,50 @@ export function Reports() {
     setSections(prev => ({ ...prev, [sectionId]: checked }));
   };
 
-  const generateReport = () => {
+  const generateReport = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
+    
+    try {
+      const includedSectionsList = includedSections.filter(section => sections[section.id]);
+      const sectionsText = includedSectionsList.map(s => s.label).join(", ");
+      
+      // Call n8n webhook
+      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: "reports",
+          question: `Generate report "${reportTitle || `${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}" with sections: ${sectionsText}.`,
+          instrument: "Multi-Asset", // Default since no specific instrument in this component
+          timeframe: "1D",
+          exportFormat: exportFormat,
+          sections: includedSectionsList.map((section, index) => ({
+            id: section.id,
+            title: section.label,
+            description: section.label,
+            order: index + 1
+          })),
+          customNotes: ""
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Report generated:', result);
+      
+      // In real app, this would trigger download or preview based on exportFormat
+      setTimeout(() => {
+        setIsGenerating(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error generating report:', error);
       setIsGenerating(false);
-      // In real app, this would trigger download or preview
-    }, 3000);
+    }
   };
 
   const getSelectedReportType = () => {
