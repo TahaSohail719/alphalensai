@@ -9,9 +9,23 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, FileText, Download, Plus, ArrowUp, ArrowDown, Check } from "lucide-react";
 import Layout from "@/components/Layout";
+import { AssetSearchBar } from "@/components/AssetSearchBar";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { safePostRequest } from "@/lib/safe-request";
+
+interface AssetProfile {
+  id: number;
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  industry: string | null;
+  country: string | null;
+  market_cap: number | null;
+  currency: string | null;
+  exchange: string | null;
+}
 
 interface ReportSection {
   id: string;
@@ -40,6 +54,7 @@ export default function Reports() {
   const [step, setStep] = useState<"compose" | "preview" | "generated">("compose");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetProfile | null>(null);
 
   const [reportConfig, setReportConfig] = useState({
     title: "Monthly Trading Report",
@@ -132,12 +147,31 @@ export default function Reports() {
   const generateReport = async () => {
     setIsGenerating(true);
 
-    // Simulate report generation
-    setTimeout(() => {
-      const includedSections = availableSections
-        .filter(section => section.included)
-        .sort((a, b) => a.order - b.order);
+    try {
+      const includedSections = availableSections.filter(s => s.included);
+      const sectionsText = includedSections.map(s => s.title).join(", ");
+      
+      // Appel du webhook n8n
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "reports",
+        question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
+        instrument: selectedAsset?.symbol || "Multi-Asset",
+        timeframe: "1D",
+        exportFormat: reportConfig.exportFormat,
+        sections: includedSections.map((section, index) => ({
+          id: section.id,
+          title: section.title,
+          description: section.description,
+          order: index + 1
+        })),
+        customNotes: reportConfig.customNotes
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Simulation de la génération de rapport pour l'affichage
       const generatedSections = includedSections.map(section => ({
         title: section.title,
         content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`
@@ -155,13 +189,21 @@ export default function Reports() {
 
       setCurrentReport(newReport);
       setStep("generated");
-      setIsGenerating(false);
 
       toast({
         title: "Report Generated",
         description: "Your report has been successfully generated.",
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const exportReport = () => {
@@ -232,6 +274,21 @@ export default function Reports() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Target Asset</Label>
+                  <AssetSearchBar
+                    onAssetSelect={setSelectedAsset}
+                    selectedAsset={selectedAsset}
+                    placeholder="Select an asset for the report..."
+                    className="mb-2"
+                  />
+                  {selectedAsset && (
+                    <Badge variant="outline" className="text-xs">
+                      Selected: {selectedAsset.symbol} - {selectedAsset.name}
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -330,11 +387,23 @@ export default function Reports() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>{currentReport.title}</CardTitle>
+                    <CardTitle>
+                      {currentReport.title}
+                      {selectedAsset && (
+                        <span className="text-sm font-normal text-muted-foreground ml-2">
+                          ({selectedAsset.symbol})
+                        </span>
+                      )}
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       Generated on {currentReport.createdAt.toLocaleDateString()} at{" "}
                       {currentReport.createdAt.toLocaleTimeString()}
                     </p>
+                    {selectedAsset && (
+                      <Badge variant="outline" className="mt-2">
+                        Target Asset: {selectedAsset.symbol} - {selectedAsset.name}
+                      </Badge>
+                    )}
                   </div>
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                     <Check className="w-3 h-3 mr-1" />
