@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { safePostRequest } from "@/lib/safe-request";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,17 +78,11 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     
     try {
       // Call n8n webhook
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "macro",
-          question: queryParams.query,
-          instrument: instrument,
-          timeframe: timeframe || "1H"
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "macro",
+        question: queryParams.query,
+        instrument: instrument,
+        timeframe: timeframe || "1H"
       });
 
       if (!response.ok) {

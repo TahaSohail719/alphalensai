@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BarChart3, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSymbolForAsset, supportsRealTimeData } from '@/lib/assetMapping';
+import { safeGetRequest } from "@/lib/safe-request";
 
 interface BinanceKlineData {
   k: {
@@ -88,9 +89,11 @@ export function CandlestickChart({
 
     // Sinon, utiliser l'API Binance pour les données temps réel
     try {
-      const response = await fetch(
-        `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=100`
-      );
+      const response = await safeGetRequest('https://api.binance.com/api/v3/klines', {
+        symbol: binanceSymbol,
+        interval: interval,
+        limit: 100
+      });
       const data = await response.json();
       
       return data.map((kline: any[]) => ({

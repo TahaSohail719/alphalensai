@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { safePostRequest } from "@/lib/safe-request";
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -188,13 +189,7 @@ export default function ApplyToPortfolioButton({
         }
       };
 
-      const response = await fetch('https://hook.eu2.make.com/abcdef123456', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(analysisData),
-      });
+      const response = await safePostRequest('https://hook.eu2.make.com/abcdef123456', analysisData);
 
       if (!response.ok) throw new Error('Failed to run analysis');
 

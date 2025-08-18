@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { safePostRequest } from "@/lib/safe-request";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -106,25 +107,19 @@ export function Reports() {
       const sectionsText = includedSectionsList.map(s => s.label).join(", ");
       
       // Call n8n webhook
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "reports",
-          question: `Generate report "${reportTitle || `${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}" with sections: ${sectionsText}.`,
-          instrument: "Multi-Asset", // Default since no specific instrument in this component
-          timeframe: "1D",
-          exportFormat: exportFormat,
-          sections: includedSectionsList.map((section, index) => ({
-            id: section.id,
-            title: section.label,
-            description: section.label,
-            order: index + 1
-          })),
-          customNotes: ""
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "reports",
+        question: `Generate report "${reportTitle || `${getSelectedReportType()?.label} - ${new Date().toLocaleDateString()}`}" with sections: ${sectionsText}.`,
+        instrument: "Multi-Asset", // Default since no specific instrument in this component
+        timeframe: "1D",
+        exportFormat: exportFormat,
+        sections: includedSectionsList.map((section, index) => ({
+          id: section.id,
+          title: section.label,
+          description: section.label,
+          order: index + 1
+        })),
+        customNotes: ""
       });
 
       if (!response.ok) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { safePostRequest } from "@/lib/safe-request";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,25 +126,19 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
       // Call n8n webhook
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "reports",
-          question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
-          instrument: instrument,
-          timeframe: timeframe || "1H",
-          exportFormat: reportConfig.exportFormat,
-          sections: includedSections.map(section => ({
-            id: section.id,
-            title: section.title,
-            description: section.description,
-            order: section.order
-          })),
-          customNotes: reportConfig.customNotes
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "reports",
+        question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
+        instrument: instrument,
+        timeframe: timeframe || "1H",
+        exportFormat: reportConfig.exportFormat,
+        sections: includedSections.map(section => ({
+          id: section.id,
+          title: section.title,
+          description: section.description,
+          order: section.order
+        })),
+        customNotes: reportConfig.customNotes
       });
 
       if (!response.ok) {

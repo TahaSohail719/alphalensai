@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { safePostRequest } from "@/lib/safe-request";
 import { 
   MessageCircle, 
   X, 
@@ -79,17 +80,11 @@ export function ConversationalBubble({ mode, instrument, timeframe, onClose }: C
       // Call n8n webhook with the appropriate type
       const webhookType = mode === "macro" ? "macro" : mode === "reports" ? "reports" : "tradesetup";
       
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: webhookType,
-          question: input.trim(),
-          instrument: instrument,
-          timeframe: timeframe || "1H"
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: webhookType,
+        question: input.trim(),
+        instrument: instrument,
+        timeframe: timeframe || "1H"
       });
 
       if (!response.ok) {

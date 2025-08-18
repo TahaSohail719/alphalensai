@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { safePostRequest } from "@/lib/safe-request";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,17 +70,11 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     
     try {
       // Call n8n webhook
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "tradesetup",
-          question: `Generate trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskAppetite} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
-          instrument: parameters.instrument,
-          timeframe: parameters.timeframe
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "tradesetup",
+        question: `Generate trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskAppetite} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
+        instrument: parameters.instrument,
+        timeframe: parameters.timeframe
       });
 
       if (!response.ok) {
@@ -144,23 +139,17 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     setIsAnalyzingTechnical(true);
     
     try {
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "technical_analysis",
-          question: `Analyze technical levels for ${parameters.instrument} on ${parameters.timeframe}. Current setup: Entry=${tradeSetup.entry}, SL=${tradeSetup.stopLoss}, TP=${tradeSetup.takeProfit}`,
-          instrument: parameters.instrument,
-          timeframe: parameters.timeframe,
-          trade_data: {
-            entry: tradeSetup.entry,
-            stop_loss: tradeSetup.stopLoss,
-            take_profit: tradeSetup.takeProfit,
-            strategy: parameters.strategy
-          }
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "technical_analysis",
+        question: `Analyze technical levels for ${parameters.instrument} on ${parameters.timeframe}. Current setup: Entry=${tradeSetup.entry}, SL=${tradeSetup.stopLoss}, TP=${tradeSetup.takeProfit}`,
+        instrument: parameters.instrument,
+        timeframe: parameters.timeframe,
+        trade_data: {
+          entry: tradeSetup.entry,
+          stop_loss: tradeSetup.stopLoss,
+          take_profit: tradeSetup.takeProfit,
+          strategy: parameters.strategy
+        }
       });
 
       if (!response.ok) {

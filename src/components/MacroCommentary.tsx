@@ -2,6 +2,7 @@ import { useState } from "react";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { safePostRequest } from "@/lib/safe-request";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,13 +228,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         };
       }
 
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -420,13 +415,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         user_id: "12345"
       };
 
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

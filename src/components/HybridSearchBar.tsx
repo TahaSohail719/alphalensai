@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AssetInfoCard from "@/components/AssetInfoCard";
+import { safePostRequest } from "@/lib/safe-request";
 
 interface Asset {
   symbol: string;
@@ -158,17 +159,11 @@ export function HybridSearchBar({
     setShowDropdown(false);
     
     try {
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "RAG",
-          question: searchTerm,
-          instrument: instrument,
-          timeframe: timeframe
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "RAG",
+        question: searchTerm,
+        instrument: instrument,
+        timeframe: timeframe
       });
 
       if (!response.ok) {
@@ -242,17 +237,11 @@ export function HybridSearchBar({
 
       const contextualQuestion = `Context:\n${conversationContext}\n\nFollow-up question: ${replyText}`;
 
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: "RAG",
-          question: contextualQuestion,
-          instrument: instrument,
-          timeframe: timeframe
-        })
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        type: "RAG",
+        question: contextualQuestion,
+        instrument: instrument,
+        timeframe: timeframe
       });
 
       if (!response.ok) {
