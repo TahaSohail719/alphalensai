@@ -71,7 +71,7 @@ export function DemoWelcome({ onModuleSelect }: DemoWelcomeProps) {
               </Badge>
             </div>
             <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4">
-              directionAI Demo
+              TradeMind Demo
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-primary-foreground/90 mb-6 sm:mb-8 leading-relaxed px-4">
               Experience the power of AI-driven trading analysis. Test our comprehensive suite 

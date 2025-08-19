@@ -47,13 +47,13 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ symbol, className }) => {
         }
 
         if (!data) {
-          setError('Asset non trouvé');
+          setError("Asset not found");
           return;
         }
 
         setAssetInfo(data);
       } catch (err) {
-        setError('Erreur lors du chargement des données');
+        setError("Error loading data");
         console.error('Error fetching asset info:', err);
       } finally {
         setLoading(false);
@@ -66,8 +66,8 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ symbol, className }) => {
   }, [symbol]);
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Non disponible';
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    if (!dateString) return "Not available";
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -138,7 +138,7 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ symbol, className }) => {
               onClick={() => window.open(assetInfo.website!, '_blank')}
             >
               <ExternalLink className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Visiter</span>
+              <span className="hidden sm:inline">Visit</span>
             </Button>
           )}
         </CardTitle>
@@ -157,16 +157,16 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ symbol, className }) => {
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Devise</p>
-                <p className="text-sm font-medium">{assetInfo.currency || 'Non disponible'}</p>
+                <p className="text-xs text-muted-foreground">Currency</p>
+                <p className="text-sm font-medium">{assetInfo.currency || "Not available"}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Building className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Marché</p>
-                <p className="text-sm font-medium">{assetInfo.exchange || 'Non disponible'}</p>
+                <p className="text-xs text-muted-foreground">Market</p>
+                <p className="text-sm font-medium">{assetInfo.exchange || "Not available"}</p>
               </div>
             </div>
 

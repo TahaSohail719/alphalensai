@@ -190,7 +190,7 @@ export default function TradingDashboard() {
                         onClick={() => navigate(`/asset/${selectedAssetProfile.symbol}`)}
                         className="shrink-0"
                       >
-                        Voir détails
+                        View Details
                       </Button>
                       <Button 
                         size="sm" 

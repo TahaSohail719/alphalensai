@@ -84,8 +84,8 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
     } catch (error) {
       console.error('Error fetching positions:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les positions",
+        title: "Error",
+        description: "Unable to load positions",
         variant: "destructive",
       });
     } finally {
@@ -103,8 +103,8 @@ export default function PositionsList({ portfolioId, onValuationChange }: Positi
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Position supprimée",
+        title: "Success",
+        description: "Position deleted",
       });
 
       fetchPositions();

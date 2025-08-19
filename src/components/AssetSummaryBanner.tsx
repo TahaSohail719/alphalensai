@@ -79,7 +79,7 @@ export function AssetSummaryBanner({ asset, onViewComplete, className }: AssetSu
               </div>
             </div>
 
-            {/* Détails du marché */}
+            {/* Market Details */}
             <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
               {asset.exchange && (
                 <div className="flex items-center gap-1">
@@ -158,7 +158,7 @@ export function AssetSummaryBanner({ asset, onViewComplete, className }: AssetSu
               className="bg-primary hover:bg-primary-dark"
             >
               <Eye className="h-4 w-4 mr-1" />
-              Fiche complète
+              Complete Profile
             </Button>
           </div>
         </div>

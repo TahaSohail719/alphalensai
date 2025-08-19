@@ -36,13 +36,13 @@ const ProductPresentation = () => {
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">directionAI</h1>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">TradeMind</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Assistant</p>
               </div>
             </div>
             <Link to="/" className="shrink-0">
               <Button className="gradient-primary shadow-glow-primary text-sm sm:text-base px-3 sm:px-4 py-2 touch-friendly">
-                <span className="hidden xs:inline">Commencer</span>
+                <span className="hidden xs:inline">Get Started</span>
                 <span className="xs:hidden">Start</span>
                 <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
@@ -56,29 +56,29 @@ const ProductPresentation = () => {
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
           <Badge variant="outline" className="border-primary/50 text-primary bg-primary/10 px-3 py-1.5 sm:px-4 sm:py-2 text-sm">
             <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-            Révolutionnez votre trading avec l'IA
+            Revolutionize your trading with AI
           </Badge>
           
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-bold text-foreground tracking-tight mobile-title">
               Trading Intelligence
-              <span className="gradient-primary bg-clip-text text-transparent block sm:inline"> Artificielle</span>
+              <span className="gradient-primary bg-clip-text text-transparent block sm:inline"> Powered by AI</span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mobile-body px-2">
-              Transformez votre approche du trading avec notre assistant IA avancé. 
-              Analyses en temps réel, prédictions précises et gestion de risque optimisée.
+              Transform your trading approach with our advanced AI assistant. 
+              Real-time analysis, precise predictions and optimized risk management.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Link to="/" className="w-full sm:w-auto">
               <Button size="lg" className="gradient-primary shadow-glow-primary text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto touch-friendly">
-                Commencer maintenant
+                Get Started Now
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
             <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto touch-friendly">
-              Voir la démo
+              View Demo
             </Button>
           </div>
         </div>
@@ -89,10 +89,10 @@ const ProductPresentation = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 mobile-title">
-              Fonctionnalités avancées
+              Advanced Features
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg mobile-body px-2">
-              Découvrez les outils qui révolutionnent le trading moderne
+              Discover the tools that revolutionize modern trading
             </p>
           </div>
 
@@ -102,12 +102,12 @@ const ProductPresentation = () => {
                 <div className="gradient-primary p-3 rounded-xl w-fit shadow-glow-primary mb-3">
                   <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                 </div>
-                <CardTitle className="text-foreground text-lg sm:text-xl">Analyse IA Avancée</CardTitle>
+                <CardTitle className="text-foreground text-lg sm:text-xl">Advanced AI Analysis</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground text-sm sm:text-base mobile-body leading-relaxed">
-                  Algorithmes d'apprentissage automatique pour analyser les marchés 
-                  et identifier les meilleures opportunités de trading.
+                  Machine learning algorithms to analyze markets 
+                  and identify the best trading opportunities.
                 </p>
               </CardContent>
             </Card>
@@ -117,12 +117,12 @@ const ProductPresentation = () => {
                 <div className="gradient-success p-3 rounded-xl w-fit shadow-glow-success mb-3">
                   <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-success-foreground" />
                 </div>
-                <CardTitle className="text-foreground text-lg sm:text-xl">Données Temps Réel</CardTitle>
+                <CardTitle className="text-foreground text-lg sm:text-xl">Real-Time Data</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground text-sm sm:text-base mobile-body leading-relaxed">
-                  Flux de données en direct pour tous les marchés majeurs. 
-                  Prix, volumes et indicateurs techniques instantanés.
+                  Live data feed for all major markets. 
+                  Instant prices, volumes and technical indicators.
                 </p>
               </CardContent>
             </Card>
@@ -132,12 +132,12 @@ const ProductPresentation = () => {
                 <div className="bg-warning/20 border border-warning/30 p-3 rounded-xl w-fit mb-3">
                   <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
                 </div>
-                <CardTitle className="text-foreground text-lg sm:text-xl">Gestion de Risque</CardTitle>
+                <CardTitle className="text-foreground text-lg sm:text-xl">Risk Management</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground text-sm sm:text-base mobile-body leading-relaxed">
-                  Outils avancés de gestion de risque avec calcul automatique 
-                  des niveaux de stop-loss et take-profit.
+                  Advanced risk management tools with automatic calculation 
+                  of stop-loss and take-profit levels.
                 </p>
               </CardContent>
             </Card>
@@ -160,15 +160,15 @@ const ProductPresentation = () => {
           <Card className="gradient-card border-primary/20 shadow-glow-primary mobile-fade-in">
             <CardContent className="p-6 sm:p-8 lg:p-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6 mobile-title">
-                Prêt à révolutionner votre trading ?
+                Ready to revolutionize your trading?
               </h2>
               <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto mobile-body leading-relaxed px-2">
-                Rejoignez des milliers de traders qui utilisent déjà notre plateforme IA 
-                pour optimiser leurs performances.
+                Join thousands of traders who already use our AI platform 
+                to optimize their performance.
               </p>
               <Link to="/" className="block sm:inline-block">
                 <Button size="lg" className="gradient-primary shadow-glow-primary text-base sm:text-lg px-8 sm:px-12 py-3 sm:py-4 w-full sm:w-auto touch-friendly">
-                  Commencer gratuitement
+                  Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </Link>

@@ -90,8 +90,8 @@ export default function AssetDetail() {
 
         if (!data) {
           toast({
-            title: "Actif non trouvé",
-            description: `Aucune information trouvée pour ${symbol}`,
+            title: "Asset Not Found",
+            description: `No information found for ${symbol}`,
             variant: "destructive"
           });
           navigate('/');
@@ -103,10 +103,10 @@ export default function AssetDetail() {
         // Charger les données historiques de prix
         fetchHistoricalPrices(symbol);
       } catch (error) {
-        console.error('Erreur lors du chargement de l\'actif:', error);
+        console.error("Error loading asset:", error);
         toast({
-          title: "Erreur",
-          description: "Impossible de charger les informations de l'actif",
+          title: "Error",
+          description: "Unable to load asset information",
           variant: "destructive"
         });
         navigate('/');
@@ -126,13 +126,13 @@ export default function AssetDetail() {
           .limit(100);
 
         if (error) {
-          console.warn('Pas de données historiques disponibles:', error);
+          console.warn("No historical data available:", error);
           return;
         }
 
         setHistoricalPrices(data || []);
       } catch (error) {
-        console.warn('Erreur lors du chargement des données historiques:', error);
+        console.warn("Error loading historical data:", error);
       } finally {
         setLoadingPrices(false);
       }
@@ -142,16 +142,16 @@ export default function AssetDetail() {
   }, [symbol, navigate, toast]);
 
   const formatNumber = (value: number | null, decimals: number = 2) => {
-    if (value === null) return 'Non disponible';
-    return value.toLocaleString('fr-FR', { 
+    if (value === null) return "Not available";
+    return value.toLocaleString("en-US", { 
       minimumFractionDigits: decimals, 
       maximumFractionDigits: decimals 
     });
   };
 
   const formatCurrency = (value: number | null, currency?: string | null) => {
-    if (value === null) return 'Non disponible';
-    return new Intl.NumberFormat('fr-FR', {
+    if (value === null) return "Not available";
+    return new Intl.NumberFormat("en-US", {
       style: 'currency',
       currency: currency || 'USD',
       notation: value >= 1e9 ? 'compact' : 'standard',
@@ -160,13 +160,13 @@ export default function AssetDetail() {
   };
 
   const formatPercentage = (value: number | null) => {
-    if (value === null) return 'Non disponible';
+    if (value === null) return "Not available";
     return `${(value * 100).toFixed(2)}%`;
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Non disponible';
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    if (!dateString) return "Not available";
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -206,7 +206,7 @@ export default function AssetDetail() {
   return (
     <Layout activeModule="trading" onModuleChange={() => {}}>
       <div className="space-y-6">
-        {/* En-tête avec navigation */}
+        {/* Header with navigation */}
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
@@ -214,7 +214,7 @@ export default function AssetDetail() {
             className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
+            Back
           </Button>
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {getCountryFlag(asset.country) && (
@@ -242,10 +242,10 @@ export default function AssetDetail() {
             <Card className="gradient-card border-border/50 shadow-medium">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-lg sm:text-xl text-foreground">
-                  Historique des prix - {asset.symbol}
+                  Price History - {asset.symbol}
                   {loadingPrices && (
                     <Badge variant="outline" className="ml-2">
-                      Chargement...
+                      Loading...
                     </Badge>
                   )}
                 </CardTitle>
@@ -267,7 +267,7 @@ export default function AssetDetail() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5" />
-                  Profil de l'entreprise
+                  Company Profile
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -283,29 +283,29 @@ export default function AssetDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Secteur</h5>
-                      <p className="text-foreground">{asset.sector || 'Non disponible'}</p>
+                      <h5 className="text-sm font-medium text-muted-foreground">Sector</h5>
+                      <p className="text-foreground">{asset.sector || "Not available"}</p>
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Industrie</h5>
-                      <p className="text-foreground">{asset.industry || 'Non disponible'}</p>
+                      <h5 className="text-sm font-medium text-muted-foreground">Industry</h5>
+                      <p className="text-foreground">{asset.industry || "Not available"}</p>
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Pays</h5>
-                      <p className="text-foreground">{asset.country || 'Non disponible'}</p>
+                      <h5 className="text-sm font-medium text-muted-foreground">Country</h5>
+                      <p className="text-foreground">{asset.country || "Not available"}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Marché</h5>
-                      <p className="text-foreground">{asset.exchange || 'Non disponible'}</p>
+                      <h5 className="text-sm font-medium text-muted-foreground">Market</h5>
+                      <p className="text-foreground">{asset.exchange || "Not available"}</p>
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Devise</h5>
-                      <p className="text-foreground">{asset.currency || 'Non disponible'}</p>
+                      <h5 className="text-sm font-medium text-muted-foreground">Currency</h5>
+                      <p className="text-foreground">{asset.currency || "Not available"}</p>
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Date de création</h5>
+                      <h5 className="text-sm font-medium text-muted-foreground">Creation Date</h5>
                       <p className="text-foreground">{formatDate(asset.inception_date)}</p>
                     </div>
                   </div>
@@ -318,7 +318,7 @@ export default function AssetDetail() {
                       onClick={() => window.open(asset.website!, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      Visiter le site officiel
+                      Visit Official Website
                     </Button>
                   </div>
                 )}
@@ -331,7 +331,7 @@ export default function AssetDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Globe className="h-5 w-5" />
-                    Informations de contact
+                    Contact Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -360,7 +360,7 @@ export default function AssetDetail() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <DollarSign className="h-5 w-5" />
-                  Valorisation
+                  Valuation
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -396,13 +396,13 @@ export default function AssetDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Percent className="h-5 w-5 text-success" />
-                    Dividendes
+                    Dividends
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {asset.dividend_rate && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Taux</span>
+                      <span className="text-sm text-muted-foreground">Rate</span>
                       <span className="font-medium text-success">
                         {formatCurrency(asset.dividend_rate, asset.currency)}
                       </span>
@@ -410,7 +410,7 @@ export default function AssetDetail() {
                   )}
                   {asset.dividend_yield && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Rendement</span>
+                      <span className="text-sm text-muted-foreground">Yield</span>
                       <span className="font-medium text-success">
                         {formatPercentage(asset.dividend_yield)}
                       </span>
@@ -477,17 +477,17 @@ export default function AssetDetail() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Target className="h-5 w-5" />
-                  Résultats financiers
+                  Financial Results
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 gap-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Chiffre d'affaires</span>
+                    <span className="text-sm text-muted-foreground">Revenue</span>
                     <span className="font-medium">{formatCurrency(asset.revenue, asset.currency)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Résultat net</span>
+                    <span className="text-sm text-muted-foreground">Net Income</span>
                     <span className="font-medium">{formatCurrency(asset.net_income, asset.currency)}</span>
                   </div>
                   <Separator />
@@ -502,13 +502,13 @@ export default function AssetDetail() {
                   <Separator />
                   {asset.gross_margins && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Marge brute</span>
+                      <span className="text-sm text-muted-foreground">Gross Margin</span>
                       <span className="font-medium">{formatPercentage(asset.gross_margins)}</span>
                     </div>
                   )}
                   {asset.operating_margins && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Marge opérationnelle</span>
+                      <span className="text-sm text-muted-foreground">Operating Margin</span>
                       <span className="font-medium">{formatPercentage(asset.operating_margins)}</span>
                     </div>
                   )}

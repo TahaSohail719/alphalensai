@@ -30,7 +30,7 @@ export default function PortfolioHeader({ portfolio, totalValue, totalPnL, total
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour au Dashboard
+          Back to Dashboard
         </Button>
       </div>
 
@@ -44,7 +44,7 @@ export default function PortfolioHeader({ portfolio, totalValue, totalPnL, total
               )}
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Créé le</p>
+              <p className="text-sm text-muted-foreground">Created on</p>
               <p className="text-sm">{new Date(portfolio.created_at).toLocaleDateString()}</p>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default function PortfolioHeader({ portfolio, totalValue, totalPnL, total
             <div className="bg-muted/50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Valorisation</span>
+                <span className="text-sm text-muted-foreground">Valuation</span>
               </div>
               <p className="text-2xl font-bold">${totalValue.toLocaleString()}</p>
             </div>

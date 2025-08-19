@@ -162,7 +162,7 @@ export default function Reports() {
       const includedSections = availableSections.filter(s => s.included);
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
-      // Appel du webhook n8n
+      // Call to n8n webhook
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "reports",
         question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
@@ -183,7 +183,7 @@ export default function Reports() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Simulation de la génération de rapport pour l'affichage
+      // Report generation simulation for display
       const generatedSections = includedSections.map(section => ({
         title: section.title,
         content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`
