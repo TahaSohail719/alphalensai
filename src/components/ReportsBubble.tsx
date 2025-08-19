@@ -76,7 +76,8 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
   const [reportConfig, setReportConfig] = useState({
     title: `${instrument} Report - ${new Date().toLocaleDateString()}`,
     customNotes: "",
-    exportFormat: "pdf"
+    exportFormat: "pdf",
+    email: ""
   });
 
   // Update report title when asset is selected
@@ -156,6 +157,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
         instrument: selectedAsset?.symbol || instrument,
         timeframe: timeframe || "1H",
         exportFormat: reportConfig.exportFormat,
+        email: reportConfig.email,
         sections: includedSections.map(section => ({
           id: section.id,
           title: section.title,
@@ -303,6 +305,18 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
                     Selected: {selectedAsset.symbol} - {selectedAsset.name}
                   </Badge>
                 )}
+              </div>
+
+              {/* Email Address */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={reportConfig.email}
+                  onChange={(e) => setReportConfig(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter your email address..."
+                />
               </div>
 
               {/* Export Format */}

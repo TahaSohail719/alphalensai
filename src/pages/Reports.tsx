@@ -59,7 +59,8 @@ export default function Reports() {
   const [reportConfig, setReportConfig] = useState({
     title: "Monthly Trading Report",
     customNotes: "",
-    exportFormat: "pdf"
+    exportFormat: "pdf",
+    email: ""
   });
 
   // Update report title when asset is selected
@@ -168,6 +169,7 @@ export default function Reports() {
         instrument: selectedAsset?.symbol || "Multi-Asset",
         timeframe: "1D",
         exportFormat: reportConfig.exportFormat,
+        email: reportConfig.email,
         sections: includedSections.map((section, index) => ({
           id: section.id,
           title: section.title,
@@ -299,6 +301,17 @@ export default function Reports() {
                       Selected: {selectedAsset.symbol} - {selectedAsset.name}
                     </Badge>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={reportConfig.email}
+                    onChange={(e) => setReportConfig({ ...reportConfig, email: e.target.value })}
+                    placeholder="Enter your email address..."
+                  />
                 </div>
 
                 <div className="space-y-2">
