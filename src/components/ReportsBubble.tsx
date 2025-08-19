@@ -154,6 +154,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "reports",
         question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
+        reportName: `${reportConfig.title}` ,
         instrument: selectedAsset?.symbol || instrument,
         timeframe: timeframe || "1H",
         exportFormat: reportConfig.exportFormat,
