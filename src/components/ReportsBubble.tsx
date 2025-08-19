@@ -239,35 +239,46 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[500px] max-w-[calc(100vw-3rem)]">
-      <Card className="shadow-2xl border-green-500/20 bg-background/95 backdrop-blur-lg">
-        {/* Header */}
-        <CardHeader className="pb-3">
+    <div className={cn(
+      "fixed z-50 mobile-fade-in",
+      // Mobile: Full width with safe margins and scroll
+      "inset-x-3 top-4 bottom-4 sm:inset-x-4",
+      // Desktop: Right side positioning with controlled width
+      "sm:right-6 sm:left-auto sm:top-6 sm:bottom-6",
+      "sm:w-[450px] sm:max-w-[calc(100vw-3rem)]",
+      // Ensure proper overflow handling
+      "max-h-[calc(100vh-2rem)] overflow-hidden"
+    )}>
+      <Card className="shadow-2xl border-green-500/20 bg-background/95 backdrop-blur-lg h-full flex flex-col">
+        {/* Header - Fixed at top */}
+        <CardHeader className="pb-3 flex-shrink-0 border-b border-border/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-green-500" />
-              <CardTitle className="text-lg">Report Generator</CardTitle>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 shrink-0" />
+              <CardTitle className="text-base sm:text-lg truncate">Report Generator</CardTitle>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMinimized(true)}
-                className="h-8 w-8 p-0"
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 touch-friendly"
+                title="Minimize"
               >
-                <Minimize2 className="h-4 w-4" />
+                <Minimize2 className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="h-8 w-8 p-0"
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 touch-friendly"
+                title="Close"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline" className="text-xs">
               {selectedAsset?.symbol || instrument}
             </Badge>
@@ -277,8 +288,10 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          {step === "compose" && (
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <CardContent className="space-y-4 p-4 sm:p-6">
+            {step === "compose" && (
             <>
               {/* Report Title */}
               <div className="space-y-2">
@@ -322,7 +335,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               {/* Export Format */}
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-2">
                   {exportFormats.map((format) => {
                     const IconComponent = format.icon;
                     return (
@@ -331,9 +344,9 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
                         variant={reportConfig.exportFormat === format.value ? "default" : "outline"}
                         size="sm"
                         onClick={() => setReportConfig(prev => ({ ...prev, exportFormat: format.value }))}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 text-xs touch-friendly"
                       >
-                        <IconComponent className="h-4 w-4" />
+                        <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
                         {format.label}
                       </Button>
                     );
@@ -344,43 +357,44 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               {/* Sections Selection */}
               <div className="space-y-2">
                 <Label>Sections to Include</Label>
-                <ScrollArea className="h-48 border rounded-md p-2">
-                  <div className="space-y-2">
-                    {availableSections.map((section) => (
-                      <div key={section.id} className="flex items-center space-x-2 p-2 border rounded hover:bg-accent/50">
-                        <Checkbox
-                          id={section.id}
-                          checked={section.included}
-                          onCheckedChange={() => toggleSection(section.id)}
-                        />
-                        <div className="flex-1">
-                          <label htmlFor={section.id} className="text-sm font-medium cursor-pointer">
-                            {section.title}
-                          </label>
-                          <p className="text-xs text-muted-foreground">{section.description}</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionUp(section.id)}
-                            className="h-6 w-6 p-0"
-                          >
-                            ↑
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionDown(section.id)}
-                            className="h-6 w-6 p-0"
-                          >
-                            ↓
-                          </Button>
-                        </div>
+                <div className="border rounded-md max-h-48 overflow-y-auto p-2 space-y-2">
+                  {availableSections.map((section) => (
+                    <div key={section.id} className="flex items-center space-x-2 p-2 border rounded hover:bg-accent/50 touch-friendly">
+                      <Checkbox
+                        id={section.id}
+                        checked={section.included}
+                        onCheckedChange={() => toggleSection(section.id)}
+                        className="shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <label htmlFor={section.id} className="text-sm font-medium cursor-pointer block truncate">
+                          {section.title}
+                        </label>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{section.description}</p>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveSectionUp(section.id)}
+                          className="h-6 w-6 p-0 text-xs touch-friendly"
+                          title="Move up"
+                        >
+                          ↑
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveSectionDown(section.id)}
+                          className="h-6 w-6 p-0 text-xs touch-friendly"
+                          title="Move down"
+                        >
+                          ↓
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Custom Notes */}
@@ -391,7 +405,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
                   value={reportConfig.customNotes}
                   onChange={(e) => setReportConfig(prev => ({ ...prev, customNotes: e.target.value }))}
                   placeholder="Add your custom comments..."
-                  className="h-20"
+                  className="h-16 sm:h-20 text-sm"
                 />
               </div>
 
@@ -399,7 +413,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               <Button 
                 onClick={generateReport} 
                 disabled={isGenerating || availableSections.filter(s => s.included).length === 0}
-                className="w-full"
+                className="w-full touch-friendly"
               >
                 {isGenerating ? (
                   <>
@@ -420,20 +434,20 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
             <div className="space-y-4">
               {/* Report Preview */}
               <div className="border rounded-lg p-4 bg-muted/50">
-                <h3 className="font-semibold mb-2">{currentReport.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="font-semibold mb-2 text-sm sm:text-base">{currentReport.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                   Generated on {currentReport.createdAt.toLocaleString()}
                 </p>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Included sections:</h4>
-                  <ul className="text-sm space-y-1">
+                  <h4 className="text-xs sm:text-sm font-medium">Included sections:</h4>
+                  <ul className="text-xs sm:text-sm space-y-1">
                     {currentReport.sections.map((section, index) => (
                       <li key={section.id} className="flex items-center gap-2">
-                        <span className="w-4 h-4 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
+                        <span className="w-4 h-4 rounded-full bg-green-500 text-white text-xs flex items-center justify-center shrink-0">
                           {index + 1}
                         </span>
-                        {section.title}
+                        <span className="truncate">{section.title}</span>
                       </li>
                     ))}
                   </ul>
@@ -441,19 +455,19 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
                 {currentReport.customNotes && (
                   <div className="mt-3 pt-3 border-t">
-                    <h4 className="text-sm font-medium mb-1">Custom Notes:</h4>
-                    <p className="text-sm text-muted-foreground">{currentReport.customNotes}</p>
+                    <h4 className="text-xs sm:text-sm font-medium mb-1">Custom Notes:</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">{currentReport.customNotes}</p>
                   </div>
                 )}
               </div>
 
               {/* Actions */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" onClick={resetComposer}>
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
+                <Button variant="outline" onClick={resetComposer} className="touch-friendly">
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
-                <Button onClick={exportReport}>
+                <Button onClick={exportReport} className="touch-friendly">
                   <Download className="h-4 w-4 mr-2" />
                   Export {currentReport.exportFormat.toUpperCase()}
                 </Button>
@@ -467,7 +481,8 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               </div>
             </div>
           )}
-        </CardContent>
+          </CardContent>
+        </div>
       </Card>
     </div>
   );

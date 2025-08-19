@@ -660,17 +660,38 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs value={activeMode} onValueChange={(value) => setActiveMode(value as AnalysisMode)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="custom_analysis" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
+            <TabsList className={cn(
+              "grid w-full",
+              isMobile ? "grid-cols-1 gap-1 h-auto" : "grid-cols-3"
+            )}>
+              <TabsTrigger 
+                value="custom_analysis" 
+                className={cn(
+                  "flex items-center gap-2 text-xs sm:text-sm",
+                  isMobile && "justify-start py-2 px-3"
+                )}
+              >
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
                 Custom Analysis
               </TabsTrigger>
-              <TabsTrigger value="article_analysis" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
+              <TabsTrigger 
+                value="article_analysis" 
+                className={cn(
+                  "flex items-center gap-2 text-xs sm:text-sm",
+                  isMobile && "justify-start py-2 px-3"
+                )}
+              >
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                 Article Analysis
               </TabsTrigger>
-              <TabsTrigger value="market_temperature" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
+              <TabsTrigger 
+                value="market_temperature" 
+                className={cn(
+                  "flex items-center gap-2 text-xs sm:text-sm",
+                  isMobile && "justify-start py-2 px-3"
+                )}
+              >
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
                 Market Temperature
               </TabsTrigger>
             </TabsList>
@@ -700,14 +721,20 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
               {/* Quick Queries */}
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Quick queries:</p>
-                <div className="flex flex-wrap gap-2">
+                <div className={cn(
+                  "flex gap-2",
+                  isMobile ? "flex-col" : "flex-wrap"
+                )}>
                   {sampleAssets.map((asset) => (
                     <Button
                       key={asset}
                       variant="outline"
                       size="sm"
                       onClick={() => handleQuickQuery(asset)}
-                      className="text-xs"
+                      className={cn(
+                        "text-xs touch-friendly",
+                        isMobile && "w-full justify-start"
+                      )}
                     >
                       {asset}
                     </Button>
@@ -730,7 +757,10 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
                     }
                   }}
                   placeholder="Paste article URL, article text, or type a market question..."
-                  className="min-h-[120px] bg-background/50 border-border-light"
+                  className={cn(
+                    "bg-background/50 border-border-light text-sm",
+                    isMobile ? "min-h-[100px]" : "min-h-[120px]"
+                  )}
                 />
                 
                 {/* Input Detection Display */}
@@ -760,7 +790,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
                 <Button 
                   type="submit" 
                   disabled={isLoading || !articleText.trim() || !!inputValidationMessage}
-                  className="w-full"
+                  className="w-full touch-friendly"
                 >
                   {isLoading ? (
                     <RefreshCw className="h-4 w-4 animate-spin mr-2" />
