@@ -144,10 +144,40 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
   };
 
   const generateReport = async () => {
+    // Validation des champs requis
+    const errors: string[] = [];
+    
+    if (!reportConfig.title.trim()) {
+      errors.push("Report title is required");
+    }
+    
+    if (!reportConfig.email.trim()) {
+      errors.push("Email address is required");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(reportConfig.email)) {
+      errors.push("Valid email address is required");
+    }
+    
+    if (!selectedAsset && !instrument) {
+      errors.push("Asset selection is required");
+    }
+    
+    const includedSections = availableSections.filter(s => s.included);
+    if (includedSections.length === 0) {
+      errors.push("At least one section must be selected");
+    }
+    
+    if (errors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: errors.join(". "),
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsGenerating(true);
     
     try {
-      const includedSections = availableSections.filter(s => s.included);
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
       // Call n8n webhook
