@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Brain, 
   X, 
@@ -20,7 +21,10 @@ import {
   ChevronDown,
   Copy,
   ExternalLink,
-  Loader2
+  Loader2,
+  BarChart3,
+  Activity,
+  AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -49,12 +53,41 @@ interface MacroAnalysis {
   }>;
 }
 
+interface TradingLevels {
+  supports: string[];
+  resistances: string[];
+  indicators: { [key: string]: string };
+  invalidation?: string;
+}
+
+interface AssetInfo {
+  symbol: string;
+  display: string;
+  market: "FX" | "CRYPTO";
+  tradingViewSymbol: string;
+}
+
 export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroCommentaryBubbleProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [selectedAsset, setSelectedAsset] = useState<AssetInfo>({
+    symbol: "EURUSD",
+    display: "EUR/USD",
+    market: "FX",
+    tradingViewSymbol: "EURUSD"
+  });
+  const [tradingViewError, setTradingViewError] = useState(false);
   const { toast } = useToast();
+
+  // Available assets
+  const assets: AssetInfo[] = [
+    { symbol: "EURUSD", display: "EUR/USD", market: "FX", tradingViewSymbol: "EURUSD" },
+    { symbol: "GBPUSD", display: "GBP/USD", market: "FX", tradingViewSymbol: "GBPUSD" },
+    { symbol: "XAUUSD", display: "XAU/USD", market: "FX", tradingViewSymbol: "XAUUSD" },
+    { symbol: "BTCUSD", display: "BTC/USD", market: "CRYPTO", tradingViewSymbol: "BTCUSD" }
+  ];
 
   // Form parameters
   const [queryParams, setQueryParams] = useState({
@@ -70,6 +103,50 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     "Bitcoin macro conditions outlook",
     "Global risk sentiment analysis"
   ];
+
+  // Parse trading levels from text
+  const parseLevels = (text: string): TradingLevels => {
+    const levels: TradingLevels = {
+      supports: [],
+      resistances: [],
+      indicators: {}
+    };
+
+    // Extract supports (S1, S2, Support, etc.)
+    const supportRegex = /(?:S\d+[:\s=]+|Support[s]?[:\s=]+)([0-9.,]+)/gi;
+    let match;
+    while ((match = supportRegex.exec(text)) !== null) {
+      levels.supports.push(match[1]);
+    }
+
+    // Extract resistances (R1, R2, Resistance, etc.)
+    const resistanceRegex = /(?:R\d+[:\s=]+|Resistance[s]?[:\s=]+)([0-9.,]+)/gi;
+    while ((match = resistanceRegex.exec(text)) !== null) {
+      levels.resistances.push(match[1]);
+    }
+
+    // Extract indicators (RSI, ATR, ADX, etc.)
+    const indicatorRegex = /(?:RSI|ATR|ADX|MACD|Stochastic)(?:\(\d+\))?[:\s=]+([0-9.,]+)/gi;
+    while ((match = indicatorRegex.exec(text)) !== null) {
+      const indicator = match[0].split(/[:\s=]/)[0].trim();
+      levels.indicators[indicator] = match[1];
+    }
+
+    // Extract invalidation
+    const invalidationRegex = /Invalidation[:\s]+(.*?)(?:\n|$)/i;
+    const invalidationMatch = text.match(invalidationRegex);
+    if (invalidationMatch) {
+      levels.invalidation = invalidationMatch[1].trim();
+    }
+
+    return levels;
+  };
+
+  // TradingView URL generator
+  const getTradingViewUrl = (asset: AssetInfo) => {
+    const exchange = asset.market === "FX" ? "FX" : "BINANCE";
+    return `https://www.tradingview.com/symbols/${asset.tradingViewSymbol}/technicals/?exchange=${exchange}`;
+  };
 
   const generateAnalysis = async () => {
     if (!queryParams.query.trim()) return;
@@ -187,7 +264,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[480px] max-w-[calc(100vw-3rem)]">
+    <div className="fixed bottom-6 right-6 z-50 w-[600px] max-w-[calc(100vw-1rem)] md:max-w-[calc(100vw-3rem)]">
       <Card className="shadow-2xl border-blue-500/20 bg-background/95 backdrop-blur-lg">
         {/* Header */}
         <CardHeader className="pb-3">
@@ -215,17 +292,71 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
               </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {instrument}
-            </Badge>
-            <Badge variant="secondary" className="text-xs border-blue-500/20">
-              Live Analysis
-            </Badge>
+          
+          {/* Asset selector and TradingView button */}
+          <div className="flex items-center justify-between gap-2 mt-3">
+            <div className="flex items-center gap-2">
+              <Select 
+                value={selectedAsset.symbol} 
+                onValueChange={(value) => {
+                  const asset = assets.find(a => a.symbol === value);
+                  if (asset) setSelectedAsset(asset);
+                }}
+              >
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {assets.map((asset) => (
+                    <SelectItem key={asset.symbol} value={asset.symbol}>
+                      {asset.display}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Badge variant="outline" className="text-xs">
+                {instrument}
+              </Badge>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(getTradingViewUrl(selectedAsset), '_blank')}
+              className="text-xs h-8"
+            >
+              <BarChart3 className="h-3 w-3 mr-1" />
+              Open in TradingView
+            </Button>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {/* TradingView Widget */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Technical Analysis - {selectedAsset.display}
+            </h4>
+            <div className="bg-muted/30 rounded-lg p-4 min-h-[200px] flex items-center justify-center">
+              {tradingViewError ? (
+                <Alert className="max-w-sm mx-auto">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Embedding blocked – open in TradingView instead.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="text-center text-muted-foreground text-xs">
+                  <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  <p>TradingView Widget would load here</p>
+                  <p className="mt-1 opacity-60">Use "Open in TradingView" button above</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Query Interface */}
           <div className="space-y-3">
             <div className="space-y-2">
@@ -319,94 +450,174 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           {analyses.length > 0 && (
             <ScrollArea className="h-96">
               <div className="space-y-4 pr-3">
-                {analyses.map((analysis, analysisIndex) => (
-                  <Card key={analysisIndex} className="border-blue-500/20">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <h4 className="font-medium text-sm">{analysis.query}</h4>
-                          <p className="text-xs text-muted-foreground">
-                            {analysis.timestamp.toLocaleString()}
-                          </p>
+                {analyses.map((analysis, analysisIndex) => {
+                  const parsedLevels = parseLevels(analysis.sections.map(s => s.content).join('\n'));
+                  const hasLevels = parsedLevels.supports.length > 0 || parsedLevels.resistances.length > 0 || Object.keys(parsedLevels.indicators).length > 0;
+                  
+                  return (
+                    <Card key={analysisIndex} className="border-blue-500/20">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <h4 className="font-medium text-sm">{analysis.query}</h4>
+                            <p className="text-xs text-muted-foreground">
+                              {analysis.timestamp.toLocaleString()}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAnalysis(analysis)}
+                            className="h-7 px-2"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyAnalysis(analysis)}
-                          className="h-7 px-2"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
 
-                    <CardContent className="space-y-2">
-                      {/* Analysis Sections */}
-                      {analysis.sections.map((section, sectionIndex) => {
-                        const sectionId = `${analysisIndex}-${sectionIndex}`;
-                        const isExpanded = section.expanded || expandedSections.has(sectionId);
-                        
-                        return (
-                          <div key={sectionIndex} className="border rounded-md">
-                            <button
-                              onClick={() => toggleSection(analysisIndex, sectionIndex)}
-                              className="w-full p-2 flex items-center justify-between text-left hover:bg-accent/50 transition-colors rounded-md"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className={cn(
-                                  "w-2 h-2 rounded-full",
-                                  section.type === "overview" && "bg-blue-500",
-                                  section.type === "technical" && "bg-green-500",
-                                  section.type === "fundamental" && "bg-orange-500",
-                                  section.type === "outlook" && "bg-purple-500"
-                                )} />
-                                <span className="font-medium text-xs">{section.title}</span>
-                              </div>
-                              <ChevronDown className={cn(
-                                "h-3 w-3 transition-transform",
-                                isExpanded && "rotate-180"
-                              )} />
-                            </button>
+                      <CardContent className="space-y-4">
+                        {/* Desktop: 2 columns layout, Mobile: stack */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {/* Actionable Levels & Signals */}
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-medium flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4" />
+                              Actionable Levels & Signals
+                            </h4>
                             
-                            {isExpanded && (
-                              <div className="px-2 pb-2">
-                                <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
-                                  {section.content}
-                                </p>
+                            {hasLevels ? (
+                              <div className="space-y-2">
+                                {/* Support/Resistance Cards */}
+                                {(parsedLevels.supports.length > 0 || parsedLevels.resistances.length > 0) && (
+                                  <Card className="bg-muted/20">
+                                    <CardContent className="p-3">
+                                      <h5 className="text-xs font-medium mb-2">Support & Resistance</h5>
+                                      <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                          <p className="text-green-600 font-medium mb-1">Supports</p>
+                                          {parsedLevels.supports.map((level, idx) => (
+                                            <div key={idx} className="text-muted-foreground">S{idx + 1}: {level}</div>
+                                          ))}
+                                        </div>
+                                        <div>
+                                          <p className="text-red-600 font-medium mb-1">Resistances</p>
+                                          {parsedLevels.resistances.map((level, idx) => (
+                                            <div key={idx} className="text-muted-foreground">R{idx + 1}: {level}</div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                )}
+
+                                {/* Indicators Card */}
+                                {Object.keys(parsedLevels.indicators).length > 0 && (
+                                  <Card className="bg-muted/20">
+                                    <CardContent className="p-3">
+                                      <h5 className="text-xs font-medium mb-2">Indicators Overview</h5>
+                                      <div className="space-y-1">
+                                        {Object.entries(parsedLevels.indicators).map(([indicator, value]) => (
+                                          <div key={indicator} className="flex justify-between text-xs">
+                                            <span className="text-muted-foreground">{indicator}:</span>
+                                            <span className="font-medium">{value}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                )}
+
+                                {/* Invalidation Badge */}
+                                {parsedLevels.invalidation && (
+                                  <Badge variant="destructive" className="text-xs w-full justify-start p-2">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    Invalidation: {parsedLevels.invalidation}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4 text-muted-foreground">
+                                <Activity className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                                <p className="text-xs">No levels detected</p>
                               </div>
                             )}
                           </div>
-                        );
-                      })}
 
-                      {/* Sources */}
-                      <div className="pt-2 border-t">
-                        <h5 className="text-xs font-medium mb-2">Sources</h5>
-                        <div className="flex flex-wrap gap-1">
-                          {analysis.sources.map((source, index) => (
-                            <Button
-                              key={index}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-6 px-2"
-                              onClick={() => window.open(source.url, '_blank')}
-                            >
-                              <ExternalLink className="h-2 w-2 mr-1" />
-                              {source.title}
-                            </Button>
-                          ))}
+                          {/* Base Commentary */}
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-medium">Base Commentary</h4>
+                            
+                            {/* Analysis Sections */}
+                            <div className="space-y-2">
+                              {analysis.sections.map((section, sectionIndex) => {
+                                const sectionId = `${analysisIndex}-${sectionIndex}`;
+                                const isExpanded = section.expanded || expandedSections.has(sectionId);
+                                
+                                return (
+                                  <div key={sectionIndex} className="border rounded-md">
+                                    <button
+                                      onClick={() => toggleSection(analysisIndex, sectionIndex)}
+                                      className="w-full p-2 flex items-center justify-between text-left hover:bg-accent/50 transition-colors rounded-md"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div className={cn(
+                                          "w-2 h-2 rounded-full",
+                                          section.type === "overview" && "bg-blue-500",
+                                          section.type === "technical" && "bg-green-500",
+                                          section.type === "fundamental" && "bg-orange-500",
+                                          section.type === "outlook" && "bg-purple-500"
+                                        )} />
+                                        <span className="font-medium text-xs">{section.title}</span>
+                                      </div>
+                                      <ChevronDown className={cn(
+                                        "h-3 w-3 transition-transform",
+                                        isExpanded && "rotate-180"
+                                      )} />
+                                    </button>
+                                    
+                                    {isExpanded && (
+                                      <div className="px-2 pb-2">
+                                        <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                                          {section.content}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-end mt-3">
-                          <ApplyToPortfolioButton 
-                            analysisContent={analysis.sections.map(s => s.content).join('\n')}
-                            analysisType="macro"
-                            className="text-xs"
-                          />
+
+                        {/* Sources */}
+                        <div className="pt-2 border-t">
+                          <h5 className="text-xs font-medium mb-2">Sources</h5>
+                          <div className="flex flex-wrap gap-1">
+                            {analysis.sources.map((source, index) => (
+                              <Button
+                                key={index}
+                                variant="outline"
+                                size="sm"
+                                className="text-xs h-6 px-2"
+                                onClick={() => window.open(source.url, '_blank')}
+                              >
+                                <ExternalLink className="h-2 w-2 mr-1" />
+                                {source.title}
+                              </Button>
+                            ))}
+                          </div>
+                          <div className="flex justify-end mt-3">
+                            <ApplyToPortfolioButton 
+                              analysisContent={analysis.sections.map(s => s.content).join('\n')}
+                              analysisType="macro"
+                              className="text-xs"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </ScrollArea>
           )}
