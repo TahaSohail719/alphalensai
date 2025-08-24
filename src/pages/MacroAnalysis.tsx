@@ -139,12 +139,16 @@ export default function MacroAnalysis() {
     setIsGenerating(true);
     
     try {
-      // Call n8n webhook (same as MacroCommentaryBubble)
+      // Call n8n webhook with all form fields
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "macro",
         question: queryParams.query,
         instrument: selectedAsset.symbol,
-        timeframe: "1H"
+        timeframe: "1H",
+        // Additional fields from Macro Analysis form
+        assetType: queryParams.assetType,
+        analysisDepth: queryParams.analysisDepth,
+        period: queryParams.period
       });
 
       if (!response.ok) {
