@@ -156,7 +156,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     try {
       // Create a promise with timeout to wait longer for n8n response
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: n8n webhook response took too long')), 60000) // 60 seconds
+        setTimeout(() => reject(new Error('Timeout: n8n webhook response took too long')), 240000) // 4 minutes
       );
 
       const fetchPromise = fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
