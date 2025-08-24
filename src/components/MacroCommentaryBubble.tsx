@@ -246,9 +246,10 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     } catch (error) {
       console.error('Webhook error:', error);
       
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       toast({
-        title: "Error",
-        description: "Failed to generate analysis. Please try again.",
+        title: "Erreur connexion n8n",
+        description: `${errorMessage}. Vérifiez que votre webhook n8n est accessible et activé.`,
         variant: "destructive"
       });
     } finally {
