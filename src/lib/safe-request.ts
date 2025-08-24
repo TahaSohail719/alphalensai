@@ -49,8 +49,10 @@ export async function safePostRequest(url: string, payload: any, headers: Record
 
   return fetch(url, {
     method: 'POST',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
       ...headers
     },
     body
