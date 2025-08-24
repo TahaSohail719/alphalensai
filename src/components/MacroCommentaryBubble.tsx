@@ -159,32 +159,31 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         setTimeout(() => reject(new Error('Timeout: n8n webhook response took too long')), 240000) // 4 minutes
       );
 
-      const fetchPromise = fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const requestPayload = {
+        type: "RAG",
+        question: queryParams.query,
+        mode: "custom_analysis",
+        filters: {
+          region: "All",
+          product: "All",
+          category: "All"
         },
-        body: JSON.stringify({
-          type: "RAG",
-          question: queryParams.query,
-          mode: "custom_analysis",
-          filters: {
-            region: "All",
-            product: "All",
-            category: "All"
-          },
-          analysis: {
-            query: queryParams.query,
-            timestamp: new Date().toISOString()
-          },
-          user_id: "default_user",
-          instrument: instrument,
-          timeframe: timeframe || "1H",
-          assetType: "currency",
-          analysisDepth: "detailed",
-          period: "weekly"
-        })
-      });
+        analysis: {
+          query: queryParams.query,
+          timestamp: new Date().toISOString()
+        },
+        user_id: "default_user",
+        instrument: instrument,
+        timeframe: timeframe || "1H",
+        assetType: "currency",
+        analysisDepth: "detailed",
+        period: "weekly"
+      };
+
+      const fetchPromise = safePostRequest(
+        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        requestPayload
+      );
 
       const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
 
