@@ -178,6 +178,26 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       }
 
       const rawData = await response.json();
+      console.log('Raw n8n response:', rawData);
+      
+      // Parse n8n response structure: array with message.content.content
+      let analysisContent = '';
+      
+      if (Array.isArray(rawData) && rawData.length > 0) {
+        const firstResult = rawData[0];
+        if (firstResult.message?.content?.content) {
+          analysisContent = firstResult.message.content.content;
+        } else if (firstResult.message?.content?.base_report) {
+          analysisContent = firstResult.message.content.base_report;
+        } else if (typeof firstResult.message?.content === 'string') {
+          analysisContent = firstResult.message.content;
+        }
+      }
+      
+      // Fallback content if parsing fails
+      if (!analysisContent) {
+        analysisContent = `Current macro analysis for ${instrument} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`;
+      }
       
       const mockAnalysis: MacroAnalysis = {
         query: queryParams.query,
@@ -185,10 +205,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         sections: [
           {
             title: "Market Overview",
-            content: typeof rawData.content?.content === 'string' ? rawData.content.content
-                   : typeof rawData.content === 'string' ? rawData.content
-                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
-                   : `Current macro analysis for ${instrument} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`,
+            content: analysisContent,
             type: "overview",
             expanded: true
           },
