@@ -139,14 +139,24 @@ export default function MacroAnalysis() {
     setIsGenerating(true);
     
     try {
-      // Call n8n webhook with all form fields
+      // Call n8n webhook following the exact RAG format from MacroCommentaryBubble
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        type: "macro",
+        type: "RAG",
         question: queryParams.query,
+        mode: "custom_analysis",
+        filters: {
+          region: "All",
+          product: "All",
+          category: "All"
+        },
+        analysis: {
+          query: queryParams.query,
+          timestamp: new Date().toISOString()
+        },
+        user_id: "default_user",
+        // Additional fields from Macro Analysis form
         instrument: selectedAsset.symbol,
         timeframe: "1H",
-        mode: "custom_analysis",
-        // Additional fields from Macro Analysis form
         assetType: queryParams.assetType,
         analysisDepth: queryParams.analysisDepth,
         period: queryParams.period
