@@ -24,7 +24,8 @@ import {
   Loader2,
   BarChart3,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -356,23 +357,28 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Query Interface - Always visible */}
+          {/* Email Address Field - ALWAYS FIRST AND VISIBLE */}
+          <div className="space-y-2 p-3 bg-muted/20 rounded-lg border">
+            <Label htmlFor="address" className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email Address (Required)
+            </Label>
+            <Input
+              id="address"
+              value={queryParams.adresse}
+              onChange={(e) => setQueryParams(prev => ({ ...prev, adresse: e.target.value }))}
+              placeholder="Enter your email address"
+              className="text-sm border-2"
+              required
+              type="email"
+            />
+            {!queryParams.adresse.trim() && (
+              <p className="text-xs text-destructive font-medium">⚠️ Email address is required to generate analysis</p>
+            )}
+          </div>
+          
+          {/* Query Interface */}
           <div className="space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="address" className="text-sm font-medium text-foreground">Email Address (Required)</Label>
-              <Input
-                id="address"
-                value={queryParams.adresse}
-                onChange={(e) => setQueryParams(prev => ({ ...prev, adresse: e.target.value }))}
-                placeholder="Enter your email address"
-                className="text-sm"
-                required
-                type="email"
-              />
-              {!queryParams.adresse.trim() && (
-                <p className="text-xs text-destructive">Email address is required to generate analysis</p>
-              )}
-            </div>
             
             <div className="space-y-2">
               <Label htmlFor="query">Analysis Request</Label>
