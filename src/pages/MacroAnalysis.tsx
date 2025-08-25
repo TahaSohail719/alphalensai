@@ -171,47 +171,22 @@ export default function MacroAnalysis() {
 
       const rawData = await response.json();
       
-      const mockAnalysis: MacroAnalysis = {
+      // Display the actual JSON response from n8n
+      const realAnalysis: MacroAnalysis = {
         query: queryParams.query,
         timestamp: new Date(),
         sections: [
           {
-            title: "Market Overview",
-            content: typeof rawData.content?.content === 'string' ? rawData.content.content
-                   : typeof rawData.content === 'string' ? rawData.content
-                   : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
-                   : `Current macro analysis for ${selectedAsset.display} reveals a complex environment with mixed signals. Central banks maintain a cautious stance amid persistent inflationary pressures. Recent economic indicators suggest moderate growth slowdown in major developed economies.`,
+            title: "n8n Response",
+            content: JSON.stringify(rawData, null, 2),
             type: "overview",
             expanded: true
-          },
-          {
-            title: "Technical Analysis",
-            content: `On the technical front, ${selectedAsset.display} is trading within a consolidation zone with well-defined support and resistance levels. Momentum indicators show short-term bearish divergence, while the underlying trend remains intact. RSI is in neutral territory, allowing for movement in both directions.`,
-            type: "technical",
-            expanded: false
-          },
-          {
-            title: "Fundamental Factors",
-            content: `Key fundamental factors include:\n• Monetary policy: Expectation of maintaining current rates\n• Inflation: Stabilization around central targets\n• Growth: Moderate but controlled slowdown\n• Geopolitics: Persistent tensions creating volatility\n• Market sentiment: Investor caution`,
-            type: "fundamental",
-            expanded: false
-          },
-          {
-            title: "Outlook and Recommendations",
-            content: `For the upcoming period, we anticipate moderate volatility with opportunities on directional moves. Recommendations:\n• Monitor central bank announcements\n• Watch employment and inflation data\n• Track market sentiment indicators\n• Opportunities on technical retracements`,
-            type: "outlook",
-            expanded: false
           }
         ],
-        sources: [
-          { title: "Fed Meeting Minutes", url: "#", type: "research" },
-          { title: "ECB Economic Bulletin", url: "#", type: "research" },
-          { title: "US Employment Data", url: "#", type: "data" },
-          { title: "Reuters Market Analysis", url: "#", type: "news" }
-        ]
+        sources: []
       };
       
-      setAnalyses(prev => [mockAnalysis, ...prev]);
+      setAnalyses(prev => [realAnalysis, ...prev]);
       setQueryParams(prev => ({ ...prev, query: "" }));
       
       toast({
