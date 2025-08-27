@@ -307,6 +307,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     setPollingInterval(interval);
   };
 
+  // 3-step async workflow: START → LAUNCH → POLLING  
   const generateAnalysis = async () => {
     if (!queryParams.query.trim()) return;
     
@@ -314,11 +315,53 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     setJobStatus("queued");
     
     try {
-      // Start job with mode: "start"
-      const requestPayload = {
+      // STEP 1: START job to get job_id
+      const startPayload = {
+        mode: "start",
+        instrument: instrument
+      };
+
+      console.log('💬 [MacroCommentaryBubble] START job request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: startPayload,
+        timestamp: new Date().toISOString()
+      });
+
+      const startResponse = await safePostRequest(
+        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        startPayload
+      );
+
+      if (!startResponse.ok) {
+        throw new Error(`START request failed! status: ${startResponse.status}`);
+      }
+
+      const startData = await startResponse.json();
+      
+      console.log('💬 [MacroCommentaryBubble] START job response:', {
+        status: startResponse.status,
+        ok: startResponse.ok,
+        data: startData,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Handle nested response structure
+      const responseBody = startData.body || startData;
+      
+      if (!responseBody.job_id || responseBody.status !== "queued") {
+        throw new Error("Invalid START response: no job_id or wrong status");
+      }
+
+      // Save job info
+      setJobId(responseBody.job_id);
+      localStorage.setItem("strategist_job_id", responseBody.job_id);
+      setJobStatus("queued");
+
+      // STEP 2: LAUNCH main processing immediately with job_id
+      const launchPayload = {
         type: "RAG",
         question: queryParams.query,
-        mode: "start",
+        job_id: responseBody.job_id, // Add job_id to associate processing with this job
         filters: {
           region: "All",
           product: "All",
@@ -337,56 +380,34 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         adresse: queryParams.adresse
       };
 
-      console.log('💬 [MacroCommentaryBubble] Start job POST request:', {
+      console.log('💬 [MacroCommentaryBubble] LAUNCH processing request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: requestPayload,
+        payload: launchPayload,
         timestamp: new Date().toISOString()
       });
 
-      const response = await safePostRequest(
-        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        requestPayload
-      );
+      // Send launch request but don't wait for long response
+      safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', launchPayload)
+        .catch(error => console.log('Launch request fired, polling will track status:', error));
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const startData = await response.json();
+      // STEP 3: Start polling immediately
+      startPolling(responseBody.job_id);
       
-      console.log('💬 [MacroCommentaryBubble] Start job response:', {
-        status: response.status,
-        ok: response.ok,
-        data: startData,
-        timestamp: new Date().toISOString()
+      setQueryParams(prev => ({ ...prev, query: "" }));
+      
+      toast({
+        title: "Analysis Started",
+        description: "Job queued, processing will begin shortly..."
       });
-      
-      if (startData.job_id) {
-        // Job started successfully
-        setJobId(startData.job_id);
-        localStorage.setItem("strategist_job_id", startData.job_id);
-        setJobStatus(startData.status || "queued");
-        
-        // Start polling for status
-        startPolling(startData.job_id);
-        
-        setQueryParams(prev => ({ ...prev, query: "" }));
-        
-        toast({
-          title: "Analysis Queued",
-          description: "Your analysis has been started"
-        });
-      } else {
-        throw new Error("No job ID received");
-      }
+
     } catch (error) {
-      console.error('Webhook error:', error);
+      console.error('Analysis startup error:', error);
       setIsGenerating(false);
       setJobStatus("");
       
       toast({
         title: "Error",
-        description: "Unable to reach strategist service. Please retry.",
+        description: "Unable to start analysis. Please retry.",
         variant: "destructive"
       });
     }
