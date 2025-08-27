@@ -157,7 +157,7 @@ export default function MacroAnalysis() {
 
   const checkJobStatus = async (currentJobId: string) => {
     try {
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      const statusPayload = {
         type: "RAG",
         question: queryParams.query,
         mode: "status",
@@ -178,13 +178,28 @@ export default function MacroAnalysis() {
         analysisDepth: queryParams.analysisDepth,
         period: queryParams.period,
         adresse: queryParams.adresse
+      };
+
+      console.log('📊 [MacroAnalysis] Status check POST request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: statusPayload,
+        timestamp: new Date().toISOString()
       });
+
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', statusPayload);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const statusData = await response.json();
+      
+      console.log('📊 [MacroAnalysis] Status check response:', {
+        status: response.status,
+        ok: response.ok,
+        data: statusData,
+        timestamp: new Date().toISOString()
+      });
       
       if (statusData.status === "done") {
         // Job completed - display results
@@ -261,7 +276,7 @@ export default function MacroAnalysis() {
     
     try {
       // Start job with mode: "start"
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      const startPayload = {
         type: "RAG",
         question: queryParams.query,
         mode: "start",
@@ -282,13 +297,28 @@ export default function MacroAnalysis() {
         analysisDepth: queryParams.analysisDepth,
         period: queryParams.period,
         adresse: queryParams.adresse
+      };
+
+      console.log('📊 [MacroAnalysis] Start job POST request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: startPayload,
+        timestamp: new Date().toISOString()
       });
+
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', startPayload);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const startData = await response.json();
+      
+      console.log('📊 [MacroAnalysis] Start job response:', {
+        status: response.status,
+        ok: response.ok,
+        data: startData,
+        timestamp: new Date().toISOString()
+      });
       
       if (startData.job_id) {
         // Job started successfully

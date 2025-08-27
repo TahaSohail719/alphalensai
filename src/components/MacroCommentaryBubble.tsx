@@ -173,7 +173,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
 
   const checkJobStatus = async (currentJobId: string) => {
     try {
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      const statusPayload = {
         type: "RAG",
         question: queryParams.query,
         mode: "status",
@@ -194,13 +194,28 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         analysisDepth: "detailed",
         period: "weekly",
         adresse: queryParams.adresse
+      };
+
+      console.log('💬 [MacroCommentaryBubble] Status check POST request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: statusPayload,
+        timestamp: new Date().toISOString()
       });
+
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', statusPayload);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const statusData = await response.json();
+      
+      console.log('💬 [MacroCommentaryBubble] Status check response:', {
+        status: response.status,
+        ok: response.ok,
+        data: statusData,
+        timestamp: new Date().toISOString()
+      });
       
       if (statusData.status === "done") {
         // Job completed - parse response like before
@@ -319,6 +334,12 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         adresse: queryParams.adresse
       };
 
+      console.log('💬 [MacroCommentaryBubble] Start job POST request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: requestPayload,
+        timestamp: new Date().toISOString()
+      });
+
       const response = await safePostRequest(
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         requestPayload
@@ -329,6 +350,13 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       }
 
       const startData = await response.json();
+      
+      console.log('💬 [MacroCommentaryBubble] Start job response:', {
+        status: response.status,
+        ok: response.ok,
+        data: startData,
+        timestamp: new Date().toISOString()
+      });
       
       if (startData.job_id) {
         // Job started successfully
