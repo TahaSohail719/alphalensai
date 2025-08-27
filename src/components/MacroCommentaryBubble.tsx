@@ -300,11 +300,46 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
   };
 
   const startPolling = (currentJobId: string) => {
-    const interval = setInterval(() => {
-      checkJobStatus(currentJobId);
-    }, 15000); // Poll every 15 seconds
+    const startTime = Date.now();
+    const TIMEOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+    let pollCount = 0;
     
-    setPollingInterval(interval);
+    const poll = () => {
+      // Check timeout (5 minutes max)
+      if (Date.now() - startTime > TIMEOUT_DURATION) {
+        setJobStatus("error");
+        setIsGenerating(false);
+        localStorage.removeItem("strategist_job_id");
+        setJobId(null);
+        
+        toast({
+          title: "Analysis Timeout",
+          description: "Analysis exceeded 5 minutes. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      checkJobStatus(currentJobId);
+      
+      // Schedule next poll with progressive timing
+      pollCount++;
+      let nextDelay;
+      if (pollCount === 1) {
+        nextDelay = 60000; // First poll: 1 minute
+      } else if (pollCount === 2) {
+        nextDelay = 30000; // Second poll: 30 seconds
+      } else {
+        nextDelay = 15000; // All subsequent polls: 15 seconds
+      }
+      
+      if (Date.now() - startTime < TIMEOUT_DURATION) {
+        setTimeout(poll, nextDelay);
+      }
+    };
+
+    // Start first poll after 1 minute
+    setTimeout(poll, 60000);
   };
 
   // 3-step async workflow: START → LAUNCH → POLLING  
