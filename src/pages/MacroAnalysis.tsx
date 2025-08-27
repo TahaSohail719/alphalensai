@@ -374,6 +374,7 @@ export default function MacroAnalysis() {
       const launchPayload = {
         type: "RAG",
         question: queryParams.query,
+        mode: "run",
         job_id: responseBody.job_id, // Add job_id to associate processing with this job
         filters: {
           region: "All",

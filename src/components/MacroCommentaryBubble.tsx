@@ -414,6 +414,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       const launchPayload = {
         type: "RAG",
         question: queryParams.query,
+        mode: "run",
         job_id: responseBody.job_id, // Add job_id to associate processing with this job
         filters: {
           region: "All",
