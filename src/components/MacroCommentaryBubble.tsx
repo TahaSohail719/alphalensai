@@ -260,6 +260,54 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         }
       }
       
+      // NOUVELLE DETECTION: Check if we got direct content response from n8n
+      if (responseText.includes('"role": "assistant"') && responseText.includes('"content":')) {
+        try {
+          const directResponse = JSON.parse(responseText);
+          if (directResponse.role === "assistant" && directResponse.content) {
+            // Extract content from direct response
+            const analysisContent = directResponse.content.content || 
+                                  directResponse.content.base_report || 
+                                  JSON.stringify(directResponse.content, null, 2);
+            
+            const realAnalysis: MacroAnalysis = {
+              query: queryParams.query,
+              timestamp: new Date(),
+              sections: [
+                {
+                  title: "Analyse Complète",
+                  content: analysisContent,
+                  type: "overview",
+                  expanded: true
+                }
+              ],
+              sources: [
+                { title: "n8n RAG Analysis", url: "#", type: "research" }
+              ]
+            };
+            
+            setAnalyses(prev => [realAnalysis, ...prev]);
+            setJobStatus("done");
+            setIsGenerating(false);
+            localStorage.removeItem("macro_commentary_job_id");
+            setJobId(null);
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            
+            toast({
+              title: "Analysis Completed",
+              description: "Nouvelle analyse macro disponible"
+            });
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse direct n8n response:', e);
+        }
+      }
+      
       if (!responseText.trim()) {
         console.log('Empty response, continuing polling...');
         return;

@@ -237,6 +237,47 @@ export default function MacroAnalysis() {
         }
       }
       
+      // NOUVELLE DETECTION: Check if we got direct content response from n8n
+      if (responseText.includes('"role": "assistant"') && responseText.includes('"content":')) {
+        try {
+          const directResponse = JSON.parse(responseText);
+          if (directResponse.role === "assistant" && directResponse.content) {
+            // Extract content from direct response
+            const analysisContent = directResponse.content.content || 
+                                  directResponse.content.base_report || 
+                                  JSON.stringify(directResponse.content, null, 2);
+            
+            const realAnalysis: MacroAnalysis = {
+              query: queryParams.query,
+              timestamp: new Date(),
+              sections: [
+                {
+                  title: "Analysis Results", 
+                  content: analysisContent,
+                  type: "overview",
+                  expanded: true
+                }
+              ],
+              sources: []
+            };
+            
+            setAnalyses(prev => [realAnalysis, ...prev]);
+            setJobStatus("done");
+            setIsGenerating(false);
+            localStorage.removeItem("strategist_job_id");
+            setJobId(null);
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse direct n8n response:', e);
+        }
+      }
+      
       if (!responseText.trim()) {
         console.log('Empty response, continuing polling...');
         return;
