@@ -192,28 +192,26 @@ export default function MacroAnalysis() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Get response data - try JSON first
+      // Get response data - try text first, then parse as JSON
       let responseJson = null;
       
       try {
-        responseJson = await response.json();
-        console.log('📊 [MacroAnalysis] JSON response:', responseJson);
-      } catch (jsonError) {
-        console.log('📊 [MacroAnalysis] Not JSON, trying text...');
-        try {
-          const responseText = await response.text();
-          console.log('📊 [MacroAnalysis] Text response:', responseText);
-          // Try to parse text as JSON
-          if (responseText.trim()) {
-            try {
-              responseJson = JSON.parse(responseText);
-            } catch (parseError) {
-              console.log('📊 [MacroAnalysis] Failed to parse text as JSON');
-            }
+        const responseText = await response.text();
+        console.log('📊 [MacroAnalysis] Raw response text:', responseText);
+        
+        if (responseText.trim()) {
+          try {
+            responseJson = JSON.parse(responseText);
+            console.log('📊 [MacroAnalysis] Successfully parsed as JSON:', responseJson);
+          } catch (parseError) {
+            console.log('📊 [MacroAnalysis] Failed to parse response as JSON:', parseError);
+            console.log('📊 [MacroAnalysis] Raw text was:', responseText);
           }
-        } catch (textError) {
-          console.error('📊 [MacroAnalysis] Failed to read response:', textError);
+        } else {
+          console.log('📊 [MacroAnalysis] Empty response received');
         }
+      } catch (textError) {
+        console.error('📊 [MacroAnalysis] Failed to read response as text:', textError);
       }
       
       // Check if we got the final n8n response with status done
