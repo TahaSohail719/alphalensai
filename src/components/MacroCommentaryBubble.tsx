@@ -220,14 +220,50 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       // Handle nested response structure
       const responseBody = statusData.body || statusData;
       
+      // SYSTEM PATCH: Check if response is array format from n8n first
+      if (Array.isArray(statusData) && statusData.length > 0 && statusData[0].status === "done") {
+        // Job completed - extract content according to patch specification
+        const analysisContent = statusData[0].message?.content?.content || JSON.stringify(statusData[0], null, 2);
+        
+        const realAnalysis: MacroAnalysis = {
+          query: queryParams.query,
+          timestamp: new Date(),
+          sections: [
+            {
+              title: "Analyse Complète",
+              content: analysisContent,
+              type: "overview",
+              expanded: true
+            }
+          ],
+          sources: [
+            { title: "n8n RAG Analysis", url: "#", type: "research" }
+          ]
+        };
+        
+        setAnalyses(prev => [realAnalysis, ...prev]);
+        setJobStatus("done");
+        setIsGenerating(false);
+        localStorage.removeItem("macro_commentary_job_id");
+        setJobId(null);
+        
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+        
+        toast({
+          title: "Analysis Completed",
+          description: "Nouvelle analyse macro disponible"
+        });
+        return;
+      }
+      
       if (responseBody.status === "done") {
         // Job completed - extract content according to patch specification
         let analysisContent = '';
         
-        // SYSTEM PATCH: Extract response[0].message.content.content if available
-        if (Array.isArray(statusData) && statusData.length > 0 && statusData[0].message?.content?.content) {
-          analysisContent = statusData[0].message.content.content;
-        } else if (responseBody.content) {
+        if (responseBody.content) {
           // Fallback to existing logic
           if (typeof responseBody.content === 'object') {
             if (responseBody.content.content) {
