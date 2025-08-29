@@ -609,59 +609,88 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
 
       // Send launch request and wait for response - might contain immediate result
       try {
+        console.log('📊 [MacroCommentary] Sending request to:', 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1');
+        console.log('📊 [MacroCommentary] Request payload:', launchPayload);
+        
         const launchResponse = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', launchPayload);
+        
+        console.log('📊 [MacroCommentary] Response status:', launchResponse.status);
+        console.log('📊 [MacroCommentary] Response headers:', launchResponse.headers);
         
         if (launchResponse.ok) {
           const launchResponseText = await launchResponse.text();
+          console.log('📊 [MacroCommentary] LAUNCH response text LENGTH:', launchResponseText.length);
           console.log('📊 [MacroCommentary] LAUNCH response text:', launchResponseText);
           
           if (launchResponseText.trim()) {
-            const launchResponseJson = JSON.parse(launchResponseText);
-            console.log('📊 [MacroCommentary] LAUNCH response JSON:', launchResponseJson);
-            
-            // Check if this is the final result with status done
-            if (launchResponseJson.status === 'done' || (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.status === 'done')) {
-              console.log('📊 [MacroCommentary] Found immediate result in launch response!');
+            try {
+              const launchResponseJson = JSON.parse(launchResponseText);
+              console.log('📊 [MacroCommentary] LAUNCH response JSON:', launchResponseJson);
               
-              let analysisContent = '';
-              
-              if (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.message?.content?.content) {
-                analysisContent = launchResponseJson[0].message.message.content.content;
-              } else if (launchResponseJson.message?.content?.content) {
-                analysisContent = launchResponseJson.message.content.content;
-              } else if (launchResponseJson.content?.content) {
-                analysisContent = launchResponseJson.content.content;
-              } else {
-                analysisContent = JSON.stringify(launchResponseJson, null, 2);
+              // Check if this is the final result with status done
+              if (launchResponseJson.status === 'done' || (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.status === 'done')) {
+                console.log('📊 [MacroCommentary] Found immediate result in launch response!');
+                
+                let analysisContent = '';
+                
+                if (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.message?.content?.content) {
+                  analysisContent = launchResponseJson[0].message.message.content.content;
+                } else if (launchResponseJson.message?.content?.content) {
+                  analysisContent = launchResponseJson.message.content.content;
+                } else if (launchResponseJson.content?.content) {
+                  analysisContent = launchResponseJson.content.content;
+                } else {
+                  analysisContent = JSON.stringify(launchResponseJson, null, 2);
+                }
+                
+                const realAnalysis: MacroAnalysis = {
+                  query: queryParams.query,
+                  timestamp: new Date(),
+                  sections: [
+                    {
+                      title: "Analysis Results",
+                      content: analysisContent,
+                      type: "overview",
+                      expanded: true
+                    }
+                  ],
+                  sources: []
+                };
+                
+                setAnalyses(prev => [realAnalysis, ...prev]);
+                setJobStatus("done");
+                setIsGenerating(false);
+                localStorage.removeItem("strategist_job_id");
+                setJobId(null);
+                
+                toast({
+                  title: "Analysis Completed",
+                  description: "Your macro analysis is ready"
+                });
+                return; // Don't start polling if we already have the result
               }
-              
-              const realAnalysis: MacroAnalysis = {
-                query: queryParams.query,
-                timestamp: new Date(),
-                sections: [
-                  {
-                    title: "Analysis Results",
-                    content: analysisContent,
-                    type: "overview",
-                    expanded: true
-                  }
-                ],
-                sources: []
-              };
-              
-              setAnalyses(prev => [realAnalysis, ...prev]);
-              setJobStatus("done");
-              setIsGenerating(false);
-              localStorage.removeItem("strategist_job_id");
-              setJobId(null);
-              
-              toast({
-                title: "Analysis Completed",
-                description: "Your macro analysis is ready"
-              });
-              return; // Don't start polling if we already have the result
+            } catch (parseError) {
+              console.log('📊 [MacroCommentary] Failed to parse response as JSON:', parseError);
             }
+          } else {
+            console.log('📊 [MacroCommentary] Empty response received');
+            toast({
+              title: "Error generating commentary",
+              description: "Empty response from webhook",
+              variant: "destructive"
+            });
+            setIsGenerating(false);
+            return;
           }
+        } else {
+          console.log('📊 [MacroCommentary] Request failed with status:', launchResponse.status);
+          toast({
+            title: "Error generating commentary", 
+            description: `Request failed with status: ${launchResponse.status}`,
+            variant: "destructive"
+          });
+          setIsGenerating(false);
+          return;
         }
       } catch (error) {
         console.log('Launch request error, will start polling:', error);
