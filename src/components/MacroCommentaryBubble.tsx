@@ -210,6 +210,10 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
 
       const responseText = await response.text();
       
+      console.log('💬 [MacroCommentaryBubble] Raw response text:', responseText);
+      console.log('💬 [MacroCommentaryBubble] Response starts with [?', responseText.trim().startsWith('['));
+      console.log('💬 [MacroCommentaryBubble] Contains status done?', responseText.includes('"status": "done"'));
+      
       // Check if we got the final n8n response array directly
       if (responseText.trim().startsWith('[') && responseText.includes('"status": "done"')) {
         try {

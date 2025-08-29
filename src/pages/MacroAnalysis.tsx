@@ -194,6 +194,10 @@ export default function MacroAnalysis() {
 
       const responseText = await response.text();
       
+      console.log('📊 [MacroAnalysis] Raw response text:', responseText);
+      console.log('📊 [MacroAnalysis] Response starts with [?', responseText.trim().startsWith('['));
+      console.log('📊 [MacroAnalysis] Contains status done?', responseText.includes('"status": "done"'));
+      
       // Check if we got the final n8n response array directly
       if (responseText.trim().startsWith('[') && responseText.includes('"status": "done"')) {
         try {
