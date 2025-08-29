@@ -234,18 +234,19 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
       }
       
       // Check if we got the final n8n response with status done
-      if (responseJson) {
-        console.log('📊 [MacroCommentary] Checking for status done in JSON response');
+      // N8N returns an array with one object containing the message
+      if (responseJson && Array.isArray(responseJson) && responseJson.length > 0) {
+        const messageObj = responseJson[0].message;
         
-        // Case 1: Array format like [{"status": "done", "message": {...}}]
-        if (Array.isArray(responseJson) && responseJson.length > 0 && responseJson[0].status === "done") {
-          console.log('📊 [MacroCommentary] Found status done in array format!');
-          const result = responseJson[0];
+        if (messageObj && messageObj.status === 'done') {
+          console.log('📊 [MacroCommentary] Found status done, stopping polling');
+          setIsGenerating(false);
           
-          // Job completed - extract content from message
-          const analysisContent = result.message?.content?.content || 
-                                result.message?.content?.base_report ||
-                                JSON.stringify(result.message || result, null, 2);
+          // Extract the content from the nested message structure
+          let analysisContent = '';
+          if (messageObj.message && messageObj.message.content && messageObj.message.content.content) {
+            analysisContent = messageObj.message.content.content;
+          }
           
           const realAnalysis: MacroAnalysis = {
             query: queryParams.query,
@@ -281,48 +282,52 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           return;
         }
         
-        // Case 2: Direct content response from n8n (role: assistant format)
-        if (responseJson.role === "assistant" && responseJson.content) {
-          console.log('📊 [MacroCommentary] Found direct assistant response!');
-          
-          // Extract content from direct response
-          const analysisContent = responseJson.content.content || 
-                                responseJson.content.base_report || 
-                                JSON.stringify(responseJson.content, null, 2);
-          
-          const realAnalysis: MacroAnalysis = {
-            query: queryParams.query,
-            timestamp: new Date(),
-            sections: [
-              {
-                title: "Analyse Complète",
-                content: analysisContent,
-                type: "overview",
-                expanded: true
-              }
-            ],
-            sources: [
-              { title: "n8n RAG Analysis", url: "#", type: "research" }
-            ]
-          };
-          
-          setAnalyses(prev => [realAnalysis, ...prev]);
-          setJobStatus("done");
-          setIsGenerating(false);
-          localStorage.removeItem("macro_commentary_job_id");
-          setJobId(null);
-          
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
-            setPollingInterval(null);
-          }
-          
-          toast({
-            title: "Analysis Completed",
-            description: "Nouvelle analyse macro disponible"
-          });
-          return;
+      }
+      
+      // Case 2: Check for direct status at root level (fallback)
+      if (responseJson && !Array.isArray(responseJson) && responseJson.status === 'done') {
+        console.log('📊 [MacroCommentary] Found status done at root level!');
+        
+        // Extract content from direct response
+        let analysisContent = '';
+        if (responseJson.content && responseJson.content.content) {
+          analysisContent = responseJson.content.content;
+        } else if (responseJson.content) {
+          analysisContent = typeof responseJson.content === 'string' ? responseJson.content : JSON.stringify(responseJson.content, null, 2);
         }
+        
+        const realAnalysis: MacroAnalysis = {
+          query: queryParams.query,
+          timestamp: new Date(),
+          sections: [
+            {
+              title: "Analyse Complète",
+              content: analysisContent,
+              type: "overview",
+              expanded: true
+            }
+          ],
+          sources: [
+            { title: "n8n RAG Analysis", url: "#", type: "research" }
+          ]
+        };
+        
+        setAnalyses(prev => [realAnalysis, ...prev]);
+        setJobStatus("done");
+        setIsGenerating(false);
+        localStorage.removeItem("macro_commentary_job_id");
+        setJobId(null);
+        
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+        
+        toast({
+          title: "Analysis Completed",
+          description: "Nouvelle analyse macro disponible"
+        });
+        return;
       }
       
       // If no proper JSON response, check if empty
