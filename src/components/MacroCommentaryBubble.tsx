@@ -208,7 +208,60 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const statusData = await response.json();
+      const responseText = await response.text();
+      
+      // Check if we got the final n8n response array directly
+      if (responseText.trim().startsWith('[') && responseText.includes('"status": "done"')) {
+        try {
+          const n8nArray = JSON.parse(responseText);
+          if (Array.isArray(n8nArray) && n8nArray.length > 0 && n8nArray[0].status === "done") {
+            // Job completed - extract content according to patch specification
+            const analysisContent = n8nArray[0].message?.content?.content || JSON.stringify(n8nArray[0], null, 2);
+            
+            const realAnalysis: MacroAnalysis = {
+              query: queryParams.query,
+              timestamp: new Date(),
+              sections: [
+                {
+                  title: "Analyse Complète",
+                  content: analysisContent,
+                  type: "overview",
+                  expanded: true
+                }
+              ],
+              sources: [
+                { title: "n8n RAG Analysis", url: "#", type: "research" }
+              ]
+            };
+            
+            setAnalyses(prev => [realAnalysis, ...prev]);
+            setJobStatus("done");
+            setIsGenerating(false);
+            localStorage.removeItem("macro_commentary_job_id");
+            setJobId(null);
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            
+            toast({
+              title: "Analysis Completed",
+              description: "Nouvelle analyse macro disponible"
+            });
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse n8n array response:', e);
+        }
+      }
+      
+      if (!responseText.trim()) {
+        console.log('Empty response, continuing polling...');
+        return;
+      }
+      
+      const statusData = JSON.parse(responseText);
       
       console.log('💬 [MacroCommentaryBubble] Status check response:', {
         status: response.status,

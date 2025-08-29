@@ -192,7 +192,53 @@ export default function MacroAnalysis() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const statusData = await response.json();
+      const responseText = await response.text();
+      
+      // Check if we got the final n8n response array directly
+      if (responseText.trim().startsWith('[') && responseText.includes('"status": "done"')) {
+        try {
+          const n8nArray = JSON.parse(responseText);
+          if (Array.isArray(n8nArray) && n8nArray.length > 0 && n8nArray[0].status === "done") {
+            // Job completed - extract content according to patch specification
+            const analysisContent = n8nArray[0].message?.content?.content || JSON.stringify(n8nArray[0], null, 2);
+            
+            const realAnalysis: MacroAnalysis = {
+              query: queryParams.query,
+              timestamp: new Date(),
+              sections: [
+                {
+                  title: "Analysis Results",
+                  content: analysisContent,
+                  type: "overview",
+                  expanded: true
+                }
+              ],
+              sources: []
+            };
+            
+            setAnalyses(prev => [realAnalysis, ...prev]);
+            setJobStatus("done");
+            setIsGenerating(false);
+            localStorage.removeItem("strategist_job_id");
+            setJobId(null);
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse n8n array response:', e);
+        }
+      }
+      
+      if (!responseText.trim()) {
+        console.log('Empty response, continuing polling...');
+        return;
+      }
+      
+      const statusData = JSON.parse(responseText);
       
       console.log('📊 [MacroAnalysis] Status check response:', {
         status: response.status,
