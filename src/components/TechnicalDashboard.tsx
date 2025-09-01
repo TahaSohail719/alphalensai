@@ -88,24 +88,35 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
     setIsLoading(true);
     try {
       // Map asset symbols to database format
-      const dbSymbol = selectedAsset.symbol === "EUR/USD" ? "EURUSD=X" : selectedAsset.symbol;
+      const dbSymbol = selectedAsset.symbol === "EUR/USD" ? "EURUSD" : selectedAsset.symbol;
       
       console.log(`Fetching real data for ${dbSymbol}...`);
       
-      // Use real price data from prices_tv table (we know it exists from the logs)
-      if (dbSymbol === "EURUSD=X") {
-        // Use the real data we saw in the logs
-        const realPricesData = [
-          { close: 1.1724703311920166, high: 1.1732958555221558, low: 1.172333002090454, open: 1.172333002090454, ts: "2025-09-01T12:00:00Z" },
-          { close: 1.172333002090454, high: 1.1728830337524414, low: 1.172195553779602, open: 1.172195553779602, ts: "2025-09-01T11:00:00Z" },
-          { close: 1.172333002090454, high: 1.1739845275878906, low: 1.172333002090454, open: 1.1739845275878906, ts: "2025-09-01T10:00:00Z" },
-          { close: 1.17384672164917, high: 1.17384672164917, low: 1.1719207763671875, open: 1.1728830337524414, ts: "2025-09-01T09:00:00Z" }
-        ];
-        
-        console.log('Using real EURUSD data from prices_tv table');
-        processRealData(realPricesData);
+      // Query real price data from prices_tv table using direct SQL
+      const SUPABASE_URL = "https://jqrlegdulnnrpiixiecf.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcmxlZ2R1bG5ucnBpaXhpZWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDYzNDgsImV4cCI6MjA2OTk4MjM0OH0.on2S0WpM45atAYvLU8laAZJ-abS4RcMmfiqW7mLtT_4";
+      
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/prices_tv?select=*&symbol=eq.${dbSymbol}&order=ts.desc&limit=20`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('Fetch error:', response.status);
+        generateMockData();
+        return;
+      }
+      
+      const pricesData = await response.json();
+
+      if (pricesData && pricesData.length > 0) {
+        console.log(`Found ${pricesData.length} real data points for ${dbSymbol}`);
+        processRealData(pricesData);
       } else {
-        console.log('No real data available for this symbol, using mock data');
+        console.log(`No real data available for ${dbSymbol}, using mock data`);
         generateMockData();
       }
     } catch (error) {
