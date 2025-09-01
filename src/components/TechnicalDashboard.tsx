@@ -87,8 +87,18 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
   const fetchTechnicalData = async () => {
     setIsLoading(true);
     try {
-      // Map asset symbols to database format
-      const dbSymbol = selectedAsset.symbol === "EUR/USD" ? "EURUSD=X" : selectedAsset.symbol;
+      // Map asset symbols to database format - only EURUSD=X is available in prices_tv
+      const symbolMapping: Record<string, string> = {
+        "EUR/USD": "EURUSD=X",
+        "GBP/USD": "EURUSD=X", // Fallback to available data
+        "USD/JPY": "EURUSD=X", // Fallback to available data
+        "GOLD": "EURUSD=X",    // Fallback to available data
+        "Gold": "EURUSD=X",    // Fallback to available data
+        "XAUUSD": "EURUSD=X",  // Fallback to available data
+        "Bitcoin": "EURUSD=X", // Fallback to available data
+        "Ethereum": "EURUSD=X" // Fallback to available data
+      };
+      const dbSymbol = symbolMapping[selectedAsset.symbol] || "EURUSD=X";
       
       console.log(`Fetching real data for ${dbSymbol}...`);
       
