@@ -729,10 +729,10 @@ export default function MacroAnalysis() {
         </div>
 
         {/* Optimized 2-Column Layout for UX */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Column 1: Market Focus + Market Chart */}
-          <div className="flex flex-col gap-6">
-            {/* Row 1: Market Focus */}
+        <div className="space-y-6">
+          {/* Row 1: Market Focus and Technical Analysis side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Column 1: Market Focus */}
             <Card className="gradient-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -781,36 +781,36 @@ export default function MacroAnalysis() {
               </CardContent>
             </Card>
 
-            {/* Row 2: Market Chart */}
-            <Card className="gradient-card flex-1">
+            {/* Column 2: Technical Analysis */}
+            <Card className="gradient-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Market Chart - {selectedAsset.display}
+                  <Activity className="h-5 w-5" />
+                  Technical Analysis - {selectedAsset.display}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2">
-                <TradingViewWidget 
-                  selectedSymbol={selectedAsset.symbol}
-                  onSymbolChange={(symbol) => {
-                    const asset = assets.find(a => a.symbol === symbol);
-                    if (asset) setSelectedAsset(asset);
-                  }}
-                />
+              <CardContent>
+                <TechnicalDashboard selectedAsset={selectedAsset} />
               </CardContent>
             </Card>
           </div>
 
-          {/* Column 2: Technical Analysis (spans both rows) */}
-          <Card className="gradient-card h-full">
+          {/* Row 2: Market Chart - Full Width */}
+          <Card className="gradient-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Technical Analysis - {selectedAsset.display}
+                <TrendingUp className="h-5 w-5" />
+                Market Chart - {selectedAsset.display}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <TechnicalDashboard selectedAsset={selectedAsset} />
+            <CardContent className="p-2">
+              <TradingViewWidget 
+                selectedSymbol={selectedAsset.symbol}
+                onSymbolChange={(symbol) => {
+                  const asset = assets.find(a => a.symbol === symbol);
+                  if (asset) setSelectedAsset(asset);
+                }}
+              />
             </CardContent>
           </Card>
         </div>
