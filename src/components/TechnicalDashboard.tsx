@@ -88,7 +88,7 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
     setIsLoading(true);
     try {
       // Map asset symbols to database format
-      const dbSymbol = selectedAsset.symbol === "EUR/USD" ? "EURUSD" : selectedAsset.symbol;
+      const dbSymbol = selectedAsset.symbol === "EUR/USD" ? "EURUSD=X" : selectedAsset.symbol;
       
       console.log(`Fetching real data for ${dbSymbol}...`);
       
