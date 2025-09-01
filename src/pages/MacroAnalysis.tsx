@@ -68,8 +68,8 @@ export default function MacroAnalysis() {
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedAsset, setSelectedAsset] = useState<AssetInfo>({
-    symbol: "EURUSD",
-    display: "EUR/USD",
+    symbol: "EUR/USD",
+    display: "EUR/USD", 
     market: "FX",
     tradingViewSymbol: "EURUSD"
   });
@@ -78,12 +78,28 @@ export default function MacroAnalysis() {
   const [jobStatus, setJobStatus] = useState<string>("");
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   
-  // Available assets (same as MacroCommentaryBubble)
+  // All available assets from Supabase
   const assets: AssetInfo[] = [
-    { symbol: "EURUSD", display: "EUR/USD", market: "FX", tradingViewSymbol: "EURUSD" },
-    { symbol: "GBPUSD", display: "GBP/USD", market: "FX", tradingViewSymbol: "GBPUSD" },
-    { symbol: "XAUUSD", display: "XAU/USD", market: "FX", tradingViewSymbol: "XAUUSD" },
-    { symbol: "BTCUSD", display: "BTC/USD", market: "CRYPTO", tradingViewSymbol: "BTCUSD" }
+    // Major FX Pairs
+    { symbol: "EUR/USD", display: "EUR/USD", market: "FX", tradingViewSymbol: "EURUSD" },
+    { symbol: "GBP/USD", display: "GBP/USD", market: "FX", tradingViewSymbol: "GBPUSD" },
+    { symbol: "USD/JPY", display: "USD/JPY", market: "FX", tradingViewSymbol: "USDJPY" },
+    { symbol: "AUDUSD=X", display: "AUD/USD", market: "FX", tradingViewSymbol: "AUDUSD" },
+    { symbol: "NZDUSD=X", display: "NZD/USD", market: "FX", tradingViewSymbol: "NZDUSD" },
+    { symbol: "USDCAD=X", display: "USD/CAD", market: "FX", tradingViewSymbol: "USDCAD" },
+    { symbol: "USDCHF=X", display: "USD/CHF", market: "FX", tradingViewSymbol: "USDCHF" },
+    
+    // Cross Pairs
+    { symbol: "EURGBP=X", display: "EUR/GBP", market: "FX", tradingViewSymbol: "EURGBP" },
+    { symbol: "EURJPY=X", display: "EUR/JPY", market: "FX", tradingViewSymbol: "EURJPY" },
+    { symbol: "GBPJPY=X", display: "GBP/JPY", market: "FX", tradingViewSymbol: "GBPJPY" },
+    
+    // Crypto
+    { symbol: "BTC-USD", display: "Bitcoin", market: "CRYPTO", tradingViewSymbol: "BTCUSD" },
+    { symbol: "ETH-USD", display: "Ethereum", market: "CRYPTO", tradingViewSymbol: "ETHUSD" },
+    { symbol: "ADA-USD", display: "Cardano", market: "CRYPTO", tradingViewSymbol: "ADAUSD" },
+    { symbol: "DOGE-USD", display: "Dogecoin", market: "CRYPTO", tradingViewSymbol: "DOGEUSD" },
+    { symbol: "SOL-USD", display: "Solana", market: "CRYPTO", tradingViewSymbol: "SOLUSD" }
   ];
   
   // Harmonized parameters with MacroCommentaryBubble
@@ -712,8 +728,9 @@ export default function MacroAnalysis() {
           </div>
         </div>
 
-        {/* Asset Selection and TradingView */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Optimized 3-Column Layout for UX */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Column 1: Market Focus (stays in place) */}
           <Card className="gradient-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -734,8 +751,15 @@ export default function MacroAnalysis() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    {assets.map((asset) => (
+                  <SelectContent className="max-h-60">
+                    <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
+                    {assets.filter(a => a.market === "FX").map((asset) => (
+                      <SelectItem key={asset.symbol} value={asset.symbol}>
+                        {asset.display}
+                      </SelectItem>
+                    ))}
+                    <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
+                    {assets.filter(a => a.market === "CRYPTO").map((asset) => (
                       <SelectItem key={asset.symbol} value={asset.symbol}>
                         {asset.display}
                       </SelectItem>
@@ -755,6 +779,26 @@ export default function MacroAnalysis() {
             </CardContent>
           </Card>
 
+          {/* Column 2: Chart Widget (immediate visibility) */}
+          <Card className="gradient-card xl:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Market Chart - {selectedAsset.display}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+              <TradingViewWidget 
+                selectedSymbol={selectedAsset.symbol}
+                onSymbolChange={(symbol) => {
+                  const asset = assets.find(a => a.symbol === symbol);
+                  if (asset) setSelectedAsset(asset);
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Column 3: Technical Analysis (preserves full length) */}
           <Card className="gradient-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -767,15 +811,6 @@ export default function MacroAnalysis() {
             </CardContent>
           </Card>
         </div>
-
-        {/* TradingView Widget powered by Supabase */}
-        <TradingViewWidget 
-          selectedSymbol={selectedAsset.symbol}
-          onSymbolChange={(symbol) => {
-            const asset = assets.find(a => a.symbol === symbol);
-            if (asset) setSelectedAsset(asset);
-          }}
-        />
 
         {/* Query Interface */}
         <Card className="gradient-card">
