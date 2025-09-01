@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { safePostRequest } from "@/lib/safe-request";
+import { TradingViewWidget } from "@/components/TradingViewWidget";
 
 interface AnalysisSection {
   title: string;
@@ -780,6 +781,15 @@ export default function MacroAnalysis() {
             </CardContent>
           </Card>
         </div>
+
+        {/* TradingView Widget powered by Supabase */}
+        <TradingViewWidget 
+          selectedSymbol={selectedAsset.symbol}
+          onSymbolChange={(symbol) => {
+            const asset = assets.find(a => a.symbol === symbol);
+            if (asset) setSelectedAsset(asset);
+          }}
+        />
 
         {/* Query Interface */}
         <Card className="gradient-card">

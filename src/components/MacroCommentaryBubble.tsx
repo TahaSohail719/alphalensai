@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { TradingViewWidget } from "./TradingViewWidget";
 
 interface MacroCommentaryBubbleProps {
   instrument: string;
@@ -824,6 +825,16 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {/* TradingView Widget powered by Supabase */}
+          <TradingViewWidget 
+            selectedSymbol={selectedAsset.symbol}
+            onSymbolChange={(symbol) => {
+              const asset = assets.find(a => a.symbol === symbol);
+              if (asset) setSelectedAsset(asset);
+            }}
+            className="mb-4"
+          />
+          
           {/* Email Address Field - ALWAYS FIRST AND VISIBLE */}
           <div className="space-y-2 p-3 bg-muted/20 rounded-lg border">
             <Label htmlFor="address" className="text-sm font-semibold text-foreground flex items-center gap-2">
