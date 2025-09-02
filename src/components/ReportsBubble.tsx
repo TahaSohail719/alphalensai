@@ -23,7 +23,8 @@ import {
   Settings,
   Loader2,
   Eye,
-  Edit3
+  Edit3,
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -289,6 +290,15 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               <CardTitle className="text-base sm:text-lg truncate">Report Generator</CardTitle>
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open('/reports', '_blank')}
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 touch-friendly"
+                title="Open Full Page"
+              >
+                <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

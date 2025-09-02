@@ -18,7 +18,8 @@ import {
   Shield,
   RotateCcw,
   Save,
-  Edit3
+  Edit3,
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -277,6 +278,15 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
               <CardTitle className="text-lg">AI Trade Setup</CardTitle>
             </div>
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open('/ai-setup', '_blank')}
+                className="h-8 w-8 p-0"
+                title="Open Full Page"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

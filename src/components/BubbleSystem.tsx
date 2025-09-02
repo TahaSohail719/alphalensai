@@ -95,20 +95,6 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
                   <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/60 rounded-full" />
                 </button>
 
-                {/* Quick access button to full page */}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    if (bubble.id === "tradesetup") navigate('/ai-setup');
-                    else if (bubble.id === "macro") navigate('/macro-analysis');
-                    else if (bubble.id === "reports") navigate('/reports');
-                  }}
-                  className="absolute -left-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-card/95 backdrop-blur-sm border-border/50 hover:bg-card text-xs px-2 py-1 h-auto whitespace-nowrap"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Full Page
-                </Button>
               </div>
             );
           })}

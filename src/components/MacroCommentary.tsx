@@ -32,7 +32,8 @@ import {
   Plus,
   Trash2,
   Calendar,
-  PieChart
+  PieChart,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -607,7 +608,16 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
             <p className="text-xs text-muted-foreground">AI market insights</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.open('/macro-analysis', '_blank')}
+            className="h-6 w-6 p-0 hover:bg-primary/10"
+            title="Open Full Page"
+          >
+            <ExternalLink className="h-3 w-3" />
+          </Button>
           {/* Hide desktop-only controls on mobile */}
           {!isMobile && (
             <>
@@ -638,7 +648,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
               onClick={onClose}
               className="h-6 w-6 p-0 hover:bg-destructive/10"
             >
-              ✕
+              <X className="h-3 w-3" />
             </Button>
           )}
           <Badge variant="secondary" className="bg-success/10 text-success border-success/20 text-xs">
