@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Brain, FileText, MessageCircle, Sparkles, Zap } from "lucide-react";
+import { Brain, FileText, MessageCircle, Sparkles, Zap, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TradeSetupBubble } from "./TradeSetupBubble";
 import { MacroCommentary } from "./MacroCommentary"; 
 import { ReportsBubble } from "./ReportsBubble";
+import { useNavigate } from "react-router-dom";
 
 interface BubbleSystemProps {
   instrument: string;
@@ -14,6 +15,7 @@ interface BubbleSystemProps {
 }
 
 export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTradeLevelsUpdate }: BubbleSystemProps) {
+  const navigate = useNavigate();
   const [activeBubble, setActiveBubble] = useState<"macro" | "reports" | "tradesetup" | null>(null);
   
   // Debug logs
@@ -66,32 +68,48 @@ export function BubbleSystem({ instrument, timeframe, onTradeSetupClick, onTrade
             const IconComponent = bubble.icon;
             
             return (
-              <button
-                key={bubble.id}
-                onClick={() => {
-                  console.log("🔥 BUBBLE CLICKED:", bubble.id);
-                  handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
-                }}
-                className={cn(
-                  "h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer border-0 touch-friendly",
-                  "flex items-center justify-center relative overflow-hidden",
-                  bubble.color,
-                  bubble.glow,
-                  "hover:shadow-xl transform hover:-translate-y-1"
-                )}
-                style={{
-                  background: `radial-gradient(circle at 30% 30%, ${bubble.color.includes('primary') ? 'hsl(var(--primary-glow))' : bubble.color.includes('blue') ? '#60a5fa' : '#34d399'}, ${bubble.color.includes('primary') ? 'hsl(var(--primary))' : bubble.color.includes('blue') ? '#3b82f6' : '#10b981'})`
-                }}
-                type="button"
-                title={bubble.label}
-                aria-label={bubble.label}
-              >
-                <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white drop-shadow-sm relative z-10" />
-                
-                {/* Circle bubble shine effect */}
-                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 w-2 h-2 sm:w-3 sm:h-3 bg-white/40 rounded-full blur-sm" />
-                <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/60 rounded-full" />
-              </button>
+              <div key={bubble.id} className="relative group">
+                <button
+                  onClick={() => {
+                    console.log("🔥 BUBBLE CLICKED:", bubble.id);
+                    handleBubbleClick(bubble.id as "macro" | "reports" | "tradesetup");
+                  }}
+                  className={cn(
+                    "h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer border-0 touch-friendly",
+                    "flex items-center justify-center relative overflow-hidden",
+                    bubble.color,
+                    bubble.glow,
+                    "hover:shadow-xl transform hover:-translate-y-1"
+                  )}
+                  style={{
+                    background: `radial-gradient(circle at 30% 30%, ${bubble.color.includes('primary') ? 'hsl(var(--primary-glow))' : bubble.color.includes('blue') ? '#60a5fa' : '#34d399'}, ${bubble.color.includes('primary') ? 'hsl(var(--primary))' : bubble.color.includes('blue') ? '#3b82f6' : '#10b981'})`
+                  }}
+                  type="button"
+                  title={bubble.label}
+                  aria-label={bubble.label}
+                >
+                  <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white drop-shadow-sm relative z-10" />
+                  
+                  {/* Circle bubble shine effect */}
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 w-2 h-2 sm:w-3 sm:h-3 bg-white/40 rounded-full blur-sm" />
+                  <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/60 rounded-full" />
+                </button>
+
+                {/* Quick access button to full page */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (bubble.id === "tradesetup") navigate('/ai-setup');
+                    else if (bubble.id === "macro") navigate('/macro-analysis');
+                    else if (bubble.id === "reports") navigate('/reports');
+                  }}
+                  className="absolute -left-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-card/95 backdrop-blur-sm border-border/50 hover:bg-card text-xs px-2 py-1 h-auto whitespace-nowrap"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Full Page
+                </Button>
+              </div>
             );
           })}
 

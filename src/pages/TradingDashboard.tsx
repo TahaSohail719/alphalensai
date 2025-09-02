@@ -316,47 +316,6 @@ export default function TradingDashboard() {
           </CardContent>
         </Card>
 
-        {/* Mobile-first Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card 
-            onClick={() => navigate('/ai-setup')}
-            className="gradient-card border-border/50 hover:shadow-glow-primary transition-smooth cursor-pointer group active:scale-95"
-          >
-            <CardContent className="p-5 text-center">
-              <div className="gradient-primary p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
-                <Zap className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h3 className="font-semibold text-base text-foreground mb-2">AI Trade Setup</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Analyze market conditions and find trading opportunities</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            onClick={() => navigate('/macro-analysis')}
-            className="gradient-card border-border/50 hover:shadow-glow-success transition-smooth cursor-pointer group active:scale-95"
-          >
-            <CardContent className="p-5 text-center">
-              <div className="gradient-success p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
-                <Activity className="h-6 w-6 text-success-foreground" />
-              </div>
-              <h3 className="font-semibold text-base text-foreground mb-2">Macro Analysis</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Get comprehensive market commentary and insights</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            onClick={() => navigate('/reports')}
-            className="gradient-card border-border/50 hover:shadow-medium transition-smooth cursor-pointer group active:scale-95 sm:col-span-2 lg:col-span-1"
-          >
-            <CardContent className="p-5 text-center">
-              <div className="bg-warning/20 border border-warning/30 p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-smooth">
-                <ArrowRight className="h-6 w-6 text-warning" />
-              </div>
-              <h3 className="font-semibold text-base text-foreground mb-2">Performance Reports</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">View detailed trading performance and analytics</p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       {/* Floating bubble system */}
