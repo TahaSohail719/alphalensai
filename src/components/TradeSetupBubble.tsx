@@ -281,11 +281,12 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('/ai-setup', '_blank')}
-                className="h-8 w-8 p-0 border-primary/50 bg-primary/10 hover:bg-primary/20 text-primary"
-                title="Open Full Page"
+                onClick={() => window.location.href = '/ai-setup'}
+                className="h-8 w-8 px-2 border-primary/50 bg-primary/10 hover:bg-primary/20 text-primary gap-1 text-xs"
+                title="Access full-featured trade setup page with advanced indicators and deeper analysis"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-3 w-3" />
+                <span className="hidden sm:inline">Full page</span>
               </Button>
               <Button
                 variant="ghost"

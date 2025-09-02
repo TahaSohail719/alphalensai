@@ -612,11 +612,12 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.open('/macro-analysis', '_blank')}
-            className="h-6 w-6 p-0 border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500"
-            title="Open Full Page"
+            onClick={() => window.location.href = '/macro-analysis'}
+            className="h-6 w-6 px-2 border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 gap-1 text-xs"
+            title="Access complete macro analysis with advanced charting and detailed insights"
           >
             <ExternalLink className="h-3 w-3" />
+            <span className="hidden sm:inline">Full page</span>
           </Button>
           {/* Hide desktop-only controls on mobile */}
           {!isMobile && (

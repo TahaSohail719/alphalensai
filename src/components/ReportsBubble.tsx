@@ -293,11 +293,12 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open('/reports', '_blank')}
-                className="h-7 w-7 sm:h-8 sm:w-8 p-0 touch-friendly border-green-500/50 bg-green-500/10 hover:bg-green-500/20 text-green-500"
-                title="Open Full Page"
+                onClick={() => window.location.href = '/reports'}
+                className="h-7 w-7 sm:h-8 sm:w-8 px-2 touch-friendly border-green-500/50 bg-green-500/10 hover:bg-green-500/20 text-green-500 gap-1 text-xs"
+                title="Access comprehensive performance reports with detailed analytics and historical data"
               >
                 <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Full page</span>
               </Button>
               <Button
                 variant="ghost"
