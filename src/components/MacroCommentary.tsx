@@ -3,6 +3,7 @@ import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { safePostRequest } from "@/lib/safe-request";
+import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -613,11 +614,11 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
             variant="outline"
             size="sm"
             onClick={() => window.location.href = '/macro-analysis'}
-            className="h-6 w-6 px-2 border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 gap-1 text-xs"
+            className="h-6 min-w-fit px-2 border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 text-xs"
             title="Access complete macro analysis with advanced charting and detailed insights"
           >
-            <ExternalLink className="h-3 w-3" />
-            <span className="hidden sm:inline">Full page</span>
+            <ExternalLink className="h-3 w-3 mr-1" />
+            <span>Full page</span>
           </Button>
           {/* Hide desktop-only controls on mobile */}
           {!isMobile && (
@@ -866,6 +867,23 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
               </Button>
             </TabsContent>
           </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* TradingView Widget Section */}
+      <Card className="gradient-card border-border-light shadow-medium">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Market Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TradingViewWidget 
+            selectedSymbol="EURUSD" 
+            onSymbolChange={() => {}}
+            className="border-0 shadow-none"
+          />
         </CardContent>
       </Card>
 
