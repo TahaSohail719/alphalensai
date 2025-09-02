@@ -39,8 +39,8 @@ export default function Layout({ children, activeModule, onModuleChange }: Layou
               onClick={() => onModuleChange("welcome")}
               className="flex items-center gap-2 hover:opacity-90 transition-all duration-200 group min-w-0"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 shrink-0">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 shrink-0 p-1">
+                <img src="/lovable-uploads/a7975a0f-13fa-4e7b-91bb-de8563181e30.png" alt="AlphaLens" className="w-full h-full object-contain" />
               </div>
               <div className="hidden xs:block min-w-0">
                 <img 
