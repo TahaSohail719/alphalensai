@@ -36,8 +36,8 @@ const ProductPresentation = () => {
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">TradeMind</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Assistant</p>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">AlphaLens</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Intelligence</p>
               </div>
             </div>
             <Link to="/" className="shrink-0">

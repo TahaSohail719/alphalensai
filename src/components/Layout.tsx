@@ -43,8 +43,8 @@ export default function Layout({ children, activeModule, onModuleChange }: Layou
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
               </div>
               <div className="hidden xs:block min-w-0">
-                <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent truncate">
-                  TradeMind
+                <h1 className="text-base sm:text-lg font-bold text-primary truncate">
+                  AlphaLens
                 </h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Intelligence</p>
               </div>
