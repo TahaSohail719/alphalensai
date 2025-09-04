@@ -9,7 +9,8 @@ import {
   Activity,
   Zap,
   User,
-  LogOut
+  LogOut,
+  Building2
 } from "lucide-react";
 import { BubbleSystem } from "./BubbleSystem";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,6 +154,18 @@ export default function Layout({ children, activeModule, onModuleChange }: Layou
                   >
                     <Zap className="h-4 w-4 mr-2" />
                     AI Setup
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigate('/about');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="justify-start text-sm"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    About
                   </Button>
                 </div>
                 <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border/30 truncate">

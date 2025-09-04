@@ -12,6 +12,7 @@ import AssetDetail from "./pages/AssetDetail";
 import ProductPresentation from "./pages/ProductPresentation";
 import Portfolio from "./pages/Portfolio";
 import Auth from "./pages/Auth";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/reports" element={<Reports />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/about" element={<About />} />
             <Route path="/product" element={<ProductPresentation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
