@@ -189,11 +189,11 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           timestamp: new Date().toISOString()
         },
         user_id: "default_user",
-        instrument: instrument,
+        instrument: selectedAsset.symbol,
         timeframe: timeframe || "1H",
-        assetType: "currency",
-        analysisDepth: "detailed",
-        period: "weekly",
+        assetType: queryParams.assetType,
+        analysisDepth: queryParams.analysisDepth,
+        period: queryParams.period,
         adresse: queryParams.adresse
       };
 
@@ -528,62 +528,18 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     currentTimeoutId = setTimeout(poll, 60000);
   };
 
-  // 3-step async workflow: START → LAUNCH → POLLING  
   const generateAnalysis = async () => {
-    if (!queryParams.query.trim()) return;
+    if (!queryParams.query.trim() || !queryParams.adresse.trim()) return;
     
     setIsGenerating(true);
-    setJobStatus("queued");
+    setJobStatus("generating");
     
     try {
-      // STEP 1: START job to get job_id
-      const startPayload = {
-        mode: "start",
-        instrument: instrument
-      };
-
-      console.log('💬 [MacroCommentaryBubble] START job request:', {
-        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: startPayload,
-        timestamp: new Date().toISOString()
-      });
-
-      const startResponse = await safePostRequest(
-        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        startPayload
-      );
-
-      if (!startResponse.ok) {
-        throw new Error(`START request failed! status: ${startResponse.status}`);
-      }
-
-      const startData = await startResponse.json();
-      
-      console.log('💬 [MacroCommentaryBubble] START job response:', {
-        status: startResponse.status,
-        ok: startResponse.ok,
-        data: startData,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Handle nested response structure
-      const responseBody = startData.body || startData;
-      
-      if (!responseBody.job_id || responseBody.status !== "queued") {
-        throw new Error("Invalid START response: no job_id or wrong status");
-      }
-
-      // Save job info
-      setJobId(responseBody.job_id);
-      localStorage.setItem("strategist_job_id", responseBody.job_id);
-      setJobStatus("queued");
-
-      // STEP 2: LAUNCH main processing immediately with job_id
-      const launchPayload = {
+      // Use same payload structure as MacroAnalysis - single step with custom_analysis mode
+      const payload = {
         type: "RAG",
         question: queryParams.query,
-        mode: "run",
-        job_id: responseBody.job_id, // Add job_id to associate processing with this job
+        mode: "custom_analysis",
         filters: {
           region: "All",
           product: "All",
@@ -594,127 +550,116 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           timestamp: new Date().toISOString()
         },
         user_id: "default_user",
-        instrument: instrument,
+        instrument: selectedAsset.symbol,
         timeframe: timeframe || "1H",
-        assetType: "currency",
-        analysisDepth: "detailed",
-        period: "weekly",
+        assetType: queryParams.assetType,
+        analysisDepth: queryParams.analysisDepth,
+        period: queryParams.period,
         adresse: queryParams.adresse
       };
 
-      console.log('💬 [MacroCommentaryBubble] LAUNCH processing request:', {
+      console.log('💬 [MacroCommentaryBubble] POST request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: launchPayload,
+        payload: payload,
         timestamp: new Date().toISOString()
       });
 
-      // Send launch request and wait for response - might contain immediate result
-      try {
-        console.log('📊 [MacroCommentary] Sending request to:', 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1');
-        console.log('📊 [MacroCommentary] Request payload:', launchPayload);
-        
-        const launchResponse = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', launchPayload);
-        
-        console.log('📊 [MacroCommentary] Response status:', launchResponse.status);
-        console.log('📊 [MacroCommentary] Response headers:', launchResponse.headers);
-        
-        if (launchResponse.ok) {
-          const launchResponseText = await launchResponse.text();
-          console.log('📊 [MacroCommentary] LAUNCH response text LENGTH:', launchResponseText.length);
-          console.log('📊 [MacroCommentary] LAUNCH response text:', launchResponseText);
-          
-          if (launchResponseText.trim()) {
-            try {
-              const launchResponseJson = JSON.parse(launchResponseText);
-              console.log('📊 [MacroCommentary] LAUNCH response JSON:', launchResponseJson);
-              
-              // Check if this is the final result with status done
-              if (launchResponseJson.status === 'done' || (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.status === 'done')) {
-                console.log('📊 [MacroCommentary] Found immediate result in launch response!');
-                
-                let analysisContent = '';
-                
-                if (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.message?.content?.content) {
-                  analysisContent = launchResponseJson[0].message.message.content.content;
-                } else if (launchResponseJson.message?.content?.content) {
-                  analysisContent = launchResponseJson.message.content.content;
-                } else if (launchResponseJson.content?.content) {
-                  analysisContent = launchResponseJson.content.content;
-                } else {
-                  analysisContent = JSON.stringify(launchResponseJson, null, 2);
-                }
-                
-                const realAnalysis: MacroAnalysis = {
-                  query: queryParams.query,
-                  timestamp: new Date(),
-                  sections: [
-                    {
-                      title: "Analysis Results",
-                      content: analysisContent,
-                      type: "overview",
-                      expanded: true
-                    }
-                  ],
-                  sources: []
-                };
-                
-                setAnalyses(prev => [realAnalysis, ...prev]);
-                setJobStatus("done");
-                setIsGenerating(false);
-                localStorage.removeItem("strategist_job_id");
-                setJobId(null);
-                
-                toast({
-                  title: "Analysis Completed",
-                  description: "Your macro analysis is ready"
-                });
-                return; // Don't start polling if we already have the result
-              }
-            } catch (parseError) {
-              console.log('📊 [MacroCommentary] Failed to parse response as JSON:', parseError);
-            }
-          } else {
-            console.log('📊 [MacroCommentary] Empty response received');
-            toast({
-              title: "Error generating commentary",
-              description: "Empty response from webhook",
-              variant: "destructive"
-            });
-            setIsGenerating(false);
-            return;
-          }
-        } else {
-          console.log('📊 [MacroCommentary] Request failed with status:', launchResponse.status);
-          toast({
-            title: "Error generating commentary", 
-            description: `Request failed with status: ${launchResponse.status}`,
-            variant: "destructive"
-          });
-          setIsGenerating(false);
-          return;
-        }
-      } catch (error) {
-        console.log('Launch request error, will start polling:', error);
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload);
+
+      console.log('💬 [MacroCommentaryBubble] Response status:', response.status);
+      console.log('💬 [MacroCommentaryBubble] Response ok:', response.ok);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // STEP 3: Start polling only if we didn't get immediate result
-      startPolling(responseBody.job_id);
+      // Get response data - try text first, then parse as JSON
+      let responseJson = null;
       
-      setQueryParams(prev => ({ ...prev, query: "" }));
-      
-      toast({
-        title: "Analysis Started",
-        description: "Job queued, processing will begin shortly..."
-      });
+      try {
+        const responseText = await response.text();
+        console.log('💬 [MacroCommentaryBubble] Raw response text:', responseText);
+        
+        if (responseText.trim()) {
+          try {
+            responseJson = JSON.parse(responseText);
+            console.log('💬 [MacroCommentaryBubble] Successfully parsed as JSON:', responseJson);
+          } catch (parseError) {
+            console.log('💬 [MacroCommentaryBubble] Failed to parse response as JSON:', parseError);
+            console.log('💬 [MacroCommentaryBubble] Raw text was:', responseText);
+          }
+        } else {
+          console.log('💬 [MacroCommentaryBubble] Empty response received');
+        }
+      } catch (textError) {
+        console.error('💬 [MacroCommentaryBubble] Failed to read response as text:', textError);
+      }
+
+      // Handle immediate response
+      if (responseJson) {
+        let analysisContent = '';
+        
+        // Check if we got the final n8n response immediately
+        if (Array.isArray(responseJson) && responseJson.length > 0) {
+          const messageObj = responseJson[0].message;
+          
+          if (messageObj && messageObj.message && messageObj.message.content && messageObj.message.content.content) {
+            analysisContent = messageObj.message.content.content;
+          } else if (messageObj && messageObj.content) {
+            analysisContent = typeof messageObj.content === 'string' ? messageObj.content : JSON.stringify(messageObj.content, null, 2);
+          } else {
+            analysisContent = JSON.stringify(responseJson[0], null, 2);
+          }
+        } else if (responseJson.content) {
+          if (typeof responseJson.content === 'object') {
+            if (responseJson.content.content) {
+              analysisContent = responseJson.content.content;
+            } else {
+              analysisContent = JSON.stringify(responseJson.content, null, 2);
+            }
+          } else {
+            analysisContent = responseJson.content;
+          }
+        } else {
+          analysisContent = JSON.stringify(responseJson, null, 2);
+        }
+
+        const realAnalysis: MacroAnalysis = {
+          query: queryParams.query,
+          timestamp: new Date(),
+          sections: [
+            {
+              title: "Analysis Results",
+              content: analysisContent,
+              type: "overview",
+              expanded: true
+            }
+          ],
+          sources: []
+        };
+
+        setAnalyses(prev => [realAnalysis, ...prev]);
+        setJobStatus("done");
+        setIsGenerating(false);
+        
+        setQueryParams(prev => ({ ...prev, query: "" }));
+        
+        toast({
+          title: "Analysis Completed",
+          description: "Your macro analysis is ready"
+        });
+      } else {
+        throw new Error("No valid response received");
+      }
 
     } catch (error) {
-      console.error('Analysis startup error:', error);
+      console.error('Analysis generation error:', error);
       setIsGenerating(false);
       setJobStatus("");
       
       toast({
         title: "Error",
-        description: "Unable to start analysis. Please retry.",
+        description: "Unable to generate analysis. Please retry.",
         variant: "destructive"
       });
     }
