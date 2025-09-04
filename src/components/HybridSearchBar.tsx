@@ -161,6 +161,7 @@ export function HybridSearchBar({
     try {
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "ChatGPT",
+        mode: "question",
         question: searchTerm,
         instrument: instrument,
         timeframe: timeframe
@@ -239,6 +240,7 @@ export function HybridSearchBar({
 
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         type: "RAG",
+        mode: "question",
         question: contextualQuestion,
         instrument: instrument,
         timeframe: timeframe
