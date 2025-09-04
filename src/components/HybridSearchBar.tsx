@@ -171,7 +171,21 @@ export function HybridSearchBar({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      console.log('Raw response status:', response.status);
+      console.log('Raw response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Parsed data:', data);
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response text that failed to parse:', responseText);
+        throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+      }
       
       const conversationId = Date.now().toString();
       const newResponse: AIResponse = {
@@ -247,7 +261,19 @@ export function HybridSearchBar({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      console.log('Reply raw response status:', response.status);
+      const responseText = await response.text();
+      console.log('Reply raw response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Reply parsed data:', data);
+      } catch (parseError) {
+        console.error('Reply JSON Parse Error:', parseError);
+        console.error('Reply response text that failed to parse:', responseText);
+        throw new Error(`Failed to parse reply JSON response: ${parseError.message}`);
+      }
       
       const newResponse: AIResponse = {
         id: Date.now().toString(),
