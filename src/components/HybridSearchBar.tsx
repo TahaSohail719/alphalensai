@@ -160,7 +160,7 @@ export function HybridSearchBar({
     
     try {
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        type: "RAG",
+        type: "ChatGPT",
         question: searchTerm,
         instrument: instrument,
         timeframe: timeframe
