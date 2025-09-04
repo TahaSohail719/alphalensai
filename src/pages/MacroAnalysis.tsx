@@ -709,6 +709,8 @@ export default function MacroAnalysis() {
     "European economic outlook"
   ];
 
+  const [showAnalysisResult, setShowAnalysisResult] = useState(false);
+  
   return (
     <Layout activeModule="macro-analysis" onModuleChange={() => {}}>
       <div className="space-y-6">
@@ -728,215 +730,241 @@ export default function MacroAnalysis() {
           </div>
         </div>
 
-        {/* Analysis Generator - Moved to top like a search bar */}
-        <Card className="gradient-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Analysis Generator
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Textarea
-                value={queryParams.query}
-                onChange={(e) => setQueryParams(prev => ({ ...prev, query: e.target.value }))}
-                placeholder="Ask your macro question or describe the context to analyze..."
-                rows={4}
-                className="text-base"
-              />
+        {/* Analysis Generator - Enhanced search bar style */}
+        <Card className="gradient-card shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Brain className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Analysis Generator</h2>
             </div>
-
+            
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Address (temporary for development)</label>
+              {/* Main search input */}
+              <div className="relative">
+                <Textarea
+                  value={queryParams.query}
+                  onChange={(e) => setQueryParams(prev => ({ ...prev, query: e.target.value }))}
+                  placeholder="Ask your macro question or describe the context to analyze..."
+                  rows={3}
+                  className="text-base resize-none pr-12"
+                />
+                <Button 
+                  onClick={generateAnalysis} 
+                  disabled={isGenerating || !queryParams.query.trim() || !queryParams.adresse.trim()}
+                  size="sm"
+                  className="absolute bottom-2 right-2"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Globe className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Quick suggestions dropdown */}
+              <div className="relative">
+                <Select value="" onValueChange={(value) => setQueryParams(prev => ({ ...prev, query: value }))}>
+                  <SelectTrigger className="w-full">
+                    <div className="flex items-center gap-2">
+                      <ChevronDown className="h-4 w-4" />
+                      <span className="text-muted-foreground">Quick analysis suggestions...</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {quickQueries.map((query, index) => (
+                      <SelectItem key={index} value={query}>
+                        {query}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Compact parameters row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Select value={queryParams.assetType} onValueChange={(value) => 
+                  setQueryParams(prev => ({ ...prev, assetType: value }))
+                }>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Asset Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="currency">Currency</SelectItem>
+                    <SelectItem value="commodity">Commodity</SelectItem>
+                    <SelectItem value="crypto">Crypto</SelectItem>
+                    <SelectItem value="equity">Equity</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={queryParams.analysisDepth} onValueChange={(value) => 
+                  setQueryParams(prev => ({ ...prev, analysisDepth: value }))
+                }>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Depth" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Summary</SelectItem>
+                    <SelectItem value="detailed">Detailed</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={queryParams.period} onValueChange={(value) => 
+                  setQueryParams(prev => ({ ...prev, period: value }))
+                }>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <Input
                   value={queryParams.adresse}
                   onChange={(e) => setQueryParams(prev => ({ ...prev, adresse: e.target.value }))}
-                  placeholder="Enter temporary address for development"
+                  placeholder="Dev address"
                   className="text-sm"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Asset Type</label>
-                  <Select value={queryParams.assetType} onValueChange={(value) => 
-                    setQueryParams(prev => ({ ...prev, assetType: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="currency">Currency</SelectItem>
-                      <SelectItem value="commodity">Commodity</SelectItem>
-                      <SelectItem value="crypto">Crypto</SelectItem>
-                      <SelectItem value="equity">Equity</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Analysis Depth</label>
-                  <Select value={queryParams.analysisDepth} onValueChange={(value) => 
-                    setQueryParams(prev => ({ ...prev, analysisDepth: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="summary">Summary</SelectItem>
-                      <SelectItem value="detailed">Detailed</SelectItem>
-                      <SelectItem value="expert">Expert</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Period</label>
-                  <Select value={queryParams.period} onValueChange={(value) => 
-                    setQueryParams(prev => ({ ...prev, period: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Quick Analysis Ideas</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                {quickQueries.map((query, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQueryParams(prev => ({ ...prev, query }))}
-                    className="text-xs h-auto py-2 px-3 text-left justify-start whitespace-normal"
-                  >
-                    {query}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <Button 
-              onClick={generateAnalysis} 
-              disabled={isGenerating || !queryParams.query.trim() || !queryParams.adresse.trim()}
-              className="w-full"
-              size="lg"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {/* Status indicator */}
+              {isGenerating && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   {jobStatus === "queued" && "Analysis queued..."}
                   {jobStatus === "running" && "Analysis in progress..."}
                   {!jobStatus && "Generating Analysis..."}
-                </>
-              ) : (
-                <>
-                  <Globe className="mr-2 h-4 w-4" />
-                  Generate Analysis
-                </>
+                </div>
               )}
-            </Button>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Optimized 2-Column Layout for UX */}
-        <div className="space-y-6">
-          {/* Row 1: Market Focus and Technical Analysis side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Column 1: Market Focus */}
-            <Card className="gradient-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Market Focus
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Selected Asset</label>
-                  <Select 
-                    value={selectedAsset.symbol} 
-                    onValueChange={(value) => {
-                      const asset = assets.find(a => a.symbol === value);
-                      if (asset) setSelectedAsset(asset);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
-                      {assets.filter(a => a.market === "FX").map((asset) => (
-                        <SelectItem key={asset.symbol} value={asset.symbol}>
-                          {asset.display}
-                        </SelectItem>
-                      ))}
-                      <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
-                      {assets.filter(a => a.market === "CRYPTO").map((asset) => (
-                        <SelectItem key={asset.symbol} value={asset.symbol}>
-                          {asset.display}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(getTradingViewUrl(selectedAsset), '_blank')}
-                  className="w-full"
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Open {selectedAsset.display} in TradingView
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Column 2: Technical Analysis */}
-            <Card className="gradient-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Technical Analysis - {selectedAsset.display}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TechnicalDashboard selectedAsset={selectedAsset} />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Row 2: Market Chart - Full Width */}
+        {/* Analysis Results - Appears after generation */}
+        {analyses.length > 0 && (
           <Card className="gradient-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Market Chart - {selectedAsset.display}
+            <CardHeader className="cursor-pointer" onClick={() => setShowAnalysisResult(!showAnalysisResult)}>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Analysis Results
+                </div>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", showAnalysisResult && "rotate-180")} />
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2">
-              <TradingViewWidget 
-                selectedSymbol={selectedAsset.symbol}
-                onSymbolChange={(symbol) => {
-                  const asset = assets.find(a => a.symbol === symbol);
+            {showAnalysisResult && (
+              <CardContent>
+                {analyses.map((analysis, analysisIndex) => (
+                  <div key={analysisIndex} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {analysis.timestamp.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyAnalysis(analysis)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {analysis.sections.map((section, sectionIndex) => (
+                      <div key={sectionIndex} className="border rounded-lg p-4">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => toggleSection(analysisIndex, sectionIndex)}
+                        >
+                          <h4 className="font-medium">{section.title}</h4>
+                          <ChevronDown className={cn(
+                            "h-4 w-4 transition-transform",
+                            expandedSections.has(`${analysisIndex}-${sectionIndex}`) && "rotate-180"
+                          )} />
+                        </div>
+                        
+                        {expandedSections.has(`${analysisIndex}-${sectionIndex}`) && (
+                          <div className="mt-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                            {section.content}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </CardContent>
+            )}
+          </Card>
+        )}
+
+        {/* Market Chart with integrated Market Focus */}
+        <Card className="gradient-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Market Chart - {selectedAsset.display}
+              </div>
+              {/* Market Focus integrated as dropdown */}
+              <Select 
+                value={selectedAsset.symbol} 
+                onValueChange={(value) => {
+                  const asset = assets.find(a => a.symbol === value);
                   if (asset) setSelectedAsset(asset);
                 }}
-              />
-            </CardContent>
-          </Card>
-        </div>
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
+                  {assets.filter(a => a.market === "FX").map((asset) => (
+                    <SelectItem key={asset.symbol} value={asset.symbol}>
+                      {asset.display}
+                    </SelectItem>
+                  ))}
+                  <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
+                  {assets.filter(a => a.market === "CRYPTO").map((asset) => (
+                    <SelectItem key={asset.symbol} value={asset.symbol}>
+                      {asset.display}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2">
+            <TradingViewWidget 
+              selectedSymbol={selectedAsset.symbol}
+              onSymbolChange={(symbol) => {
+                const asset = assets.find(a => a.symbol === symbol);
+                if (asset) setSelectedAsset(asset);
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Technical Analysis */}
+        <Card className="gradient-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Technical Analysis - {selectedAsset.display}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TechnicalDashboard selectedAsset={selectedAsset} />
+          </CardContent>
+        </Card>
 
         {/* Analyses Results */}
         <div className="space-y-6">
