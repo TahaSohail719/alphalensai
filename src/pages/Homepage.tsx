@@ -200,7 +200,7 @@ export default function Homepage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>&copy; 2024 Alphalens. All rights reserved.</p>
+            <p>© 2025 Alphalens. All rights reserved.</p>
           </div>
         </div>
       </footer>
