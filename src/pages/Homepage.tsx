@@ -20,9 +20,12 @@ import {
   ChevronDown,
   Sparkles,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  PieChart,
+  Users,
+  Globe,
+  Rocket
 } from 'lucide-react';
-import alphalensLogo from '@/assets/alphalens-logo.png';
 
 export default function Homepage() {
   const [demoFormData, setDemoFormData] = useState({
@@ -93,58 +96,69 @@ export default function Homepage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        {/* Dynamic Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-success/15 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-chart-1/20 via-transparent to-chart-3/15" />
         <div 
-          className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-accent/10 opacity-50"
-          style={{ transform: `translateY(${scrollY * 0.5}px)` }}
+          className="absolute inset-0 bg-gradient-to-bl from-transparent via-primary/5 to-accent/10 opacity-70"
+          style={{ transform: `translateY(${scrollY * 0.3}px) rotate(${scrollY * 0.05}deg)` }}
         />
         
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent/10 rounded-full blur-xl animate-pulse delay-700" />
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-success/10 rounded-full blur-xl animate-pulse delay-300" />
+        {/* Enhanced Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-primary/30 to-accent/20 rounded-full blur-2xl animate-bounce" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-l from-success/25 to-chart-2/20 rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-chart-1/30 to-chart-4/20 rounded-full blur-xl animate-pulse delay-300" />
+        <div className="absolute top-1/3 right-1/3 w-28 h-28 bg-gradient-to-tl from-accent/25 to-primary/15 rounded-full blur-2xl animate-bounce delay-1000" />
         
-        <div className="relative max-w-6xl mx-auto text-center z-10">
-          {/* Logo with Animation */}
-          <div className="flex justify-center mb-8 animate-fade-in">
-            <div className="relative">
+        <div className="relative max-w-7xl mx-auto text-center z-10">
+          {/* Logo Section with New Assets */}
+          <div className="flex flex-col items-center mb-12 animate-scale-in">
+            <div className="relative mb-6">
+              {/* Logo */}
               <img 
-                src={alphalensLogo} 
-                alt="alphalens.ai" 
-                className="h-20 w-auto drop-shadow-lg hover:scale-105 transition-all duration-300"
+                src="/lovable-uploads/635272b8-b111-4fd1-ab2a-1d95c280e6b6.png" 
+                alt="alphalens.ai logo" 
+                className="h-24 w-auto drop-shadow-2xl hover:scale-110 transition-all duration-500 filter saturate-150"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-3xl -z-10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-accent/30 rounded-full blur-3xl -z-10 animate-pulse" />
             </div>
+            {/* Brand Name */}
+            <img 
+              src="/lovable-uploads/4c3adeb5-400f-4ac7-9d77-160bcd8ee6ed.png" 
+              alt="alphalens.ai" 
+              className="h-16 w-auto drop-shadow-xl hover:scale-105 transition-all duration-300"
+            />
           </div>
           
-          {/* Hero Title */}
-          <div className="space-y-6 mb-12">
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-transparent leading-tight animate-fade-in">
-              alphalens.ai
-            </h1>
-            <div className="flex items-center justify-center gap-2 animate-fade-in delay-200">
-              <Sparkles className="h-6 w-6 text-accent animate-pulse" />
-              <p className="text-xl md:text-2xl text-muted-foreground font-medium">
-                Intelligent FX, Crypto & Macro Research — Powered by AI & Institutional Insights
-              </p>
-              <Sparkles className="h-6 w-6 text-primary animate-pulse delay-500" />
+          {/* Enhanced Hero Content */}
+          <div className="space-y-8 mb-16">
+            <div className="flex items-center justify-center gap-3 animate-fade-in delay-200">
+              <Sparkles className="h-8 w-8 text-accent animate-spin" />
+              <h2 className="text-2xl md:text-3xl text-foreground font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Intelligence Financière de Nouvelle Génération
+              </h2>
+              <Sparkles className="h-8 w-8 text-primary animate-spin delay-500" />
             </div>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-medium">
+              Analyse macro-économique institutionnelle enrichie par l'IA et les données en temps réel. 
+              Transformez la complexité des marchés en opportunités d'investissement claires et actionnables.
+            </p>
           </div>
           
-          {/* CTA Section */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in delay-400">
+          {/* Enhanced CTA Section */}
+          <div className="flex flex-col gap-8 justify-center items-center animate-fade-in delay-400">
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button 
                   size="lg" 
-                  className="px-12 py-6 text-lg font-semibold bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary shadow-glow-primary hover:shadow-xl transition-all duration-300 group"
+                  className="px-16 py-8 text-xl font-bold bg-gradient-to-r from-primary via-accent to-success hover:from-success hover:via-accent hover:to-primary shadow-2xl hover:shadow-primary/50 transition-all duration-500 group transform hover:scale-105 border-0"
                 >
-                  Request Demo
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <Rocket className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform" />
+                  Demander une Démo
+                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -198,12 +212,28 @@ export default function Homepage() {
               </DialogContent>
             </Dialog>
             
-            <div className="flex gap-4">
-              <Button variant="outline" size="lg" className="px-8 py-6 text-lg hover:bg-primary hover:text-primary-foreground transition-all duration-300" asChild>
-                <Link to="/auth">Sign Up</Link>
+            <div className="flex gap-6">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-10 py-6 text-lg font-semibold border-2 border-primary/50 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:scale-105 bg-background/80 backdrop-blur-sm" 
+                asChild
+              >
+                <Link to="/auth">
+                  <Users className="mr-2 h-5 w-5" />
+                  S'inscrire
+                </Link>
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-6 text-lg hover:bg-accent hover:text-accent-foreground transition-all duration-300" asChild>
-                <Link to="/auth">Login</Link>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-10 py-6 text-lg font-semibold border-2 border-accent/50 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300 hover:scale-105 bg-background/80 backdrop-blur-sm" 
+                asChild
+              >
+                <Link to="/auth">
+                  <Globe className="mr-2 h-5 w-5" />
+                  Se connecter
+                </Link>
               </Button>
             </div>
           </div>
@@ -215,52 +245,96 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* Problem/Solution Narrative */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background-secondary">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            {/* Problem */}
-            <div className="space-y-6 animate-fade-in">
-              <div className="inline-flex items-center px-4 py-2 bg-danger/10 text-danger rounded-full text-sm font-medium">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                The Challenge
+      {/* Problem/Solution Narrative with Enhanced Design */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-background via-background/95 to-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-success" />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent mb-6">
+              Révolutionnez Votre Analyse
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              De la complexité du marché à la clarté de l'action en quelques clics
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-20 items-center">
+            {/* Enhanced Problem */}
+            <Card className="p-10 bg-gradient-to-br from-destructive/5 to-destructive/10 border-destructive/20 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2">
+              <div className="space-y-8">
+                <div className="inline-flex items-center px-6 py-3 bg-destructive/15 text-destructive rounded-full text-base font-bold border border-destructive/30">
+                  <AlertTriangle className="h-5 w-5 mr-3 animate-pulse" />
+                  Le Défi Actuel
+                </div>
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  Submergés par la Data,<br />
+                  <span className="text-destructive">Affamés d'Insights</span>
+                </h3>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Les marchés financiers génèrent des volumes de données écrasants. Les traders passent des heures 
+                  à éplucher des informations dispersées, peinant à identifier les opportunités pendant que les conditions changent.
+                </p>
+                <div className="flex items-center gap-4 text-destructive">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                    <span className="text-sm font-medium">Surcharge informationnelle</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-destructive rounded-full animate-pulse delay-200" />
+                    <span className="text-sm font-medium">Analyse dispersée</span>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Drowning in Data,<br />Starving for Insights
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Financial markets generate overwhelming amounts of data. Traders and analysts spend hours sifting through 
-                scattered information, struggling to identify actionable opportunities while market conditions change rapidly.
-              </p>
-            </div>
+            </Card>
             
-            {/* Solution */}
-            <div className="space-y-6 animate-fade-in delay-200">
-              <div className="inline-flex items-center px-4 py-2 bg-success/10 text-success rounded-full text-sm font-medium">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Our Solution
+            {/* Enhanced Solution */}
+            <Card className="p-10 bg-gradient-to-br from-success/5 to-success/10 border-success/20 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2">
+              <div className="space-y-8">
+                <div className="inline-flex items-center px-6 py-3 bg-success/15 text-success rounded-full text-base font-bold border border-success/30">
+                  <Sparkles className="h-5 w-5 mr-3 animate-spin" />
+                  Notre Solution
+                </div>
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  Analyse IA<br />
+                  <span className="text-success">à l'Échelle Institutionnelle</span>
+                </h3>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  alphalens.ai combine l'IA de pointe avec l'expertise de recherche institutionnelle, livrant 
+                  des setups de trading précis et des rapports qui transforment la complexité en clarté.
+                </p>
+                <div className="flex items-center gap-4 text-success">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-success rounded-full animate-pulse" />
+                    <span className="text-sm font-medium">Intelligence artificielle</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-success rounded-full animate-pulse delay-200" />
+                    <span className="text-sm font-medium">Recherche institutionnelle</span>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                AI-Powered Analysis<br />at Institutional Scale
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                alphalens.ai combines cutting-edge AI with institutional research expertise, delivering 
-                precise trade setups, macro commentary, and research reports that transform complexity into clarity.
-              </p>
-            </div>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Feature Highlights */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Powerful Features for Modern Traders
+      {/* Enhanced Feature Highlights */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-chart-1/5 via-background to-chart-3/5" />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full text-base font-bold text-primary mb-6 border border-primary/20">
+              <Zap className="h-5 w-5 mr-3 animate-pulse" />
+              Fonctionnalités Avancées
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent mb-8">
+              Outils de Nouvelle Génération
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Experience institutional-grade analysis tools designed for today's fast-moving markets
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Découvrez une suite complète d'outils d'analyse conçus pour les marchés d'aujourd'hui
             </p>
           </div>
           
@@ -268,38 +342,67 @@ export default function Homepage() {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="group relative overflow-hidden border-0 bg-gradient-to-br from-card to-card-secondary hover:shadow-strong transition-all duration-500 hover:-translate-y-2"
+                className="group relative overflow-hidden border-0 bg-gradient-to-br from-background to-background/80 hover:shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:rotate-1 backdrop-blur-sm"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <CardHeader className="relative z-10">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                
+                <CardHeader className="relative z-10 pb-4">
+                  <div className="flex justify-center mb-6">
+                    <div className="p-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 border border-primary/20">
                       {feature.icon}
                     </div>
                   </div>
-                  <CardTitle className="text-xl text-center group-hover:text-primary transition-colors">
+                  <CardTitle className="text-xl text-center group-hover:text-primary transition-colors duration-300 font-bold">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <CardDescription className="text-center text-muted-foreground group-hover:text-foreground transition-colors">
+                <CardContent className="relative z-10 pt-0">
+                  <CardDescription className="text-center text-muted-foreground group-hover:text-foreground transition-colors duration-300 leading-relaxed">
                     {feature.description}
                   </CardDescription>
-                  <div className="mt-4 flex justify-center">
+                  <div className="mt-6 flex justify-center">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="opacity-0 group-hover:opacity-100 transition-all duration-300 text-primary hover:bg-primary hover:text-primary-foreground"
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-500 text-primary hover:bg-primary hover:text-primary-foreground rounded-full px-6 border border-primary/20 hover:border-primary"
                       asChild
                     >
                       <Link to="/dashboard">
-                        Explore <ArrowRight className="ml-1 h-4 w-4" />
+                        Découvrir <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+          
+          {/* Additional Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mt-16">
+            <Card className="p-8 bg-gradient-to-br from-chart-1/10 to-chart-2/10 border-chart-1/20 hover:shadow-xl transition-all duration-500">
+              <div className="flex items-center gap-4 mb-4">
+                <PieChart className="h-8 w-8 text-chart-1" />
+                <h3 className="text-xl font-bold text-chart-1">Analyse Quantitative</h3>
+              </div>
+              <p className="text-muted-foreground">Modèles mathématiques avancés pour l'évaluation des risques et opportunités</p>
+            </Card>
+            
+            <Card className="p-8 bg-gradient-to-br from-chart-3/10 to-chart-4/10 border-chart-3/20 hover:shadow-xl transition-all duration-500">
+              <div className="flex items-center gap-4 mb-4">
+                <Activity className="h-8 w-8 text-chart-3" />
+                <h3 className="text-xl font-bold text-chart-3">Données Temps Réel</h3>
+              </div>
+              <p className="text-muted-foreground">Flux de données en continu pour des décisions basées sur l'actualité du marché</p>
+            </Card>
+            
+            <Card className="p-8 bg-gradient-to-br from-success/10 to-chart-5/10 border-success/20 hover:shadow-xl transition-all duration-500">
+              <div className="flex items-center gap-4 mb-4">
+                <Shield className="h-8 w-8 text-success" />
+                <h3 className="text-xl font-bold text-success">Gestion des Risques</h3>
+              </div>
+              <p className="text-muted-foreground">Outils sophistiqués de monitoring et contrôle des expositions</p>
+            </Card>
           </div>
         </div>
       </section>
@@ -371,15 +474,24 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* CTA Strip */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-r from-primary to-accent p-12 rounded-3xl text-white shadow-strong">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Transform Your Trading Analysis?
+      {/* Enhanced CTA Strip */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-success animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-accent/70 to-success/80" />
+        
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="p-16 rounded-3xl text-white shadow-2xl backdrop-blur-sm border border-white/20">
+            <div className="flex justify-center mb-8">
+              <div className="p-4 bg-white/20 rounded-full backdrop-blur-sm">
+                <Rocket className="h-12 w-12 text-white animate-bounce" />
+              </div>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
+              Prêt à Révolutionner<br />Votre Analyse Financière ?
             </h2>
-            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join institutional traders and analysts who trust alphalens.ai for their market insights.
+            <p className="text-xl md:text-2xl opacity-95 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Rejoignez les traders et analystes institutionnels qui font confiance à alphalens.ai 
+              pour leurs insights de marché décisifs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Dialog>
@@ -498,7 +610,7 @@ export default function Homepage() {
             <div className="flex flex-col items-center md:items-start gap-4">
               <div className="flex items-center gap-3">
                 <img 
-                  src={alphalensLogo} 
+                  src="/lovable-uploads/4c3adeb5-400f-4ac7-9d77-160bcd8ee6ed.png" 
                   alt="alphalens.ai" 
                   className="h-10 w-auto"
                 />
