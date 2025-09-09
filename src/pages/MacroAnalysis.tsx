@@ -714,29 +714,29 @@ export default function MacroAnalysis() {
   
   return (
     <Layout activeModule="macro-analysis" onModuleChange={() => {}}>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="icon"
             onClick={() => navigate('/dashboard')}
-            className="shrink-0"
+            className="shrink-0 min-h-[44px] w-11"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Macro Analysis</h1>
-            <p className="text-muted-foreground">AI-powered economic analysis and market insights</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">Macro Analysis</h1>
+            <p className="text-sm sm:text-base text-muted-foreground break-words">AI-powered economic analysis and market insights</p>
           </div>
         </div>
 
         {/* Analysis Generator - Enhanced search bar style */}
-        <Card className="gradient-card shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Brain className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Analysis Generator</h2>
+        <Card className="gradient-card shadow-lg rounded-2xl border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground">Analysis Generator</h2>
             </div>
             
             <div className="space-y-4">
@@ -783,7 +783,7 @@ export default function MacroAnalysis() {
               </div>
 
               {/* Compact parameters row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Select value={queryParams.assetType} onValueChange={(value) => 
                   setQueryParams(prev => ({ ...prev, assetType: value }))
                 }>

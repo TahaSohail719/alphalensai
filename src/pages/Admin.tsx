@@ -71,19 +71,19 @@ export default function Admin() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-              <Shield className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               Admin Dashboard
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Manage users, approvals, and system permissions
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <CreateUserDialog
               onCreateUser={createUser}
               loading={actionLoading}
@@ -93,6 +93,7 @@ export default function Admin() {
               onClick={handleRefresh} 
               disabled={refreshing}
               variant="outline"
+              className="h-10 sm:h-11"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -101,68 +102,68 @@ export default function Admin() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card className="rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 Total Users
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
+          <Card className="rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4 text-warning" />
                 Pending
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.pending}</div>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{stats.pending}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
+          <Card className="rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-success" />
                 Approved
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.approved}</div>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{stats.approved}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
+          <Card className="rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserX className="h-4 w-4 text-danger" />
                 Rejected
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.rejected}</div>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{stats.rejected}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Role Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="rounded-2xl shadow-sm border">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
               Role Distribution
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Current user roles and permissions in the system
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                 <div className="flex items-center gap-2">
@@ -190,33 +191,35 @@ export default function Admin() {
         </Card>
 
         {/* Users Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription>
+        <Card className="rounded-2xl shadow-sm border">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Manage user accounts, approve registrations, and assign roles
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <Tabs defaultValue="all" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  All ({stats.total})
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Pending ({stats.pending})
-                </TabsTrigger>
-                <TabsTrigger value="approved" className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
-                  Approved ({stats.approved})
-                </TabsTrigger>
-                <TabsTrigger value="rejected" className="flex items-center gap-2">
-                  <UserX className="h-4 w-4" />
-                  Rejected ({stats.rejected})
-                </TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <TabsList className="grid w-full grid-cols-4 min-w-[640px] sm:min-w-full">
+                  <TabsTrigger value="all" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="break-words">All ({stats.total})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="pending" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="break-words">Pending ({stats.pending})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="approved" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="break-words">Approved ({stats.approved})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="rejected" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                    <UserX className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="break-words">Rejected ({stats.rejected})</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="all">
                 <UsersTable

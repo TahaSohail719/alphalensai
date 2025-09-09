@@ -152,18 +152,19 @@ export function UsersTable({
 
       {/* Table */}
       <div className="border border-border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead>Email</TableHead>
-              <TableHead>User ID</TableHead>
-              <TableHead>Broker</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="min-w-[200px]">Email</TableHead>
+                <TableHead className="min-w-[120px]">User ID</TableHead>
+                <TableHead className="min-w-[100px]">Broker</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
+                <TableHead className="min-w-[100px]">Role</TableHead>
+                <TableHead className="min-w-[120px]">Created</TableHead>
+                <TableHead className="text-right min-w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
@@ -226,7 +227,8 @@ export function UsersTable({
               })
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </div>
 
       {/* User Actions Dialog */}

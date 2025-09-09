@@ -143,19 +143,19 @@ export default function TradingDashboard() {
 
   return (
     <Layout activeModule="trading" onModuleChange={() => {}}>
-      <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+      <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
         {/* Mobile-first header with real-time price */}
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-4">
           {/* Title section - Mobile optimized */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-3">
             <div className="gradient-primary p-2 sm:p-3 rounded-xl shadow-glow-primary shrink-0">
               <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight break-words">
                 Trading Dashboard
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+              <p className="text-sm sm:text-base text-muted-foreground break-words">
                 Real-time AI analysis and trade execution
               </p>
             </div>

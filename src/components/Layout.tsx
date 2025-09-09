@@ -33,10 +33,10 @@ export default function Layout({ children, activeModule, onModuleChange }: Layou
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 overflow-x-hidden">
       {/* Mobile-First Responsive Header */}
-      <header className="h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
-        <div className="h-full px-3 sm:px-4 lg:px-6">
+      <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-sm">
+        <div className="h-full px-4 sm:px-6 max-w-screen-lg mx-auto">
           <div className="flex items-center justify-between h-full">
             {/* Logo - Mobile optimized */}
             <button
@@ -208,10 +208,10 @@ export default function Layout({ children, activeModule, onModuleChange }: Layou
       </header>
 
       {/* Main Content - Mobile responsive */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-x-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <div className="min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">
           {/* Mobile-first container with proper spacing */}
-          <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
+          <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-4 sm:py-6 overflow-x-hidden">
             {children}
           </div>
         </div>

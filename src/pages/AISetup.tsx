@@ -299,33 +299,33 @@ export default function AISetup() {
 
   return (
     <Layout activeModule="ai-setup" onModuleChange={() => {}}>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="icon"
             onClick={() => navigate('/dashboard')}
-            className="shrink-0"
+            className="shrink-0 min-h-[44px] w-11"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">AI Trade Setup</h1>
-            <p className="text-muted-foreground">Automated trade configuration and generation</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">AI Trade Setup</h1>
+            <p className="text-sm sm:text-base text-muted-foreground break-words">Automated trade configuration and generation</p>
           </div>
         </div>
 
         {step === "parameters" && (
-          <Card className="gradient-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="gradient-card rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                 <Settings className="h-5 w-5" />
                 Trading Parameters
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="instrument">Instrument</Label>
                   <Select value={parameters.instrument} onValueChange={(value) => setParameters({...parameters, instrument: value})}>
@@ -436,7 +436,7 @@ export default function AISetup() {
               <Button 
                 onClick={generateTradeSetup} 
                 disabled={isGenerating}
-                className="w-full"
+                className="w-full min-h-[44px]"
                 size="lg"
               >
                 {isGenerating ? (

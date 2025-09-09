@@ -8,8 +8,8 @@ const MobileCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm mobile-fade-in",
-      "touch-friendly active:scale-95 transition-transform",
+      "rounded-2xl border bg-card text-card-foreground shadow-sm mobile-fade-in",
+      "touch-friendly active:scale-95 transition-transform overflow-x-hidden",
       className
     )}
     {...props}
@@ -62,7 +62,7 @@ const MobileCardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div 
     ref={ref} 
-    className={cn("p-4 sm:p-6 pt-0", className)} 
+    className={cn("p-4 sm:p-6 pt-0 overflow-x-hidden", className)} 
     {...props} 
   />
 ));
