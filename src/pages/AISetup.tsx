@@ -75,23 +75,19 @@ export default function AISetup() {
     try {
       // Step 1: Call macro-commentary endpoint first
       const macroPayload = {
-        type: "RAG",
-        question: parameters.customNotes || `Market analysis for ${parameters.instrument}`,
-        mode: "run",
         instrument: parameters.instrument,
-        timeframe: parameters.timeframe,
-        assetType: "currency",
-        analysisDepth: "detailed",
-        period: "weekly",
-        adresse: ""
+        customNote: parameters.customNotes,
+        mode: "run",
+        type: "RAG"
       };
 
       console.log('📊 [AISetup] Calling macro-commentary endpoint:', macroPayload);
 
-      const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      const macroResponse = await fetch('https://jqrlegdulnnrpiixiecf.supabase.co/functions/v1/macro-commentary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcmxlZ2R1bG5ucnBpaXhpZWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDYzNDgsImV4cCI6MjA2OTk4MjM0OH0.on2S0WpM45atAYvLU8laAZJ-abS4RcMmfiqW7mLtT_4'}`,
         },
         body: JSON.stringify(macroPayload)
       });
