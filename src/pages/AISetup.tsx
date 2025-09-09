@@ -17,7 +17,15 @@ async function safeFetchJson(url, options) {
   console.log('🌐 safeFetchJson→', url, options?.method || 'GET');
   let res;
   try {
-    res = await fetch(url, options);
+    res = await fetch(url, {
+      ...options,
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
   } catch (e) {
     console.error('❌ fetch failed (network/CORS before response):', e);
     throw e;
