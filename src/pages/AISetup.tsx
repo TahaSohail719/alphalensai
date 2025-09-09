@@ -48,6 +48,38 @@ interface N8nTradeResult {
   disclaimer: string;
 }
 
+function buildQuestion(p: any) {
+  const lines = [
+    `Provide an institutional macro outlook and risks for ${p.instrument}, then a macro-grounded trade idea (entry/SL/TP).`,
+    `Prioritize central banks / Bloomberg / Reuters; ignore low-authority sources unless they synthesize institutional research.`,
+    `Focus on policy divergence, inflation, growth, labor, real yields, financial conditions.`,
+    `Use technicals only to refine entries after macro.`
+  ];
+  if (p?.timeframe)    lines.push(`User timeframe: ${p.timeframe}.`);
+  if (p?.riskLevel)    lines.push(`User risk: ${p.riskLevel}.`);
+  if (p?.strategy)     lines.push(`Strategy: ${p.strategy}.`);
+  if (p?.positionSize) lines.push(`Position size: ${p.positionSize}.`);
+  if (p?.customNotes)  lines.push(`Note: ${p.customNotes}.`);
+  return lines.join(' ');
+}
+
+function extractMacroInsight(macroResult: any) {
+  try {
+    // formats fréquents (Perplexity-like / n8n custom)
+    if (Array.isArray(macroResult) && macroResult[0]?.message?.content) {
+      return String(macroResult[0].message.content);
+    }
+    if (typeof macroResult?.summary === 'string') return macroResult.summary;
+    if (typeof macroResult?.data?.summary === 'string') return macroResult.data.summary;
+
+    // fallback sécurisé (taille max 5000 chars)
+    const s = JSON.stringify(macroResult);
+    return s.length > 5000 ? s.slice(0, 5000) + " …[truncated]" : s;
+  } catch (e) {
+    return "[macro insight unavailable]";
+  }
+}
+
 export default function AISetup() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -73,69 +105,56 @@ export default function AISetup() {
     setN8nResult(null);
     
     try {
-      // Step 1: Call macro-commentary endpoint first
+      // STEP 1: macro-commentary
       const macroPayload = {
         type: "RAG",
-        question: parameters.customNotes || `Market analysis for ${parameters.instrument}`,
         mode: "run",
         instrument: parameters.instrument,
-        timeframe: parameters.timeframe,
-        assetType: "currency",
-        analysisDepth: "detailed",
-        period: "weekly",
-        adresse: ""
+        question: buildQuestion(parameters)
       };
 
-      console.log('📊 [AISetup] Calling macro-commentary endpoint:', macroPayload);
+      console.log('📊[AISetup] STEP1 Request macro-commentary:', macroPayload);
 
-      let macroResult = null;
-      try {
-        const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(macroPayload),
-          signal: AbortSignal.timeout(120000) // 2 minutes timeout
-        });
+      const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(macroPayload),
+        signal: AbortSignal.timeout(120000)
+      });
 
-        console.log('📊 [AISetup] Macro response status:', macroResponse.status);
+      console.log('📊[AISetup] STEP1 Status:', macroResponse.status);
 
-        if (!macroResponse.ok) {
-          throw new Error(`HTTP ${macroResponse.status}: Failed to get macro commentary`);
-        }
+      if (!macroResponse.ok) throw new Error(`HTTP ${macroResponse.status}: macro-commentary failed`);
 
-        macroResult = await macroResponse.json();
-        console.log('📊 [AISetup] Macro commentary response received:', macroResult);
-      } catch (macroError) {
-        console.error('📊 [AISetup] Macro commentary failed:', macroError);
-        throw macroError; // Stop if macro fails
-      }
+      const macroResult = await macroResponse.json();
+      console.log('📊[AISetup] STEP1 Response body received');
 
-      // Step 2: Prepare JSON payload for trade setup with macro insight
+      const macroInsight = extractMacroInsight(macroResult);
+      console.log('📊[AISetup] STEP1 macroInsight(length):', macroInsight?.length);
+
+      // STEP 2: ai-trade-setup (⚠️ macroInsight string compact)
       const payload = {
         ...parameters,
         mode: "run",
         type: "trade",
-        macroInsight: macroResult
+        macroInsight
       };
 
-      console.log('📊 [AISetup] Calling trade setup endpoint with macro insight:', payload);
+      console.log('📊[AISetup] STEP2 About to POST trade-setup (macroInsight length):', macroInsight?.length);
 
       const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(120000)
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: Failed to generate trade setup`);
-      }
+      console.log('📊[AISetup] STEP2 Status:', response.status);
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ai-trade-setup failed`);
 
       const result = await response.json();
-      console.log('N8n Response:', result);
+      console.log('📊[AISetup] STEP2 Response body received');
       setRawN8nResponse(result);
       
       // Check if we have the expected n8n format
