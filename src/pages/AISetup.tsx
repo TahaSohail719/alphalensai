@@ -124,7 +124,7 @@ function normalizeN8n(raw: any): N8nTradeResult | null {
       disclaimer: maybeContent.disclaimer || "Illustrative ideas, not investment advice.",
     };
 
-    // Sécurité: clamp confidence 0..1
+    // Security: clamp confidence 0..1
     r.setups?.forEach(s => {
       if (s?.strategyMeta?.confidence != null) {
         s.strategyMeta.confidence = Math.max(0, Math.min(1, Number(s.strategyMeta.confidence)));
@@ -269,8 +269,8 @@ export default function AISetup() {
       } else {
         setN8nResult(null);
         setTradeSetup(null);
-        setError("Le workflow n8n a répondu sans setups exploitables.");
-        toast({ title: "No Setups Returned", description: "La réponse ne contient pas de setups.", variant: "destructive" });
+        setError("The n8n workflow responded without exploitable setups.");
+        toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
       }
       
       setStep("generated");
@@ -462,7 +462,7 @@ export default function AISetup() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-red-800">
                     <AlertCircle className="h-5 w-5" />
-                    Erreur de Génération
+                    Generation Error
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -473,7 +473,7 @@ export default function AISetup() {
                     className="mt-4"
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Réessayer
+                    Retry
                   </Button>
                 </CardContent>
               </Card>
@@ -644,7 +644,7 @@ export default function AISetup() {
             <div className="flex gap-3">
               <Button onClick={() => setStep("parameters")} variant="outline">
                 <RotateCcw className="mr-2 h-4 w-4" />
-                Nouvelle Configuration
+                New Configuration
               </Button>
             </div>
           </div>
