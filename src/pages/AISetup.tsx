@@ -13,6 +13,39 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import TradeResultPanel from "@/components/TradeResultPanel";
 
+async function safeFetchJson(url, options) {
+  console.log('🌐 safeFetchJson→', url, options?.method || 'GET');
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (e) {
+    console.error('❌ fetch failed (network/CORS before response):', e);
+    throw e;
+  }
+  console.log('✅ fetch responded, status =', res.status);
+
+  // Tente JSON, sinon text
+  const ct = res.headers?.get('content-type') || '';
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '[unreadable]');
+    console.error('❌ non-OK response body:', txt?.slice(0, 500));
+    throw new Error(`HTTP ${res.status}`);
+  }
+  try {
+    if (ct.includes('application/json')) {
+      return await res.json();
+    } else {
+      const txt = await res.text();
+      console.warn('⚠️ content-type not JSON, returning text:', ct);
+      return { _rawText: txt };
+    }
+  } catch (e) {
+    console.error('❌ body parse failed (JSON/text):', e);
+    const txt = await res.text().catch(() => '[unreadable]');
+    return { _rawText: txt };
+  }
+}
+
 interface TradeSetup {
   entry: number;
   stopLoss: number;
@@ -65,17 +98,19 @@ function buildQuestion(p: any) {
 
 function extractMacroInsight(macroResult: any) {
   try {
-    // formats fréquents (Perplexity-like / n8n custom)
     if (Array.isArray(macroResult) && macroResult[0]?.message?.content) {
       return String(macroResult[0].message.content);
     }
     if (typeof macroResult?.summary === 'string') return macroResult.summary;
     if (typeof macroResult?.data?.summary === 'string') return macroResult.data.summary;
-
-    // fallback sécurisé (taille max 5000 chars)
+    if (typeof macroResult?._rawText === 'string') {
+      // fallback texte brut
+      const t = macroResult._rawText.trim();
+      return t.length > 5000 ? t.slice(0, 5000) + ' …[truncated]' : t;
+    }
     const s = JSON.stringify(macroResult);
-    return s.length > 5000 ? s.slice(0, 5000) + " …[truncated]" : s;
-  } catch (e) {
+    return s.length > 5000 ? s.slice(0, 5000) + ' …[truncated]' : s;
+  } catch {
     return "[macro insight unavailable]";
   }
 }
@@ -110,51 +145,52 @@ export default function AISetup() {
         type: "RAG",
         mode: "run",
         instrument: parameters.instrument,
-        question: buildQuestion(parameters)
+        question: buildQuestion(parameters),
       };
 
-      console.log('📊[AISetup] STEP1 Request macro-commentary:', macroPayload);
+      console.log('📊[AISetup] STEP1 Request macro-commentary payload =', macroPayload);
 
-      const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(macroPayload),
-        signal: AbortSignal.timeout(120000)
-      });
+      let macroResult;
+      try {
+        macroResult = await safeFetchJson(
+          'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(macroPayload),
+            signal: AbortSignal.timeout ? AbortSignal.timeout(120000) : undefined
+          }
+        );
+      } catch (e) {
+        console.error('❌ STEP1 failed before parsing (network/CORS):', e);
+        throw e;
+      }
 
-      console.log('📊[AISetup] STEP1 Status:', macroResponse.status);
-
-      if (!macroResponse.ok) throw new Error(`HTTP ${macroResponse.status}: macro-commentary failed`);
-
-      const macroResult = await macroResponse.json();
-      console.log('📊[AISetup] STEP1 Response body received');
-
+      console.log('📊[AISetup] STEP1 Response (keys):', Object.keys(macroResult || {}));
       const macroInsight = extractMacroInsight(macroResult);
-      console.log('📊[AISetup] STEP1 macroInsight(length):', macroInsight?.length);
+      console.log('📊[AISetup] STEP1 macroInsight length =', macroInsight?.length);
 
-      // STEP 2: ai-trade-setup (⚠️ macroInsight string compact)
+      // STEP 2: ai-trade-setup
       const payload = {
         ...parameters,
         mode: "run",
         type: "trade",
-        macroInsight
+        macroInsight, // string compacte
       };
 
-      console.log('📊[AISetup] STEP2 About to POST trade-setup (macroInsight length):', macroInsight?.length);
+      console.log('📊[AISetup] STEP2 Request trade-setup, macroInsight length =', macroInsight?.length);
 
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(120000)
-      });
+      const result = await safeFetchJson(
+        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout ? AbortSignal.timeout(120000) : undefined
+        }
+      );
 
-      console.log('📊[AISetup] STEP2 Status:', response.status);
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}: ai-trade-setup failed`);
-
-      const result = await response.json();
-      console.log('📊[AISetup] STEP2 Response body received');
+      console.log('📊[AISetup] STEP2 Response received (keys):', Object.keys(result || {}));
       setRawN8nResponse(result);
       
       // Check if we have the expected n8n format
