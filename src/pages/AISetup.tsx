@@ -97,11 +97,22 @@ type N8nTradeResult = {
 
 function normalizeN8n(raw: any): N8nTradeResult | null {
   try {
-    // Perplexity/n8n style: [{ message: { content: {...} } }]
-    const maybeContent =
-      Array.isArray(raw) && raw[0]?.message?.content
-        ? raw[0].message.content
-        : raw;
+    // Handle multiple response formats
+    let maybeContent;
+    
+    if (Array.isArray(raw) && raw[0]?.message?.content) {
+      // Format: [{ message: { content: {...} } }]
+      maybeContent = raw[0].message.content;
+    } else if (Array.isArray(raw) && raw[0]?.content) {
+      // Format: [{ content: {...} }]
+      maybeContent = raw[0].content;
+    } else if (raw?.content) {
+      // Format: { content: {...} }
+      maybeContent = raw.content;
+    } else {
+      // Direct format: {...}
+      maybeContent = raw;
+    }
 
     if (!maybeContent || typeof maybeContent !== 'object') return null;
 
