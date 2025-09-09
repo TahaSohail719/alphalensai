@@ -45,7 +45,34 @@ export function useProfile() {
       }
     }
 
-    fetchProfile();
+    if (user) {
+      fetchProfile();
+
+      // Set up real-time subscription for profile changes
+      const subscription = supabase
+        .channel('profile-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Profile updated:', payload.new);
+            setProfile(payload.new as Profile);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    } else {
+      setProfile(null);
+      setLoading(false);
+    }
   }, [user]);
 
   const updateProfile = async (updates: Partial<Profile>) => {
