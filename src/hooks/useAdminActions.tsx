@@ -19,42 +19,24 @@ export function useAdminActions() {
 
   const fetchUsers = async (): Promise<AdminUser[]> => {
     try {
-      // D'abord récupérer tous les profils
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Utiliser la Edge Function pour récupérer les utilisateurs avec leurs emails
+      const { data, error } = await supabase.functions.invoke('fetch-users-with-emails');
 
-      if (profilesError) throw profilesError;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
-      // Ensuite récupérer les utilisateurs auth pour obtenir les emails
-      // Utiliser une fonction admin pour récupérer les emails
-      const usersWithEmails = await Promise.all(
-        (profilesData || []).map(async (profile) => {
-          try {
-            // Récupérer l'email depuis auth.users via admin API
-            const { data: { user }, error } = await supabase.auth.admin.getUserById(profile.user_id);
-            
-            return {
-              ...profile,
-              email: user?.email || 'N/A'
-            } as AdminUser;
-          } catch (error) {
-            console.warn(`Could not fetch email for user ${profile.user_id}:`, error);
-            return {
-              ...profile,
-              email: 'N/A'
-            } as AdminUser;
-          }
-        })
-      );
+      if (!data || !data.users) {
+        throw new Error('No users data returned from Edge Function');
+      }
 
-      return usersWithEmails;
+      return data.users as AdminUser[];
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to fetch users. Please try again.",
         variant: "destructive",
       });
       return [];
