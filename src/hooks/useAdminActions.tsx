@@ -146,11 +146,60 @@ export function useAdminActions() {
     }
   };
 
+  const createUser = async (email: string, password: string, role: 'user' | 'admin' | 'super_user', brokerName?: string) => {
+    setLoading(true);
+    try {
+      // Use Supabase Auth Admin API to create user
+      const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          broker_name: brokerName || null
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Update the profile with the specified role (the trigger creates it with default role 'user')
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ 
+            role,
+            status: 'approved', // Auto-approve admin-created users
+            broker_name: brokerName || null
+          })
+          .eq('user_id', data.user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      toast({
+        title: "Success",
+        description: `User created successfully with ${role} role`,
+      });
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create user",
+        variant: "destructive",
+      });
+      return { success: false, error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     fetchUsers,
     updateUserStatus,
     updateUserRole,
     deleteUser,
+    createUser,
     loading
   };
 }

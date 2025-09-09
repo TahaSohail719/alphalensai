@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAdminActions } from "@/hooks/useAdminActions";
 import { UsersTable } from "@/components/admin/UsersTable";
+import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import Layout from "@/components/Layout";
 
 interface AdminUser {
@@ -36,7 +37,8 @@ export default function Admin() {
   const { 
     fetchUsers, 
     updateUserStatus, 
-    updateUserRole, 
+    updateUserRole,
+    createUser, 
     loading: actionLoading 
   } = useAdminActions();
 
@@ -81,14 +83,21 @@ export default function Admin() {
               Manage users, approvals, and system permissions
             </p>
           </div>
-          <Button 
-            onClick={handleRefresh} 
-            disabled={refreshing}
-            variant="outline"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <CreateUserDialog
+              onCreateUser={createUser}
+              loading={actionLoading}
+              onSuccess={loadUsers}
+            />
+            <Button 
+              onClick={handleRefresh} 
+              disabled={refreshing}
+              variant="outline"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
