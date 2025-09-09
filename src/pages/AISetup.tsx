@@ -88,20 +88,29 @@ export default function AISetup() {
 
       console.log('📊 [AISetup] Calling macro-commentary endpoint:', macroPayload);
 
-      const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(macroPayload)
-      });
+      let macroResult = null;
+      try {
+        const macroResponse = await fetch('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(macroPayload)
+        });
 
-      if (!macroResponse.ok) {
-        throw new Error(`HTTP ${macroResponse.status}: Failed to get macro commentary`);
+        console.log('📊 [AISetup] Macro response status:', macroResponse.status);
+
+        if (!macroResponse.ok) {
+          console.log('📊 [AISetup] Macro response not ok, proceeding without macro insight');
+          macroResult = null; // Continue without macro insight
+        } else {
+          macroResult = await macroResponse.json();
+          console.log('📊 [AISetup] Macro commentary response:', macroResult);
+        }
+      } catch (macroError) {
+        console.warn('📊 [AISetup] Macro commentary failed, proceeding without:', macroError);
+        macroResult = null; // Continue without macro insight
       }
-
-      const macroResult = await macroResponse.json();
-      console.log('📊 [AISetup] Macro commentary response:', macroResult);
 
       // Step 2: Prepare JSON payload for trade setup with macro insight
       const payload = {
