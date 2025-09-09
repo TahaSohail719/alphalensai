@@ -164,6 +164,7 @@ export default function Reports() {
       
       // Call to n8n webhook
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        mode: "run",
         type: "reports",
         question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
         instrument: selectedAsset?.symbol || "Multi-Asset",
