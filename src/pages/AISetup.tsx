@@ -94,11 +94,13 @@ export default function AISetup() {
       }
 
       const result = await response.json();
+      console.log('N8n Response:', result);
       setRawN8nResponse(result);
       
       // Check if we have the expected n8n format
       if (Array.isArray(result) && result.length > 0 && result[0].message?.content) {
         const content = result[0].message.content;
+        console.log('N8n Result set:', content);
         setN8nResult(content);
         
         toast({

@@ -42,6 +42,7 @@ interface TradeResultPanelProps {
 }
 
 export default function TradeResultPanel({ result, rawResponse }: TradeResultPanelProps) {
+  console.log('TradeResultPanel received:', result);
   const { toast } = useToast();
   const [openAccordions, setOpenAccordions] = useState<number[]>([]);
 
@@ -56,15 +57,15 @@ export default function TradeResultPanel({ result, rawResponse }: TradeResultPan
   const exportToCsv = () => {
     const headers = ["Horizon", "Timeframe", "Strategy", "Direction", "Entry", "Stop", "TakeProfits", "RRR", "Confidence"];
     const csvData = result.setups.map(setup => [
-      setup.horizon,
-      setup.timeframe,
-      setup.strategy,
-      setup.direction,
-      setup.entryPrice,
-      setup.stopLoss,
-      setup.takeProfits.join(';'),
-      setup.riskRewardRatio,
-      setup.strategyMeta.confidence
+      setup.horizon || "N/A",
+      setup.timeframe || "N/A",
+      setup.strategy || "N/A",
+      setup.direction || "N/A",
+      setup.entryPrice || "N/A",
+      setup.stopLoss || "N/A",
+      setup.takeProfits ? setup.takeProfits.join(';') : "N/A",
+      setup.riskRewardRatio || "N/A",
+      setup.strategyMeta?.confidence || "N/A"
     ]);
 
     const csvContent = [
@@ -165,21 +166,23 @@ export default function TradeResultPanel({ result, rawResponse }: TradeResultPan
                 <TableBody>
                   {result.setups.map((setup, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{setup.horizon}</TableCell>
-                      <TableCell>{setup.timeframe}</TableCell>
-                      <TableCell>{setup.strategy}</TableCell>
+                      <TableCell className="font-medium">{setup.horizon || "N/A"}</TableCell>
+                      <TableCell>{setup.timeframe || "N/A"}</TableCell>
+                      <TableCell>{setup.strategy || "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant={setup.direction === 'long' ? 'default' : 'destructive'}>
-                          {setup.direction}
+                          {setup.direction || "N/A"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{setup.entryPrice}</TableCell>
-                      <TableCell>{setup.stopLoss}</TableCell>
-                      <TableCell>{setup.takeProfits.join(', ')}</TableCell>
-                      <TableCell>{setup.riskRewardRatio}</TableCell>
+                      <TableCell>{setup.entryPrice?.toFixed(4) || "N/A"}</TableCell>
+                      <TableCell>{setup.stopLoss?.toFixed(4) || "N/A"}</TableCell>
+                      <TableCell>
+                        {setup.takeProfits ? setup.takeProfits.map(tp => tp.toFixed(4)).join(', ') : "N/A"}
+                      </TableCell>
+                      <TableCell>{setup.riskRewardRatio?.toFixed(2) || "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {Math.round(setup.strategyMeta.confidence * 100)}%
+                          {setup.strategyMeta?.confidence ? Math.round(setup.strategyMeta.confidence * 100) + '%' : "N/A"}
                         </Badge>
                       </TableCell>
                     </TableRow>
