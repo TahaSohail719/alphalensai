@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Zap, Target, TrendingUp, Settings, RotateCcw, Save } from "lucide-react";
+import { ArrowLeft, Zap, Target, TrendingUp, Settings, RotateCcw, Save, AlertCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import TradeResultPanel from "@/components/TradeResultPanel";
 
 interface TradeSetup {
   entry: number;
@@ -22,12 +23,40 @@ interface TradeSetup {
   reasoning: string;
 }
 
+interface N8nTradeResult {
+  instrument: string;
+  asOf: string;
+  market_commentary_anchor: {
+    summary: string;
+    key_drivers: string[];
+  };
+  setups: Array<{
+    horizon: string;
+    timeframe: string;
+    strategy: string;
+    direction: string;
+    entryPrice: number;
+    stopLoss: number;
+    takeProfits: number[];
+    riskRewardRatio: number;
+    context: string;
+    riskNotes: string;
+    strategyMeta: {
+      confidence: number;
+    };
+  }>;
+  disclaimer: string;
+}
+
 export default function AISetup() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState<"parameters" | "generated">("parameters");
   const [isGenerating, setIsGenerating] = useState(false);
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
+  const [n8nResult, setN8nResult] = useState<N8nTradeResult | null>(null);
+  const [rawN8nResponse, setRawN8nResponse] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const [parameters, setParameters] = useState({
     instrument: "EUR/USD",
@@ -40,6 +69,8 @@ export default function AISetup() {
 
   const generateTradeSetup = async () => {
     setIsGenerating(true);
+    setError(null);
+    setN8nResult(null);
     
     try {
       // Prepare JSON payload for n8n workflow
@@ -59,50 +90,65 @@ export default function AISetup() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate trade setup');
+        throw new Error(`HTTP ${response.status}: Failed to generate trade setup`);
       }
 
       const result = await response.json();
+      setRawN8nResponse(result);
       
-      // Mock setup for now since we don't have the actual n8n response structure
-      const direction = Math.random() > 0.5 ? "buy" : "sell";
-      const basePrice = 1.0900;
-      
-      let entry, stopLoss, takeProfit;
-      if (direction === "buy") {
-        entry = basePrice * 0.998;
-        stopLoss = entry * 0.985;
-        takeProfit = entry * 1.045;
+      // Check if we have the expected n8n format
+      if (Array.isArray(result) && result.length > 0 && result[0].message?.content) {
+        const content = result[0].message.content;
+        setN8nResult(content);
+        
+        toast({
+          title: "Trade Setup Generated",
+          description: "Your AI trade setup has been generated successfully.",
+        });
       } else {
-        entry = basePrice * 1.002;
-        stopLoss = entry * 1.015;
-        takeProfit = entry * 0.955;
+        // Fallback to legacy format for backward compatibility
+        const direction = Math.random() > 0.5 ? "buy" : "sell";
+        const basePrice = 1.0900;
+        
+        let entry, stopLoss, takeProfit;
+        if (direction === "buy") {
+          entry = basePrice * 0.998;
+          stopLoss = entry * 0.985;
+          takeProfit = entry * 1.045;
+        } else {
+          entry = basePrice * 1.002;
+          stopLoss = entry * 1.015;
+          takeProfit = entry * 0.955;
+        }
+        
+        const riskReward = Math.abs(takeProfit - entry) / Math.abs(entry - stopLoss);
+        
+        setTradeSetup({
+          entry: parseFloat(entry.toFixed(4)),
+          stopLoss: parseFloat(stopLoss.toFixed(4)),
+          takeProfit: parseFloat(takeProfit.toFixed(4)),
+          positionSize: parseFloat(parameters.positionSize),
+          riskReward: parseFloat(riskReward.toFixed(2)),
+          confidence: Math.floor(Math.random() * 25) + 70,
+          reasoning: `AI analysis suggests a ${direction} opportunity based on ${parameters.strategy} strategy for ${parameters.instrument}. Technical indicators show strong momentum with favorable risk-reward ratio.`
+        });
+        
+        toast({
+          title: "Trade Setup Generated",
+          description: "Your AI trade setup has been generated successfully (legacy format).",
+        });
       }
-      
-      const riskReward = Math.abs(takeProfit - entry) / Math.abs(entry - stopLoss);
-      
-      setTradeSetup({
-        entry: parseFloat(entry.toFixed(4)),
-        stopLoss: parseFloat(stopLoss.toFixed(4)),
-        takeProfit: parseFloat(takeProfit.toFixed(4)),
-        positionSize: parseFloat(parameters.positionSize),
-        riskReward: parseFloat(riskReward.toFixed(2)),
-        confidence: Math.floor(Math.random() * 25) + 70,
-        reasoning: `AI analysis suggests a ${direction} opportunity based on ${parameters.strategy} strategy for ${parameters.instrument}. Technical indicators show strong momentum with favorable risk-reward ratio.`
-      });
       
       setStep("generated");
       
-      toast({
-        title: "Trade Setup Generated",
-        description: "Your AI trade setup has been generated successfully.",
-      });
-      
     } catch (error) {
       console.error('Error generating trade setup:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      
       toast({
         title: "Generation Failed",
-        description: "Failed to generate trade setup. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -275,55 +321,90 @@ export default function AISetup() {
           </Card>
         )}
 
-        {step === "generated" && tradeSetup && (
+        {step === "generated" && (
           <div className="space-y-6">
-            <Card className="border-green-200 bg-green-50/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-800">
-                  <Target className="h-5 w-5" />
-                  Generated Trade Setup
-                  <Badge variant="outline" className="ml-auto">
-                    Confidence: {tradeSetup.confidence}%
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                  <div className="text-center">
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wide">Entry</Label>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{tradeSetup.entry}</p>
-                  </div>
-                  <div className="text-center">
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wide">Stop Loss</Label>
-                    <p className="text-2xl font-bold text-red-600 mt-1">{tradeSetup.stopLoss}</p>
-                  </div>
-                  <div className="text-center">
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wide">Take Profit</Label>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{tradeSetup.takeProfit}</p>
-                  </div>
-                  <div className="text-center">
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wide">Risk/Reward</Label>
-                    <p className="text-2xl font-bold text-orange-600 mt-1">{tradeSetup.riskReward}</p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-white/70 rounded-lg border mb-6">
-                  <h4 className="font-semibold text-green-800 mb-2">AI Analysis</h4>
-                  <p className="text-sm leading-relaxed">{tradeSetup.reasoning}</p>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button onClick={() => setStep("parameters")} variant="outline">
+            {error && (
+              <Card className="border-red-200 bg-red-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-800">
+                    <AlertCircle className="h-5 w-5" />
+                    Erreur de Génération
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-red-700">{error}</p>
+                  <Button 
+                    onClick={() => setStep("parameters")} 
+                    variant="outline" 
+                    className="mt-4"
+                  >
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Regenerate
+                    Réessayer
                   </Button>
-                  <Button onClick={saveSetup} className="flex-1">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Setup
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {n8nResult && (
+              <TradeResultPanel result={n8nResult} rawResponse={rawN8nResponse} />
+            )}
+
+            {tradeSetup && !n8nResult && (
+              <Card className="border-green-200 bg-green-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-800">
+                    <Target className="h-5 w-5" />
+                    Generated Trade Setup (Legacy)
+                    <Badge variant="outline" className="ml-auto">
+                      Confidence: {tradeSetup.confidence}%
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                    <div className="text-center">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Entry</Label>
+                      <p className="text-2xl font-bold text-blue-600 mt-1">{tradeSetup.entry}</p>
+                    </div>
+                    <div className="text-center">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Stop Loss</Label>
+                      <p className="text-2xl font-bold text-red-600 mt-1">{tradeSetup.stopLoss}</p>
+                    </div>
+                    <div className="text-center">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Take Profit</Label>
+                      <p className="text-2xl font-bold text-green-600 mt-1">{tradeSetup.takeProfit}</p>
+                    </div>
+                    <div className="text-center">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Risk/Reward</Label>
+                      <p className="text-2xl font-bold text-orange-600 mt-1">{tradeSetup.riskReward}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white/70 rounded-lg border mb-6">
+                    <h4 className="font-semibold text-green-800 mb-2">AI Analysis</h4>
+                    <p className="text-sm leading-relaxed">{tradeSetup.reasoning}</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button onClick={() => setStep("parameters")} variant="outline">
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Regenerate
+                    </Button>
+                    <Button onClick={saveSetup} className="flex-1">
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Setup
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="flex gap-3">
+              <Button onClick={() => setStep("parameters")} variant="outline">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Nouvelle Configuration
+              </Button>
+            </div>
           </div>
         )}
       </div>
