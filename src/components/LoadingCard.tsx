@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -17,6 +17,8 @@ import {
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const { useState, useEffect } = React;
 
 interface LoadingRequest {
   id: string;

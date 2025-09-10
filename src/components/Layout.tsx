@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
+const { useState, useEffect } = React;
 import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, 

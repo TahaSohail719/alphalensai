@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +29,8 @@ import { useToast } from "@/hooks/use-toast";
 import { safePostRequest } from "@/lib/safe-request";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { TechnicalDashboard } from "@/components/TechnicalDashboard";
+
+const { useState, useEffect } = React;
 
 interface AnalysisSection {
   title: string;

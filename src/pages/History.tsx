@@ -1,10 +1,12 @@
-import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { UserHistoryPanel } from "@/components/UserHistoryPanel";
 import { ConversationalBubble } from "@/components/ConversationalBubble";
+
+const { useState } = React;
 
 interface UserRequest {
   id: string;

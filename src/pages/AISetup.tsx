@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import TradeResultPanel from "@/components/TradeResultPanel";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { useGlobalLoading } from "@/components/GlobalLoadingProvider";
+
+const { useState } = React;
 
 async function safeFetchJson(url, options) {
   console.log('🌐 safeFetchJson→', url, options?.method || 'GET');
