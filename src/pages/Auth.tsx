@@ -115,7 +115,7 @@ export default function Auth() {
 
     if (error) {
       toast({
-        title: "Erreur de connexion",
+        title: "Login Error",
         description: error.message,
         variant: "destructive"
       });

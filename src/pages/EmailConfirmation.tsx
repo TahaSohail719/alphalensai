@@ -60,14 +60,14 @@ export default function EmailConfirmation() {
 
     if (error) {
       toast({
-        title: "Erreur",
+        title: "Error",
         description: error.message,
         variant: "destructive"
       });
     } else {
       toast({
-        title: "Email envoyé",
-        description: "Un nouvel email de confirmation vous a été envoyé."
+        title: "Email sent",
+        description: "A new confirmation email has been sent to you."
       });
     }
 
@@ -93,16 +93,16 @@ export default function EmailConfirmation() {
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="h-8 w-8 text-blue-600" />
           </div>
-          <CardTitle className="text-xl">Confirmez votre adresse email</CardTitle>
+          <CardTitle className="text-xl">Confirm your email address</CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-muted-foreground">
-            Nous avons envoyé un email de confirmation à <strong>{userEmail}</strong>. 
-            Veuillez cliquer sur le lien dans cet email pour activer votre compte.
+            We've sent a confirmation email to <strong>{userEmail}</strong>. 
+            Please click the link in that email to activate your account.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              💡 Vérifiez également votre dossier spam si vous ne trouvez pas l'email.
+              💡 Also check your spam folder if you can't find the email.
             </p>
           </div>
           
@@ -114,16 +114,16 @@ export default function EmailConfirmation() {
               className="w-full"
             >
               {loading && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-              Renvoyer l'email de confirmation
+              Resend confirmation email
             </Button>
             
             <Button variant="ghost" onClick={handleSignOut} className="w-full">
-              Se déconnecter
+              Sign out
             </Button>
           </div>
           
           <div className="text-xs text-muted-foreground mt-4">
-            Une fois votre email confirmé, votre compte sera soumis pour approbation par notre équipe.
+            Once your email is confirmed, your account will be submitted for approval by our team.
           </div>
         </CardContent>
       </Card>
