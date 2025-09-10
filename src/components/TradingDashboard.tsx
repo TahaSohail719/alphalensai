@@ -1,13 +1,14 @@
-import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Zap, Target, Loader2, MessageCircle, Brain, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { CandlestickChart } from "./CandlestickChart";
 import { BubbleSystem } from "./BubbleSystem";
+
+const { useState } = React;
 
 const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "GOLD", "SILVER", "CRUDE", "BTC", "ETH"];
 const timeframes = ["1h", "4h", "1d"];

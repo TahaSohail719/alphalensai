@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
 import { AlertCircle, Clock, XCircle } from 'lucide-react';
+
+const { useEffect } = React;
 
 interface AuthGuardProps {
   children: React.ReactNode;

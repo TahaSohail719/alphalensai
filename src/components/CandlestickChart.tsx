@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickData, Time, CandlestickSeries } from 'lightweight-charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart3, Wifi, WifiOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { getSymbolForAsset, supportsRealTimeData } from '@/lib/assetMapping';
 import { safeGetRequest } from "@/lib/safe-request";
+import { cn } from '@/lib/utils';
+
+const { useEffect, useRef, useState } = React;
 
 interface BinanceKlineData {
   k: {

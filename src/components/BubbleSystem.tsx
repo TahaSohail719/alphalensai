@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Brain, FileText, MessageCircle, Sparkles, Zap, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -6,6 +6,9 @@ import { TradeSetupBubble } from "./TradeSetupBubble";
 import { MacroCommentary } from "./MacroCommentary";
 import { ReportsBubble } from "./ReportsBubble";
 import { useNavigate } from "react-router-dom";
+
+const { useState } = React;
+
 interface BubbleSystemProps {
   instrument: string;
   timeframe?: string;
