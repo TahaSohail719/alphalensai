@@ -108,17 +108,20 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
 
     if (error) {
       toast({
-        title: "Login Error",
+        title: "Erreur de connexion",
         description: error.message,
         variant: "destructive"
       });
+    } else if (data.user && !data.user.email_confirmed_at) {
+      // User exists but email not confirmed, redirect to confirmation page
+      navigate('/email-confirmation');
     }
 
     setLoading(false);

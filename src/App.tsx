@@ -14,6 +14,7 @@ import AssetDetail from "./pages/AssetDetail";
 import ProductPresentation from "./pages/ProductPresentation";
 import Portfolio from "./pages/Portfolio";
 import Auth from "./pages/Auth";
+import EmailConfirmation from "./pages/EmailConfirmation";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
 import Features from "./pages/Features";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/reports" element={<Reports />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/email-confirmation" element={<EmailConfirmation />} />
             <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
             <Route path="/about" element={<About />} />
             <Route path="/features" element={<Features />} />
