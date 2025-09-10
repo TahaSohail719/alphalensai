@@ -242,11 +242,6 @@ export default function TradingDashboard() {
             </Card>
           )}
 
-          {/* Asset Information Card - Affiche l'actif sélectionné ou par défaut */}
-          <AssetInfoCard 
-            symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} 
-            className="w-full" 
-          />
         </div>
 
         {/* Hybrid Search + AI Interface */}
@@ -280,6 +275,12 @@ export default function TradingDashboard() {
             ))}
           </div>
         </div>
+
+        {/* Asset Information Card - Moved before chart to prevent overlap */}
+        <AssetInfoCard 
+          symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} 
+          className="w-full" 
+        />
 
         {/* Mobile-first responsive chart */}
         <Card className="gradient-card border-border/50 shadow-medium">

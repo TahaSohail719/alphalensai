@@ -98,15 +98,6 @@ export function useProfile() {
     }
   };
 
-  // Debug logging
-  console.log('useProfile debug:', {
-    user: user?.id,
-    profile: profile,
-    loading,
-    isAdmin: profile?.role === 'admin' || profile?.role === 'super_user',
-    isSuperUser: profile?.role === 'super_user'
-  });
-
   return {
     profile,
     loading,
