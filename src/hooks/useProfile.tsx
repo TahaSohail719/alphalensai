@@ -54,14 +54,18 @@ export function useProfile() {
         .on(
           'postgres_changes',
           {
-            event: 'UPDATE',
+            event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
             schema: 'public',
             table: 'profiles',
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('Profile updated:', payload.new);
-            setProfile(payload.new as Profile);
+            console.log('Profile updated via realtime:', payload);
+            if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+              setProfile(payload.new as Profile);
+            } else if (payload.eventType === 'DELETE') {
+              setProfile(null);
+            }
           }
         )
         .subscribe();
