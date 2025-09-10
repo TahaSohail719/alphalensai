@@ -104,11 +104,16 @@ export function useAdminActions() {
   const deleteUser = async (userId: string) => {
     setLoading(true);
     try {
-      // Use Supabase Auth Admin API to delete the user
-      // This will also delete the profile automatically due to ON DELETE CASCADE
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Call our Edge Function to delete user with proper permissions
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
 
       if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to delete user');
+      }
 
       toast({
         title: "Success",
