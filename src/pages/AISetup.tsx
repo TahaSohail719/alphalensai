@@ -101,10 +101,19 @@ type N8nTradeResult = {
 
 function normalizeN8n(raw: any): N8nTradeResult | null {
   try {
-    // Handle multiple response formats
+    // Handle multiple response formats - patch to extract content from data[0].message.message.content
     let maybeContent;
     
-    if (Array.isArray(raw) && raw[0]?.message?.content) {
+    if (Array.isArray(raw) && raw[0]?.message?.message?.content) {
+      // Format specified by user: data[0].message.message.content
+      const contentStr = raw[0].message.message.content || '';
+      try {
+        maybeContent = JSON.parse(contentStr);
+      } catch {
+        // If content is not JSON, return null to show empty string
+        return null;
+      }
+    } else if (Array.isArray(raw) && raw[0]?.message?.content) {
       // Format: [{ message: { content: {...} } }]
       maybeContent = raw[0].message.content;
     } else if (Array.isArray(raw) && raw[0]?.content) {

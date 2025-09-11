@@ -246,8 +246,8 @@ export default function MacroAnalysis() {
           
           // Extract the content from the nested message structure
           let analysisContent = '';
-          if (messageObj.message && messageObj.message.content && messageObj.message.content.content) {
-            analysisContent = messageObj.message.content.content;
+          if (messageObj.message && messageObj.message.content) {
+            analysisContent = messageObj.message.content || '';
           }
           
           const realAnalysis: MacroAnalysis = {
@@ -290,10 +290,8 @@ export default function MacroAnalysis() {
         
         // Extract content from direct response
         let analysisContent = '';
-        if (responseJson.content && responseJson.content.content) {
-          analysisContent = responseJson.content.content;
-        } else if (responseJson.content) {
-          analysisContent = typeof responseJson.content === 'string' ? responseJson.content : JSON.stringify(responseJson.content, null, 2);
+        if (responseJson.content) {
+          analysisContent = typeof responseJson.content === 'string' ? responseJson.content : '';
         }
         
         const realAnalysis: MacroAnalysis = {
@@ -349,7 +347,7 @@ export default function MacroAnalysis() {
       // SYSTEM PATCH: Check if response is array format from n8n first
       if (Array.isArray(statusData) && statusData.length > 0 && statusData[0].status === "done") {
         // Job completed - extract content according to patch specification
-        const analysisContent = statusData[0].message?.content?.content || JSON.stringify(statusData[0], null, 2);
+        const analysisContent = statusData[0].message?.message?.content || '';
         
         const realAnalysis: MacroAnalysis = {
           query: queryParams.query,
@@ -383,18 +381,7 @@ export default function MacroAnalysis() {
         let analysisContent = '';
         
         if (responseBody.content) {
-          // Fallback to existing logic
-          if (typeof responseBody.content === 'object') {
-            if (responseBody.content.content) {
-              analysisContent = responseBody.content.content;
-            } else {
-              analysisContent = JSON.stringify(responseBody.content, null, 2);
-            }
-          } else {
-            analysisContent = responseBody.content;
-          }
-        } else {
-          analysisContent = JSON.stringify(responseBody, null, 2);
+          analysisContent = typeof responseBody.content === 'string' ? responseBody.content : '';
         }
         
         const realAnalysis: MacroAnalysis = {
@@ -609,14 +596,10 @@ export default function MacroAnalysis() {
               
               let analysisContent = '';
               
-              if (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.message?.content?.content) {
-                analysisContent = launchResponseJson[0].message.message.content.content;
-              } else if (launchResponseJson.message?.content?.content) {
-                analysisContent = launchResponseJson.message.content.content;
-              } else if (launchResponseJson.content?.content) {
-                analysisContent = launchResponseJson.content.content;
+              if (Array.isArray(launchResponseJson) && launchResponseJson[0]?.message?.message?.content) {
+                analysisContent = launchResponseJson[0].message.message.content || '';
               } else {
-                analysisContent = JSON.stringify(launchResponseJson, null, 2);
+                analysisContent = '';
               }
               
               const realAnalysis: MacroAnalysis = {
