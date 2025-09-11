@@ -236,52 +236,44 @@ export default function MacroAnalysis() {
       }
       
       // Check if we got the final n8n response with status done
-      // N8N returns an array with one object containing the message
-      if (responseJson && Array.isArray(responseJson) && responseJson.length > 0) {
-        const messageObj = responseJson[0].message;
+      // N8N returns an object with message containing status and the LLM response
+      if (responseJson && responseJson.message && responseJson.message.status === 'done') {
+        console.log('📊 [MacroAnalysis] Found status done, stopping polling');
+        setIsGenerating(false);
         
-        if (messageObj && messageObj.status === 'done') {
-          console.log('📊 [MacroAnalysis] Found status done, stopping polling');
-          setIsGenerating(false);
-          
-          // Extract the content from the nested message structure
-          let analysisContent = '';
-          if (messageObj.message && messageObj.message.content && messageObj.message.content.content) {
-            analysisContent = messageObj.message.content.content;
-          }
-          
-          const realAnalysis: MacroAnalysis = {
-            query: queryParams.query,
-            timestamp: new Date(),
-            sections: [
-              {
-                title: "Analysis Results",
-                content: analysisContent,
-                type: "overview",
-                expanded: true
-              }
-            ],
-            sources: []
-          };
-          
-          setAnalyses(prev => [realAnalysis, ...prev]);
-          setJobStatus("done");
-          setIsGenerating(false);
-          localStorage.removeItem("strategist_job_id");
-          setJobId(null);
-          
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
-            setPollingInterval(null);
-          }
-          
-          toast({
-            title: "Analysis Completed",
-            description: "Your macro analysis is ready"
-          });
-          return;
+        // Extract the message field which contains the LLM response string
+        const analysisContent = responseJson.message.message || '';
+        
+        const realAnalysis: MacroAnalysis = {
+          query: queryParams.query,
+          timestamp: new Date(),
+          sections: [
+            {
+              title: "Analysis Results",
+              content: analysisContent,
+              type: "overview",
+              expanded: true
+            }
+          ],
+          sources: []
+        };
+        
+        setAnalyses(prev => [realAnalysis, ...prev]);
+        setJobStatus("done");
+        setIsGenerating(false);
+        localStorage.removeItem("strategist_job_id");
+        setJobId(null);
+        
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
         }
         
+        toast({
+          title: "Analysis Completed",
+          description: "Your macro analysis is ready"
+        });
+        return;
       }
       
       // Case 2: Check for direct status at root level (fallback)
