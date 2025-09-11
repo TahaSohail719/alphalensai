@@ -213,14 +213,24 @@ export default function MacroAnalysis() {
         
         // Handle array format response from n8n
         if (Array.isArray(responseJson) && responseJson.length > 0) {
-          const messageObj = responseJson[0].message;
-          if (messageObj && messageObj.message) {
-            analysisContent = messageObj.message;
+          const envelope = responseJson[0]?.message;
+          const payload = envelope?.message;
+          if (payload) {
+            analysisContent = typeof payload === 'string'
+              ? payload
+              : typeof payload?.content === 'string'
+                ? payload.content
+                : JSON.stringify(payload, null, 2);
           }
         } 
         // Handle direct response format
-        else if (responseJson.message && responseJson.message.message) {
-          analysisContent = responseJson.message.message;
+        else if (responseJson?.message?.message) {
+          const payload = responseJson.message.message;
+          analysisContent = typeof payload === 'string'
+            ? payload
+            : typeof payload?.content === 'string'
+              ? payload.content
+              : JSON.stringify(payload, null, 2);
         }
         // Fallback to stringify
         else {
