@@ -7,31 +7,23 @@ export default function PublicNavbar() {
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-        {/* Logo Section - Clickable and optimized for mobile */}
-        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-          <button 
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
-            {/* Icon logo for mobile */}
+        {/* Logo - Mobile optimized */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 hover:opacity-90 transition-all duration-200 group min-w-0"
+        >
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 shrink-0 p-1">
+            <img src="/lovable-uploads/56d2c4af-fb26-47d8-8419-779a1da01775.png" alt="alphaLens.ai" className="w-full h-full object-contain" />
+          </div>
+          <div className="hidden xs:block min-w-0">
             <img 
-              src="/lovable-uploads/56d2c4af-fb26-47d8-8419-779a1da01775.png" 
+              src="/lovable-uploads/3b568e3e-a3d8-47d3-b8ca-4f500781b5e4.png" 
               alt="alphaLens.ai" 
-              className="h-8 w-8 sm:h-10 sm:w-10 shrink-0" 
+              className="h-5 sm:h-6 w-auto"
             />
-            {/* Text logo and tagline - hidden on very small screens, visible on xs+ */}
-            <div className="hidden xs:flex flex-col items-start">
-              <img 
-                src="/lovable-uploads/3b568e3e-a3d8-47d3-b8ca-4f500781b5e4.png" 
-                alt="alphaLens.ai" 
-                className="h-6 sm:h-8 w-auto" 
-              />
-              <span className="text-xs text-muted-foreground font-medium leading-none">
-                AI Trading Intelligence
-              </span>
-            </div>
-          </button>
-        </div>
+            <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Intelligence</p>
+          </div>
+        </button>
         
         {/* Navigation - Responsive */}
         <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-4">
