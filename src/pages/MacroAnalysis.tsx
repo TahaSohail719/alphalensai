@@ -224,43 +224,26 @@ export default function MacroAnalysis() {
           throw new Error(`Erreur n8n: ${errorMessage}`);
         }
         
-// Extract analysis content from n8n response
-let analysisContent = '';
-
-// Handle array format response from n8n
-if (Array.isArray(responseJson) && responseJson.length > 0) {
-  const envelope = responseJson[0]?.message;
-  const payload = envelope?.message;
-
-  if (payload) {
-    if (typeof payload === 'string') {
-      analysisContent = payload;
-    } else if (typeof payload?.content === 'string') {
-      analysisContent = payload.content;
-    } else if (typeof payload?.content?.content === 'string') {
-      analysisContent = payload.content.content; // 👈 clé profonde
-    } else {
-      analysisContent = JSON.stringify(payload, null, 2);
-    }
-  }
-}
-// Handle direct response format
-else if (responseJson?.message?.message) {
-  const payload = responseJson.message.message;
-  if (typeof payload === 'string') {
-    analysisContent = payload;
-  } else if (typeof payload?.content === 'string') {
-    analysisContent = payload.content;
-  } else if (typeof payload?.content?.content === 'string') {
-    analysisContent = payload.content.content; // 👈 clé profonde
-  } else {
-    analysisContent = JSON.stringify(payload, null, 2);
-  }
-}
-// Fallback to stringify
-else {
-  analysisContent = JSON.stringify(responseJson, null, 2);
-}
+      // Extract analysis content from n8n response
+      let analysisContent = '';
+      
+      // Handle array format response from n8n
+      if (Array.isArray(responseJson) && responseJson.length > 0) {
+        const deepContent = responseJson[0]?.message?.message?.content?.content;
+        if (typeof deepContent === 'string') {
+          analysisContent = deepContent;
+        } else {
+          analysisContent = JSON.stringify(responseJson[0], null, 2);
+        }
+      }
+      // Handle direct response format
+      else if (responseJson?.message?.content?.content) {
+        analysisContent = responseJson.message.content.content;
+      }
+      // Fallback
+      else {
+        analysisContent = JSON.stringify(responseJson, null, 2);
+      }
 
         
         const realAnalysis: MacroAnalysis = {
