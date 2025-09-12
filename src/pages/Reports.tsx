@@ -33,6 +33,7 @@ interface ReportSection {
   description: string;
   included: boolean;
   order: number;
+  userNotes?: string;
 }
 
 interface GeneratedReport {
@@ -41,6 +42,7 @@ interface GeneratedReport {
   sections: Array<{
     title: string;
     content: string;
+    userNotes?: string;
   }>;
   customNotes: string;
   exportFormat: string;
@@ -75,46 +77,52 @@ export default function Reports() {
 
   const [availableSections, setAvailableSections] = useState<ReportSection[]>([
     {
-      id: "performance",
-      title: "Overall Performance",
-      description: "Performance summary with key metrics",
-      included: true,
-      order: 1
-    },
-    {
-      id: "trades",
-      title: "Trade History",
-      description: "Detailed list of all executed trades",
-      included: true,
-      order: 2
-    },
-    {
-      id: "analysis",
-      title: "Technical Analysis",
-      description: "Analysis of identified patterns and signals",
-      included: false,
-      order: 3
-    },
-    {
-      id: "risk",
-      title: "Risk Management",
-      description: "Risk assessment and portfolio exposure",
-      included: true,
-      order: 4
-    },
-    {
       id: "market",
       title: "Market Conditions",
       description: "Macro context and trading conditions",
-      included: false,
-      order: 5
+      included: true,
+      order: 1,
+      userNotes: ""
+    },
+    {
+      id: "technical",
+      title: "Technical Analysis",
+      description: "Analysis of identified patterns and signals",
+      included: true,
+      order: 2,
+      userNotes: ""
+    },
+    {
+      id: "risks",
+      title: "Key Risks",
+      description: "Risk assessment and key threats to watch",
+      included: true,
+      order: 3,
+      userNotes: ""
+    },
+    {
+      id: "events",
+      title: "Event Watch",
+      description: "Upcoming events and catalysts to monitor",
+      included: true,
+      order: 4,
+      userNotes: ""
+    },
+    {
+      id: "sentiment",
+      title: "Sentiment & Positioning",
+      description: "Market sentiment and positioning analysis",
+      included: true,
+      order: 5,
+      userNotes: ""
     },
     {
       id: "recommendations",
       title: "Recommendations",
-      description: "Improvement suggestions and future strategies",
+      description: "Investment recommendations and strategic outlook",
       included: true,
-      order: 6
+      order: 6,
+      userNotes: ""
     }
   ]);
 
@@ -123,6 +131,16 @@ export default function Reports() {
       prev.map(section =>
         section.id === sectionId
           ? { ...section, included: !section.included }
+          : section
+      )
+    );
+  };
+
+  const updateSectionNotes = (sectionId: string, notes: string) => {
+    setAvailableSections(prev =>
+      prev.map(section =>
+        section.id === sectionId
+          ? { ...section, userNotes: notes }
           : section
       )
     );
@@ -187,7 +205,8 @@ export default function Reports() {
       // Report generation simulation for display
       const generatedSections = includedSections.map(section => ({
         title: section.title,
-        content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`
+        content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+        userNotes: section.userNotes || ""
       }));
 
       const newReport: GeneratedReport = {
@@ -334,50 +353,71 @@ export default function Reports() {
                 <CardTitle>Report Sections</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {availableSections
                     .sort((a, b) => a.order - b.order)
                     .map((section) => (
-                      <div
+                      <Card
                         key={section.id}
                         className={cn(
-                          "flex items-center gap-4 p-4 border border-border/50 rounded-lg transition-colors",
+                          "transition-colors",
                           section.included ? "bg-primary/5 border-primary/30" : "bg-muted/20"
                         )}
                       >
-                        <Checkbox
-                          checked={section.included}
-                          onCheckedChange={() => toggleSection(section.id)}
-                        />
-                        
-                        <div className="flex-1">
-                          <h4 className="font-medium">{section.title}</h4>
-                          <p className="text-sm text-muted-foreground">{section.description}</p>
-                        </div>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4 mb-4">
+                            <Checkbox
+                              checked={section.included}
+                              onCheckedChange={() => toggleSection(section.id)}
+                              className="mt-1"
+                            />
+                            
+                            <div className="flex-1">
+                              <h4 className="font-medium">{section.title}</h4>
+                              <p className="text-sm text-muted-foreground">{section.description}</p>
+                            </div>
 
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionUp(section.id)}
-                            disabled={section.order === 1}
-                          >
-                            <ArrowUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionDown(section.id)}
-                            disabled={section.order === Math.max(...availableSections.map(s => s.order))}
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </Button>
-                        </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveSectionUp(section.id)}
+                                disabled={section.order === 1}
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveSectionDown(section.id)}
+                                disabled={section.order === Math.max(...availableSections.map(s => s.order))}
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </Button>
+                            </div>
 
-                        <Badge variant="outline">
-                          {section.order}
-                        </Badge>
-                      </div>
+                            <Badge variant="outline">
+                              {section.order}
+                            </Badge>
+                          </div>
+
+                          {section.included && (
+                            <div className="space-y-2">
+                              <Label htmlFor={`notes-${section.id}`} className="text-sm font-medium">
+                                User Notes
+                              </Label>
+                              <Textarea
+                                id={`notes-${section.id}`}
+                                value={section.userNotes || ""}
+                                onChange={(e) => updateSectionNotes(section.id, e.target.value)}
+                                placeholder="Add comments, focus areas, or questions for this section..."
+                                rows={2}
+                                className="text-sm"
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     ))}
                 </div>
 
@@ -437,10 +477,19 @@ export default function Reports() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {currentReport.sections.map((section, index) => (
-                  <div key={index} className="border-l-4 border-primary/30 pl-4">
-                    <h3 className="font-semibold text-lg mb-2">{section.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{section.content}</p>
-                  </div>
+                  <Card key={index} className="border-l-4 border-primary/30">
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-lg mb-3">{section.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed mb-4">{section.content}</p>
+                      
+                      {section.userNotes && (
+                        <div className="mt-4 p-3 bg-accent/10 rounded-lg border border-accent/20">
+                          <h4 className="text-sm font-medium text-accent-foreground mb-2">User Notes:</h4>
+                          <p className="text-sm text-muted-foreground">{section.userNotes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
 
                 {currentReport.customNotes && (
