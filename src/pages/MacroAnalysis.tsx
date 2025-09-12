@@ -220,19 +220,48 @@ export default function MacroAnalysis() {
                               responseJson?.message || 
                               (Array.isArray(responseJson) && responseJson[0]?.error) ||
                               (Array.isArray(responseJson) && responseJson[0]?.message) ||
-                              'n8n workflow error';
-          throw new Error(`n8n workflow error: ${errorMessage}`);
+                              'Erreur du workflow n8n';
+          throw new Error(`Erreur n8n: ${errorMessage}`);
         }
         
-        // Extract analysis content from responseJson[0].message.message.content.content
-        let analysisContent = '';
-        
-        try {
-          analysisContent = responseJson[0]?.message?.message?.content?.content || '';
-        } catch (pathError) {
-          console.warn('Failed to extract from responseJson[0].message.message.content.content:', pathError, responseJson);
-          analysisContent = '';
-        }
+// Extract analysis content from n8n response
+let analysisContent = '';
+
+// Handle array format response from n8n
+if (Array.isArray(responseJson) && responseJson.length > 0) {
+  const envelope = responseJson[0]?.message;
+  const payload = envelope?.message;
+
+  if (payload) {
+    if (typeof payload === 'string') {
+      analysisContent = payload;
+    } else if (typeof payload?.content === 'string') {
+      analysisContent = payload.content;
+    } else if (typeof payload?.content?.content === 'string') {
+      analysisContent = payload.content.content; // 👈 clé profonde
+    } else {
+      analysisContent = JSON.stringify(payload, null, 2);
+    }
+  }
+}
+// Handle direct response format
+else if (responseJson?.message?.message) {
+  const payload = responseJson.message.message;
+  if (typeof payload === 'string') {
+    analysisContent = payload;
+  } else if (typeof payload?.content === 'string') {
+    analysisContent = payload.content;
+  } else if (typeof payload?.content?.content === 'string') {
+    analysisContent = payload.content.content; // 👈 clé profonde
+  } else {
+    analysisContent = JSON.stringify(payload, null, 2);
+  }
+}
+// Fallback to stringify
+else {
+  analysisContent = JSON.stringify(responseJson, null, 2);
+}
+
         
         const realAnalysis: MacroAnalysis = {
           query: queryParams.query,
@@ -259,7 +288,7 @@ export default function MacroAnalysis() {
         
         setQueryParams(prev => ({ ...prev, query: "" }));
       } else {
-        throw new Error('Empty response from n8n workflow');
+        throw new Error('Réponse vide du workflow n8n');
       }
 
     } catch (error) {
