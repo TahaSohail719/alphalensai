@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Building2, TrendingUp } from "lucide-react";
-import Layout from "@/components/Layout";
+import PublicNavbar from "@/components/PublicNavbar";
 
 export default function About() {
   return (
-    <Layout activeModule="about" onModuleChange={() => {}}>
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <PublicNavbar />
+      <div className="max-w-4xl mx-auto space-y-6 px-4 py-6">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit">
@@ -108,6 +109,6 @@ export default function About() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </div>
   );
 }

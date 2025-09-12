@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, BarChart3, FileText, Target, TrendingUp, Globe2, Zap, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PublicNavbar from "@/components/PublicNavbar";
 
 export default function Features() {
   const navigate = useNavigate();
@@ -86,31 +87,7 @@ export default function Features() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <img src="/lovable-uploads/3b568e3e-a3d8-47d3-b8ca-4f500781b5e4.png" alt="alphaLens.ai" className="h-8" />
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              Home
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/about")}>
-              About
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/contact")}>
-              Contact
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/auth")}>
-              Login
-            </Button>
-            <Button onClick={() => navigate("/auth")}>
-              Sign Up
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PublicNavbar />
 
       {/* Hero Section */}
       <section className="py-20 px-4 text-center bg-gradient-to-br from-background via-background to-secondary/10">
