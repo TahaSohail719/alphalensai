@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -644,15 +645,15 @@ export default function MacroAnalysis() {
           </div>
         )}
 
-        {/* Market Chart with integrated Market Focus */}
+        {/* Unified Market Analysis */}
         <Card className="gradient-card">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Market Chart - {selectedAsset.display}
+                Market Analysis - {selectedAsset.display}
               </div>
-              {/* Market Focus integrated as dropdown */}
+              {/* Asset Selector */}
               <Select 
                 value={selectedAsset.symbol} 
                 onValueChange={(value) => {
@@ -680,27 +681,31 @@ export default function MacroAnalysis() {
               </Select>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
-            <TradingViewWidget 
-              selectedSymbol={selectedAsset.symbol}
-              onSymbolChange={(symbol) => {
-                const asset = assets.find(a => a.symbol === symbol);
-                if (asset) setSelectedAsset(asset);
-              }}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Technical Analysis */}
-        <Card className="gradient-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Technical Analysis - {selectedAsset.display}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TechnicalDashboard selectedAsset={selectedAsset} />
+          <CardContent className="p-0">
+            <Tabs defaultValue="chart" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 m-4 mb-0">
+                <TabsTrigger value="chart" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Price Chart
+                </TabsTrigger>
+                <TabsTrigger value="technical" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Technical Analysis
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="chart" className="p-4 pt-2">
+                <TradingViewWidget 
+                  selectedSymbol={selectedAsset.symbol}
+                  onSymbolChange={(symbol) => {
+                    const asset = assets.find(a => a.symbol === symbol);
+                    if (asset) setSelectedAsset(asset);
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="technical" className="p-4 pt-2">
+                <TechnicalDashboard selectedAsset={selectedAsset} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
