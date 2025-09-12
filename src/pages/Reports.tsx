@@ -193,7 +193,8 @@ export default function Reports() {
           id: section.id,
           title: section.title,
           description: section.description,
-          order: index + 1
+          order: index + 1,
+          userNotes: section.userNotes || ""
         })),
         customNotes: reportConfig.customNotes
       });
