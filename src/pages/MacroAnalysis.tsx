@@ -224,33 +224,20 @@ export default function MacroAnalysis() {
           throw new Error(`Erreur n8n: ${errorMessage}`);
         }
         
-        // Extract analysis content from n8n response
+        // Extract analysis content from n8n response - always from message.message.content.content
         let analysisContent = '';
         
-        // Handle array format response from n8n
-        if (Array.isArray(responseJson) && responseJson.length > 0) {
-          const envelope = responseJson[0]?.message;
-          const payload = envelope?.message;
-          if (payload) {
-            analysisContent = typeof payload === 'string'
-              ? payload
-              : typeof payload?.content === 'string'
-                ? payload.content
-                : JSON.stringify(payload, null, 2);
+        try {
+          // Extract from the specific field: message.message.content.content
+          const contentPath = responseJson?.message?.message?.content?.content;
+          if (contentPath && typeof contentPath === 'string') {
+            analysisContent = contentPath;
+          } else {
+            throw new Error('Content not found at message.message.content.content');
           }
-        } 
-        // Handle direct response format
-        else if (responseJson?.message?.message) {
-          const payload = responseJson.message.message;
-          analysisContent = typeof payload === 'string'
-            ? payload
-            : typeof payload?.content === 'string'
-              ? payload.content
-              : JSON.stringify(payload, null, 2);
-        }
-        // Fallback to stringify
-        else {
-          analysisContent = JSON.stringify(responseJson, null, 2);
+        } catch (pathError) {
+          console.warn('Failed to extract from message.message.content.content:', pathError);
+          analysisContent = 'Impossible d\'extraire le contenu de l\'analyse depuis le workflow n8n';
         }
         
         const realAnalysis: MacroAnalysis = {
