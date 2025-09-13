@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import TradeResultPanel from "@/components/TradeResultPanel";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { useGlobalLoading } from "@/components/GlobalLoadingProvider";
+import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 
 const { useState } = React;
 
@@ -191,6 +192,7 @@ export default function AISetup() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const globalLoading = useGlobalLoading();
+  const { logInteraction } = useAIInteractionLogger();
   const [step, setStep] = useState<"parameters" | "generated">("parameters");
   const [isGenerating, setIsGenerating] = useState(false);
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
@@ -284,6 +286,14 @@ export default function AISetup() {
         setN8nResult(normalized);
         setTradeSetup(null);
         globalLoading.completeRequest(requestId, normalized);
+        
+        // Log successful interaction
+        await logInteraction({
+          featureName: 'trade_setup',
+          userQuery: `Generate AI trade setup for ${parameters.instrument} with ${parameters.strategy} strategy. Parameters: ${JSON.stringify(parameters)}`,
+          aiResponse: normalized
+        });
+        
         toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
       } else {
         setN8nResult(null);

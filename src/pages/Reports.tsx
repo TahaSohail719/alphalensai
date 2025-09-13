@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { safePostRequest } from "@/lib/safe-request";
+import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 
 interface AssetProfile {
   id: number;
@@ -53,6 +54,7 @@ interface GeneratedReport {
 export default function Reports() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logInteraction } = useAIInteractionLogger();
   const [step, setStep] = useState<"compose" | "preview" | "generated">("compose");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
@@ -222,6 +224,13 @@ export default function Reports() {
 
       setCurrentReport(newReport);
       setStep("generated");
+
+      // Log successful interaction
+      await logInteraction({
+        featureName: 'report',
+        userQuery: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. Custom notes: ${reportConfig.customNotes}`,
+        aiResponse: newReport
+      });
 
       toast({
         title: "Report Generated",

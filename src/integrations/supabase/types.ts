@@ -120,6 +120,33 @@ export type Database = {
           },
         ]
       }
+      ai_interactions: {
+        Row: {
+          ai_response: Json
+          created_at: string
+          feature_name: string
+          id: string
+          user_id: string
+          user_query: string
+        }
+        Insert: {
+          ai_response: Json
+          created_at?: string
+          feature_name: string
+          id?: string
+          user_id: string
+          user_query: string
+        }
+        Update: {
+          ai_response?: Json
+          created_at?: string
+          feature_name?: string
+          id?: string
+          user_id?: string
+          user_query?: string
+        }
+        Relationships: []
+      }
       ai_recommendations: {
         Row: {
           confidence_score: number | null

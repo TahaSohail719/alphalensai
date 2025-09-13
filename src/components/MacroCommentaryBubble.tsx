@@ -28,6 +28,7 @@ import {
   Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { useToast } from "@/hooks/use-toast";
 import { TradingViewWidget } from "./TradingViewWidget";
 
@@ -70,6 +71,7 @@ interface AssetInfo {
 }
 
 export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroCommentaryBubbleProps) {
+  const { logInteraction } = useAIInteractionLogger();
   const [isMinimized, setIsMinimized] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
@@ -657,6 +659,13 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           setAnalyses(prev => [realAnalysis, ...prev]);
           setJobStatus("done");
           setIsGenerating(false);
+          
+          // Log successful interaction
+          await logInteraction({
+            featureName: 'market_commentary',
+            userQuery: queryParams.query,
+            aiResponse: realAnalysis
+          });
           
           setQueryParams(prev => ({ ...prev, query: "" }));
           
