@@ -119,7 +119,14 @@ export function TradingViewWidget({
       "allow_symbol_change": false,
       "calendar": false,
       "support_host": "https://www.tradingview.com",
-      "studies": ["RSI@tv-basicstudies", "ATR@tv-basicstudies", "ADX@tv-basicstudies"]
+      "studies": ["RSI@tv-basicstudies", "ATR@tv-basicstudies", "ADX@tv-basicstudies"],
+      "show_popup_button": false,
+      "popup_width": "1000",
+      "popup_height": "650",
+      "hide_top_toolbar": false,
+      "hide_legend": false,
+      "save_image": false,
+      "container_id": "tradingview_chart"
     });
     const container = document.createElement('div');
     container.className = 'tradingview-widget-container';

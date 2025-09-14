@@ -246,8 +246,23 @@ export function CandlestickChart({
     };
   }, []);
 
-  // WebSocket connection
+  // WebSocket connection - Enhanced with proper asset reset
   useEffect(() => {
+    // Clean up previous WebSocket connection
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
+    // Clear previous data when asset changes
+    if (seriesRef.current) {
+      seriesRef.current.setData([]);
+    }
+
+    // Reset current price
+    setCurrentPrice('');
+    setIsConnected(false);
+
     // Si pas de données temps réel, on charge seulement les données historiques
     if (!hasRealTimeData) {
       fetchHistoricalData(timeframe).then((historicalData) => {
@@ -259,21 +274,22 @@ export function CandlestickChart({
     }
 
     const connectWebSocket = () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-
       const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${binanceSymbol.toLowerCase()}@kline_${timeframe}`);
       
       ws.onopen = () => {
         setIsConnected(true);
-        console.log('WebSocket connected');
+        console.log(`WebSocket connected for ${binanceSymbol}`);
       };
 
       ws.onmessage = (event) => {
         try {
           const data: BinanceKlineData = JSON.parse(event.data);
           const kline = data.k;
+          
+          // Verify this is data for the current asset
+          if (kline.s !== binanceSymbol) {
+            return;
+          }
           
           const candleData: CandlestickData = {
             time: (kline.t / 1000) as Time,
@@ -295,9 +311,13 @@ export function CandlestickChart({
 
       ws.onclose = () => {
         setIsConnected(false);
-        console.log('WebSocket disconnected');
-        // Attempt to reconnect after 3 seconds
-        setTimeout(connectWebSocket, 3000);
+        console.log(`WebSocket disconnected for ${binanceSymbol}`);
+        // Only reconnect if this is still the current asset
+        setTimeout(() => {
+          if (wsRef.current === ws) {
+            connectWebSocket();
+          }
+        }, 3000);
       };
 
       ws.onerror = (error) => {
@@ -308,7 +328,7 @@ export function CandlestickChart({
       wsRef.current = ws;
     };
 
-    // Load historical data first
+    // Load historical data first, then connect WebSocket
     fetchHistoricalData(timeframe).then((historicalData) => {
       if (seriesRef.current && historicalData.length > 0) {
         seriesRef.current.setData(historicalData);
@@ -320,9 +340,10 @@ export function CandlestickChart({
     return () => {
       if (wsRef.current) {
         wsRef.current.close();
+        wsRef.current = null;
       }
     };
-  }, [timeframe, binanceSymbol, hasRealTimeData]);
+  }, [timeframe, binanceSymbol, hasRealTimeData]); // Include binanceSymbol dependency
 
   // Add/Update trade levels on chart
   useEffect(() => {
