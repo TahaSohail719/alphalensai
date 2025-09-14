@@ -129,8 +129,8 @@ export function TradingViewWidget({
       "container_id": "tradingview_chart"
     });
     const container = document.createElement('div');
-    container.className = 'tradingview-widget-container';
-    container.style.height = '400px';
+    container.className = 'tradingview-widget-container h-full w-full';
+    container.style.height = '100%';
     container.appendChild(script);
     chartContainerRef.current.appendChild(container);
   };
@@ -170,20 +170,22 @@ export function TradingViewWidget({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {loading && <div className="flex items-center justify-center h-96">
+      <CardContent className="pb-0">
+        {loading && <div className="flex items-center justify-center h-64 sm:h-80 lg:h-96">
             <Loader2 className="h-8 w-8 animate-spin" />
             <span className="ml-2">Loading market data...</span>
           </div>}
 
         {hasFallback && !loading}
 
-        <div ref={chartContainerRef} className="w-full h-96 border border-border rounded-lg" />
+        <div ref={chartContainerRef} className="w-full h-64 sm:h-80 lg:h-96 border border-border rounded-lg overflow-hidden" />
 
-        <div className="mt-4 text-sm text-muted-foreground">
-          <div className="flex justify-between">
-            
-            <Button variant="outline" size="sm" onClick={fetchData} className="h-7 touch-manipulation" style={{ minHeight: '44px' }}>
+        <div className="mt-3 sm:mt-4 text-sm text-muted-foreground">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">
+              Market data powered by TradingView
+            </span>
+            <Button variant="outline" size="sm" onClick={fetchData} className="h-8 sm:h-9 text-xs touch-manipulation" style={{ minHeight: '44px' }}>
               Refresh
             </Button>
           </div>
