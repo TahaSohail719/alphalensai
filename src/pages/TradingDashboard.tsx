@@ -286,7 +286,6 @@ export default function TradingDashboard() {
         <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
           <CandlestickChart 
             asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
-            title={`Chart - ${selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} (${timeframe})`}
             showHeader={true}
             tradeLevels={activeTradeLevels}
             onLevelUpdate={(type, value) => {
