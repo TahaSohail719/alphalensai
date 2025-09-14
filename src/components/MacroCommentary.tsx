@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAIInteractionLogger } from '@/hooks/useAIInteractionLogger';
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MacroCommentaryProps {
@@ -150,6 +151,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
   const [portfolioAnalysisResult, setPortfolioAnalysisResult] = useState<PortfolioAnalysisResult | null>(null);
   
   const { toast } = useToast();
+  const { logInteraction } = useAIInteractionLogger();
   const isMobile = useIsMobile();
 
   // Input validation and detection for Article Analysis mode
@@ -311,6 +313,13 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
       }
       
       setCommentary(data);
+      
+      // Log the interaction to history
+      await logInteraction({
+        featureName: 'market_commentary',
+        userQuery: query || `${activeMode === "article_analysis" ? "Article Analysis" : "Macro Commentary"} for ${instrument || "markets"}`,
+        aiResponse: data
+      });
       
       toast({
         title: "Analysis Generated",
