@@ -282,40 +282,23 @@ export default function TradingDashboard() {
           className="w-full" 
         />
 
-        {/* Mobile-first responsive chart */}
-        <Card className="gradient-card border-border/50 shadow-medium">
-          <CardHeader className="border-b border-border/50 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <CardTitle className="text-lg sm:text-xl text-foreground">
-                Chart - {selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
-                <span className="text-sm font-normal text-muted-foreground ml-2">({timeframe})</span>
-              </CardTitle>
-              <Badge variant="outline" className={cn(
-                "border-success/50 text-success bg-success/10 w-fit",
-                !isConnected && "border-danger/50 text-danger bg-danger/10"
-              )}>
-                {isConnected ? "Connected" : "Disconnected"}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {/* Dynamic height based on screen size */}
-          <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
-            <CandlestickChart 
-              asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
-              tradeLevels={activeTradeLevels}
-              onLevelUpdate={(type, value) => {
-                if (activeTradeLevels) {
-                  setActiveTradeLevels({
-                    ...activeTradeLevels,
-                    [type === 'stopLoss' ? 'stopLoss' : type]: value
-                  });
-                }
-              }}
-            />
-          </div>
-          </CardContent>
-        </Card>
+        {/* Unified chart section - No nesting */}
+        <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+          <CandlestickChart 
+            asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
+            title={`Chart - ${selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} (${timeframe})`}
+            showHeader={true}
+            tradeLevels={activeTradeLevels}
+            onLevelUpdate={(type, value) => {
+              if (activeTradeLevels) {
+                setActiveTradeLevels({
+                  ...activeTradeLevels,
+                  [type === 'stopLoss' ? 'stopLoss' : type]: value
+                });
+              }
+            }}
+          />
+        </div>
 
         {/* Quick Access - History Button */}
         <div className="flex justify-end">
