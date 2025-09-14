@@ -370,7 +370,7 @@ export function CandlestickChart({
                 <BarChart3 className="h-5 w-5" />
               </div>
               <div>
-                <span className="text-xl font-bold">{title || `${asset} Chart`}</span>
+                <span className="text-xl font-bold">{title || `${asset} Live Chart`}</span>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="border-primary/20 text-primary">
                     {asset}
