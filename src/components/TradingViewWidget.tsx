@@ -107,12 +107,15 @@ export function TradingViewWidget({
   const loadTradingViewFallback = async () => {
     if (!chartContainerRef.current) return;
 
-    // Clear container
+    // Clear container and wait a bit for cleanup
     chartContainerRef.current.innerHTML = '';
+    
+    // Small delay to ensure proper cleanup
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    // Create inner container for the chart
+    // Create inner container for the chart with unique ID
     const chartEl = document.createElement('div');
-    const CONTAINER_ID = 'tv_chart_container';
+    const CONTAINER_ID = `tv_chart_container_${Date.now()}`;
     chartEl.id = CONTAINER_ID;
     chartEl.style.height = '100%';
     chartEl.style.width = '100%';
