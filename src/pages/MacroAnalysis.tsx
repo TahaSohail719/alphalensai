@@ -724,7 +724,7 @@ export default function MacroAnalysis() {
               </TabsList>
               <TabsContent value="chart" className="p-4 pt-2">
                 <TradingViewWidget 
-                  selectedSymbol={selectedAsset.symbol}
+                  selectedSymbol={selectedAsset.tradingViewSymbol}
                   onSymbolChange={(symbol) => {
                     const asset = assets.find(a => a.symbol === symbol);
                     if (asset) setSelectedAsset(asset);
