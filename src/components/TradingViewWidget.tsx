@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TrendingUp, BarChart3, AlertTriangle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+declare global {
+  interface Window {
+    TradingView: any;
+  }
+}
+
 interface TradingViewWidgetProps {
   selectedSymbol: string;
   onSymbolChange?: (symbol: string) => void;
@@ -96,53 +103,66 @@ export function TradingViewWidget({
     }
   };
 
-  // Load TradingView fallback widget
-  const loadTradingViewFallback = () => {
+  // Load TradingView widget via tv.js (more reliable in SPAs)
+  const loadTradingViewFallback = async () => {
     if (!chartContainerRef.current) return;
 
     // Clear container
     chartContainerRef.current.innerHTML = '';
 
-    // Create wrapper container
-    const container = document.createElement('div');
-    container.className = 'tradingview-widget-container h-full w-full';
-    container.style.height = '100%';
-
-    // Target element for TradingView (must exist when script runs)
+    // Create inner container for the chart
     const chartEl = document.createElement('div');
-    chartEl.id = 'tradingview_chart';
+    const CONTAINER_ID = 'tv_chart_container';
+    chartEl.id = CONTAINER_ID;
     chartEl.style.height = '100%';
     chartEl.style.width = '100%';
+    chartContainerRef.current.appendChild(chartEl);
 
-    // Create TradingView widget script
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      "autosize": true,
-      "symbol": selectedSymbol,
-      "interval": timeframe === "1h" ? "60" : timeframe === "4h" ? "240" : "D",
-      "timezone": "Etc/UTC",
-      "theme": "light",
-      "style": "1",
-      "locale": "en",
-      "enable_publishing": false,
-      "allow_symbol_change": false,
-      "calendar": false,
-      "support_host": "https://www.tradingview.com",
-      "studies": ["RSI@tv-basicstudies", "ATR@tv-basicstudies", "ADX@tv-basicstudies"],
-      "show_popup_button": false,
-      "popup_width": "1000",
-      "popup_height": "650",
-      "hide_top_toolbar": false,
-      "hide_legend": false,
-      "save_image": false,
-      "container_id": "tradingview_chart"
+    // Ensure tv.js is loaded once
+    const ensureTvJs = () => new Promise<void>((resolve, reject) => {
+      if (window.TradingView && typeof window.TradingView.widget === 'function') {
+        resolve();
+        return;
+      }
+      const existing = document.getElementById('tradingview-widget-script');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('TradingView script failed to load')));
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'tradingview-widget-script';
+      script.src = 'https://s3.tradingview.com/tv.js';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('TradingView script failed to load'));
+      document.head.appendChild(script);
     });
 
-    container.appendChild(chartEl);
-    container.appendChild(script);
-    chartContainerRef.current.appendChild(container);
+    try {
+      await ensureTvJs();
+      // Map timeframe to TradingView intervals
+      const interval = timeframe === '1h' ? '60' : timeframe === '4h' ? '240' : 'D';
+      // Initialize widget
+      // @ts-ignore
+      new window.TradingView.widget({
+        autosize: true,
+        symbol: selectedSymbol,
+        interval,
+        timezone: 'Etc/UTC',
+        theme: 'light',
+        style: '1',
+        locale: 'en',
+        enable_publishing: false,
+        hide_top_toolbar: false,
+        allow_symbol_change: false,
+        withdateranges: true,
+        studies: ['RSI@tv-basicstudies', 'ATR@tv-basicstudies', 'ADX@tv-basicstudies'],
+        container_id: CONTAINER_ID,
+      });
+    } catch (e) {
+      console.error('TradingView init error:', e);
+    }
   };
 
   // Load data when symbol or timeframe changes
