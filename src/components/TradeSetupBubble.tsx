@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { safePostRequest } from "@/lib/safe-request";
+import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
+import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +57,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+  const { createJob } = useRealtimeJobManager();
 
   // Form parameters
   const [parameters, setParameters] = useState({
@@ -70,48 +73,47 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     setIsGenerating(true);
     
     try {
-      // Call n8n webhook
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      const payload = {
         type: "tradesetup",
         question: `Generate trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskAppetite} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
         instrument: parameters.instrument,
         timeframe: parameters.timeframe
-      });
+      };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Create job for realtime tracking
+      const jobId = await createJob('tradesetup', parameters.instrument, payload);
+      
+      // Enhanced request with both HTTP and realtime support
+      const { response } = await enhancedPostRequest(
+        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload,
+        {
+          enableJobTracking: true,
+          jobType: 'tradesetup',
+          instrument: parameters.instrument
+        }
+      );
+
+      let rawData: any = null;
+      
+      // Handle response with realtime fallback
+      rawData = await handleResponseWithFallback(
+        response,
+        jobId,
+        (realtimeResult) => {
+          console.log('Received realtime result:', realtimeResult);
+          if (realtimeResult && !realtimeResult.error) {
+            processTradeSetupData(realtimeResult);
+          }
+        }
+      );
+
+      if (rawData) {
+        processTradeSetupData(rawData);
       }
 
-      const rawData = await response.json();
-      
-      // Create trade setup from webhook response or use fallback
-      const mockSetup: TradeSetup = {
-        entry: parameters.instrument === "EUR/USD" ? 1.0950 : 
-               parameters.instrument === "Bitcoin" ? 45250 : 1.2850,
-        stopLoss: parameters.instrument === "EUR/USD" ? 1.0890 : 
-                  parameters.instrument === "Bitcoin" ? 43800 : 1.2780,
-        takeProfit: parameters.instrument === "EUR/USD" ? 1.1080 : 
-                    parameters.instrument === "Bitcoin" ? 47200 : 1.2980,
-        positionSize: parseFloat(parameters.positionSize),
-        riskReward: 2.1,
-        confidence: parameters.riskAppetite === "low" ? 75 : 
-                   parameters.riskAppetite === "high" ? 90 : 82,
-        reasoning: typeof rawData.content?.content === 'string' ? rawData.content.content
-                 : typeof rawData.content === 'string' ? rawData.content
-                 : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
-                 : `Based on ${parameters.strategy} strategy with ${parameters.riskAppetite} risk profile. Technical indicators align with current market structure on ${parameters.timeframe} timeframe.`
-      };
-      
-      setTradeSetup(mockSetup);
-      setStep("generated");
-      
-      toast({
-        title: "Trade Setup Generated",
-        description: "Ready for technical analysis confirmation"
-      });
     } catch (error) {
-      console.error('Webhook error:', error);
-      
+      console.error('Error generating trade setup:', error);
       toast({
         title: "Error",
         description: "Failed to generate trade setup. Please try again.",
@@ -120,6 +122,34 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const processTradeSetupData = (rawData: any) => {
+    // Create trade setup from webhook response or use fallback
+    const mockSetup: TradeSetup = {
+      entry: parameters.instrument === "EUR/USD" ? 1.0950 : 
+             parameters.instrument === "Bitcoin" ? 45250 : 1.2850,
+      stopLoss: parameters.instrument === "EUR/USD" ? 1.0890 : 
+                parameters.instrument === "Bitcoin" ? 43800 : 1.2780,
+      takeProfit: parameters.instrument === "EUR/USD" ? 1.1080 : 
+                  parameters.instrument === "Bitcoin" ? 47200 : 1.2980,
+      positionSize: parseFloat(parameters.positionSize),
+      riskReward: 2.1,
+      confidence: parameters.riskAppetite === "low" ? 75 : 
+                 parameters.riskAppetite === "high" ? 90 : 82,
+      reasoning: typeof rawData.content?.content === 'string' ? rawData.content.content
+               : typeof rawData.content === 'string' ? rawData.content
+               : typeof rawData.content === 'object' ? JSON.stringify(rawData.content, null, 2)
+               : `Based on ${parameters.strategy} strategy with ${parameters.riskAppetite} risk profile. Technical indicators align with current market structure on ${parameters.timeframe} timeframe.`
+    };
+    
+    setTradeSetup(mockSetup);
+    setStep("generated");
+    
+    toast({
+      title: "Trade Setup Generated",
+      description: "Ready for technical analysis confirmation"
+    });
   };
 
   const regenerateSetup = () => {

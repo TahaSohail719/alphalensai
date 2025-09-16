@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/components/GlobalLoadingProvider";
+import { JobStatusCards } from "@/components/JobStatusCards";
 import AdminGuard from "./components/AdminGuard";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
@@ -30,6 +31,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <GlobalLoadingProvider>
+          <JobStatusCards />
           <Toaster />
           <Sonner />
           <BrowserRouter>
