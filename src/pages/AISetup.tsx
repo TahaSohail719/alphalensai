@@ -500,7 +500,9 @@ export default function AISetup() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-sm text-red-700">
+                    We're experiencing a temporary issue processing your request. This could be due to high server load or a connectivity problem. Please try again in a moment.
+                  </p>
                   <Button 
                     onClick={() => setStep("parameters")} 
                     variant="outline" 
