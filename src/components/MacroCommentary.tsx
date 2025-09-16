@@ -425,7 +425,8 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
       const { response, jobId } = await enhancedPostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload, {
         enableJobTracking: true,
         jobType: 'portfolio_analysis',
-        instrument: 'portfolio'
+        instrument: 'portfolio',
+        feature: 'macro_commentary'
       });
 
       const result = await handleResponseWithFallback(response, jobId);
