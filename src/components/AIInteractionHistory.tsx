@@ -222,6 +222,119 @@ export function AIInteractionHistory() {
     }
     
     if (typeof response === 'object' && response !== null) {
+      // Handle AI Trade Setup responses specifically
+      if (response.entry !== undefined && response.stopLoss !== undefined && response.takeProfit !== undefined) {
+        return (
+          <div className="space-y-4">
+            {/* Trade Direction */}
+            {response.direction && (
+              <div className="space-y-2">
+                <h5 className="font-semibold text-sm text-primary border-b border-border/30 pb-1">Direction</h5>
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                  response.direction === "BUY" 
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" 
+                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                }`}>
+                  {response.direction}
+                </div>
+              </div>
+            )}
+            
+            {/* Trade Levels */}
+            <div className="space-y-2">
+              <h5 className="font-semibold text-sm text-primary border-b border-border/30 pb-1">Trade Levels</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-3 rounded-lg border border-border/20">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Entry</div>
+                  <div className="text-lg font-semibold text-foreground">{Number(response.entry).toFixed(4)}</div>
+                </div>
+                <div className="bg-gradient-to-r from-red-50/50 to-red-100/30 dark:from-red-950/20 dark:to-red-900/10 p-3 rounded-lg border border-red-200/30 dark:border-red-800/30">
+                  <div className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Stop Loss</div>
+                  <div className="text-lg font-semibold text-red-700 dark:text-red-300">{Number(response.stopLoss).toFixed(4)}</div>
+                </div>
+                <div className="bg-gradient-to-r from-green-50/50 to-green-100/30 dark:from-green-950/20 dark:to-green-900/10 p-3 rounded-lg border border-green-200/30 dark:border-green-800/30">
+                  <div className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Take Profit</div>
+                  <div className="text-lg font-semibold text-green-700 dark:text-green-300">{Number(response.takeProfit).toFixed(4)}</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Risk & Metrics */}
+            <div className="space-y-2">
+              <h5 className="font-semibold text-sm text-primary border-b border-border/30 pb-1">Risk Metrics</h5>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {response.riskReward && (
+                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-3 rounded-lg border border-border/20 text-center">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Risk:Reward</div>
+                    <div className="text-lg font-semibold text-foreground">{Number(response.riskReward).toFixed(2)}:1</div>
+                  </div>
+                )}
+                {response.confidence && (
+                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-3 rounded-lg border border-border/20 text-center">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Confidence</div>
+                    <div className="text-lg font-semibold text-foreground">{response.confidence}%</div>
+                  </div>
+                )}
+                {response.positionSize && (
+                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-3 rounded-lg border border-border/20 text-center">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Position Size</div>
+                    <div className="text-lg font-semibold text-foreground">{Number(response.positionSize).toFixed(2)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Reasoning */}
+            {response.reasoning && (
+              <div className="space-y-2">
+                <h5 className="font-semibold text-sm text-primary border-b border-border/30 pb-1">Analysis & Reasoning</h5>
+                <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-4 rounded-lg border border-border/20">
+                  <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{response.reasoning}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Technical Analysis */}
+            {response.technicalAnalysis && (
+              <div className="space-y-2">
+                <h5 className="font-semibold text-sm text-primary border-b border-border/30 pb-1">Technical Analysis</h5>
+                <div className="bg-gradient-to-r from-muted/20 to-muted/10 p-4 rounded-lg border border-border/20 space-y-3">
+                  {response.technicalAnalysis.summary && (
+                    <div>
+                      <h6 className="font-medium text-xs text-primary/80 uppercase tracking-wide border-b border-border/20 pb-1 mb-2">Summary</h6>
+                      <p className="text-sm text-foreground/90">{response.technicalAnalysis.summary}</p>
+                    </div>
+                  )}
+                  {response.technicalAnalysis.indicators && response.technicalAnalysis.indicators.length > 0 && (
+                    <div>
+                      <h6 className="font-medium text-xs text-primary/80 uppercase tracking-wide border-b border-border/20 pb-1 mb-2">Indicators</h6>
+                      <div className="flex flex-wrap gap-2">
+                        {response.technicalAnalysis.indicators.map((indicator: string, index: number) => (
+                          <span key={index} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-md border border-primary/20">
+                            {indicator}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {response.technicalAnalysis.confirmation !== undefined && (
+                    <div>
+                      <h6 className="font-medium text-xs text-primary/80 uppercase tracking-wide border-b border-border/20 pb-1 mb-2">Confirmation</h6>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        response.technicalAnalysis.confirmation 
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" 
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                      }`}>
+                        {response.technicalAnalysis.confirmation ? "Confirmed" : "Pending"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
       // Check for sections structure (new format)
       if (response.sections && Array.isArray(response.sections)) {
         return (
