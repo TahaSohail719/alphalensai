@@ -60,7 +60,9 @@ export function useRealtimeJobManager() {
 
             toast({
               title: "Analysis Complete",
-              description: "Your request has been processed successfully"
+              description: "Your request has been processed successfully",
+              duration: Infinity, // Reste visible jusqu'au clic
+              className: "fixed top-4 left-4 z-[100] max-w-sm"
             });
           } else if (job.status === 'error') {
             setActiveJobs(prev => prev.map(activeJob => 
@@ -72,7 +74,9 @@ export function useRealtimeJobManager() {
             toast({
               title: "Analysis Failed",
               description: "The request could not be processed",
-              variant: "destructive"
+              variant: "destructive",
+              duration: Infinity, // Reste visible jusqu'au clic
+              className: "fixed top-4 left-4 z-[100] max-w-sm"
             });
           } else if (job.status === 'running') {
             setActiveJobs(prev => prev.map(activeJob => 
