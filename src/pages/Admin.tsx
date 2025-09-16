@@ -13,7 +13,10 @@ import {
   Crown,
   User,
   TrendingUp,
-  Activity
+  Activity,
+  Euro,
+  Calculator,
+  BarChart3
 } from "lucide-react";
 import { useAdminActions } from "@/hooks/useAdminActions";
 import { useProfile } from "@/hooks/useProfile";
@@ -21,6 +24,7 @@ import { UsersTable } from "@/components/admin/UsersTable";
 import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { JobsMonitoring } from "@/components/admin/JobsMonitoring";
 import Layout from "@/components/Layout";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdminUser {
   id: string;
@@ -33,10 +37,21 @@ interface AdminUser {
   email?: string;
 }
 
+interface UserCostStats {
+  user_id: string;
+  email: string;
+  aiTradeSetupCount: number;
+  macroCommentaryCount: number;
+  reportCount: number;
+  totalCost: number;
+}
+
 export default function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [costStats, setCostStats] = useState<UserCostStats[]>([]);
+  const [loadingCosts, setLoadingCosts] = useState(false);
   const { isSuperUser } = useProfile();
   const { 
     fetchUsers, 
@@ -54,15 +69,99 @@ export default function Admin() {
     setLoading(false);
   };
 
+  const loadCostStats = async () => {
+    if (!isSuperUser) return;
+    setLoadingCosts(true);
+    
+    try {
+      // Charger les données de jobs avec les profils utilisateurs
+      const { data: jobsData, error: jobsError } = await supabase
+        .from('jobs')
+        .select(`
+          user_id,
+          feature,
+          created_at
+        `);
+
+      if (jobsError) throw jobsError;
+
+      // Charger les emails des utilisateurs
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id');
+
+      if (profilesError) throw profilesError;
+
+      // Récupérer les emails via l'edge function
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('fetch-users-with-emails', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      const usersWithEmails = response.data || [];
+
+      // Tarification par fonctionnalité
+      const featureCosts = {
+        'AI Trade setup': 0.06,
+        'Macro Commentary': 0.07,
+        'Report': 0.14
+      };
+
+      // Calculer les statistiques par utilisateur
+      const userStatsMap = new Map<string, UserCostStats>();
+
+      jobsData?.forEach(job => {
+        const userId = job.user_id;
+        const feature = job.feature;
+        
+        if (!userStatsMap.has(userId)) {
+          const user = usersWithEmails.find((u: any) => u.user_id === userId);
+          userStatsMap.set(userId, {
+            user_id: userId,
+            email: user?.email || 'Unknown',
+            aiTradeSetupCount: 0,
+            macroCommentaryCount: 0,
+            reportCount: 0,
+            totalCost: 0
+          });
+        }
+
+        const userStats = userStatsMap.get(userId)!;
+        const cost = featureCosts[feature as keyof typeof featureCosts] || 0;
+
+        if (feature === 'AI Trade setup') {
+          userStats.aiTradeSetupCount++;
+        } else if (feature === 'Macro Commentary') {
+          userStats.macroCommentaryCount++;
+        } else if (feature === 'Report') {
+          userStats.reportCount++;
+        }
+
+        userStats.totalCost += cost;
+      });
+
+      setCostStats(Array.from(userStatsMap.values()));
+    } catch (error) {
+      console.error('Error loading cost stats:', error);
+    } finally {
+      setLoadingCosts(false);
+    }
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadUsers();
+    await Promise.all([loadUsers(), loadCostStats()]);
     setRefreshing(false);
   };
 
   useEffect(() => {
     loadUsers();
-  }, []);
+    if (isSuperUser) {
+      loadCostStats();
+    }
+  }, [isSuperUser]);
 
   const stats = {
     total: users.length,
@@ -72,6 +171,16 @@ export default function Admin() {
     users: users.filter(u => u.role === 'user').length,
     admins: users.filter(u => u.role === 'admin').length,
     superUsers: users.filter(u => u.role === 'super_user').length,
+  };
+
+  // Statistiques de coûts globales
+  const globalCostStats = {
+    totalRequests: costStats.reduce((sum, user) => 
+      sum + user.aiTradeSetupCount + user.macroCommentaryCount + user.reportCount, 0),
+    totalCost: costStats.reduce((sum, user) => sum + user.totalCost, 0),
+    aiTradeSetupTotal: costStats.reduce((sum, user) => sum + user.aiTradeSetupCount, 0),
+    macroCommentaryTotal: costStats.reduce((sum, user) => sum + user.macroCommentaryCount, 0),
+    reportTotal: costStats.reduce((sum, user) => sum + user.reportCount, 0),
   };
 
   return (
@@ -194,6 +303,128 @@ export default function Admin() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Cost Tracking Section - Super Users Only */}
+        {isSuperUser && (
+          <Card className="rounded-2xl shadow-sm border">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <Euro className="h-5 w-5 text-success" />
+                Cost Tracking
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Monitor usage costs by user and feature
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              {/* Global Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <Card className="rounded-xl border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calculator className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">Total Requests</span>
+                    </div>
+                    <div className="text-xl font-bold">{globalCostStats.totalRequests}</div>
+                  </CardContent>
+                </Card>
+                <Card className="rounded-xl border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Euro className="h-4 w-4 text-success" />
+                      <span className="text-sm font-medium">Total Cost</span>
+                    </div>
+                    <div className="text-xl font-bold">€{globalCostStats.totalCost.toFixed(2)}</div>
+                  </CardContent>
+                </Card>
+                <Card className="rounded-xl border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BarChart3 className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">AI Trade</span>
+                    </div>
+                    <div className="text-xl font-bold">{globalCostStats.aiTradeSetupTotal}</div>
+                    <div className="text-xs text-muted-foreground">€{(globalCostStats.aiTradeSetupTotal * 0.06).toFixed(2)}</div>
+                  </CardContent>
+                </Card>
+                <Card className="rounded-xl border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BarChart3 className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm font-medium">Reports</span>
+                    </div>
+                    <div className="text-xl font-bold">{globalCostStats.reportTotal}</div>
+                    <div className="text-xs text-muted-foreground">€{(globalCostStats.reportTotal * 0.14).toFixed(2)}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* User Costs Table */}
+              <div className="rounded-xl border">
+                <div className="p-4 border-b">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Cost by User
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-3 font-medium text-sm">User</th>
+                        <th className="text-right p-3 font-medium text-sm">AI Trade</th>
+                        <th className="text-right p-3 font-medium text-sm">Macro</th>
+                        <th className="text-right p-3 font-medium text-sm">Reports</th>
+                        <th className="text-right p-3 font-medium text-sm">Total Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loadingCosts ? (
+                        <tr>
+                          <td colSpan={5} className="text-center p-8">
+                            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
+                            Loading cost data...
+                          </td>
+                        </tr>
+                      ) : costStats.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="text-center p-8 text-muted-foreground">
+                            No cost data available
+                          </td>
+                        </tr>
+                      ) : (
+                        costStats
+                          .sort((a, b) => b.totalCost - a.totalCost)
+                          .map((userStat) => (
+                            <tr key={userStat.user_id} className="border-b hover:bg-muted/50">
+                              <td className="p-3">
+                                <div className="font-medium text-sm">{userStat.email}</div>
+                              </td>
+                              <td className="text-right p-3">
+                                <div className="text-sm">{userStat.aiTradeSetupCount}</div>
+                                <div className="text-xs text-muted-foreground">€{(userStat.aiTradeSetupCount * 0.06).toFixed(2)}</div>
+                              </td>
+                              <td className="text-right p-3">
+                                <div className="text-sm">{userStat.macroCommentaryCount}</div>
+                                <div className="text-xs text-muted-foreground">€{(userStat.macroCommentaryCount * 0.07).toFixed(2)}</div>
+                              </td>
+                              <td className="text-right p-3">
+                                <div className="text-sm">{userStat.reportCount}</div>
+                                <div className="text-xs text-muted-foreground">€{(userStat.reportCount * 0.14).toFixed(2)}</div>
+                              </td>
+                              <td className="text-right p-3">
+                                <div className="font-semibold text-sm">€{userStat.totalCost.toFixed(2)}</div>
+                              </td>
+                            </tr>
+                          ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
