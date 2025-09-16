@@ -117,6 +117,13 @@ export function JobsMonitoring() {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user found');
+        return;
+      }
+
       // Fetch jobs with user emails using edge function
       const { data: usersData } = await supabase.functions.invoke('fetch-users-with-emails');
       const userEmailMap = usersData?.users?.reduce((acc: any, user: any) => {
@@ -128,10 +135,11 @@ export function JobsMonitoring() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('user_id', user.id)
         .single();
 
       const isSuperUser = profile?.role === 'super_user';
+      console.log('Current user role:', profile?.role, 'isSuperUser:', isSuperUser);
 
       // Build query - super_users see all jobs, others see only their own
       let query = supabase
@@ -142,7 +150,10 @@ export function JobsMonitoring() {
 
       // Add user filter for non-super users
       if (!isSuperUser) {
-        query = query.eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+        query = query.eq('user_id', user.id);
+        console.log('Filtering jobs for user:', user.id);
+      } else {
+        console.log('Loading all jobs for super_user');
       }
 
       if (featureFilter !== 'all') {
@@ -156,7 +167,12 @@ export function JobsMonitoring() {
 
       const { data: jobs, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching jobs:', error);
+        throw error;
+      }
+
+      console.log('Fetched jobs count:', jobs?.length || 0);
 
       // Add email to jobs and calculate durations
       const jobsWithDetails: JobDetail[] = (jobs || []).map((job: any) => {
