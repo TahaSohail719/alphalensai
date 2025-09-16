@@ -53,58 +53,44 @@ export function CreateUserDialog({ onCreateUser, loading: externalLoading, onSuc
       return;
     }
 
-    if (createMethod === 'password' && onCreateUser) {
-      // Use the traditional method with password
-      const result = await onCreateUser(
-        formData.email, 
-        formData.password, 
-        formData.role,
-        formData.brokerName || undefined
-      );
-
-      if (result.success) {
-        resetForm();
+    // Only use admin creation method since password method requires service role
+    setInternalLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
       }
-    } else if (createMethod === 'admin') {
-      // Use the admin method via edge function
-      setInternalLoading(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          throw new Error('No active session');
+
+      const response = await supabase.functions.invoke('create-user', {
+        body: {
+          email: formData.email.trim(),
+          role: formData.role,
+          brokerName: formData.brokerName.trim() || null
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
+      });
 
-        const response = await supabase.functions.invoke('create-user', {
-          body: {
-            email: formData.email.trim(),
-            role: formData.role,
-            brokerName: formData.brokerName.trim() || null
-          },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
-        });
-
-        if (response.error) {
-          throw new Error(response.error.message || 'Error during creation');
-        }
-
-        toast({
-          title: "✅ User Created",
-          description: `User ${formData.email} has been created with role ${formData.role}`,
-        });
-
-        resetForm();
-      } catch (error: any) {
-        console.error('Error creating user:', error);
-        toast({
-          title: "❌ Error",
-          description: error.message || "Unable to create user",
-          variant: "destructive",
-        });
-      } finally {
-        setInternalLoading(false);
+      if (response.error) {
+        throw new Error(response.error.message || 'Error during creation');
       }
+
+      toast({
+        title: "✅ User Created",
+        description: `User ${formData.email} has been created with role ${formData.role}`,
+      });
+
+      resetForm();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast({
+        title: "❌ Error",
+        description: error.message || "Unable to create user",
+        variant: "destructive",
+      });
+    } finally {
+      setInternalLoading(false);
     }
   };
 
@@ -136,24 +122,6 @@ export function CreateUserDialog({ onCreateUser, loading: externalLoading, onSuc
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSuperUser && (
-            <div className="space-y-2">
-              <Label>Creation Method</Label>
-              <Select 
-                value={createMethod} 
-                onValueChange={(value: 'password' | 'admin') => setCreateMethod(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin Creation (No Password)</SelectItem>
-                  <SelectItem value="password">Standard Creation (With Password)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
@@ -165,21 +133,6 @@ export function CreateUserDialog({ onCreateUser, loading: externalLoading, onSuc
               required
             />
           </div>
-          
-          {createMethod === 'password' && (
-            <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                placeholder="Enter secure password"
-                required
-                minLength={6}
-              />
-            </div>
-          )}
 
           <div className="space-y-2">
             <Label htmlFor="role">Role *</Label>
@@ -210,16 +163,14 @@ export function CreateUserDialog({ onCreateUser, loading: externalLoading, onSuc
             />
           </div>
 
-          {createMethod === 'admin' && (
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="active"
-                checked={formData.active}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-              />
-              <Label htmlFor="active">Active Account (Approved)</Label>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="active"
+              checked={formData.active}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
+            />
+            <Label htmlFor="active">Active Account (Approved)</Label>
+          </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button 

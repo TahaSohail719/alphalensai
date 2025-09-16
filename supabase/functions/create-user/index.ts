@@ -58,8 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if user is super_user
-    const { data: profile, error: profileError } = await supabase
+    // Check if user is super_user using the admin client to bypass RLS
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('user_id', user.id)
@@ -109,9 +109,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Update the profile with the specified role and approved status
+    // Update the profile with the specified role and approved status using admin client
     if (newUser.user) {
-      const { error: profileUpdateError } = await supabase
+      const { error: profileUpdateError } = await supabaseAdmin
         .from('profiles')
         .update({ 
           role: role,
