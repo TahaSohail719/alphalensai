@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ArrowLeft, Brain, Globe, TrendingUp, Calendar, Copy, ExternalLink, Loader2, BarChart3, Activity, AlertTriangle, ChevronDown, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -518,24 +519,28 @@ export default function MacroAnalysis() {
                   {analysis.sections.map((section, sectionIndex) => {
               const sectionKey = `${index}-${sectionIndex}`;
               const isExpanded = section.expanded || expandedSections.has(sectionKey);
-              return <div key={sectionIndex} className="border border-border rounded-lg overflow-hidden">
-                        <button onClick={() => toggleSection(index, sectionIndex)} className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex justify-between items-center group">
-                          <div className="flex items-center gap-3">
-                            {section.type === "overview" && <Brain className="h-4 w-4 text-primary" />}
-                            {section.type === "technical" && <BarChart3 className="h-4 w-4 text-blue-500" />}
-                            {section.type === "fundamental" && <TrendingUp className="h-4 w-4 text-green-500" />}
-                            {section.type === "outlook" && <Globe className="h-4 w-4 text-purple-500" />}
-                            <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                              {section.title}
-                            </span>
-                          </div>
-                          <ChevronDown className={cn("h-4 w-4 transition-transform text-muted-foreground group-hover:text-primary", isExpanded ? "rotate-180" : "")} />
-                        </button>
-                        
-                        {isExpanded && <div className="whitespace-pre-wrap text-foreground text-sm leading-relaxed bg-muted/20 p-4 rounded-lg border animate-accordion-down">
-                                {section.content}
-                              </div>}
-                      </div>;
+              return <Collapsible key={sectionIndex} open={isExpanded} onOpenChange={() => toggleSection(index, sectionIndex)}>
+                        <div className="border border-border rounded-lg overflow-hidden">
+                          <CollapsibleTrigger className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex justify-between items-center group">
+                            <div className="flex items-center gap-3">
+                              {section.type === "overview" && <Brain className="h-4 w-4 text-primary" />}
+                              {section.type === "technical" && <BarChart3 className="h-4 w-4 text-blue-500" />}
+                              {section.type === "fundamental" && <TrendingUp className="h-4 w-4 text-green-500" />}
+                              {section.type === "outlook" && <Globe className="h-4 w-4 text-purple-500" />}
+                              <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {section.title}
+                              </span>
+                            </div>
+                            <ChevronDown className={cn("h-4 w-4 transition-transform text-muted-foreground group-hover:text-primary", isExpanded ? "rotate-180" : "")} />
+                          </CollapsibleTrigger>
+                          
+                          <CollapsibleContent className="animate-accordion-down">
+                            <div className="whitespace-pre-wrap text-foreground text-sm leading-relaxed bg-muted/20 p-4 rounded-lg border">
+                              {section.content}
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>;
             })}
                   
                   {/* Trading Levels Extraction */}
