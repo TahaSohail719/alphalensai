@@ -245,9 +245,9 @@ export function JobsMonitoring() {
 
   // Filter jobs based on search term
   const filteredJobs = jobDetails.filter(job => 
-    job.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.promptSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.feature.toLowerCase().includes(searchTerm.toLowerCase())
+    (job.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (job.promptSummary || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (job.feature || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
