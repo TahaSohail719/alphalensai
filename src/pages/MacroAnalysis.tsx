@@ -245,7 +245,7 @@ export default function MacroAnalysis() {
         enableJobTracking: true,
         jobType: 'macro_analysis',
         instrument: selectedAsset.symbol,
-        feature: 'macro_commentary'
+        feature: 'Macro Commentary'
       });
       const responseJson = await handleResponseWithFallback(response, jobId);
       console.log('📊 [MacroAnalysis] Response JSON:', responseJson);

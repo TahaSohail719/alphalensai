@@ -238,7 +238,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         enableJobTracking: true,
         jobType: 'macro_commentary',
         instrument: instrument || 'markets',
-        feature: 'macro_commentary'
+        feature: 'Macro Commentary'
       });
 
       console.log('📊 [MacroCommentary] Job created with ID:', jobId);
@@ -434,7 +434,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         enableJobTracking: true,
         jobType: 'portfolio_analysis',
         instrument: 'portfolio',
-        feature: 'macro_commentary'
+        feature: 'Macro Commentary'
       });
 
       const result = await handleResponseWithFallback(response, jobId);
