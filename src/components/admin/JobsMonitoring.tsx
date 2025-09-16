@@ -78,6 +78,37 @@ export function JobsMonitoring() {
   const [userFilter, setUserFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Feature mapping for harmonized labels
+  const mapFeatureToLabel = (feature: string): string => {
+    switch (feature) {
+      case 'ai_trade_setup':
+      case 'AI Trade Setup':
+        return 'AI Trade Setup';
+      case 'macro_commentary':
+      case 'Macro Commentary':
+        return 'Macro Commentary';
+      case 'report':
+      case 'Report':
+        return 'Report';
+      default:
+        return feature;
+    }
+  };
+
+  const mapFeatureToKey = (feature: string): string => {
+    const mapped = mapFeatureToLabel(feature);
+    switch (mapped) {
+      case 'AI Trade Setup':
+        return 'ai_trade_setup';
+      case 'Macro Commentary':
+        return 'macro_commentary';
+      case 'Report':
+        return 'report';
+      default:
+        return feature;
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -93,15 +124,30 @@ export function JobsMonitoring() {
         return acc;
       }, {}) || {};
 
-      // Build query
+      // Check current user role for super_user permissions
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      const isSuperUser = profile?.role === 'super_user';
+
+      // Build query - super_users see all jobs, others see only their own
       let query = supabase
         .from('jobs')
         .select('*')
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false });
 
+      // Add user filter for non-super users
+      if (!isSuperUser) {
+        query = query.eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+      }
+
       if (featureFilter !== 'all') {
-        query = query.eq('feature', featureFilter);
+        const mappedFeature = mapFeatureToKey(featureFilter);
+        query = query.eq('feature', mappedFeature);
       }
 
       if (userFilter) {
@@ -130,20 +176,29 @@ export function JobsMonitoring() {
 
       setJobDetails(jobsWithDetails);
 
-      // Calculate overall stats
+      // Calculate overall stats with harmonized feature mapping
       const completedJobs = jobsWithDetails.filter(job => job.status === 'completed' || job.status === 'error');
       const totalDuration = completedJobs.reduce((sum, job) => sum + job.duration, 0);
       
-      // Apply macro commentary correction rule
-      const aiTradeSetupCount = jobsWithDetails.filter(job => job.feature === 'ai_trade_setup').length;
-      const macroCommentaryRawCount = jobsWithDetails.filter(job => job.feature === 'macro_commentary').length;
-      const macroCommentaryCount = macroCommentaryRawCount - aiTradeSetupCount; // Remove 1 for each AI Trade Setup
+      // Count jobs by harmonized feature labels
+      const featureCounts = {
+        'AI Trade Setup': 0,
+        'Macro Commentary': 0,
+        'Report': 0
+      };
+
+      jobsWithDetails.forEach(job => {
+        const harmonizedFeature = mapFeatureToLabel(job.feature);
+        if (featureCounts.hasOwnProperty(harmonizedFeature)) {
+          featureCounts[harmonizedFeature as keyof typeof featureCounts]++;
+        }
+      });
 
       const newStats: JobStats = {
         totalRequests: jobsWithDetails.length,
-        aiTradeSetupRequests: aiTradeSetupCount,
-        reportRequests: jobsWithDetails.filter(job => job.feature === 'report').length,
-        macroCommentaryRequests: Math.max(0, macroCommentaryCount), // Ensure non-negative
+        aiTradeSetupRequests: featureCounts['AI Trade Setup'],
+        reportRequests: featureCounts['Report'],
+        macroCommentaryRequests: featureCounts['Macro Commentary'],
         avgDuration: completedJobs.length > 0 ? Math.round(totalDuration / completedJobs.length) : 0,
         requestsPerDay: Math.round(jobsWithDetails.length / daysAgo)
       };
@@ -174,9 +229,10 @@ export function JobsMonitoring() {
           userStat.lastRequest = job.created_at;
         }
 
-        if (job.feature === 'ai_trade_setup') userStat.aiTradeCount++;
-        else if (job.feature === 'report') userStat.reportCount++;
-        else if (job.feature === 'macro_commentary') userStat.macroCount++;
+        const harmonizedFeature = mapFeatureToLabel(job.feature);
+        if (harmonizedFeature === 'AI Trade Setup') userStat.aiTradeCount++;
+        else if (harmonizedFeature === 'Report') userStat.reportCount++;
+        else if (harmonizedFeature === 'Macro Commentary') userStat.macroCount++;
       });
 
       // Calculate average durations per user
@@ -226,10 +282,11 @@ export function JobsMonitoring() {
   };
 
   const getFeatureBadgeColor = (feature: string) => {
-    switch (feature) {
-      case 'ai_trade_setup': return 'bg-blue-500';
-      case 'report': return 'bg-green-500';
-      case 'macro_commentary': return 'bg-purple-500';
+    const harmonizedFeature = mapFeatureToLabel(feature);
+    switch (harmonizedFeature) {
+      case 'AI Trade Setup': return 'bg-blue-500';
+      case 'Report': return 'bg-green-500';
+      case 'Macro Commentary': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
@@ -285,9 +342,9 @@ export function JobsMonitoring() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Features</SelectItem>
-              <SelectItem value="ai_trade_setup">AI Trade Setup</SelectItem>
-              <SelectItem value="report">Report</SelectItem>
-              <SelectItem value="macro_commentary">Macro Commentary</SelectItem>
+              <SelectItem value="AI Trade Setup">AI Trade Setup</SelectItem>
+              <SelectItem value="Report">Report</SelectItem>
+              <SelectItem value="Macro Commentary">Macro Commentary</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -460,7 +517,7 @@ export function JobsMonitoring() {
                       <TableCell className="font-medium">{job.email}</TableCell>
                       <TableCell>
                         <Badge className={cn("text-white", getFeatureBadgeColor(job.feature))}>
-                          {job.feature}
+                          {mapFeatureToLabel(job.feature)}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDuration(job.duration)}</TableCell>
