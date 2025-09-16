@@ -30,16 +30,16 @@ const mapTypeToFeature = (type: string): string => {
     case 'macro_commentary':
     case 'macro-commentary':
     case 'macro_analysis':
-      return 'Macro Commentary';
+      return 'macro_commentary';
     case 'trade_setup':
     case 'tradesetup':
     case 'ai_trade_setup':
-      return 'AI Trade Setup';
+      return 'ai_trade_setup';
     case 'reports':
     case 'report':
-      return 'Report';
+      return 'report';
     default:
-      return 'Macro Commentary'; // Default fallback
+      return 'macro_commentary'; // Default fallback
   }
 };
 

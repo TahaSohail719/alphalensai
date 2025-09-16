@@ -135,14 +135,14 @@ export function JobsMonitoring() {
       const totalDuration = completedJobs.reduce((sum, job) => sum + job.duration, 0);
       
       // Apply macro commentary correction rule
-      const aiTradeSetupCount = jobsWithDetails.filter(job => job.feature === 'AI Trade Setup').length;
-      const macroCommentaryRawCount = jobsWithDetails.filter(job => job.feature === 'Macro Commentary').length;
+      const aiTradeSetupCount = jobsWithDetails.filter(job => job.feature === 'ai_trade_setup').length;
+      const macroCommentaryRawCount = jobsWithDetails.filter(job => job.feature === 'macro_commentary').length;
       const macroCommentaryCount = macroCommentaryRawCount - aiTradeSetupCount; // Remove 1 for each AI Trade Setup
 
       const newStats: JobStats = {
         totalRequests: jobsWithDetails.length,
         aiTradeSetupRequests: aiTradeSetupCount,
-        reportRequests: jobsWithDetails.filter(job => job.feature === 'Report').length,
+        reportRequests: jobsWithDetails.filter(job => job.feature === 'report').length,
         macroCommentaryRequests: Math.max(0, macroCommentaryCount), // Ensure non-negative
         avgDuration: completedJobs.length > 0 ? Math.round(totalDuration / completedJobs.length) : 0,
         requestsPerDay: Math.round(jobsWithDetails.length / daysAgo)
@@ -174,9 +174,9 @@ export function JobsMonitoring() {
           userStat.lastRequest = job.created_at;
         }
 
-        if (job.feature === 'AI Trade Setup') userStat.aiTradeCount++;
-        else if (job.feature === 'Report') userStat.reportCount++;
-        else if (job.feature === 'Macro Commentary') userStat.macroCount++;
+        if (job.feature === 'ai_trade_setup') userStat.aiTradeCount++;
+        else if (job.feature === 'report') userStat.reportCount++;
+        else if (job.feature === 'macro_commentary') userStat.macroCount++;
       });
 
       // Calculate average durations per user
@@ -227,9 +227,9 @@ export function JobsMonitoring() {
 
   const getFeatureBadgeColor = (feature: string) => {
     switch (feature) {
-      case 'AI Trade Setup': return 'bg-blue-500';
-      case 'Report': return 'bg-green-500';
-      case 'Macro Commentary': return 'bg-purple-500';
+      case 'ai_trade_setup': return 'bg-blue-500';
+      case 'report': return 'bg-green-500';
+      case 'macro_commentary': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
@@ -285,9 +285,9 @@ export function JobsMonitoring() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Features</SelectItem>
-              <SelectItem value="AI Trade Setup">AI Trade Setup</SelectItem>
-              <SelectItem value="Report">Report</SelectItem>
-              <SelectItem value="Macro Commentary">Macro Commentary</SelectItem>
+              <SelectItem value="ai_trade_setup">AI Trade Setup</SelectItem>
+              <SelectItem value="report">Report</SelectItem>
+              <SelectItem value="macro_commentary">Macro Commentary</SelectItem>
             </SelectContent>
           </Select>
         </div>
