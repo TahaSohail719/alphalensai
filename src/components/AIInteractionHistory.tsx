@@ -319,17 +319,29 @@ export function AIInteractionHistory() {
         );
       }
       
-      // Fallback for unstructured objects - but make it more readable
+      // Fallback for unstructured objects - present a readable summary and let raw be viewed below
+      const stringEntries = Object.entries(response)
+        .filter(([_, v]) => typeof v === 'string' && (v as string).length > 0)
+        .slice(0, 6) as [string, string][];
+
       return (
-        <details className="group">
-          <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2">
-            <ChevronDown className="h-3 w-3 group-open:rotate-180 transition-transform" />
-            View raw response data
-          </summary>
-          <pre className="text-xs text-muted-foreground bg-muted/50 p-4 rounded-md overflow-auto max-h-64 mt-3 border border-border/30 font-mono">
-            {JSON.stringify(response, null, 2)}
-          </pre>
-        </details>
+        <div className="space-y-3">
+          <div className="p-3 bg-muted/20 rounded-md border-l-2 border-muted-foreground/20">
+            <p className="text-sm text-muted-foreground">
+              Unformatted response detected. See the raw response section below for full details.
+            </p>
+          </div>
+          {stringEntries.length > 0 && (
+            <div className="space-y-2">
+              {stringEntries.map(([k, v]) => (
+                <div key={k} className="text-sm">
+                  <span className="font-medium capitalize text-foreground">{k.replace(/_/g, ' ')}:</span>{' '}
+                  <span className="text-muted-foreground whitespace-pre-wrap">{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       );
     }
     
@@ -473,8 +485,15 @@ export function AIInteractionHistory() {
 
                         <div className="space-y-4">
                           <div>
-                            <h4 className="font-medium text-sm mb-3 text-foreground">AI Response (Formatted)</h4>
-                            {renderFormattedResponse(interaction.ai_response)}
+                            <details className="group">
+                              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 py-2">
+                                <ChevronDown className="h-3 w-3 group-open:rotate-180 transition-transform" />
+                                View formatted response
+                              </summary>
+                              <div className="mt-3 animate-fade-in">
+                                {renderFormattedResponse(interaction.ai_response)}
+                              </div>
+                            </details>
                           </div>
                           
                           <div>
