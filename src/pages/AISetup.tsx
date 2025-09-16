@@ -213,6 +213,48 @@ export default function AISetup() {
     customNotes: ""
   });
 
+  // Map instrument to TradingView symbol
+  const mapInstrumentToSymbol = (instrument: string): string => {
+    const symbolMap: Record<string, string> = {
+      "EUR/USD": "EURUSD",
+      "GBP/USD": "GBPUSD", 
+      "USD/JPY": "USDJPY",
+      "USD/CHF": "USDCHF",
+      "AUD/USD": "AUDUSD",
+      "USD/CAD": "USDCAD",
+      "NZD/USD": "NZDUSD",
+      "EUR/GBP": "EURGBP",
+      "EUR/JPY": "EURJPY",
+      "GBP/JPY": "GBPJPY",
+      "BTC/USD": "BTCUSD",
+      "ETH/USD": "ETHUSD",
+      "BNB/USD": "BNBUSD",
+      "ADA/USD": "ADAUSD",
+      "SOL/USD": "SOLUSD",
+      "DOT/USD": "DOTUSD",
+      "MATIC/USD": "MATICUSD",
+      "GOLD": "XAUUSD",
+      "SILVER": "XAGUSD",
+      "WTI": "USOIL",
+      "BRENT": "UKOIL",
+      "AAPL": "AAPL",
+      "TSLA": "TSLA",
+      "MSFT": "MSFT",
+      "GOOGL": "GOOGL",
+      "AMZN": "AMZN",
+      "NVDA": "NVDA",
+      "META": "META",
+      "NFLX": "NFLX"
+    };
+    return symbolMap[instrument] || "EURUSD";
+  };
+
+  // Update selected symbol when instrument changes
+  React.useEffect(() => {
+    const newSymbol = mapInstrumentToSymbol(parameters.instrument);
+    setSelectedSymbol(newSymbol);
+  }, [parameters.instrument]);
+
   const generateTradeSetup = async () => {
     setIsGenerating(true);
     setError(null);
