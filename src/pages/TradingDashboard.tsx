@@ -70,7 +70,7 @@ export default function TradingDashboard() {
   // Selected asset from search bar
   const [selectedAssetProfile, setSelectedAssetProfile] = useState<any>(null);
 
-  // WebSocket for real-time prices - Fixed synchronization
+  // WebSocket for real-time prices - Twelve Data API
   useEffect(() => {
     const symbol = getSymbolForAsset(selectedAsset);
     let ws: WebSocket;
@@ -82,12 +82,22 @@ export default function TradingDashboard() {
         ws.close();
       }
 
-      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`);
+      ws = new WebSocket('wss://ws.twelvedata.com/v1/quotes');
       
       ws.onopen = () => {
         if (isMounted) {
           setIsConnected(true);
           console.log(`Connected to ${selectedAsset} (${symbol}) price feed`);
+          
+          // Subscribe to symbol with API key
+          const subscribeMessage = {
+            action: "subscribe",
+            params: {
+              symbols: symbol,
+              apikey: "d325jn9r01qn0gi2h72gd325jn9r01qn0gi2h730"
+            }
+          };
+          ws.send(JSON.stringify(subscribeMessage));
         }
       };
 
@@ -96,13 +106,20 @@ export default function TradingDashboard() {
         
         try {
           const data = JSON.parse(event.data);
-          // Verify the symbol matches current selection
-          if (data.s === symbol) {
+          
+          // Handle subscription confirmation
+          if (data.status === 'ok') {
+            console.log('Subscription confirmed for:', symbol);
+            return;
+          }
+          
+          // Handle price data
+          if (data.symbol === symbol && data.price) {
             setPriceData({
               symbol: selectedAsset,
-              price: parseFloat(data.c),
-              change24h: parseFloat(data.P),
-              volume: parseFloat(data.v)
+              price: parseFloat(data.price),
+              change24h: data.day_change_pct ? parseFloat(data.day_change_pct) : 0,
+              volume: data.volume ? parseFloat(data.volume) : 0
             });
           }
         } catch (error) {
