@@ -16,6 +16,8 @@ import TradeResultPanel from "@/components/TradeResultPanel";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { useGlobalLoading } from "@/components/GlobalLoadingProvider";
 import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
+import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
+import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 
 const { useState } = React;
 
@@ -193,6 +195,7 @@ export default function AISetup() {
   const { toast } = useToast();
   const globalLoading = useGlobalLoading();
   const { logInteraction } = useAIInteractionLogger();
+  const { createJob } = useRealtimeJobManager();
   const [step, setStep] = useState<"parameters" | "generated">("parameters");
   const [isGenerating, setIsGenerating] = useState(false);
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
@@ -227,7 +230,19 @@ export default function AISetup() {
     const progressInterval = globalLoading.startProcessing(requestId);
     
     try {
-      // STEP 1: macro-commentary
+      // Create Realtime jobs for both requests
+      const macroJobId = await createJob(
+        'macro_commentary',
+        parameters.instrument,
+        {
+          type: "RAG",
+          mode: "run",
+          instrument: parameters.instrument,
+          question: buildQuestion(parameters)
+        }
+      );
+
+      // STEP 1: macro-commentary with Realtime tracking
       const macroPayload = {
         type: "RAG",
         mode: "run",
@@ -239,13 +254,21 @@ export default function AISetup() {
 
       let macroResult;
       try {
-        macroResult = await safeFetchJson(
+        const { response: macroResponse, jobId: macroJobIdFromRequest } = await enhancedPostRequest(
           'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+          macroPayload,
           {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(macroPayload),
-            signal: AbortSignal.timeout ? AbortSignal.timeout(180000) : undefined
+            enableJobTracking: true,
+            jobType: 'macro_commentary',
+            instrument: parameters.instrument
+          }
+        );
+        
+        macroResult = await handleResponseWithFallback(
+          macroResponse,
+          macroJobIdFromRequest,
+          (realtimeResult) => {
+            console.log('📊[AISetup] STEP1 Realtime result received:', realtimeResult);
           }
         );
       } catch (e) {
@@ -257,7 +280,19 @@ export default function AISetup() {
       const macroInsight = extractMacroInsight(macroResult);
       console.log('📊[AISetup] STEP1 macroInsight length =', macroInsight?.length);
 
-      // STEP 2: ai-trade-setup
+      // Create second Realtime job for trade setup
+      const tradeJobId = await createJob(
+        'trade_setup',
+        parameters.instrument,
+        {
+          ...parameters,
+          mode: "run",
+          type: "trade",
+          macroInsight
+        }
+      );
+
+      // STEP 2: ai-trade-setup with Realtime tracking
       const payload = {
         ...parameters,
         mode: "run",
@@ -267,13 +302,21 @@ export default function AISetup() {
 
       console.log('📊[AISetup] STEP2 Request trade-setup, macroInsight length =', macroInsight?.length);
 
-      const result = await safeFetchJson(
+      const { response: tradeResponse, jobId: tradeJobIdFromRequest } = await enhancedPostRequest(
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(payload),
-          signal: AbortSignal.timeout ? AbortSignal.timeout(180000) : undefined
+          enableJobTracking: true,
+          jobType: 'trade_setup',
+          instrument: parameters.instrument
+        }
+      );
+
+      const result = await handleResponseWithFallback(
+        tradeResponse,
+        tradeJobIdFromRequest,
+        (realtimeResult) => {
+          console.log('📊[AISetup] STEP2 Realtime result received:', realtimeResult);
         }
       );
 

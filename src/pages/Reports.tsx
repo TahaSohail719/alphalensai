@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { safePostRequest } from "@/lib/safe-request";
 import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
+import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
+import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 
 interface AssetProfile {
   id: number;
@@ -55,6 +57,7 @@ export default function Reports() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logInteraction } = useAIInteractionLogger();
+  const { createJob } = useRealtimeJobManager();
   const [step, setStep] = useState<"compose" | "preview" | "generated">("compose");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
@@ -182,8 +185,8 @@ export default function Reports() {
       const includedSections = availableSections.filter(s => s.included);
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
-      // Call to n8n webhook
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+      // Prepare payload for n8n webhook
+      const reportPayload = {
         mode: "run",
         type: "reports",
         question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
@@ -199,37 +202,85 @@ export default function Reports() {
           userNotes: section.userNotes || ""
         })),
         customNotes: reportConfig.customNotes
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Report generation simulation for display
-      const generatedSections = includedSections.map(section => ({
-        title: section.title,
-        content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
-        userNotes: section.userNotes || ""
-      }));
-
-      const newReport: GeneratedReport = {
-        id: Date.now().toString(),
-        title: reportConfig.title,
-        sections: generatedSections,
-        customNotes: reportConfig.customNotes,
-        exportFormat: reportConfig.exportFormat,
-        createdAt: new Date(),
-        status: "generated"
       };
 
-      setCurrentReport(newReport);
-      setStep("generated");
+      // Create Realtime job for report generation
+      const jobId = await createJob(
+        'reports',
+        selectedAsset?.symbol || "Multi-Asset",
+        reportPayload
+      );
+
+      // Call to n8n webhook with Realtime tracking
+      const { response, jobId: jobIdFromRequest } = await enhancedPostRequest(
+        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        reportPayload,
+        {
+          enableJobTracking: true,
+          jobType: 'reports',
+          instrument: selectedAsset?.symbol || "Multi-Asset"
+        }
+      );
+
+      // Handle response with Realtime fallback
+      const result = await handleResponseWithFallback(
+        response,
+        jobIdFromRequest,
+        (realtimeResult) => {
+          console.log('📊[Reports] Realtime result received:', realtimeResult);
+          
+          // Process realtime result if needed
+          if (realtimeResult && !realtimeResult.error) {
+            // Update UI with realtime result if available
+            const generatedSections = includedSections.map(section => ({
+              title: section.title,
+              content: realtimeResult.sections?.[section.id] || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+              userNotes: section.userNotes || ""
+            }));
+
+            const newReport: GeneratedReport = {
+              id: Date.now().toString(),
+              title: reportConfig.title,
+              sections: generatedSections,
+              customNotes: reportConfig.customNotes,
+              exportFormat: reportConfig.exportFormat,
+              createdAt: new Date(),
+              status: "generated"
+            };
+
+            setCurrentReport(newReport);
+            setStep("generated");
+          }
+        }
+      );
+
+      // Report generation simulation for display (fallback)
+      if (!currentReport) {
+        const generatedSections = includedSections.map(section => ({
+          title: section.title,
+          content: `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+          userNotes: section.userNotes || ""
+        }));
+
+        const newReport: GeneratedReport = {
+          id: Date.now().toString(),
+          title: reportConfig.title,
+          sections: generatedSections,
+          customNotes: reportConfig.customNotes,
+          exportFormat: reportConfig.exportFormat,
+          createdAt: new Date(),
+          status: "generated"
+        };
+
+        setCurrentReport(newReport);
+        setStep("generated");
+      }
 
       // Log successful interaction
       await logInteraction({
         featureName: 'report',
         userQuery: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. Custom notes: ${reportConfig.customNotes}`,
-        aiResponse: newReport
+        aiResponse: currentReport
       });
 
       toast({
