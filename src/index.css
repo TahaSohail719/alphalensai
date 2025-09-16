@@ -359,6 +359,16 @@
     overflow-x: hidden !important;
   }
   
+  /* Scrollbar hiding utilities */
+  .scrollbar-none {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
   .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
