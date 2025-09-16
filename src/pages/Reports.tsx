@@ -208,7 +208,8 @@ export default function Reports() {
       const jobId = await createJob(
         'reports',
         selectedAsset?.symbol || "Multi-Asset",
-        reportPayload
+        reportPayload,
+        'Report'
       );
 
       // Call to n8n webhook with Realtime tracking

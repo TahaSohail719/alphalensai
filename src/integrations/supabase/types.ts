@@ -416,6 +416,7 @@ export type Database = {
       jobs: {
         Row: {
           created_at: string
+          feature: string | null
           id: string
           request_payload: Json
           response_payload: Json | null
@@ -425,6 +426,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          feature?: string | null
           id?: string
           request_payload: Json
           response_payload?: Json | null
@@ -434,6 +436,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          feature?: string | null
           id?: string
           request_payload?: Json
           response_payload?: Json | null

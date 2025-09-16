@@ -12,12 +12,14 @@ import {
   RefreshCw,
   Crown,
   User,
-  TrendingUp
+  TrendingUp,
+  Activity
 } from "lucide-react";
 import { useAdminActions } from "@/hooks/useAdminActions";
 import { useProfile } from "@/hooks/useProfile";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
+import { JobsMonitoring } from "@/components/admin/JobsMonitoring";
 import Layout from "@/components/Layout";
 
 interface AdminUser {
@@ -193,83 +195,103 @@ export default function Admin() {
           </CardContent>
         </Card>
 
-        {/* Users Management */}
-        <Card className="rounded-2xl shadow-sm border">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
-            <CardDescription className="text-sm sm:text-base">
-              Manage user accounts, approve registrations, and assign roles
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <Tabs defaultValue="all" className="space-y-4">
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-                <TabsList className="grid w-full grid-cols-4 min-w-[640px] sm:min-w-full">
-                  <TabsTrigger value="all" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
-                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="break-words">All ({stats.total})</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="pending" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
-                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="break-words">Pending ({stats.pending})</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="approved" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
-                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="break-words">Approved ({stats.approved})</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="rejected" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
-                    <UserX className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="break-words">Rejected ({stats.rejected})</span>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              User Management
+            </TabsTrigger>
+            <TabsTrigger value="monitoring" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Jobs Monitoring
+            </TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="all">
-                <UsersTable
-                  users={users}
-                  onUpdateStatus={updateUserStatus}
-                  onUpdateRole={updateUserRole}
-                  onDeleteUser={deleteUser}
-                  loading={actionLoading}
-                  onRefresh={loadUsers}
-                />
-              </TabsContent>
+          <TabsContent value="users">
+            {/* Users Management */}
+            <Card className="rounded-2xl shadow-sm border">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Manage user accounts, approve registrations, and assign roles
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Tabs defaultValue="all" className="space-y-4">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <TabsList className="grid w-full grid-cols-4 min-w-[640px] sm:min-w-full">
+                      <TabsTrigger value="all" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="break-words">All ({stats.total})</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="pending" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="break-words">Pending ({stats.pending})</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="approved" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                        <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="break-words">Approved ({stats.approved})</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="rejected" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                        <UserX className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="break-words">Rejected ({stats.rejected})</span>
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
 
-              <TabsContent value="pending">
-                <UsersTable
-                  users={users.filter(u => u.status === 'pending')}
-                  onUpdateStatus={updateUserStatus}
-                  onUpdateRole={updateUserRole}
-                  onDeleteUser={deleteUser}
-                  loading={actionLoading}
-                  onRefresh={loadUsers}
-                />
-              </TabsContent>
+                  <TabsContent value="all">
+                    <UsersTable
+                      users={users}
+                      onUpdateStatus={updateUserStatus}
+                      onUpdateRole={updateUserRole}
+                      onDeleteUser={deleteUser}
+                      loading={actionLoading}
+                      onRefresh={loadUsers}
+                    />
+                  </TabsContent>
 
-              <TabsContent value="approved">
-                <UsersTable
-                  users={users.filter(u => u.status === 'approved')}
-                  onUpdateStatus={updateUserStatus}
-                  onUpdateRole={updateUserRole}
-                  onDeleteUser={deleteUser}
-                  loading={actionLoading}
-                  onRefresh={loadUsers}
-                />
-              </TabsContent>
+                  <TabsContent value="pending">
+                    <UsersTable
+                      users={users.filter(u => u.status === 'pending')}
+                      onUpdateStatus={updateUserStatus}
+                      onUpdateRole={updateUserRole}
+                      onDeleteUser={deleteUser}
+                      loading={actionLoading}
+                      onRefresh={loadUsers}
+                    />
+                  </TabsContent>
 
-              <TabsContent value="rejected">
-                <UsersTable
-                  users={users.filter(u => u.status === 'rejected')}
-                  onUpdateStatus={updateUserStatus}
-                  onUpdateRole={updateUserRole}
-                  onDeleteUser={deleteUser}
-                  loading={actionLoading}
-                  onRefresh={loadUsers}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                  <TabsContent value="approved">
+                    <UsersTable
+                      users={users.filter(u => u.status === 'approved')}
+                      onUpdateStatus={updateUserStatus}
+                      onUpdateRole={updateUserRole}
+                      onDeleteUser={deleteUser}
+                      loading={actionLoading}
+                      onRefresh={loadUsers}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="rejected">
+                    <UsersTable
+                      users={users.filter(u => u.status === 'rejected')}
+                      onUpdateStatus={updateUserStatus}
+                      onUpdateRole={updateUserRole}
+                      onDeleteUser={deleteUser}
+                      loading={actionLoading}
+                      onRefresh={loadUsers}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="monitoring">
+            <JobsMonitoring />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

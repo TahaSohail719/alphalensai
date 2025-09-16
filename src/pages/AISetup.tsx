@@ -239,7 +239,8 @@ export default function AISetup() {
           mode: "run",
           instrument: parameters.instrument,
           question: buildQuestion(parameters)
-        }
+        },
+        'Macro Commentary'
       );
 
       // STEP 1: macro-commentary with Realtime tracking
@@ -289,7 +290,8 @@ export default function AISetup() {
           mode: "run",
           type: "trade",
           macroInsight
-        }
+        },
+        'AI Trade Setup'
       );
 
       // STEP 2: ai-trade-setup with Realtime tracking

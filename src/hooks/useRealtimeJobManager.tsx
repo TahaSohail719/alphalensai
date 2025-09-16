@@ -24,6 +24,25 @@ interface ActiveJob {
   resultData?: any;
 }
 
+// Map job types to features for backward compatibility
+const mapTypeToFeature = (type: string): string => {
+  switch (type.toLowerCase()) {
+    case 'macro_commentary':
+    case 'macro-commentary':
+    case 'macro_analysis':
+      return 'Macro Commentary';
+    case 'trade_setup':
+    case 'tradesetup':
+    case 'ai_trade_setup':
+      return 'AI Trade Setup';
+    case 'reports':
+    case 'report':
+      return 'Report';
+    default:
+      return 'Macro Commentary'; // Default fallback
+  }
+};
+
 export function useRealtimeJobManager() {
   const [activeJobs, setActiveJobs] = useState<ActiveJob[]>([]);
   const { user } = useAuth();
@@ -97,7 +116,8 @@ export function useRealtimeJobManager() {
   const createJob = useCallback(async (
     type: string,
     instrument: string,
-    requestPayload: any
+    requestPayload: any,
+    feature?: string
   ): Promise<string> => {
     if (!user?.id) {
       throw new Error('User not authenticated');
@@ -105,14 +125,18 @@ export function useRealtimeJobManager() {
 
     const jobId = uuidv4();
 
-    // Create job in database
+    // Map type to feature if not explicitly provided
+    const jobFeature = feature || mapTypeToFeature(type);
+
+    // Create job in database with feature field
     const { error } = await supabase
       .from('jobs')
       .insert({
         id: jobId,
         status: 'pending',
         request_payload: requestPayload,
-        user_id: user.id
+        user_id: user.id,
+        feature: jobFeature
       });
 
     if (error) {
