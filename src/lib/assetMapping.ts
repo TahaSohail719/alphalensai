@@ -1,7 +1,7 @@
 // Mapping des actifs vers les symboles Binance
 export const assetToBinanceSymbol: Record<string, string> = {
   'EUR/USD': 'EURUSDT',  // Proxy via Tether
-  'GBP/USD': 'GBPUSDT',  // Proxy via Tether
+  'GBP/USD': 'EURGBP',   // Utilise la paire EUR/GBP disponible sur Binance
   'USD/JPY': 'BTCUSDT',  // Fallback vers BTC (pas de JPY direct)
   'GOLD': 'PAXGUSDT',    // PAX Gold
   'Gold': 'PAXGUSDT',    // PAX Gold
