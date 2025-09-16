@@ -2,6 +2,7 @@ import { useState } from "react";
 import ApplyToPortfolioButton from "./ApplyToPortfolioButton";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { safePostRequest } from "@/lib/safe-request";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useAIInteractionLogger } from '@/hooks/useAIInteractionLogger';
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MacroCommentaryProps {
