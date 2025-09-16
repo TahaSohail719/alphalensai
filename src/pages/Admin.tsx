@@ -27,6 +27,8 @@ import { JobsMonitoring } from "@/components/admin/JobsMonitoring";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { startOfDay } from 'date-fns';
+import { RealtimeDiagnostic } from "@/components/RealtimeDiagnostic";
 
 interface AdminUser {
   id: string;
@@ -504,7 +506,7 @@ export default function Admin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
@@ -513,6 +515,11 @@ export default function Admin() {
               <Activity className="h-4 w-4" />
               Jobs Monitoring
             </TabsTrigger>
+            {isSuperUser && (
+              <TabsTrigger value="realtime-diagnostic" className="flex items-center gap-2">
+                🔍 Realtime Diagnostic
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="users">
@@ -598,6 +605,12 @@ export default function Admin() {
           <TabsContent value="monitoring">
             <JobsMonitoring />
           </TabsContent>
+
+          {isSuperUser && (
+            <TabsContent value="realtime-diagnostic">
+              <RealtimeDiagnostic />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </Layout>

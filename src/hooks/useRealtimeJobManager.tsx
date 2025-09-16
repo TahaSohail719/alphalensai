@@ -13,6 +13,8 @@ interface JobStatus {
   response_payload?: any;
   created_at: string;
   updated_at: string;
+  feature?: string;
+  user_id: string;
 }
 
 interface ActiveJob {
@@ -50,7 +52,12 @@ export function useRealtimeJobManager() {
 
   // Subscribe to realtime updates for jobs table
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('🔍 [RealtimeJobManager] No user, skipping subscription');
+      return;
+    }
+
+    console.log('🔍 [RealtimeJobManager] Setting up subscription for user:', user.id);
 
     const channel = supabase
       .channel('jobs-changes')
@@ -63,9 +70,22 @@ export function useRealtimeJobManager() {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
+          console.log('🔍 [RealtimeJobManager] Received realtime event:', {
+            eventType: payload.eventType,
+            old: payload.old,
+            new: payload.new,
+            timestamp: new Date().toISOString()
+          });
+
           const job = payload.new as JobStatus;
           
           if (job.status === 'completed' && job.response_payload) {
+            console.log('✅ [RealtimeJobManager] Job completed:', {
+              jobId: job.id,
+              feature: job.feature,
+              hasResponse: !!job.response_payload
+            });
+
             // Update the active job with results
             setActiveJobs(prev => prev.map(activeJob => 
               activeJob.id === job.id 
@@ -84,6 +104,11 @@ export function useRealtimeJobManager() {
               className: "fixed top-4 left-4 z-[100] max-w-sm"
             });
           } else if (job.status === 'error') {
+            console.log('❌ [RealtimeJobManager] Job failed:', {
+              jobId: job.id,
+              feature: job.feature
+            });
+
             setActiveJobs(prev => prev.map(activeJob => 
               activeJob.id === job.id 
                 ? { ...activeJob, status: 'error' }
@@ -98,17 +123,36 @@ export function useRealtimeJobManager() {
               className: "fixed top-4 left-4 z-[100] max-w-sm"
             });
           } else if (job.status === 'running') {
+            console.log('🔄 [RealtimeJobManager] Job running:', {
+              jobId: job.id,
+              feature: job.feature
+            });
+
             setActiveJobs(prev => prev.map(activeJob => 
               activeJob.id === job.id 
                 ? { ...activeJob, status: 'running' }
                 : activeJob
             ));
+          } else {
+            console.log('ℹ️ [RealtimeJobManager] Job status update:', {
+              jobId: job.id,
+              status: job.status,
+              hasResponse: !!job.response_payload
+            });
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('🔍 [RealtimeJobManager] Channel status:', status, err);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ [RealtimeJobManager] Successfully subscribed to jobs channel');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ [RealtimeJobManager] Channel subscription error:', err);
+        }
+      });
 
     return () => {
+      console.log('🔍 [RealtimeJobManager] Cleaning up subscription');
       supabase.removeChannel(channel);
     };
   }, [user?.id, toast]);
