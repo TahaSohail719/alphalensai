@@ -8,21 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  ArrowLeft, 
-  Brain, 
-  Globe, 
-  TrendingUp, 
-  Calendar, 
-  Copy, 
-  ExternalLink,
-  Loader2,
-  BarChart3,
-  Activity,
-  AlertTriangle,
-  ChevronDown,
-  Target
-} from "lucide-react";
+import { ArrowLeft, Brain, Globe, TrendingUp, Calendar, Copy, ExternalLink, Loader2, BarChart3, Activity, AlertTriangle, ChevronDown, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -30,16 +16,16 @@ import { useToast } from "@/hooks/use-toast";
 import { safePostRequest } from "@/lib/safe-request";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { TechnicalDashboard } from "@/components/TechnicalDashboard";
-
-const { useState, useEffect } = React;
-
+const {
+  useState,
+  useEffect
+} = React;
 interface AnalysisSection {
   title: string;
   content: string;
   type: "overview" | "technical" | "fundamental" | "outlook";
   expanded: boolean;
 }
-
 interface MacroAnalysis {
   query: string;
   timestamp: Date;
@@ -50,30 +36,31 @@ interface MacroAnalysis {
     type: "news" | "data" | "research";
   }>;
 }
-
 interface TradingLevels {
   supports: string[];
   resistances: string[];
-  indicators: { [key: string]: string };
+  indicators: {
+    [key: string]: string;
+  };
   invalidation?: string;
 }
-
 interface AssetInfo {
   symbol: string;
   display: string;
   market: "FX" | "CRYPTO";
   tradingViewSymbol: string;
 }
-
 export default function MacroAnalysis() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedAsset, setSelectedAsset] = useState<AssetInfo>({
     symbol: "EUR/USD",
-    display: "EUR/USD", 
+    display: "EUR/USD",
     market: "FX",
     tradingViewSymbol: "EURUSD"
   });
@@ -81,31 +68,91 @@ export default function MacroAnalysis() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<string>("");
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
-  
+
   // All available assets from Supabase
   const assets: AssetInfo[] = [
-    // Major FX Pairs
-    { symbol: "EUR/USD", display: "EUR/USD", market: "FX", tradingViewSymbol: "EURUSD" },
-    { symbol: "GBP/USD", display: "GBP/USD", market: "FX", tradingViewSymbol: "GBPUSD" },
-    { symbol: "USD/JPY", display: "USD/JPY", market: "FX", tradingViewSymbol: "USDJPY" },
-    { symbol: "AUDUSD=X", display: "AUD/USD", market: "FX", tradingViewSymbol: "AUDUSD" },
-    { symbol: "NZDUSD=X", display: "NZD/USD", market: "FX", tradingViewSymbol: "NZDUSD" },
-    { symbol: "USDCAD=X", display: "USD/CAD", market: "FX", tradingViewSymbol: "USDCAD" },
-    { symbol: "USDCHF=X", display: "USD/CHF", market: "FX", tradingViewSymbol: "USDCHF" },
-    
-    // Cross Pairs
-    { symbol: "EURGBP=X", display: "EUR/GBP", market: "FX", tradingViewSymbol: "EURGBP" },
-    { symbol: "EURJPY=X", display: "EUR/JPY", market: "FX", tradingViewSymbol: "EURJPY" },
-    { symbol: "GBPJPY=X", display: "GBP/JPY", market: "FX", tradingViewSymbol: "GBPJPY" },
-    
-    // Crypto
-    { symbol: "BTC-USD", display: "Bitcoin", market: "CRYPTO", tradingViewSymbol: "BTCUSD" },
-    { symbol: "ETH-USD", display: "Ethereum", market: "CRYPTO", tradingViewSymbol: "ETHUSD" },
-    { symbol: "ADA-USD", display: "Cardano", market: "CRYPTO", tradingViewSymbol: "ADAUSD" },
-    { symbol: "DOGE-USD", display: "Dogecoin", market: "CRYPTO", tradingViewSymbol: "DOGEUSD" },
-    { symbol: "SOL-USD", display: "Solana", market: "CRYPTO", tradingViewSymbol: "SOLUSD" }
-  ];
-  
+  // Major FX Pairs
+  {
+    symbol: "EUR/USD",
+    display: "EUR/USD",
+    market: "FX",
+    tradingViewSymbol: "EURUSD"
+  }, {
+    symbol: "GBP/USD",
+    display: "GBP/USD",
+    market: "FX",
+    tradingViewSymbol: "GBPUSD"
+  }, {
+    symbol: "USD/JPY",
+    display: "USD/JPY",
+    market: "FX",
+    tradingViewSymbol: "USDJPY"
+  }, {
+    symbol: "AUDUSD=X",
+    display: "AUD/USD",
+    market: "FX",
+    tradingViewSymbol: "AUDUSD"
+  }, {
+    symbol: "NZDUSD=X",
+    display: "NZD/USD",
+    market: "FX",
+    tradingViewSymbol: "NZDUSD"
+  }, {
+    symbol: "USDCAD=X",
+    display: "USD/CAD",
+    market: "FX",
+    tradingViewSymbol: "USDCAD"
+  }, {
+    symbol: "USDCHF=X",
+    display: "USD/CHF",
+    market: "FX",
+    tradingViewSymbol: "USDCHF"
+  },
+  // Cross Pairs
+  {
+    symbol: "EURGBP=X",
+    display: "EUR/GBP",
+    market: "FX",
+    tradingViewSymbol: "EURGBP"
+  }, {
+    symbol: "EURJPY=X",
+    display: "EUR/JPY",
+    market: "FX",
+    tradingViewSymbol: "EURJPY"
+  }, {
+    symbol: "GBPJPY=X",
+    display: "GBP/JPY",
+    market: "FX",
+    tradingViewSymbol: "GBPJPY"
+  },
+  // Crypto
+  {
+    symbol: "BTC-USD",
+    display: "Bitcoin",
+    market: "CRYPTO",
+    tradingViewSymbol: "BTCUSD"
+  }, {
+    symbol: "ETH-USD",
+    display: "Ethereum",
+    market: "CRYPTO",
+    tradingViewSymbol: "ETHUSD"
+  }, {
+    symbol: "ADA-USD",
+    display: "Cardano",
+    market: "CRYPTO",
+    tradingViewSymbol: "ADAUSD"
+  }, {
+    symbol: "DOGE-USD",
+    display: "Dogecoin",
+    market: "CRYPTO",
+    tradingViewSymbol: "DOGEUSD"
+  }, {
+    symbol: "SOL-USD",
+    display: "Solana",
+    market: "CRYPTO",
+    tradingViewSymbol: "SOLUSD"
+  }];
+
   // Harmonized parameters with MacroCommentaryBubble
   const [queryParams, setQueryParams] = useState({
     query: "",
@@ -149,7 +196,6 @@ export default function MacroAnalysis() {
     if (invalidationMatch) {
       levels.invalidation = invalidationMatch[1].trim();
     }
-
     return levels;
   };
 
@@ -162,10 +208,8 @@ export default function MacroAnalysis() {
   // Simplified workflow: single request with mode="run"
   const generateAnalysis = async () => {
     if (!queryParams.query.trim()) return;
-    
     setIsGenerating(true);
     setJobStatus("running");
-    
     try {
       // Single request with mode="run"
       const payload = {
@@ -189,127 +233,108 @@ export default function MacroAnalysis() {
         period: queryParams.period,
         adresse: queryParams.adresse
       };
-
       console.log('📊 [MacroAnalysis] Analysis request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         payload: payload,
         timestamp: new Date().toISOString()
       });
-
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload);
-      
       if (!response.ok) {
         throw new Error(`Request failed! status: ${response.status}`);
       }
-
       const responseText = await response.text();
       console.log('📊 [MacroAnalysis] Response text:', responseText);
-      
       if (responseText.trim()) {
         const responseJson = JSON.parse(responseText);
         console.log('📊 [MacroAnalysis] Response JSON:', responseJson);
-        
+
         // Check for n8n workflow errors first
-        const isError = responseJson?.error || 
-                       responseJson?.status === 'error' ||
-                       (Array.isArray(responseJson) && responseJson[0]?.error) ||
-                       (Array.isArray(responseJson) && responseJson[0]?.status === 'error');
-        
+        const isError = responseJson?.error || responseJson?.status === 'error' || Array.isArray(responseJson) && responseJson[0]?.error || Array.isArray(responseJson) && responseJson[0]?.status === 'error';
         if (isError) {
-          const errorMessage = responseJson?.error || 
-                              responseJson?.message || 
-                              (Array.isArray(responseJson) && responseJson[0]?.error) ||
-                              (Array.isArray(responseJson) && responseJson[0]?.message) ||
-                              'Erreur du workflow n8n';
+          const errorMessage = responseJson?.error || responseJson?.message || Array.isArray(responseJson) && responseJson[0]?.error || Array.isArray(responseJson) && responseJson[0]?.message || 'Erreur du workflow n8n';
           throw new Error(`Erreur n8n: ${errorMessage}`);
         }
-        
-      // Extract analysis content from n8n response
-      let analysisContent = '';
-      
-      // Helper function to safely extract string content from nested objects
-      const extractStringContent = (obj: any): string => {
-        if (typeof obj === 'string') {
-          return obj;
-        }
-        if (obj && typeof obj === 'object') {
-          // Handle MaxDepthReached objects
-          if ((obj as any)._type === 'MaxDepthReached' && (obj as any).value) {
-            return String((obj as any).value);
-          }
-          // Handle nested content objects
-          if (obj.content) {
-            return extractStringContent(obj.content);
-          }
-          // Handle weekly_outlook and trade_idea structure
-          if (obj.weekly_outlook && obj.trade_idea) {
-            let content = String(obj.weekly_outlook);
-            if (obj.trade_idea && typeof obj.trade_idea === 'object') {
-              content += '\n\nTrade Idea:\n';
-              Object.entries(obj.trade_idea).forEach(([key, value]) => {
-                if (value && typeof value === 'object' && (value as any)._type === 'MaxDepthReached') {
-                  content += `${key}: ${(value as any).value}\n`;
-                } else {
-                  content += `${key}: ${value}\n`;
-                }
-              });
-            }
-            return content;
-          }
-          // Fallback to stringifying the object
-          return JSON.stringify(obj, null, 2);
-        }
-        return String(obj);
-      };
-      
-      // Handle array format response from n8n
-      if (Array.isArray(responseJson) && responseJson.length > 0) {
-        const deepContent = responseJson[0]?.message?.message?.content?.content;
-        analysisContent = extractStringContent(deepContent);
-      }
-      // Handle direct response format
-      else if (responseJson?.message?.content?.content) {
-        analysisContent = extractStringContent(responseJson.message.content.content);
-      }
-      // Fallback
-      else {
-        analysisContent = extractStringContent(responseJson);
-      }
 
-        
+        // Extract analysis content from n8n response
+        let analysisContent = '';
+
+        // Helper function to safely extract string content from nested objects
+        const extractStringContent = (obj: any): string => {
+          if (typeof obj === 'string') {
+            return obj;
+          }
+          if (obj && typeof obj === 'object') {
+            // Handle MaxDepthReached objects
+            if ((obj as any)._type === 'MaxDepthReached' && (obj as any).value) {
+              return String((obj as any).value);
+            }
+            // Handle nested content objects
+            if (obj.content) {
+              return extractStringContent(obj.content);
+            }
+            // Handle weekly_outlook and trade_idea structure
+            if (obj.weekly_outlook && obj.trade_idea) {
+              let content = String(obj.weekly_outlook);
+              if (obj.trade_idea && typeof obj.trade_idea === 'object') {
+                content += '\n\nTrade Idea:\n';
+                Object.entries(obj.trade_idea).forEach(([key, value]) => {
+                  if (value && typeof value === 'object' && (value as any)._type === 'MaxDepthReached') {
+                    content += `${key}: ${(value as any).value}\n`;
+                  } else {
+                    content += `${key}: ${value}\n`;
+                  }
+                });
+              }
+              return content;
+            }
+            // Fallback to stringifying the object
+            return JSON.stringify(obj, null, 2);
+          }
+          return String(obj);
+        };
+
+        // Handle array format response from n8n
+        if (Array.isArray(responseJson) && responseJson.length > 0) {
+          const deepContent = responseJson[0]?.message?.message?.content?.content;
+          analysisContent = extractStringContent(deepContent);
+        }
+        // Handle direct response format
+        else if (responseJson?.message?.content?.content) {
+          analysisContent = extractStringContent(responseJson.message.content.content);
+        }
+        // Fallback
+        else {
+          analysisContent = extractStringContent(responseJson);
+        }
         const realAnalysis: MacroAnalysis = {
           query: queryParams.query,
           timestamp: new Date(),
-          sections: [
-            {
-              title: "Analysis Results",
-              content: analysisContent,
-              type: "overview",
-              expanded: true
-            }
-          ],
+          sections: [{
+            title: "Analysis Results",
+            content: analysisContent,
+            type: "overview",
+            expanded: true
+          }],
           sources: []
         };
-        
         setAnalyses(prev => [realAnalysis, ...prev]);
         setJobStatus("done");
         setIsGenerating(false);
-        
         toast({
           title: "Analysis Completed",
           description: "Your macro analysis is ready"
         });
-        
-        setQueryParams(prev => ({ ...prev, query: "" }));
+        setQueryParams(prev => ({
+          ...prev,
+          query: ""
+        }));
       } else {
         throw new Error('Réponse vide du workflow n8n');
       }
-
     } catch (error) {
       console.error('Analysis error:', error);
       setIsGenerating(false);
       setJobStatus("error");
-      
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Unable to complete analysis. Please retry.",
@@ -317,7 +342,6 @@ export default function MacroAnalysis() {
       });
     }
   };
-
   const toggleSection = (analysisIndex: number, sectionIndex: number) => {
     const sectionId = `${analysisIndex}-${sectionIndex}`;
     setExpandedSections(prev => {
@@ -330,7 +354,6 @@ export default function MacroAnalysis() {
       return newSet;
     });
   };
-
   const copyAnalysis = (analysis: MacroAnalysis) => {
     const content = `Macro Analysis - ${analysis.query}\n\n${analysis.sections.map(s => `${s.title}:\n${s.content}`).join('\n\n')}`;
     navigator.clipboard.writeText(content);
@@ -341,34 +364,13 @@ export default function MacroAnalysis() {
   };
 
   // Extended quick queries for full page experience
-  const quickQueries = [
-    "EUR/USD macro analysis for this week",
-    "NFP data impact on USD",  
-    "Bitcoin macro conditions outlook",
-    "Global risk sentiment analysis",
-    "Impact of inflation on major currencies",
-    "Analysis of ECB vs Fed monetary policies", 
-    "Gold price drivers and outlook",
-    "Crypto trends vs traditional markets",
-    "Opportunities in commodities",
-    "Central bank policy divergence effects",
-    "Dollar strength analysis",
-    "European economic outlook"
-  ];
-
+  const quickQueries = ["EUR/USD macro analysis for this week", "NFP data impact on USD", "Bitcoin macro conditions outlook", "Global risk sentiment analysis", "Impact of inflation on major currencies", "Analysis of ECB vs Fed monetary policies", "Gold price drivers and outlook", "Crypto trends vs traditional markets", "Opportunities in commodities", "Central bank policy divergence effects", "Dollar strength analysis", "European economic outlook"];
   const [showAnalysisResult, setShowAnalysisResult] = useState(false);
-  
-  return (
-    <Layout activeModule="macro-analysis" onModuleChange={() => {}}>
+  return <Layout activeModule="macro-analysis" onModuleChange={() => {}}>
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => navigate('/dashboard')}
-            className="shrink-0 min-h-[44px] w-11"
-          >
+          <Button variant="outline" size="icon" onClick={() => navigate('/dashboard')} className="shrink-0 min-h-[44px] w-11">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0 flex-1">
@@ -388,30 +390,21 @@ export default function MacroAnalysis() {
             <div className="space-y-4">
               {/* Main search input */}
               <div className="relative">
-                <Textarea
-                  value={queryParams.query}
-                  onChange={(e) => setQueryParams(prev => ({ ...prev, query: e.target.value }))}
-                  placeholder="Ask your macro question or describe the context to analyze..."
-                  rows={3}
-                  className="text-base resize-none pr-12"
-                />
-                <Button 
-                  onClick={generateAnalysis} 
-                  disabled={isGenerating || !queryParams.query.trim()}
-                  size="sm"
-                  className="absolute bottom-2 right-2"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Globe className="h-4 w-4" />
-                  )}
+                <Textarea value={queryParams.query} onChange={e => setQueryParams(prev => ({
+                ...prev,
+                query: e.target.value
+              }))} placeholder="Ask your macro question or describe the context to analyze..." rows={3} className="text-base resize-none pr-12" />
+                <Button onClick={generateAnalysis} disabled={isGenerating || !queryParams.query.trim()} size="sm" className="absolute bottom-2 right-2">
+                  {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
                 </Button>
               </div>
 
               {/* Quick suggestions dropdown */}
               <div className="relative">
-                <Select value="" onValueChange={(value) => setQueryParams(prev => ({ ...prev, query: value }))}>
+                <Select value="" onValueChange={value => setQueryParams(prev => ({
+                ...prev,
+                query: value
+              }))}>
                   <SelectTrigger className="w-full">
                     <div className="flex items-center gap-2">
                       <ChevronDown className="h-4 w-4" />
@@ -419,20 +412,19 @@ export default function MacroAnalysis() {
                     </div>
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {quickQueries.map((query, index) => (
-                      <SelectItem key={index} value={query}>
+                    {quickQueries.map((query, index) => <SelectItem key={index} value={query}>
                         {query}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Compact parameters row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                <Select value={queryParams.assetType} onValueChange={(value) =>
-                  setQueryParams(prev => ({ ...prev, assetType: value }))
-                }>
+                <Select value={queryParams.assetType} onValueChange={value => setQueryParams(prev => ({
+                ...prev,
+                assetType: value
+              }))}>
                   <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
                     <SelectValue placeholder="Asset Type" />
                   </SelectTrigger>
@@ -444,9 +436,10 @@ export default function MacroAnalysis() {
                   </SelectContent>
                 </Select>
 
-                <Select value={queryParams.analysisDepth} onValueChange={(value) => 
-                  setQueryParams(prev => ({ ...prev, analysisDepth: value }))
-                }>
+                <Select value={queryParams.analysisDepth} onValueChange={value => setQueryParams(prev => ({
+                ...prev,
+                analysisDepth: value
+              }))}>
                   <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
                     <SelectValue placeholder="Depth" />
                   </SelectTrigger>
@@ -457,9 +450,10 @@ export default function MacroAnalysis() {
                   </SelectContent>
                 </Select>
 
-                <Select value={queryParams.period} onValueChange={(value) => 
-                  setQueryParams(prev => ({ ...prev, period: value }))
-                }>
+                <Select value={queryParams.period} onValueChange={value => setQueryParams(prev => ({
+                ...prev,
+                period: value
+              }))}>
                   <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
                     <SelectValue placeholder="Period" />
                   </SelectTrigger>
@@ -470,37 +464,30 @@ export default function MacroAnalysis() {
                   </SelectContent>
                 </Select>
 
-                <Input
-                  value={queryParams.adresse}
-                  onChange={(e) => setQueryParams(prev => ({ ...prev, adresse: e.target.value }))}
-                  placeholder="Dev address"
-                  className="text-sm"
-                  required
-                />
+                <Input value={queryParams.adresse} onChange={e => setQueryParams(prev => ({
+                ...prev,
+                adresse: e.target.value
+              }))} placeholder="Dev address" className="text-sm" required />
               </div>
 
               {/* Status indicator */}
-              {isGenerating && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {isGenerating && <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {jobStatus === "queued" && "Analysis queued..."}
                   {jobStatus === "running" && "Analysis in progress..."}
                   {!jobStatus && "Generating Analysis..."}
-                </div>
-              )}
+                </div>}
             </div>
           </CardContent>
         </Card>
 
         {/* Analysis Results - Auto-displayed chat-style */}
-        {analyses.length > 0 && (
-          <div className="space-y-6">
+        {analyses.length > 0 && <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-foreground mb-6 flex items-center gap-2">
               <Brain className="h-6 w-6 text-primary" />
               Analysis Results
             </h2>
-            {analyses.map((analysis, index) => (
-              <Card key={index} className="overflow-hidden animate-fade-in shadow-soft hover:shadow-medium transition-all">
+            {analyses.map((analysis, index) => <Card key={index} className="overflow-hidden animate-fade-in shadow-soft hover:shadow-medium transition-all">
                 <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-accent/5">
                   <div className="flex justify-between items-start">
                     <div className="flex items-start gap-3">
@@ -508,9 +495,7 @@ export default function MacroAnalysis() {
                         <Activity className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg font-semibold text-foreground mb-1">
-                          Macro Analysis Bot
-                        </CardTitle>
+                        <CardTitle className="text-lg font-semibold text-foreground mb-1">Macro Analysis</CardTitle>
                         <p className="text-sm text-muted-foreground">
                           Analysis for {analysis.query} • {analysis.timestamp.toLocaleString()}
                         </p>
@@ -524,23 +509,18 @@ export default function MacroAnalysis() {
                 
                 <CardContent className="space-y-4">
                   {analysis.sections.map((section, sectionIndex) => {
-                    const sectionKey = `${index}-${sectionIndex}`;
-                    const isExpanded = section.expanded || expandedSections.has(sectionKey);
-                    
-                    return (
-                      <div key={sectionIndex} className="border border-border rounded-lg overflow-hidden">
-                        <button
-                          onClick={() => {
-                            const newExpanded = new Set(expandedSections);
-                            if (isExpanded) {
-                              newExpanded.delete(sectionKey);
-                            } else {
-                              newExpanded.add(sectionKey);
-                            }
-                            setExpandedSections(newExpanded);
-                          }}
-                          className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex justify-between items-center group"
-                        >
+              const sectionKey = `${index}-${sectionIndex}`;
+              const isExpanded = section.expanded || expandedSections.has(sectionKey);
+              return <div key={sectionIndex} className="border border-border rounded-lg overflow-hidden">
+                        <button onClick={() => {
+                  const newExpanded = new Set(expandedSections);
+                  if (isExpanded) {
+                    newExpanded.delete(sectionKey);
+                  } else {
+                    newExpanded.add(sectionKey);
+                  }
+                  setExpandedSections(newExpanded);
+                }} className="w-full px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors flex justify-between items-center group">
                           <div className="flex items-center gap-3">
                             {section.type === "overview" && <Brain className="h-4 w-4 text-primary" />}
                             {section.type === "technical" && <BarChart3 className="h-4 w-4 text-blue-500" />}
@@ -550,90 +530,62 @@ export default function MacroAnalysis() {
                               {section.title}
                             </span>
                           </div>
-                          <ChevronDown className={cn(
-                            "h-4 w-4 transition-transform text-muted-foreground group-hover:text-primary",
-                            isExpanded ? "rotate-180" : ""
-                          )} />
+                          <ChevronDown className={cn("h-4 w-4 transition-transform text-muted-foreground group-hover:text-primary", isExpanded ? "rotate-180" : "")} />
                         </button>
                         
-                        {isExpanded && (
-                          <div className="p-6 bg-background border-t border-border animate-fade-in">
+                        {isExpanded && <div className="p-6 bg-background border-t border-border animate-fade-in">
                             <div className="prose prose-sm max-w-none">
                               <div className="whitespace-pre-wrap text-foreground text-sm leading-relaxed bg-muted/20 p-4 rounded-lg border">
                                 {section.content}
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          </div>}
+                      </div>;
+            })}
                   
                   {/* Trading Levels Extraction */}
-                  {analysis.sections.some(section => 
-                    typeof section.content === 'string' && 
-                    (section.content.includes('Support') || section.content.includes('Resistance'))
-                  ) && (
-                    <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
+                  {analysis.sections.some(section => typeof section.content === 'string' && (section.content.includes('Support') || section.content.includes('Resistance'))) && <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
                       <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                         <Target className="h-4 w-4 text-primary" />
                         Extracted Trading Levels
                       </h4>
                       
                       {(() => {
-                        const fullContent = analysis.sections
-                          .map(s => typeof s.content === 'string' ? s.content : '')
-                          .join('\n');
-                        const levels = parseLevels(fullContent);
-                        
-                        return (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            {levels.supports.length > 0 && (
-                              <div className="p-3 bg-success/10 rounded-lg border border-success/20">
+                const fullContent = analysis.sections.map(s => typeof s.content === 'string' ? s.content : '').join('\n');
+                const levels = parseLevels(fullContent);
+                return <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            {levels.supports.length > 0 && <div className="p-3 bg-success/10 rounded-lg border border-success/20">
                                 <h5 className="font-medium text-success mb-2 flex items-center gap-1">
                                   <div className="w-2 h-2 bg-success rounded-full"></div>
                                   Support Levels
                                 </h5>
                                 <ul className="space-y-1">
-                                  {levels.supports.slice(0, 3).map((level, i) => (
-                                    <li key={i} className="text-muted-foreground">• {level}</li>
-                                  ))}
+                                  {levels.supports.slice(0, 3).map((level, i) => <li key={i} className="text-muted-foreground">• {level}</li>)}
                                 </ul>
-                              </div>
-                            )}
+                              </div>}
                             
-                            {levels.resistances.length > 0 && (
-                              <div className="p-3 bg-danger/10 rounded-lg border border-danger/20">
+                            {levels.resistances.length > 0 && <div className="p-3 bg-danger/10 rounded-lg border border-danger/20">
                                 <h5 className="font-medium text-danger mb-2 flex items-center gap-1">
                                   <div className="w-2 h-2 bg-danger rounded-full"></div>
                                   Resistance Levels
                                 </h5>
                                 <ul className="space-y-1">
-                                  {levels.resistances.slice(0, 3).map((level, i) => (
-                                    <li key={i} className="text-muted-foreground">• {level}</li>
-                                  ))}
+                                  {levels.resistances.slice(0, 3).map((level, i) => <li key={i} className="text-muted-foreground">• {level}</li>)}
                                 </ul>
-                              </div>
-                            )}
+                              </div>}
                             
-                            {Object.keys(levels.indicators).length > 0 && (
-                              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                            {Object.keys(levels.indicators).length > 0 && <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
                                 <h5 className="font-medium text-primary mb-2 flex items-center gap-1">
                                   <div className="w-2 h-2 bg-primary rounded-full"></div>
                                   Key Indicators
                                 </h5>
                                 <ul className="space-y-1">
-                                  {Object.entries(levels.indicators).slice(0, 3).map(([name, value], i) => (
-                                    <li key={i} className="text-muted-foreground">• {name}: {value}</li>
-                                  ))}
+                                  {Object.entries(levels.indicators).slice(0, 3).map(([name, value], i) => <li key={i} className="text-muted-foreground">• {name}: {value}</li>)}
                                 </ul>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
+                              </div>}
+                          </div>;
+              })()}
+                    </div>}
                   
                   {/* Action Buttons */}
                   <div className="pt-4 border-t border-border flex gap-3 justify-between items-center">
@@ -641,38 +593,26 @@ export default function MacroAnalysis() {
                       Response received in real-time
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const fullContent = analysis.sections.map(s => `${s.title}\n${s.content}`).join('\n\n');
-                          navigator.clipboard.writeText(fullContent);
-                          toast({
-                            title: "Copied!",
-                            description: "Analysis copied to clipboard"
-                          });
-                        }}
-                        className="flex items-center gap-2 hover:bg-primary hover:text-primary-foreground"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => {
+                  const fullContent = analysis.sections.map(s => `${s.title}\n${s.content}`).join('\n\n');
+                  navigator.clipboard.writeText(fullContent);
+                  toast({
+                    title: "Copied!",
+                    description: "Analysis copied to clipboard"
+                  });
+                }} className="flex items-center gap-2 hover:bg-primary hover:text-primary-foreground">
                         <Copy className="h-4 w-4" />
                         Copy
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(getTradingViewUrl(selectedAsset), '_blank')}
-                        className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => window.open(getTradingViewUrl(selectedAsset), '_blank')} className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground">
                         <ExternalLink className="h-4 w-4" />
                         TradingView
                       </Button>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+              </Card>)}
+          </div>}
 
         {/* Unified Market Analysis */}
         <Card className="gradient-card">
@@ -683,29 +623,22 @@ export default function MacroAnalysis() {
                 Market Analysis - {selectedAsset.display}
               </div>
               {/* Asset Selector */}
-              <Select 
-                value={selectedAsset.symbol} 
-                onValueChange={(value) => {
-                  const asset = assets.find(a => a.symbol === value);
-                  if (asset) setSelectedAsset(asset);
-                }}
-              >
+              <Select value={selectedAsset.symbol} onValueChange={value => {
+              const asset = assets.find(a => a.symbol === value);
+              if (asset) setSelectedAsset(asset);
+            }}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
-                  {assets.filter(a => a.market === "FX").map((asset) => (
-                    <SelectItem key={asset.symbol} value={asset.symbol}>
+                  {assets.filter(a => a.market === "FX").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
                       {asset.display}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                   <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
-                  {assets.filter(a => a.market === "CRYPTO").map((asset) => (
-                    <SelectItem key={asset.symbol} value={asset.symbol}>
+                  {assets.filter(a => a.market === "CRYPTO").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
                       {asset.display}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </CardTitle>
@@ -723,13 +656,10 @@ export default function MacroAnalysis() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="chart" className="p-4 pt-2">
-                <TradingViewWidget 
-                  selectedSymbol={selectedAsset.tradingViewSymbol}
-                  onSymbolChange={(symbol) => {
-                    const asset = assets.find(a => a.symbol === symbol);
-                    if (asset) setSelectedAsset(asset);
-                  }}
-                />
+                <TradingViewWidget selectedSymbol={selectedAsset.tradingViewSymbol} onSymbolChange={symbol => {
+                const asset = assets.find(a => a.symbol === symbol);
+                if (asset) setSelectedAsset(asset);
+              }} />
               </TabsContent>
               <TabsContent value="technical" className="p-4 pt-2">
                 <TechnicalDashboard selectedAsset={selectedAsset} />
@@ -739,6 +669,5 @@ export default function MacroAnalysis() {
         </Card>
 
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
