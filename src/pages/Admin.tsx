@@ -18,7 +18,6 @@ import { useAdminActions } from "@/hooks/useAdminActions";
 import { useProfile } from "@/hooks/useProfile";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
-import CreateUserByAdminDialog from "@/components/admin/CreateUserByAdminDialog";
 import Layout from "@/components/Layout";
 
 interface AdminUser {
@@ -93,9 +92,6 @@ export default function Admin() {
               loading={actionLoading}
               onSuccess={loadUsers}
             />
-            {isSuperUser && (
-              <CreateUserByAdminDialog onSuccess={loadUsers} />
-            )}
             <Button 
               onClick={handleRefresh} 
               disabled={refreshing}
