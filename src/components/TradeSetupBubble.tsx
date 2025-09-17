@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 
 interface TradeSetupBubbleProps {
   instrument: string;
@@ -59,6 +60,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const { createJob } = useRealtimeJobManager();
+  const { logInteraction } = useAIInteractionLogger();
 
   // Set up automatic response injection from Supabase
   useRealtimeResponseInjector({
@@ -66,7 +68,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
       console.log('⚡ [TradeSetupBubble] Realtime response injected:', { responseData, jobId });
       
       // Process the trade setup data from Supabase exactly as HTTP response
-      processTradeSetupData(responseData);
+      processTradeSetupData(responseData).catch(console.error);
     }
   });
 
@@ -112,16 +114,16 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
       rawData = await handleResponseWithFallback(
         response,
         jobId,
-        (realtimeResult) => {
+        async (realtimeResult) => {
           console.log('Received realtime result:', realtimeResult);
           if (realtimeResult && !realtimeResult.error) {
-            processTradeSetupData(realtimeResult);
+            await processTradeSetupData(realtimeResult);
           }
         }
       );
 
       if (rawData) {
-        processTradeSetupData(rawData);
+        await processTradeSetupData(rawData);
       }
 
     } catch (error) {
@@ -136,7 +138,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     }
   };
 
-  const processTradeSetupData = (rawData: any) => {
+  const processTradeSetupData = async (rawData: any) => {
     // Create trade setup from webhook response or use fallback
     const mockSetup: TradeSetup = {
       entry: parameters.instrument === "EUR/USD" ? 1.0950 : 
@@ -157,6 +159,13 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     
     setTradeSetup(mockSetup);
     setStep("generated");
+    
+    // Log AI interaction to database
+    await logInteraction({
+      featureName: 'trade_setup',
+      userQuery: `Generate trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskAppetite} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
+      aiResponse: mockSetup
+    });
     
     toast({
       title: "Trade Setup Generated",
