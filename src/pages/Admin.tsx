@@ -154,7 +154,7 @@ export default function Admin() {
         const userStats = userStatsMap.get(userId)!;
         const cost = featureCosts[feature as keyof typeof featureCosts] || 0;
 
-        if (feature === 'AI Trade setup') {
+        if (feature === 'AI Trade Setup') {
           userStats.aiTradeSetupCount++;
         } else if (feature === 'Macro Commentary') {
           userStats.macroCommentaryCount++;
