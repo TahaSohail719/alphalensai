@@ -19,8 +19,6 @@ import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
 import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { dualResponseHandler } from "@/lib/dual-response-handler";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
 const { useState } = React;
 
@@ -199,7 +197,6 @@ export default function AISetup() {
   const globalLoading = useGlobalLoading();
   const { logInteraction } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
-  const { user } = useAuth();
   const [step, setStep] = useState<"parameters" | "generated">("parameters");
   const [isGenerating, setIsGenerating] = useState(false);
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
@@ -264,8 +261,6 @@ export default function AISetup() {
     setError(null);
     setN8nResult(null);
     
-    let jobsChannel: any = null;
-    
     // Create loading request
     const requestId = await globalLoading.createRequest(
       'ai_trade_setup',
@@ -278,75 +273,6 @@ export default function AISetup() {
     const progressInterval = globalLoading.startProcessing(requestId);
     
     try {
-      // 1. Subscribe to Realtime channel BEFORE requests
-      console.log('📡 [Realtime] Subscribing before POST');
-      jobsChannel = supabase
-        .channel(`ai-setup-${user?.id}-${Date.now()}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'jobs',
-            filter: `user_id=eq.${user?.id}`
-          },
-          (payload) => {
-            console.log('📩 [Realtime] Payload received:', payload);
-            
-            if (payload.new?.status && ['completed', 'failed'].includes(payload.new.status)) {
-              console.log('✅ [Realtime] Job completed with status:', payload.new.status);
-              
-              if (payload.new.status === 'completed' && payload.new.response_payload) {
-                const responseData = payload.new.response_payload;
-                
-                // Handle based on job feature
-                if (payload.new.feature === 'macro_commentary') {
-                  console.log('📊 [Realtime] Macro response received');
-                  // Process macro response but don't update UI yet
-                } else if (payload.new.feature === 'ai_trade_setup') {
-                  console.log('⚡ [Realtime] Trade setup response received');
-                  setRawN8nResponse(responseData);
-                  const normalized = normalizeN8n(responseData);
-
-                  if (normalized && normalized.setups && normalized.setups.length > 0) {
-                    setN8nResult(normalized);
-                    setTradeSetup(null);
-                    globalLoading.completeRequest(requestId, normalized);
-                    
-                    toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
-                  } else {
-                    setN8nResult(null);
-                    setTradeSetup(null);
-                    setError("The n8n workflow responded without exploitable setups.");
-                    globalLoading.failRequest(requestId, "No exploitable setups returned");
-                    toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
-                  }
-                  
-                  setStep("generated");
-                }
-              } else if (payload.new.status === 'failed') {
-                console.log('❌ [Loader] Stopping loader due to failed job');
-                setIsGenerating(false);
-                globalLoading.failRequest(requestId, "Job failed");
-                toast({
-                  title: "Generation Failed",
-                  description: "The generation could not be completed.",
-                  variant: "destructive"
-                });
-              }
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('📡 [Realtime] Successfully subscribed before POST');
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('❌ [Realtime] Subscription error');
-          }
-        });
-      
-      console.log('📡 [Realtime] Subscribed before POST');
-
       // Create Realtime jobs for both requests
       const macroJobId = await createJob(
         'macro_commentary',
@@ -506,11 +432,6 @@ export default function AISetup() {
 
       // Wait a moment for the response to be processed
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Cleanup Realtime subscription
-      if (jobsChannel) {
-        supabase.removeChannel(jobsChannel);
-      }
       
     } catch (error) {
       console.error('Error generating trade setup:', error);

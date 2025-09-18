@@ -20,8 +20,7 @@ import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { TechnicalDashboard } from "@/components/TechnicalDashboard";
 import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { dualResponseHandler } from "@/lib/dual-response-handler";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { subscribeToPostgresChanges } from "@/utils/supabaseRealtimeManager";
 const {
   useState,
   useEffect
@@ -59,9 +58,8 @@ interface AssetInfo {
 export default function MacroAnalysis() {
   const navigate = useNavigate();
   const { toast } = useToast();
-    const { logInteraction } = useAIInteractionLogger();
-    const { createJob } = useRealtimeJobManager();
-    const { user } = useAuth();
+  const { logInteraction } = useAIInteractionLogger();
+  const { createJob } = useRealtimeJobManager();
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -325,8 +323,6 @@ export default function MacroAnalysis() {
     setIsGenerating(true);
     setJobStatus("running");
     
-    let realtimeChannel: any = null;
-    
     try {
       // Generate job ID first
       const responseJobId = Date.now().toString();
@@ -334,15 +330,13 @@ export default function MacroAnalysis() {
       // 1. CRITICAL: Subscribe to Realtime BEFORE sending POST request
       console.log('📡 [Realtime] Subscribing to channel before POST request');
       
-      realtimeChannel = supabase
-        .channel(`macro-analysis-${responseJobId}-${Date.now()}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public', 
-            table: 'jobs',
-            filter: `id=eq.${responseJobId}`
+      const realtimeChannel = subscribeToPostgresChanges(
+        `macro-analysis-${responseJobId}`,
+        {
+          event: 'UPDATE',
+          schema: 'public', 
+          table: 'jobs',
+          filter: `id=eq.${responseJobId}`
         },
         (payload) => {
           console.log('📩 [Realtime] Payload received:', payload);
@@ -359,14 +353,8 @@ export default function MacroAnalysis() {
               handleRealtimeError(job.error_message);
             }
           }
-        })
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('📡 [Realtime] Successfully subscribed before POST');
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('❌ [Realtime] Subscription error');
-          }
-        });
+        }
+      );
       
       console.log('📡 [Realtime] Subscribed before POST');
       
@@ -430,11 +418,6 @@ export default function MacroAnalysis() {
     } catch (error) {
       console.error('Analysis error:', error);
       setIsGenerating(false);
-      
-      // Cleanup Realtime subscription on error
-      if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
-      }
       setJobStatus("error");
       toast({
         title: "Error",
