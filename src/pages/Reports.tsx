@@ -19,6 +19,8 @@ import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-
 import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { useRealtimeResponseInjector } from "@/hooks/useRealtimeResponseInjector";
 import { dualResponseHandler } from "@/lib/dual-response-handler";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AssetProfile {
   id: number;
@@ -60,6 +62,7 @@ export default function Reports() {
   const { toast } = useToast();
   const { logInteraction } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
+  const { user } = useAuth();
 
   // Set up automatic response injection from Supabase
   useRealtimeResponseInjector({
@@ -217,11 +220,79 @@ export default function Reports() {
 
   const generateReport = async () => {
     setIsGenerating(true);
+    
+    let jobsChannel: any = null;
 
     try {
       const includedSections = availableSections.filter(s => s.included);
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
+      // 1. Subscribe to Realtime channel BEFORE POST request
+      console.log('📡 [Realtime] Subscribing before POST');
+      jobsChannel = supabase
+        .channel(`reports-${user?.id}-${Date.now()}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'jobs',
+            filter: `user_id=eq.${user?.id}`
+          },
+          (payload) => {
+            console.log('📩 [Realtime] Payload received:', payload);
+            
+            if (payload.new?.status && ['completed', 'failed'].includes(payload.new.status)) {
+              console.log('✅ [Realtime] Job completed with status:', payload.new.status);
+              
+              if (payload.new.status === 'completed' && payload.new.response_payload) {
+                const responseData = payload.new.response_payload;
+                
+                const generatedSections = includedSections.map(section => ({
+                  title: section.title,
+                  content: responseData.sections?.[section.id] || responseData.content || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+                  userNotes: section.userNotes || ""
+                }));
+
+                const newReport: GeneratedReport = {
+                  id: payload.new.id || Date.now().toString(),
+                  title: reportConfig.title,
+                  sections: generatedSections,
+                  customNotes: reportConfig.customNotes,
+                  exportFormat: reportConfig.exportFormat,
+                  createdAt: new Date(),
+                  status: "generated"
+                };
+
+                setCurrentReport(newReport);
+                setStep("generated");
+                
+                toast({
+                  title: "Report Generated",
+                  description: "Your report has been successfully generated from realtime data."
+                });
+              } else if (payload.new.status === 'failed') {
+                console.log('❌ [Loader] Stopping loader due to failed job');
+                setIsGenerating(false);
+                toast({
+                  title: "Report Failed",
+                  description: "The report generation could not be completed.",
+                  variant: "destructive"
+                });
+              }
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('📡 [Realtime] Successfully subscribed before POST');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('❌ [Realtime] Subscription error');
+          }
+        });
+      
+      console.log('📡 [Realtime] Subscribed before POST');
+
       // Prepare payload for n8n webhook
       const reportPayload = {
         mode: "run",
@@ -335,6 +406,11 @@ export default function Reports() {
         setStep("generated");
       }
 
+      // Cleanup Realtime subscription
+      if (jobsChannel) {
+        supabase.removeChannel(jobsChannel);
+      }
+
       // Log successful interaction
       await logInteraction({
         featureName: 'report',
@@ -355,6 +431,10 @@ export default function Reports() {
       });
     } finally {
       setIsGenerating(false);
+      // Cleanup on error
+      if (jobsChannel) {
+        supabase.removeChannel(jobsChannel);
+      }
     }
   };
 
