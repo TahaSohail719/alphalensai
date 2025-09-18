@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { dualResponseHandler } from "@/lib/dual-response-handler";
 
 interface AssetProfile {
   id: number;
@@ -180,6 +181,30 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
     
     try {
       const sectionsText = includedSections.map(s => s.title).join(", ");
+      const currentJobId = Date.now().toString();
+      
+      // Register dual response handler
+      dualResponseHandler.registerHandler(currentJobId, (data, source) => {
+        console.log(`[ReportsBubble] Response received from ${source}:`, data);
+        
+        const report: GeneratedReport = {
+          id: currentJobId,
+          title: reportConfig.title,
+          sections: includedSections,
+          customNotes: reportConfig.customNotes,
+          exportFormat: reportConfig.exportFormat,
+          createdAt: new Date(),
+          status: "generated"
+        };
+        
+        setCurrentReport(report);
+        setStep("generated");
+        
+        toast({
+          title: "Report Generated",
+          description: "Your report is ready for export"
+        });
+      });
       
       // Call n8n webhook
       const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
@@ -196,32 +221,21 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
           description: section.description,
           order: section.order
         })),
-        customNotes: reportConfig.customNotes
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const rawData = await response.json();
-      
-      const report: GeneratedReport = {
-        id: Date.now().toString(),
-        title: reportConfig.title,
-        sections: includedSections,
         customNotes: reportConfig.customNotes,
-        exportFormat: reportConfig.exportFormat,
-        createdAt: new Date(),
-        status: "generated"
-      };
-      
-      setCurrentReport(report);
-      setStep("generated");
-      
-      toast({
-        title: "Report Generated",
-        description: "Your report is ready for export"
+        job_id: currentJobId
       });
+
+      // Handle HTTP response
+      try {
+        if (response.ok) {
+          const rawData = await response.json();
+          dualResponseHandler.handleHttpResponse(currentJobId, rawData);
+        } else {
+          console.log(`[ReportsBubble] HTTP error ${response.status}, waiting for Supabase response`);
+        }
+      } catch (httpError) {
+        console.log(`[ReportsBubble] HTTP response failed, waiting for Supabase response:`, httpError);
+      }
     } catch (error) {
       console.error('Webhook error:', error);
       

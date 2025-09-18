@@ -6,6 +6,7 @@ import { safePostRequest } from "@/lib/safe-request";
 import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
 import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { useRealtimeResponseInjector } from "@/hooks/useRealtimeResponseInjector";
+import { dualResponseHandler } from "@/lib/dual-response-handler";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,6 +97,14 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
       // Create job for realtime tracking
       const jobId = await createJob('tradesetup', parameters.instrument, payload);
       
+      // Register dual response handler
+      dualResponseHandler.registerHandler(jobId, async (data, source) => {
+        console.log(`[TradeSetupBubble] Response received from ${source}:`, data);
+        if (data && !data.error) {
+          await processTradeSetupData(data);
+        }
+      });
+      
       // Enhanced request with both HTTP and realtime support
       const { response } = await enhancedPostRequest(
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
@@ -108,22 +117,16 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
         }
       );
 
-      let rawData: any = null;
-      
-      // Handle response with realtime fallback
-      rawData = await handleResponseWithFallback(
-        response,
-        jobId,
-        async (realtimeResult) => {
-          console.log('Received realtime result:', realtimeResult);
-          if (realtimeResult && !realtimeResult.error) {
-            await processTradeSetupData(realtimeResult);
-          }
+      // Handle HTTP response
+      try {
+        if (response.ok) {
+          const rawData = await response.json();
+          dualResponseHandler.handleHttpResponse(jobId, rawData);
+        } else {
+          console.log(`[TradeSetupBubble] HTTP error ${response.status}, waiting for Supabase response`);
         }
-      );
-
-      if (rawData) {
-        await processTradeSetupData(rawData);
+      } catch (httpError) {
+        console.log(`[TradeSetupBubble] HTTP response failed, waiting for Supabase response:`, httpError);
       }
 
     } catch (error) {

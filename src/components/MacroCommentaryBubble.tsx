@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { useToast } from "@/hooks/use-toast";
 import { TradingViewWidget } from "./TradingViewWidget";
+import { dualResponseHandler } from "@/lib/dual-response-handler";
 
 interface MacroCommentaryBubbleProps {
   instrument: string;
@@ -566,119 +567,81 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
         timestamp: new Date().toISOString()
       });
 
-      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload);
+      // Store the job ID for dual response handling
+      const currentJobId = Date.now().toString();
+      
+      // Register dual response handler
+      dualResponseHandler.registerHandler(currentJobId, async (data, source) => {
+        console.log(`[MacroCommentaryBubble] Response received from ${source}:`, data);
+        
+        let analysisContent = '';
+        if (data.content && data.content.content) {
+          analysisContent = data.content.content;
+        } else if (typeof data.content === 'string') {
+          analysisContent = data.content;
+        } else if (typeof data.content === 'object') {
+          analysisContent = JSON.stringify(data.content, null, 2);
+        } else {
+          analysisContent = 'Analysis completed successfully';
+        }
+        
+        const realAnalysis: MacroAnalysis = {
+          query: queryParams.query,
+          timestamp: new Date(),
+          sections: [
+            {
+              title: "Analysis Results",
+              content: analysisContent,
+              type: "overview",
+              expanded: true
+            }
+          ],
+          sources: [
+            { title: `Analysis (${source})`, url: "#", type: "research" }
+          ]
+        };
+        
+        setAnalyses(prev => [realAnalysis, ...prev]);
+        setJobStatus("done");
+        setIsGenerating(false);
+        
+        // Log successful interaction
+        await logInteraction({
+          featureName: 'market_commentary',
+          userQuery: queryParams.query,
+          aiResponse: realAnalysis
+        });
+        
+        setQueryParams(prev => ({ ...prev, query: "" }));
+        
+        toast({
+          title: "Analysis Completed",
+          description: "Your macro analysis is ready"
+        });
+      });
+
+      const response = await safePostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
+        ...payload,
+        job_id: currentJobId
+      });
 
       console.log('💬 [MacroCommentaryBubble] Response status:', response.status);
       console.log('💬 [MacroCommentaryBubble] Response ok:', response.ok);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Get response data - try text first, then parse as JSON
-      let responseJson = null;
-      
+      // Handle HTTP response
       try {
-        const responseText = await response.text();
-        console.log('💬 [MacroCommentaryBubble] Raw response text:', responseText);
-        
-        if (responseText.trim()) {
-          try {
-            responseJson = JSON.parse(responseText);
-            console.log('💬 [MacroCommentaryBubble] Successfully parsed as JSON:', responseJson);
-          } catch (parseError) {
-            console.log('💬 [MacroCommentaryBubble] Failed to parse response as JSON:', parseError);
-            console.log('💬 [MacroCommentaryBubble] Raw text was:', responseText);
-          }
+        if (response.ok) {
+          const responseData = await response.json();
+          dualResponseHandler.handleHttpResponse(currentJobId, responseData);
         } else {
-          console.log('💬 [MacroCommentaryBubble] Empty response received');
+          console.log(`[MacroCommentaryBubble] HTTP error ${response.status}, waiting for Supabase response`);
         }
-      } catch (textError) {
-        console.error('💬 [MacroCommentaryBubble] Failed to read response as text:', textError);
+      } catch (httpError) {
+        console.log(`[MacroCommentaryBubble] HTTP response failed, waiting for Supabase response:`, httpError);
       }
 
-      // Handle immediate response
-      if (responseJson) {
-        let analysisContent = '';
-        
-        // Use same logic as MacroAnalysis that works
-        // Check if we got the final n8n response with status done
-        // N8N returns an array with one object containing the message
-        if (Array.isArray(responseJson) && responseJson.length > 0) {
-          const messageObj = responseJson[0].message;
-          
-          if (messageObj && messageObj.status === 'done') {
-            console.log('💬 [MacroCommentaryBubble] Found status done, processing result');
-            
-            // Extract the content from the nested message structure
-            if (messageObj.message && messageObj.message.content && messageObj.message.content.content) {
-              analysisContent = messageObj.message.content.content;
-            } else if (messageObj.message && messageObj.message.content && messageObj.message.content.base_report) {
-              analysisContent = messageObj.message.content.base_report;
-            } else if (messageObj.message && messageObj.message.content) {
-              analysisContent = JSON.stringify(messageObj.message.content, null, 2);
-            } else {
-              analysisContent = JSON.stringify(messageObj, null, 2);
-            }
-          } else {
-            // Fallback for other structures
-            analysisContent = JSON.stringify(responseJson[0], null, 2);
-          }
-        } else if (responseJson.content) {
-          // Handle direct content structure
-          if (typeof responseJson.content === 'object') {
-            if (responseJson.content.content) {
-              analysisContent = responseJson.content.content;
-            } else {
-              analysisContent = JSON.stringify(responseJson.content, null, 2);
-            }
-          } else {
-            analysisContent = responseJson.content;
-          }
-        } else {
-          // Last fallback - stringify the entire response
-          analysisContent = JSON.stringify(responseJson, null, 2);
-        }
-
-        // Always create analysis if we have any content
-        if (analysisContent) {
-          const realAnalysis: MacroAnalysis = {
-            query: queryParams.query,
-            timestamp: new Date(),
-            sections: [
-              {
-                title: "Analysis Results",
-                content: analysisContent,
-                type: "overview",
-                expanded: true
-              }
-            ],
-            sources: []
-          };
-
-          setAnalyses(prev => [realAnalysis, ...prev]);
-          setJobStatus("done");
-          setIsGenerating(false);
-          
-          // Log successful interaction
-          await logInteraction({
-            featureName: 'market_commentary',
-            userQuery: queryParams.query,
-            aiResponse: realAnalysis
-          });
-          
-          setQueryParams(prev => ({ ...prev, query: "" }));
-          
-          toast({
-            title: "Analysis Completed",
-            description: "Your macro analysis is ready"
-          });
-          return; // Important: return here to avoid throwing error
-        }
-      }
-      
-      // Only throw error if we really have no content at all
-      throw new Error("Invalid response structure - missing content");
+      // Return early since dual response handler will manage the UI updates
+      return;
 
     } catch (error) {
       console.error('Analysis generation error:', error);
