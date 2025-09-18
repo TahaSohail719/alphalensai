@@ -339,22 +339,22 @@ export default function MacroAnalysis() {
           schema: 'public',
           table: 'jobs',
           filter: `user_id=eq.${user?.id}`
-        }, (payload) => {
-          console.log('📩 [Realtime] Payload received:', payload);
-          const job = payload.new as any;
-          
-          if (job && job.status && job.id === responseJobId) {
-            console.log(`✅ [Realtime] Job completed with status: ${job.status}`);
-            
-            if (job.status === 'completed' && job.response_payload) {
-              console.log('📩 [Realtime] Processing completed response');
-              handleRealtimeResponse(job.response_payload, responseJobId);
-            } else if (job.status === 'error') {
-              console.log('❌ [Realtime] Job failed:', job.error_message);
-              handleRealtimeError(job.error_message);
-            }
-          }
-        })
+         }, (payload) => {
+           console.log('📩 [Realtime] Payload received:', payload);
+           const job = payload.new as any;
+           
+           if (job && job.status && job.id === responseJobId) {
+             console.log(`ℹ️ [Realtime] Event received but ignored (temporary patch) - status: ${job.status}`);
+             // Realtime logic kept intact but temporarily ignored
+             // if (job.status === 'completed' && job.response_payload) {
+             //   console.log('📩 [Realtime] Processing completed response');
+             //   handleRealtimeResponse(job.response_payload, responseJobId);
+             // } else if (job.status === 'error') {
+             //   console.log('❌ [Realtime] Job failed:', job.error_message);
+             //   handleRealtimeError(job.error_message);
+             // }
+           }
+         })
         .subscribe();
       
       console.log('📡 [Realtime] Subscribed before POST');

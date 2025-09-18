@@ -263,51 +263,51 @@ export default function Reports() {
           schema: 'public',
           table: 'jobs',
           filter: `user_id=eq.${user?.id}`
-        }, (payload) => {
-          console.log('📩 [Realtime] Job update received:', payload);
-          const job = payload.new as any;
-          
-          if (job && job.status && job.id === reportJobId) {
-            console.log(`✅ [Realtime] Job completed with status: ${job.status}`);
-            
-            if (job.status === 'completed' && job.response_payload) {
-              console.log('📩 [Realtime] Processing completed response');
-              console.log('🔄 [Loader] Stopping loader - Realtime response received');
-              
-              const generatedSections = includedSections.map(section => ({
-                title: section.title,
-                content: job.response_payload.sections?.[section.id] || job.response_payload.content || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
-                userNotes: section.userNotes || ""
-              }));
+         }, (payload) => {
+           console.log('📩 [Realtime] Job update received:', payload);
+           const job = payload.new as any;
+           
+           if (job && job.status && job.id === reportJobId) {
+             console.log(`ℹ️ [Realtime] Event received but ignored (temporary patch) - status: ${job.status}`);
+             // Realtime logic kept intact but temporarily ignored
+             // if (job.status === 'completed' && job.response_payload) {
+             //   console.log('📩 [Realtime] Processing completed response');
+             //   console.log('🔄 [Loader] Stopping loader - Realtime response received');
+             //   
+             //   const generatedSections = includedSections.map(section => ({
+             //     title: section.title,
+             //     content: job.response_payload.sections?.[section.id] || job.response_payload.content || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+             //     userNotes: section.userNotes || ""
+             //   }));
 
-              const newReport: GeneratedReport = {
-                id: reportJobId,
-                title: reportConfig.title,
-                sections: generatedSections,
-                customNotes: reportConfig.customNotes,
-                exportFormat: reportConfig.exportFormat,
-                createdAt: new Date(),
-                status: "generated"
-              };
+             //   const newReport: GeneratedReport = {
+             //     id: reportJobId,
+             //     title: reportConfig.title,
+             //     sections: generatedSections,
+             //     customNotes: reportConfig.customNotes,
+             //     exportFormat: reportConfig.exportFormat,
+             //     createdAt: new Date(),
+              //     status: "generated"
+             //   };
 
-              setCurrentReport(newReport);
-              setStep("generated");
-              setIsGenerating(false);
-              
-              toast({
-                title: "Report Generated",
-                description: "Your report has been successfully generated."
-              });
-            } else if (job.status === 'error') {
-              console.log('❌ [Realtime] Job failed:', job.error_message);
-              console.log('🔄 [Loader] Stopping loader - Realtime error received');
-              setIsGenerating(false);
-              toast({
-                title: "Error",
-                description: job.error_message || "Failed to generate report. Please try again.",
-                variant: "destructive"
-              });
-            }
+             //   setCurrentReport(newReport);
+             //   setStep("generated");
+             //   setIsGenerating(false);
+             //   
+             //   toast({
+             //     title: "Report Generated",
+             //     description: "Your report has been successfully generated."
+             //   });
+             // } else if (job.status === 'error') {
+             //   console.log('❌ [Realtime] Job failed:', job.error_message);
+             //   console.log('🔄 [Loader] Stopping loader - Realtime error received');
+             //   setIsGenerating(false);
+             //   toast({
+             //     title: "Error",
+             //     description: job.error_message || "Failed to generate report. Please try again.",
+             //     variant: "destructive"
+             //   });
+             // }
           }
         })
         .subscribe();

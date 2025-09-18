@@ -300,21 +300,21 @@ export default function AISetup() {
           schema: 'public',
           table: 'jobs',
           filter: `user_id=eq.${user?.id}`
-        }, (payload) => {
-          console.log('📩 [Realtime] Job update received:', payload);
-          const job = payload.new as any;
-          
-          if (job && job.status && job.id === macroJobId) {
-            console.log(`✅ [Realtime] Job completed with status: ${job.status}`);
-            
-            if (job.status === 'completed' && job.response_payload) {
-              console.log('📩 [Realtime] Processing completed response');
-              // Handle macro response here if needed
-            } else if (job.status === 'error') {
-              console.log('❌ [Realtime] Job failed:', job.error_message);
-            }
-          }
-        })
+         }, (payload) => {
+           console.log('📩 [Realtime] Job update received:', payload);
+           const job = payload.new as any;
+           
+           if (job && job.status && job.id === macroJobId) {
+             console.log(`ℹ️ [Realtime] Event received but ignored (temporary patch) - status: ${job.status}`);
+             // Realtime logic kept intact but temporarily ignored
+             // if (job.status === 'completed' && job.response_payload) {
+             //   console.log('📩 [Realtime] Processing completed response');
+             //   // Handle macro response here if needed
+             // } else if (job.status === 'error') {
+             //   console.log('❌ [Realtime] Job failed:', job.error_message);
+             // }
+           }
+         })
         .subscribe();
       
       console.log('📡 [Realtime] Subscribed before POST');
@@ -360,19 +360,18 @@ export default function AISetup() {
         }
       );
       
-      // 3. Handle HTTP response (secondary path)
-      try {
-        if (macroResponse.ok) {
-          const responseData = await macroResponse.json();
-          console.log('📩 [HTTP] Response:', responseData);
-          dualResponseHandler.handleHttpResponse(macroJobId, responseData);
-        } else {
-          console.log(`⚠️ [HTTP] Error ${macroResponse.status}, waiting for Realtime…`);
-        }
-      } catch (httpError) {
-        console.log(`⚠️ [HTTP] Timeout, waiting for Realtime…`, httpError);
-        // CRITICAL: Do NOT stop loading here - wait for Realtime
-      }
+       // 3. Handle HTTP response (active path)
+       try {
+         if (macroResponse.ok) {
+           const responseData = await macroResponse.json();
+           console.log('📩 [HTTP] Response (active):', responseData);
+           dualResponseHandler.handleHttpResponse(macroJobId, responseData);
+         } else {
+           console.log(`⚠️ [HTTP] Error ${macroResponse.status}`);
+         }
+       } catch (httpError) {
+         console.log(`⚠️ [HTTP] Error:`, httpError);
+       }
 
         // Wait a moment for the response to be processed
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -408,43 +407,43 @@ export default function AISetup() {
           schema: 'public',
           table: 'jobs',
           filter: `user_id=eq.${user?.id}`
-        }, (payload) => {
-          console.log('📩 [Realtime] Trade job update received:', payload);
-          const job = payload.new as any;
-          
-          if (job && job.status && job.id === tradeJobId) {
-            console.log(`✅ [Realtime] Trade job completed with status: ${job.status}`);
-            
-            if (job.status === 'completed' && job.response_payload) {
-              console.log('📩 [Realtime] Processing trade setup response');
-              console.log('🔄 [Loader] Stopping loader - Realtime response received');
-              
-              setRawN8nResponse(job.response_payload);
-              const normalized = normalizeN8n(job.response_payload);
+         }, (payload) => {
+           console.log('📩 [Realtime] Trade job update received:', payload);
+           const job = payload.new as any;
+           
+           if (job && job.status && job.id === tradeJobId) {
+             console.log(`ℹ️ [Realtime] Event received but ignored (temporary patch) - status: ${job.status}`);
+             // Realtime logic kept intact but temporarily ignored
+             // if (job.status === 'completed' && job.response_payload) {
+             //   console.log('📩 [Realtime] Processing trade setup response');
+             //   console.log('🔄 [Loader] Stopping loader - Realtime response received');
+             //   
+             //   setRawN8nResponse(job.response_payload);
+             //   const normalized = normalizeN8n(job.response_payload);
 
-              if (normalized && normalized.setups && normalized.setups.length > 0) {
-                setN8nResult(normalized);
-                setTradeSetup(null);
-                globalLoading.completeRequest(requestId, normalized);
-                
-                toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
-              } else {
-                setN8nResult(null);
-                setTradeSetup(null);
-                setError("The n8n workflow responded without exploitable setups.");
-                globalLoading.failRequest(requestId, "No exploitable setups returned");
-                toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
-              }
-              
-              setStep("generated");
-              setIsGenerating(false);
-            } else if (job.status === 'error') {
-              console.log('❌ [Realtime] Trade job failed:', job.error_message);
-              console.log('🔄 [Loader] Stopping loader - Realtime error received');
-              setIsGenerating(false);
-              setError(job.error_message || 'Job failed');
-              globalLoading.failRequest(requestId, job.error_message || 'Job failed');
-            }
+             //   if (normalized && normalized.setups && normalized.setups.length > 0) {
+             //     setN8nResult(normalized);
+             //     setTradeSetup(null);
+             //     globalLoading.completeRequest(requestId, normalized);
+             //     
+             //     toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
+             //   } else {
+             //     setN8nResult(null);
+             //     setTradeSetup(null);
+             //     setError("The n8n workflow responded without exploitable setups.");
+             //     globalLoading.failRequest(requestId, "No exploitable setups returned");
+             //     toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
+             //   }
+             //   
+              //   setStep("generated");
+              //   setIsGenerating(false);
+             // } else if (job.status === 'error') {
+             //   console.log('❌ [Realtime] Trade job failed:', job.error_message);
+             //   console.log('🔄 [Loader] Stopping loader - Realtime error received');
+             //   setIsGenerating(false);
+             //   setError(job.error_message || 'Job failed');
+             //   globalLoading.failRequest(requestId, job.error_message || 'Job failed');
+             // }
           }
         })
         .subscribe();
