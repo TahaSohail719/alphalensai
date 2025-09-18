@@ -399,23 +399,25 @@ export default function MacroAnalysis() {
         feature: 'Macro Commentary'
       });
       
-      // 4. Handle HTTP response (secondary path)
+      // 4. Handle HTTP response (primary path for now)
       try {
         if (response.ok) {
           const responseData = await response.json();
-          console.log('📩 [HTTP] Response:', responseData);
-          // Note: Realtime is primary, HTTP is just a backup log
-          // The UI updates will be handled by Realtime callback
+          console.log('📩 [HTTP] Response (active):', responseData);
+          
+          // Process the HTTP response immediately
+          await handleRealtimeResponse(responseData, responseJobId);
+          
+          // Clean up the realtime channel since we got HTTP response
+          supabase.removeChannel(realtimeChannel);
         } else {
-          console.log(`⚠️ [HTTP] Error ${response.status}, waiting for Realtime…`);
+          console.log(`⚠️ [HTTP] Error ${response.status}, keeping loader active...`);
+          // HTTP failed, keep loading for potential Realtime response
         }
       } catch (httpError) {
-        console.log(`⚠️ [HTTP] Timeout, waiting for Realtime…`, httpError);
-        // CRITICAL: Do NOT stop loading here - wait for Realtime
+        console.log(`⚠️ [HTTP] Timeout, keeping loader active...`, httpError);
+        // HTTP failed, keep loading for potential Realtime response
       }
-      
-      // Return early - Realtime will handle all UI updates
-      return;
     } catch (error) {
       console.error('Analysis error:', error);
       setIsGenerating(false);
