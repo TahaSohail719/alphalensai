@@ -112,7 +112,7 @@ export function CandlestickChart({
           <TradingViewWidget 
             selectedSymbol={binanceSymbol}
             onSymbolChange={() => {}}
-            className="border-0 shadow-none bg-black"
+            className="border-0 shadow-none"
           />
           
           {/* Mobile-responsive Trade Levels Overlay */}
