@@ -205,34 +205,10 @@ export function TradingViewWidget({
   }, [currentSymbol, timeframe]);
   return <Card className={`w-full ${className}`}>
       <CardHeader className="pb-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Market Chart
-          </CardTitle>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Select value={currentSymbol} onValueChange={(v) => { setCurrentSymbol(v); onSymbolChange?.(v); }}>
-              <SelectTrigger className="w-full sm:w-32 h-10 touch-manipulation">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {symbols.map(symbol => <SelectItem key={symbol.value} value={symbol.value}>
-                    {symbol.label}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={timeframe} onValueChange={setTimeframe}>
-              <SelectTrigger className="w-20 h-10 touch-manipulation">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1h">1H</SelectItem>
-                <SelectItem value="4h">4H</SelectItem>
-                <SelectItem value="1d">1D</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          Market Chart
+        </CardTitle>
       </CardHeader>
       <CardContent className="pb-0">
         {loading && <div className="flex items-center justify-center h-64 sm:h-80 lg:h-96">
