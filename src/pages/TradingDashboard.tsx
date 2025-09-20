@@ -152,7 +152,7 @@ export default function TradingDashboard() {
       onResetJobsCount={jobManager.resetCompletedCount}
       activeJobsCount={jobManager.activeJobs.filter(job => job.status === 'pending' || job.status === 'running').length}
     >
-      <div className="space-y-4 sm:space-y-6 overflow-x-hidden overflow-y-hidden scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="space-y-4 sm:space-y-6 overflow-x-hidden scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {/* Mobile-first header with real-time price */}
         <div className="space-y-4">
           {/* Title section - Mobile optimized */}
@@ -290,8 +290,8 @@ export default function TradingDashboard() {
           className="w-full" 
         />
 
-        {/* Unified chart section - No nesting */}
-        <div className="h-[280px] xs:h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+        {/* Market Chart */}
+        <section aria-label="Market chart">
           <CandlestickChart 
             asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
             showHeader={true}
@@ -305,72 +305,74 @@ export default function TradingDashboard() {
               }
             }}
           />
-        </div>
+        </section>
 
 
 
         {/* Navigation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 md:mt-14">
-          <Card 
-            className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
-            onClick={() => navigate('/ai-setup')}
-            style={{ minHeight: '44px' }}
-          >
-            <CardContent className="p-6 text-center">
-              <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                <Zap className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">AI Trade Setup</h3>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                Generate intelligent trade setups with AI-powered analysis
-              </p>
-              <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                Get Started
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </CardContent>
-          </Card>
+        <section aria-label="Quick navigation" className="mt-16 md:mt-24">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card 
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
+              onClick={() => navigate('/ai-setup')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 text-center">
+                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
+                  <Zap className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">AI Trade Setup</h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  Generate intelligent trade setups with AI-powered analysis
+                </p>
+                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
+                  Get Started
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
 
-          <Card 
-            className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
-            onClick={() => navigate('/macro-analysis')}
-            style={{ minHeight: '44px' }}
-          >
-            <CardContent className="p-6 text-center">
-              <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                <Activity className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Macro Commentary</h3>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                In-depth macroeconomic analysis and market insights
-              </p>
-              <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                Explore
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </CardContent>
-          </Card>
+            <Card 
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
+              onClick={() => navigate('/macro-analysis')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 text-center">
+                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
+                  <Activity className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Macro Commentary</h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  In-depth macroeconomic analysis and market insights
+                </p>
+                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
+                  Explore
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
 
-          <Card 
-            className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
-            onClick={() => navigate('/reports')}
-            style={{ minHeight: '44px' }}
-          >
-            <CardContent className="p-6 text-center">
-              <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                <Activity className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Reports</h3>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                Generate comprehensive market reports and analysis
-              </p>
-              <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                Create Report
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            <Card 
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden" 
+              onClick={() => navigate('/reports')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 text-center">
+                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
+                  <Activity className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Reports</h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  Generate comprehensive market reports and analysis
+                </p>
+                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
+                  Create Report
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
       </div>
 
