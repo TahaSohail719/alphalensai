@@ -55,6 +55,20 @@ export function CandlestickChart({
   const binanceSymbol = getSymbolForAsset(asset);
   const hasRealTimeData = supportsRealTimeData(asset);
 
+  // Update price when asset changes
+  React.useEffect(() => {
+    const basePrice = asset === 'Bitcoin' || asset === 'BTC' ? 95247.50 : 
+                     asset === 'EUR/USD' ? 1.0856 :
+                     asset === 'GBP/USD' ? 1.2734 :
+                     asset === 'GOLD' || asset === 'Gold' ? 2687.45 :
+                     asset === 'USD/JPY' ? 154.23 :
+                     asset === 'Ethereum' || asset === 'ETH' ? 3421.67 :
+                     asset === 'SILVER' || asset === 'Silver' ? 31.45 :
+                     asset === 'CRUDE' || asset === 'Crude Oil' ? 68.92 : 1.0000;
+    
+    setCurrentPrice(basePrice.toString());
+  }, [asset]);
+
 
   const handleTimeframeChange = (newTimeframe: string) => {
     setTimeframe(newTimeframe);
