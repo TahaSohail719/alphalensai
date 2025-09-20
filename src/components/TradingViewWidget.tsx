@@ -5,13 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TrendingUp, BarChart3, AlertTriangle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
 declare global {
   interface Window {
     TradingView: any;
   }
 }
-
 interface TradingViewWidgetProps {
   selectedSymbol: string;
   timeframe?: string;
@@ -42,7 +40,9 @@ export function TradingViewWidget({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasFallback, setHasFallback] = useState(false);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   // Local symbol state to keep dropdown selection stable and update chart
@@ -126,7 +126,7 @@ export function TradingViewWidget({
 
     // Clear container and wait a bit for cleanup
     chartContainerRef.current.innerHTML = '';
-    
+
     // Small delay to ensure proper cleanup
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -158,7 +158,6 @@ export function TradingViewWidget({
       script.onerror = () => reject(new Error('TradingView script failed to load'));
       document.head.appendChild(script);
     });
-
     try {
       await ensureTvJs();
       // Map timeframe to TradingView intervals
@@ -182,14 +181,7 @@ export function TradingViewWidget({
         onChartReady: () => {
           // Mock price update for demonstration
           if (onPriceUpdate) {
-            const mockPrice = currentSymbol === 'BTCUSD' ? '95247.50' : 
-                            currentSymbol === 'EURUSD' ? '1.0856' :
-                            currentSymbol === 'GBPUSD' ? '1.2734' :
-                            currentSymbol === 'XAUUSD' ? '2687.45' :
-                            currentSymbol === 'USDJPY' ? '154.23' :
-                            currentSymbol === 'ETHUSD' ? '3421.67' :
-                            currentSymbol === 'XAGUSD' ? '31.45' :
-                            currentSymbol === 'USOIL' ? '68.92' : '1.0000';
+            const mockPrice = currentSymbol === 'BTCUSD' ? '95247.50' : currentSymbol === 'EURUSD' ? '1.0856' : currentSymbol === 'GBPUSD' ? '1.2734' : currentSymbol === 'XAUUSD' ? '2687.45' : currentSymbol === 'USDJPY' ? '154.23' : currentSymbol === 'ETHUSD' ? '3421.67' : currentSymbol === 'XAGUSD' ? '31.45' : currentSymbol === 'USOIL' ? '68.92' : '1.0000';
             onPriceUpdate(mockPrice);
           }
         }
@@ -222,10 +214,10 @@ export function TradingViewWidget({
 
         <div className="mt-3 sm:mt-4 text-sm text-muted-foreground">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">
-              Market data powered by TradingView
-            </span>
-            <Button variant="outline" size="sm" onClick={fetchData} className="h-8 sm:h-9 text-xs touch-manipulation" style={{ minHeight: '44px' }}>
+            
+            <Button variant="outline" size="sm" onClick={fetchData} className="h-8 sm:h-9 text-xs touch-manipulation" style={{
+            minHeight: '44px'
+          }}>
               Refresh
             </Button>
           </div>
