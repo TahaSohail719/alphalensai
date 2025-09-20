@@ -297,7 +297,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
     )}>
       <Card className="shadow-2xl border-green-500/20 bg-background/95 backdrop-blur-lg h-full flex flex-col">
         {/* Header - Fixed at top */}
-        <CardHeader className="pb-3 flex-shrink-0 border-b border-border/10">
+        <CardHeader className="pb-4 flex-shrink-0 border-b border-border/10 px-6 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 shrink-0" />
@@ -336,7 +336,7 @@ export function ReportsBubble({ instrument, timeframe, onClose }: ReportsBubbleP
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto">
-          <CardContent className="space-y-4 p-4 sm:p-6">
+          <CardContent className="space-y-4 px-6 py-4">
             {step === "compose" && (
             <>
               {/* Report Title */}

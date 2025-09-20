@@ -695,7 +695,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
     <div className="fixed bottom-6 right-6 z-50 w-[600px] max-w-[calc(100vw-1rem)] md:max-w-[calc(100vw-3rem)]">
       <Card className="shadow-2xl border-blue-500/20 bg-background/95 backdrop-blur-lg">
         {/* Header */}
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4 px-6 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-blue-500" />
@@ -760,7 +760,7 @@ export function MacroCommentaryBubble({ instrument, timeframe, onClose }: MacroC
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-6 pb-6">
           {/* TradingView Widget powered by Supabase */}
           <TradingViewWidget 
             selectedSymbol={selectedAsset.symbol}

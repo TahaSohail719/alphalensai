@@ -325,7 +325,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     <div className="fixed bottom-6 right-6 z-50 w-[420px] max-w-[calc(100vw-3rem)]">
       <Card className="shadow-2xl border-primary/20 bg-background/95 backdrop-blur-lg">
         {/* Header */}
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4 px-6 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-primary" />
@@ -367,7 +367,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-6 pb-6">
           {step === "parameters" && (
             <>
               <div className="grid grid-cols-2 gap-4">
