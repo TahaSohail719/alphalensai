@@ -111,7 +111,9 @@ export function CandlestickChart({
         <div className="relative overflow-hidden isolate z-0">
           <TradingViewWidget 
             selectedSymbol={binanceSymbol}
+            timeframe={timeframe}
             onSymbolChange={() => {}}
+            onPriceUpdate={setCurrentPrice}
             className="border-0 shadow-none z-0"
           />
           

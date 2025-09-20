@@ -14,7 +14,9 @@ declare global {
 
 interface TradingViewWidgetProps {
   selectedSymbol: string;
+  timeframe?: string;
   onSymbolChange?: (symbol: string) => void;
+  onPriceUpdate?: (price: string) => void;
   className?: string;
 }
 interface CombinedData {
@@ -30,10 +32,12 @@ interface CombinedData {
 }
 export function TradingViewWidget({
   selectedSymbol,
+  timeframe: propTimeframe,
   onSymbolChange,
+  onPriceUpdate,
   className = ""
 }: TradingViewWidgetProps) {
-  const [timeframe, setTimeframe] = useState<string>("1h");
+  const [timeframe, setTimeframe] = useState<string>(propTimeframe || "1h");
   const [data, setData] = useState<CombinedData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +52,13 @@ export function TradingViewWidget({
   useEffect(() => {
     setCurrentSymbol(selectedSymbol);
   }, [selectedSymbol]);
+
+  // Sync timeframe with prop
+  useEffect(() => {
+    if (propTimeframe) {
+      setTimeframe(propTimeframe);
+    }
+  }, [propTimeframe]);
 
   // Available symbols
   const symbols = [{
@@ -151,10 +162,10 @@ export function TradingViewWidget({
     try {
       await ensureTvJs();
       // Map timeframe to TradingView intervals
-      const interval = timeframe === '1h' ? '60' : timeframe === '4h' ? '240' : 'D';
+      const interval = timeframe === '1m' ? '1' : timeframe === '5m' ? '5' : timeframe === '15m' ? '15' : timeframe === '1h' ? '60' : timeframe === '4h' ? '240' : 'D';
       // Initialize widget
       // @ts-ignore
-      new window.TradingView.widget({
+      const widget = new window.TradingView.widget({
         autosize: true,
         symbol: currentSymbol,
         interval,
@@ -168,6 +179,17 @@ export function TradingViewWidget({
         withdateranges: true,
         studies: ['RSI@tv-basicstudies', 'ATR@tv-basicstudies', 'ADX@tv-basicstudies'],
         container_id: CONTAINER_ID,
+        onChartReady: () => {
+          // Mock price update for demonstration
+          if (onPriceUpdate) {
+            const mockPrice = currentSymbol === 'BTCUSD' ? '95247.50' : 
+                            currentSymbol === 'EURUSD' ? '1.0856' :
+                            currentSymbol === 'GBPUSD' ? '1.2734' :
+                            currentSymbol === 'XAUUSD' ? '2687.45' :
+                            currentSymbol === 'USDJPY' ? '154.23' : '1.0000';
+            onPriceUpdate(mockPrice);
+          }
+        }
       });
     } catch (e) {
       console.error('TradingView init error:', e);
