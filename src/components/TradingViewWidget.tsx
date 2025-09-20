@@ -159,7 +159,7 @@ export function TradingViewWidget({
         symbol: currentSymbol,
         interval,
         timezone: 'Etc/UTC',
-        theme: 'light',
+        theme: 'dark',
         style: '1',
         locale: 'en',
         enable_publishing: false,
