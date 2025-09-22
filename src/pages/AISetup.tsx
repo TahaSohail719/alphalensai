@@ -625,12 +625,17 @@ export default function AISetup() {
                     <SelectTrigger className="h-11 text-sm touch-manipulation">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1h">1 Hour</SelectItem>
-                      <SelectItem value="4h">4 Hours</SelectItem>
-                      <SelectItem value="1d">1 Day</SelectItem>
-                      <SelectItem value="1w">1 Week</SelectItem>
-                    </SelectContent>
+                     <SelectContent>
+                       <SelectItem value="1m">1 Minute</SelectItem>
+                       <SelectItem value="5m">5 Minutes</SelectItem>
+                       <SelectItem value="15m">15 Minutes</SelectItem>
+                       <SelectItem value="30m">30 Minutes</SelectItem>
+                       <SelectItem value="1h">1 Hour</SelectItem>
+                       <SelectItem value="4h">4 Hours</SelectItem>
+                       <SelectItem value="D">1 Day</SelectItem>
+                       <SelectItem value="W">1 Week</SelectItem>
+                       <SelectItem value="M">1 Month</SelectItem>
+                     </SelectContent>
                   </Select>
                 </div>
 
