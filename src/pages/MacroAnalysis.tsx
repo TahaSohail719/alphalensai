@@ -75,6 +75,7 @@ export default function MacroAnalysis() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<string>("");
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [timeframe, setTimeframe] = useState('1h');
 
   // Handler functions for Realtime responses
   const handleRealtimeResponse = async (responsePayload: any, jobId: string) => {
@@ -265,6 +266,19 @@ export default function MacroAnalysis() {
     market: "CRYPTO",
     tradingViewSymbol: "SOLUSD"
   }];
+
+  // Timeframes compatible with TradingView
+  const timeframes = [
+    { value: '1m', label: '1 Minute' },
+    { value: '5m', label: '5 Minutes' },
+    { value: '15m', label: '15 Minutes' },
+    { value: '30m', label: '30 Minutes' },
+    { value: '1h', label: '1 Hour' },
+    { value: '4h', label: '4 Hours' },
+    { value: 'D', label: '1 Day' },
+    { value: 'W', label: '1 Week' },
+    { value: 'M', label: '1 Month' },
+  ];
 
   // Harmonized parameters with MacroCommentaryBubble
   const [queryParams, setQueryParams] = useState({
@@ -701,25 +715,40 @@ export default function MacroAnalysis() {
                 <TrendingUp className="h-5 w-5" />
                 Market Analysis - {selectedAsset.display}
               </div>
-              {/* Asset Selector */}
-              <Select value={selectedAsset.symbol} onValueChange={value => {
-              const asset = assets.find(a => a.symbol === value);
-              if (asset) setSelectedAsset(asset);
-            }}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
-                  {assets.filter(a => a.market === "FX").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
-                      {asset.display}
-                    </SelectItem>)}
-                  <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
-                  {assets.filter(a => a.market === "CRYPTO").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
-                      {asset.display}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-3">
+                {/* Timeframe Selector */}
+                <Select value={timeframe} onValueChange={setTimeframe}>
+                  <SelectTrigger className="w-32 bg-background/50 border-border-light">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeframes.map((tf) => (
+                      <SelectItem key={tf.value} value={tf.value}>
+                        {tf.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Asset Selector */}
+                <Select value={selectedAsset.symbol} onValueChange={value => {
+                const asset = assets.find(a => a.symbol === value);
+                if (asset) setSelectedAsset(asset);
+              }}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
+                    {assets.filter(a => a.market === "FX").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
+                        {asset.display}
+                      </SelectItem>)}
+                    <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
+                    {assets.filter(a => a.market === "CRYPTO").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
+                        {asset.display}
+                      </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -735,10 +764,13 @@ export default function MacroAnalysis() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="chart" className="p-4 pt-2">
-                <TradingViewWidget selectedSymbol={selectedAsset.tradingViewSymbol} onSymbolChange={symbol => {
-                const asset = assets.find(a => a.symbol === symbol);
-                if (asset) setSelectedAsset(asset);
-              }} />
+                <TradingViewWidget 
+                  selectedSymbol={selectedAsset.tradingViewSymbol} 
+                  timeframe={timeframe}
+                  onSymbolChange={symbol => {
+                  const asset = assets.find(a => a.symbol === symbol);
+                  if (asset) setSelectedAsset(asset);
+                }} />
               </TabsContent>
               <TabsContent value="technical" className="p-4 pt-2">
                 <TechnicalDashboard selectedAsset={selectedAsset} />
