@@ -36,34 +36,19 @@ interface AssetInfo {
 
 interface TechnicalDashboardProps {
   selectedAsset: AssetInfo;
+  timeframe?: string;
 }
 
-export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
+export function TechnicalDashboard({ selectedAsset, timeframe = "1h" }: TechnicalDashboardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [indicators, setIndicators] = useState<TechnicalIndicator[]>([]);
   const [signals, setSignals] = useState<TechnicalSignal[]>([]);
   const [summary, setSummary] = useState<"BUY" | "SELL" | "NEUTRAL">("NEUTRAL");
-  const [selectedSymbol, setSelectedSymbol] = useState(selectedAsset.symbol);
-  const [selectedInterval, setSelectedInterval] = useState("1h");
   const [error, setError] = useState<string | null>(null);
 
   const API_KEY = "e40fcead02054731aef55d2dfe01cf47";
   const BASE_URL = "https://api.twelvedata.com";
 
-  const assetOptions = [
-    { value: "EUR/USD", label: "EUR/USD" },
-    { value: "GBP/USD", label: "GBP/USD" },
-    { value: "USD/JPY", label: "USD/JPY" },
-    { value: "BTC/USD", label: "BTC/USD" },
-    { value: "ETH/USD", label: "ETH/USD" }
-  ];
-
-  const intervalOptions = [
-    { value: "15min", label: "15 min" },
-    { value: "30min", label: "30 min" },
-    { value: "1h", label: "1 hour" },
-    { value: "1day", label: "1 day" }
-  ];
 
   const calculateSimpleRSI = (prices: number[]): number => {
     if (prices.length < 14) return 50;
@@ -110,13 +95,27 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
     setError(null);
     
     try {
-      console.log(`Fetching technical data for ${selectedSymbol} with interval ${selectedInterval}...`);
+      // Convert timeframe to Twelve Data API format
+      const intervalMap: { [key: string]: string } = {
+        '1m': '1min',
+        '5m': '5min', 
+        '15m': '15min',
+        '30m': '30min',
+        '1h': '1h',
+        '4h': '4h',
+        'D': '1day',
+        'W': '1week',
+        'M': '1month'
+      };
+      const apiInterval = intervalMap[timeframe] || '1h';
+      
+      console.log(`Fetching technical data for ${selectedAsset.symbol} with interval ${apiInterval}...`);
       
       // Fetch multiple indicators from Twelve Data API
       const [rsiResponse, atrResponse, adxResponse] = await Promise.all([
-        fetch(`${BASE_URL}/rsi?symbol=${selectedSymbol}&interval=${selectedInterval}&apikey=${API_KEY}&format=JSON`),
-        fetch(`${BASE_URL}/atr?symbol=${selectedSymbol}&interval=${selectedInterval}&apikey=${API_KEY}&format=JSON`),
-        fetch(`${BASE_URL}/adx?symbol=${selectedSymbol}&interval=${selectedInterval}&apikey=${API_KEY}&format=JSON`)
+        fetch(`${BASE_URL}/rsi?symbol=${selectedAsset.symbol}&interval=${apiInterval}&apikey=${API_KEY}&format=JSON`),
+        fetch(`${BASE_URL}/atr?symbol=${selectedAsset.symbol}&interval=${apiInterval}&apikey=${API_KEY}&format=JSON`),
+        fetch(`${BASE_URL}/adx?symbol=${selectedAsset.symbol}&interval=${apiInterval}&apikey=${API_KEY}&format=JSON`)
       ]);
 
       // Check if all requests were successful
@@ -293,7 +292,7 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [selectedSymbol, selectedInterval]);
+  }, [selectedAsset.symbol, timeframe]);
 
   const getSignalColor = (signal: string) => {
     switch (signal) {
@@ -330,40 +329,6 @@ export function TechnicalDashboard({ selectedAsset }: TechnicalDashboardProps) {
           <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
           Refresh
         </Button>
-      </div>
-
-      {/* Controls */}
-      <div className="flex gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Asset</label>
-          <Select value={selectedSymbol} onValueChange={setSelectedSymbol}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {assetOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Interval</label>
-          <Select value={selectedInterval} onValueChange={setSelectedInterval}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {intervalOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       {/* Error Display */}

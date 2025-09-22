@@ -773,7 +773,7 @@ export default function MacroAnalysis() {
                 }} />
               </TabsContent>
               <TabsContent value="technical" className="p-4 pt-2">
-                <TechnicalDashboard selectedAsset={selectedAsset} />
+                <TechnicalDashboard selectedAsset={selectedAsset} timeframe={timeframe} />
               </TabsContent>
             </Tabs>
           </CardContent>
