@@ -60,16 +60,18 @@ export function CandlestickChart({
   const binanceSymbol = getSymbolForAsset(asset);
   const hasRealTimeData = supportsRealTimeData(asset);
 
-  // Initial price setup - will be updated by real-time data
+  // Prix de fallback mis à jour (utilisés seulement en attendant WebSocket)
   React.useEffect(() => {
-    const basePrice = asset === 'Bitcoin' || asset === 'BTC' ? 95247.50 : 
-                     asset === 'EUR/USD' ? 1.0856 :
-                     asset === 'GBP/USD' ? 1.2734 :
-                     asset === 'GOLD' || asset === 'Gold' ? 2687.45 :
-                     asset === 'USD/JPY' ? 154.23 :
-                     asset === 'Ethereum' || asset === 'ETH' ? 3421.67 :
-                     asset === 'SILVER' || asset === 'Silver' ? 31.45 :
-                     asset === 'CRUDE' || asset === 'Crude Oil' ? 68.92 : 1.0000;
+    const basePrice = asset === 'Bitcoin' || asset === 'BTC' ? 67500.00 : 
+                     asset === 'EUR/USD' ? 1.0850 :
+                     asset === 'GBP/USD' ? 1.2650 :
+                     asset === 'GOLD' || asset === 'Gold' ? 2650.00 :
+                     asset === 'USD/JPY' ? 150.50 :
+                     asset === 'Ethereum' || asset === 'ETH' ? 3500.00 :
+                     asset === 'SILVER' || asset === 'Silver' ? 31.50 :
+                     asset === 'CRUDE' || asset === 'Crude Oil' ? 75.00 :
+                     asset === 'AUD/USD' ? 0.6650 :
+                     asset === 'NZD/USD' ? 0.6100 : 1.0000;
     
     setCurrentPrice(basePrice.toString());
   }, [asset]);
