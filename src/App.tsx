@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/components/GlobalLoadingProvider";
 import { JobStatusCards } from "@/components/JobStatusCards";
 import AdminGuard from "./components/AdminGuard";
+import AuthGuard from "./components/AuthGuard";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import AISetup from "./pages/AISetup";
@@ -38,16 +39,16 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Homepage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<AuthGuard requireApproval><Dashboard /></AuthGuard>} />
               <Route path="/asset/:symbol" element={<AssetDetail />} />
-              <Route path="/ai-setup" element={<AISetup />} />
-              <Route path="/macro-analysis" element={<MacroAnalysis />} />
-              <Route path="/reports" element={<Reports />} />
+              <Route path="/ai-setup" element={<AuthGuard requireApproval><AISetup /></AuthGuard>} />
+              <Route path="/macro-analysis" element={<AuthGuard requireApproval><MacroAnalysis /></AuthGuard>} />
+              <Route path="/reports" element={<AuthGuard requireApproval><Reports /></AuthGuard>} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/history" element={<History />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/email-confirmation" element={<EmailConfirmation />} />
-              <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+              <Route path="/admin" element={<AuthGuard requireApproval><AdminGuard><Admin /></AdminGuard></AuthGuard>} />
               <Route path="/about" element={<About />} />
               <Route path="/features" element={<Features />} />
               <Route path="/contact" element={<Contact />} />
