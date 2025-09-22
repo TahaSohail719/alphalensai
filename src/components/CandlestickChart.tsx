@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart3, Wifi, WifiOff } from 'lucide-react';
 import { getSymbolForAsset, supportsRealTimeData } from '@/lib/assetMapping';
-import { TradingViewWidget } from '@/components/TradingViewWidget';
 import { cn } from '@/lib/utils';
 
 const { useState } = React;
@@ -76,6 +75,70 @@ export function CandlestickChart({
     setCurrentPrice(basePrice.toString());
   }, [asset]);
 
+  // Connexion WebSocket Binance directe
+  React.useEffect(() => {
+    let ws: WebSocket | null = null;
+    let isMounted = true;
+    
+    const connectToBinance = () => {
+      const wsUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol.toLowerCase()}@ticker`;
+      console.log(`🔌 Connecting to Binance WebSocket: ${wsUrl}`);
+      
+      ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        if (isMounted) {
+          console.log(`✅ Connected to ${binanceSymbol} price feed (Binance)`);
+          setIsConnected(true);
+        }
+      };
+      
+      ws.onmessage = (event) => {
+        if (!isMounted) return;
+        
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.c) {
+            const price = parseFloat(data.c);
+            const decimals = binanceSymbol.includes('JPY') ? 2 : 
+                            binanceSymbol.includes('USDT') ? 2 : 4;
+            setCurrentPrice(price.toFixed(decimals));
+          }
+        } catch (error) {
+          console.error('Error parsing Binance data:', error);
+        }
+      };
+      
+      ws.onclose = () => {
+        if (isMounted) {
+          console.log(`🔌 Disconnected from ${binanceSymbol} price feed`);
+          setIsConnected(false);
+          // Reconnect after 3 seconds
+          setTimeout(() => {
+            if (isMounted) {
+              connectToBinance();
+            }
+          }, 3000);
+        }
+      };
+      
+      ws.onerror = (error) => {
+        if (isMounted) {
+          console.error('Binance WebSocket error:', error);
+          setIsConnected(false);
+        }
+      };
+    };
+    
+    connectToBinance();
+    
+    return () => {
+      isMounted = false;
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, [binanceSymbol]);
 
   const handleTimeframeChange = (newTimeframe: string) => {
     setTimeframe(newTimeframe);
@@ -130,13 +193,17 @@ export function CandlestickChart({
       )}
       <CardContent className="pb-4 sm:pb-6">
         <div className="relative overflow-hidden isolate z-0">
-          <TradingViewWidget 
-            selectedSymbol={binanceSymbol}
-            timeframe={timeframe}
-            onSymbolChange={() => {}}
-            onPriceUpdate={setCurrentPrice}
-            className="border-0 shadow-none z-0"
-          />
+          {/* Chart container for direct implementation */}
+          <div className="w-full h-[380px] sm:h-[460px] lg:h-[560px] border border-border rounded-lg bg-card flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl font-mono font-bold text-primary mb-2">
+                ${parseFloat(currentPrice).toLocaleString('en-US', { minimumFractionDigits: binanceSymbol.includes('JPY') ? 2 : 4 })}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Live price from Binance WebSocket
+              </div>
+            </div>
+          </div>
           
           {/* Mobile-responsive Trade Levels Overlay */}
           {tradeLevels && (
