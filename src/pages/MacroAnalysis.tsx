@@ -413,10 +413,28 @@ export default function MacroAnalysis() {
         feature: 'Macro Commentary'
       });
       
-      // 4. Handle HTTP response (primary path for now)
+      // 4. Handle HTTP response with proper error handling
       try {
         if (response.ok) {
-          const responseData = await response.json();
+          const responseText = await response.text();
+          
+          // Validate JSON response
+          if (!responseText || responseText.trim() === '') {
+            throw new Error('Empty response from server');
+          }
+          
+          let responseData;
+          try {
+            responseData = JSON.parse(responseText);
+          } catch (jsonError) {
+            throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
+          }
+          
+          // Check for explicit error fields in the response
+          if (responseData && typeof responseData === 'object' && responseData.error) {
+            throw new Error(`Server error: ${responseData.error}`);
+          }
+          
           console.log('📩 [HTTP] Response (active):', responseData);
           
           // Process the HTTP response immediately
@@ -425,12 +443,27 @@ export default function MacroAnalysis() {
           // Clean up the realtime channel since we got HTTP response
           supabase.removeChannel(realtimeChannel);
         } else {
-          console.log(`⚠️ [HTTP] Error ${response.status}, keeping loader active...`);
-          // HTTP failed, keep loading for potential Realtime response
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
       } catch (httpError) {
-        console.log(`⚠️ [HTTP] Timeout, keeping loader active...`, httpError);
-        // HTTP failed, keep loading for potential Realtime response
+        console.log(`❌ [HTTP] Request failed:`, httpError);
+        
+        // Stop loading and show error to user
+        setIsGenerating(false);
+        setJobStatus("error");
+        
+        // Clean up the realtime channel
+        supabase.removeChannel(realtimeChannel);
+        
+        const errorMessage = httpError instanceof Error ? httpError.message : 'Request failed - please try again';
+        
+        toast({
+          title: "Analysis Error", 
+          description: errorMessage,
+          variant: "destructive"
+        });
+        
+        return; // Exit early, don't continue with realtime fallback
       }
     } catch (error) {
       console.error('Analysis error:', error);
