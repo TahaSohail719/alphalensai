@@ -55,7 +55,7 @@ export function CandlestickChart({
   const binanceSymbol = getSymbolForAsset(asset);
   const hasRealTimeData = supportsRealTimeData(asset);
 
-  // Update price when asset changes
+  // Initial price setup - will be updated by real-time data
   React.useEffect(() => {
     const basePrice = asset === 'Bitcoin' || asset === 'BTC' ? 95247.50 : 
                      asset === 'EUR/USD' ? 1.0856 :
