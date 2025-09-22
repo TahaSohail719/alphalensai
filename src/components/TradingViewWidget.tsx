@@ -161,7 +161,15 @@ export function TradingViewWidget({
     try {
       await ensureTvJs();
       // Map timeframe to TradingView intervals
-      const interval = timeframe === '1m' ? '1' : timeframe === '5m' ? '5' : timeframe === '15m' ? '15' : timeframe === '1h' ? '60' : timeframe === '4h' ? '240' : 'D';
+      const interval = timeframe === '1m' ? '1' : 
+                      timeframe === '5m' ? '5' : 
+                      timeframe === '15m' ? '15' : 
+                      timeframe === '30m' ? '30' : 
+                      timeframe === '1h' ? '60' : 
+                      timeframe === '4h' ? '240' : 
+                      timeframe === 'D' ? 'D' : 
+                      timeframe === 'W' ? 'W' : 
+                      timeframe === 'M' ? 'M' : '60';
       // Initialize widget
       // @ts-ignore
       const widget = new window.TradingView.widget({
