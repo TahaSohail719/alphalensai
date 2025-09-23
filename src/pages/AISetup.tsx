@@ -269,7 +269,29 @@ export default function AISetup() {
       "GOLD": "XAUUSD",
       "SILVER": "XAGUSD",
       "WTI": "USOIL",
-      "BRENT": "UKOIL"
+      "BRENT": "UKOIL",
+      "COPPER": "COPPER",
+      "PLATINUM": "XPTUSD",
+      "PALLADIUM": "XPDUSD",
+      "ALUMINUM": "ALUMINUM",
+      "ZINC": "ZINC",
+      "NICKEL": "NICKEL",
+      "NATGAS": "NATGAS",
+      "HEATING_OIL": "HEATING_OIL",
+      "GASOLINE": "GASOLINE",
+      "WHEAT": "WHEAT",
+      "CORN": "CORN",
+      "SOYBEANS": "SOYBEANS",
+      "RICE": "RICE",
+      "OATS": "OATS",
+      "SUGAR": "SUGAR",
+      "COFFEE": "COFFEE",
+      "COCOA": "COCOA",
+      "COTTON": "COTTON",
+      "ORANGE_JUICE": "ORANGE_JUICE",
+      "LUMBER": "LUMBER",
+      "LIVE_CATTLE": "LIVE_CATTLE",
+      "LEAN_HOGS": "LEAN_HOGS"
     };
     return symbolMap[instrument] || "EURUSD";
   };
@@ -674,6 +696,28 @@ export default function AISetup() {
                       <SelectItem value="SILVER">Silver</SelectItem>
                       <SelectItem value="WTI">Oil (WTI)</SelectItem>
                       <SelectItem value="BRENT">Oil (Brent)</SelectItem>
+                      <SelectItem value="COPPER">Copper</SelectItem>
+                      <SelectItem value="PLATINUM">Platinum</SelectItem>
+                      <SelectItem value="PALLADIUM">Palladium</SelectItem>
+                      <SelectItem value="ALUMINUM">Aluminum</SelectItem>
+                      <SelectItem value="ZINC">Zinc</SelectItem>
+                      <SelectItem value="NICKEL">Nickel</SelectItem>
+                      <SelectItem value="NATGAS">Natural Gas</SelectItem>
+                      <SelectItem value="HEATING_OIL">Heating Oil</SelectItem>
+                      <SelectItem value="GASOLINE">Gasoline</SelectItem>
+                      <SelectItem value="WHEAT">Wheat</SelectItem>
+                      <SelectItem value="CORN">Corn</SelectItem>
+                      <SelectItem value="SOYBEANS">Soybeans</SelectItem>
+                      <SelectItem value="RICE">Rice</SelectItem>
+                      <SelectItem value="OATS">Oats</SelectItem>
+                      <SelectItem value="SUGAR">Sugar</SelectItem>
+                      <SelectItem value="COFFEE">Coffee</SelectItem>
+                      <SelectItem value="COCOA">Cocoa</SelectItem>
+                      <SelectItem value="COTTON">Cotton</SelectItem>
+                      <SelectItem value="ORANGE_JUICE">Orange Juice</SelectItem>
+                      <SelectItem value="LUMBER">Lumber</SelectItem>
+                      <SelectItem value="LIVE_CATTLE">Live Cattle</SelectItem>
+                      <SelectItem value="LEAN_HOGS">Lean Hogs</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
