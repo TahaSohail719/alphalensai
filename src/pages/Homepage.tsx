@@ -116,7 +116,7 @@ export default function Homepage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <img src="/lovable-uploads/Only_text_white_BG_FINAL.png" alt="alphaLens.ai" className="h-6" />
+                <img src="/lovable-uploads/Only_text_white_BG_FINAL.png" alt="alphaLens.ai" className="h-[1.95rem]" />
               </div>
               <p className="text-muted-foreground text-sm">
                 Professional financial research and trading intelligence powered by artificial intelligence.
