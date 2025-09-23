@@ -53,7 +53,7 @@ interface TradingLevels {
 interface AssetInfo {
   symbol: string;
   display: string;
-  market: "FX" | "CRYPTO";
+  market: "FX" | "CRYPTO" | "COMMODITY";
   tradingViewSymbol: string;
 }
 export default function MacroAnalysis() {
@@ -239,6 +239,68 @@ export default function MacroAnalysis() {
     market: "FX",
     tradingViewSymbol: "GBPJPY"
   },
+  // Additional Currencies
+  {
+    symbol: "USD/SEK",
+    display: "USD/SEK",
+    market: "FX",
+    tradingViewSymbol: "USDSEK"
+  }, {
+    symbol: "USD/NOK",
+    display: "USD/NOK",
+    market: "FX",
+    tradingViewSymbol: "USDNOK"
+  }, {
+    symbol: "USD/DKK",
+    display: "USD/DKK",
+    market: "FX",
+    tradingViewSymbol: "USDDKK"
+  }, {
+    symbol: "USD/PLN",
+    display: "USD/PLN",
+    market: "FX",
+    tradingViewSymbol: "USDPLN"
+  }, {
+    symbol: "USD/HUF",
+    display: "USD/HUF",
+    market: "FX",
+    tradingViewSymbol: "USDHUF"
+  }, {
+    symbol: "USD/CZK",
+    display: "USD/CZK",
+    market: "FX",
+    tradingViewSymbol: "USDCZK"
+  }, {
+    symbol: "USD/TRY",
+    display: "USD/TRY",
+    market: "FX",
+    tradingViewSymbol: "USDTRY"
+  }, {
+    symbol: "USD/ZAR",
+    display: "USD/ZAR",
+    market: "FX",
+    tradingViewSymbol: "USDZAR"
+  }, {
+    symbol: "USD/MXN",
+    display: "USD/MXN",
+    market: "FX",
+    tradingViewSymbol: "USDMXN"
+  }, {
+    symbol: "USD/SGD",
+    display: "USD/SGD",
+    market: "FX",
+    tradingViewSymbol: "USDSGD"
+  }, {
+    symbol: "USD/HKD",
+    display: "USD/HKD",
+    market: "FX",
+    tradingViewSymbol: "USDHKD"
+  }, {
+    symbol: "USD/CNY",
+    display: "USD/CNY",
+    market: "FX",
+    tradingViewSymbol: "USDCNH"
+  },
   // Crypto
   {
     symbol: "BTC-USD",
@@ -265,6 +327,223 @@ export default function MacroAnalysis() {
     display: "Solana",
     market: "CRYPTO",
     tradingViewSymbol: "SOLUSD"
+  }, {
+    symbol: "DOT-USD",
+    display: "Polkadot",
+    market: "CRYPTO",
+    tradingViewSymbol: "DOTUSD"
+  }, {
+    symbol: "AVAX-USD",
+    display: "Avalanche",
+    market: "CRYPTO",
+    tradingViewSymbol: "AVAXUSD"
+  }, {
+    symbol: "LINK-USD",
+    display: "Chainlink",
+    market: "CRYPTO",
+    tradingViewSymbol: "LINKUSD"
+  }, {
+    symbol: "UNI-USD",
+    display: "Uniswap",
+    market: "CRYPTO",
+    tradingViewSymbol: "UNIUSD"
+  }, {
+    symbol: "LTC-USD",
+    display: "Litecoin",
+    market: "CRYPTO",
+    tradingViewSymbol: "LTCUSD"
+  }, {
+    symbol: "BCH-USD",
+    display: "Bitcoin Cash",
+    market: "CRYPTO",
+    tradingViewSymbol: "BCHUSD"
+  }, {
+    symbol: "XRP-USD",
+    display: "XRP",
+    market: "CRYPTO",
+    tradingViewSymbol: "XRPUSD"
+  }, {
+    symbol: "XLM-USD",
+    display: "Stellar",
+    market: "CRYPTO",
+    tradingViewSymbol: "XLMUSD"
+  }, {
+    symbol: "MATIC-USD",
+    display: "Polygon",
+    market: "CRYPTO",
+    tradingViewSymbol: "MATICUSD"
+  }, {
+    symbol: "ATOM-USD",
+    display: "Cosmos",
+    market: "CRYPTO",
+    tradingViewSymbol: "ATOMUSD"
+  }, {
+    symbol: "ALGO-USD",
+    display: "Algorand",
+    market: "CRYPTO",
+    tradingViewSymbol: "ALGOUSD"
+  }, {
+    symbol: "VET-USD",
+    display: "VeChain",
+    market: "CRYPTO",
+    tradingViewSymbol: "VETUSD"
+  }, {
+    symbol: "ICP-USD",
+    display: "Internet Computer",
+    market: "CRYPTO",
+    tradingViewSymbol: "ICPUSD"
+  }, {
+    symbol: "FIL-USD",
+    display: "Filecoin",
+    market: "CRYPTO",
+    tradingViewSymbol: "FILUSD"
+  }, {
+    symbol: "SAND-USD",
+    display: "The Sandbox",
+    market: "CRYPTO",
+    tradingViewSymbol: "SANDUSD"
+  }, {
+    symbol: "MANA-USD",
+    display: "Decentraland",
+    market: "CRYPTO",
+    tradingViewSymbol: "MANAUSD"
+  }, {
+    symbol: "APE-USD",
+    display: "ApeCoin",
+    market: "CRYPTO",
+    tradingViewSymbol: "APEUSD"
+  },
+  // Commodities
+  {
+    symbol: "GOLD",
+    display: "Gold",
+    market: "COMMODITY",
+    tradingViewSymbol: "XAUUSD"
+  }, {
+    symbol: "SILVER",
+    display: "Silver",
+    market: "COMMODITY",
+    tradingViewSymbol: "XAGUSD"
+  }, {
+    symbol: "WTI",
+    display: "Oil (WTI)",
+    market: "COMMODITY",
+    tradingViewSymbol: "USOIL"
+  }, {
+    symbol: "BRENT",
+    display: "Oil (Brent)",
+    market: "COMMODITY",
+    tradingViewSymbol: "UKOIL"
+  }, {
+    symbol: "COPPER",
+    display: "Copper",
+    market: "COMMODITY",
+    tradingViewSymbol: "COPPER"
+  }, {
+    symbol: "PLATINUM",
+    display: "Platinum",
+    market: "COMMODITY",
+    tradingViewSymbol: "XPTUSD"
+  }, {
+    symbol: "PALLADIUM",
+    display: "Palladium",
+    market: "COMMODITY",
+    tradingViewSymbol: "XPDUSD"
+  }, {
+    symbol: "ALUMINUM",
+    display: "Aluminum",
+    market: "COMMODITY",
+    tradingViewSymbol: "ALUMINUM"
+  }, {
+    symbol: "ZINC",
+    display: "Zinc",
+    market: "COMMODITY",
+    tradingViewSymbol: "ZINC"
+  }, {
+    symbol: "NICKEL",
+    display: "Nickel",
+    market: "COMMODITY",
+    tradingViewSymbol: "NICKEL"
+  }, {
+    symbol: "NATGAS",
+    display: "Natural Gas",
+    market: "COMMODITY",
+    tradingViewSymbol: "NGAS"
+  }, {
+    symbol: "HEATING_OIL",
+    display: "Heating Oil",
+    market: "COMMODITY",
+    tradingViewSymbol: "HEATING_OIL"
+  }, {
+    symbol: "GASOLINE",
+    display: "Gasoline",
+    market: "COMMODITY",
+    tradingViewSymbol: "GASOLINE"
+  }, {
+    symbol: "WHEAT",
+    display: "Wheat",
+    market: "COMMODITY",
+    tradingViewSymbol: "WHEAT"
+  }, {
+    symbol: "CORN",
+    display: "Corn",
+    market: "COMMODITY",
+    tradingViewSymbol: "CORN"
+  }, {
+    symbol: "SOYBEANS",
+    display: "Soybeans",
+    market: "COMMODITY",
+    tradingViewSymbol: "SOYBEAN"
+  }, {
+    symbol: "RICE",
+    display: "Rice",
+    market: "COMMODITY",
+    tradingViewSymbol: "RICE"
+  }, {
+    symbol: "OATS",
+    display: "Oats",
+    market: "COMMODITY",
+    tradingViewSymbol: "OATS"
+  }, {
+    symbol: "SUGAR",
+    display: "Sugar",
+    market: "COMMODITY",
+    tradingViewSymbol: "SUGAR"
+  }, {
+    symbol: "COFFEE",
+    display: "Coffee",
+    market: "COMMODITY",
+    tradingViewSymbol: "COFFEE"
+  }, {
+    symbol: "COCOA",
+    display: "Cocoa",
+    market: "COMMODITY",
+    tradingViewSymbol: "COCOA"
+  }, {
+    symbol: "COTTON",
+    display: "Cotton",
+    market: "COMMODITY",
+    tradingViewSymbol: "COTTON"
+  }, {
+    symbol: "ORANGE_JUICE",
+    display: "Orange Juice",
+    market: "COMMODITY",
+    tradingViewSymbol: "ORANGE_JUICE"
+  }, {
+    symbol: "LUMBER",
+    display: "Lumber",
+    market: "COMMODITY",
+    tradingViewSymbol: "LUMBER"
+  }, {
+    symbol: "LIVE_CATTLE",
+    display: "Live Cattle",
+    market: "COMMODITY",
+    tradingViewSymbol: "LIVE_CATTLE"
+  }, {
+    symbol: "LEAN_HOGS",
+    display: "Lean Hogs",
+    market: "COMMODITY",
+    tradingViewSymbol: "LEAN_HOGS"
   }];
 
   // Timeframes compatible with TradingView

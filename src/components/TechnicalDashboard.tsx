@@ -30,7 +30,7 @@ interface TechnicalIndicator {
 interface AssetInfo {
   symbol: string;
   display: string;
-  market: "FX" | "CRYPTO";
+  market: "FX" | "CRYPTO" | "COMMODITY";
   tradingViewSymbol: string;
 }
 
