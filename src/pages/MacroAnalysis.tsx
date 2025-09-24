@@ -803,10 +803,25 @@ export default function MacroAnalysis() {
             <div className="space-y-4">
               {/* Main search input */}
               <div className="relative">
-                <Textarea value={queryParams.query} onChange={e => setQueryParams(prev => ({
-                ...prev,
-                query: e.target.value
-              }))} placeholder="Ask your macro question or describe the context to analyze..." rows={3} className="text-base resize-none pr-12" />
+                <Textarea 
+                  value={queryParams.query} 
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (value.length <= 500) {
+                      setQueryParams(prev => ({
+                        ...prev,
+                        query: value
+                      }));
+                    }
+                  }} 
+                  placeholder="Ask your macro question or describe the context to analyze..." 
+                  rows={3} 
+                  className="text-base resize-none pr-12 pb-8" 
+                  maxLength={500}
+                />
+                <div className="absolute bottom-2 left-2 text-xs text-muted-foreground">
+                  {queryParams.query.length}/500
+                </div>
                 <Button onClick={generateAnalysis} disabled={isGenerating || !queryParams.query.trim()} size="sm" className="absolute bottom-2 right-2">
                   {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
                 </Button>
