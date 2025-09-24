@@ -5,72 +5,38 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import PublicNavbar from '@/components/PublicNavbar';
-
 const Pricing = () => {
   const navigate = useNavigate();
-  
   useEffect(() => {
     console.log('📊 [Pricing] Alphalens pricing page initialized');
   }, []);
-
   const handleCTAClick = (plan: string) => {
     console.log(`📊 [Pricing] CTA clicked: ${plan}`);
     // TODO: Implement actual subscription logic
   };
-
-  const b2cPlans = [
-    {
-      name: 'Basic',
-      price: '$25',
-      description: 'Perfect for individual traders getting started',
-      features: [
-        'Market Commentary',
-        'AI Trade Setup',
-        'Research Reports'
-      ],
-      usage: [
-        '70 queries per month',
-        '20 investment ideas per month',
-        '4 reports per month'
-      ],
-      highlight: false
-    },
-    {
-      name: 'Standard',
-      price: '$35',
-      description: 'Ideal for active traders and investors',
-      features: [
-        'Market Commentary',
-        'AI Trade Setup',
-        'Research Reports'
-      ],
-      usage: [
-        '120 queries per month',
-        '35 investment ideas per month',
-        '8 reports per month'
-      ],
-      highlight: false
-    },
-    {
-      name: 'Premium',
-      price: '$49',
-      description: 'Complete solution for professional traders',
-      features: [
-        'Market Commentary',
-        'AI Trade Setup',
-        'Research Reports'
-      ],
-      usage: [
-        'Unlimited queries',
-        '50 investment ideas per month',
-        '16 reports per month'
-      ],
-      highlight: true
-    }
-  ];
-
-  return (
-    <>
+  const b2cPlans = [{
+    name: 'Basic',
+    price: '$25',
+    description: 'Perfect for individual traders getting started',
+    features: ['Market Commentary', 'AI Trade Setup', 'Research Reports'],
+    usage: ['70 queries per month', '20 investment ideas per month', '4 reports per month'],
+    highlight: false
+  }, {
+    name: 'Standard',
+    price: '$35',
+    description: 'Ideal for active traders and investors',
+    features: ['Market Commentary', 'AI Trade Setup', 'Research Reports'],
+    usage: ['120 queries per month', '35 investment ideas per month', '8 reports per month'],
+    highlight: false
+  }, {
+    name: 'Premium',
+    price: '$49',
+    description: 'Complete solution for professional traders',
+    features: ['Market Commentary', 'AI Trade Setup', 'Research Reports'],
+    usage: ['Unlimited queries', '50 investment ideas per month', '16 reports per month'],
+    highlight: true
+  }];
+  return <>
       <PublicNavbar />
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-16">
@@ -114,7 +80,7 @@ const Pricing = () => {
                       </li>
                       <li className="flex items-start gap-3">
                         <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span>$1 per active user (billed at end of month)</span>
+                        <span>$3 per active user (billed at end of month)</span>
                       </li>
                     </ul>
                   </div>
@@ -141,11 +107,7 @@ const Pricing = () => {
                     Entry-level access to showcase Alphalens' value to all broker clients. 
                     Direct revenue from traders who subscribe to paid plans.
                   </p>
-                  <Button 
-                    size="lg" 
-                    className="w-full md:w-auto"
-                    onClick={() => handleCTAClick('B2B Contact Sales')}
-                  >
+                  <Button size="lg" className="w-full md:w-auto" onClick={() => handleCTAClick('B2B Contact Sales')}>
                     Contact Sales
                   </Button>
                 </div>
@@ -165,18 +127,12 @@ const Pricing = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {b2cPlans.map((plan) => (
-                <Card 
-                  key={plan.name} 
-                  className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}
-                >
-                  {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
+                  {plan.highlight && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge variant="default" className="px-4 py-1">
                         Most Complete
                       </Badge>
-                    </div>
-                  )}
+                    </div>}
                   
                   <CardHeader className="text-center pb-6">
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
@@ -193,37 +149,28 @@ const Pricing = () => {
                     <div>
                       <h4 className="font-semibold mb-3">Features</h4>
                       <ul className="space-y-2">
-                        {plan.features.map((feature, index) => (
-                          <li key={index} className="flex items-center gap-3">
+                        {plan.features.map((feature, index) => <li key={index} className="flex items-center gap-3">
                             <Check className="h-4 w-4 text-primary flex-shrink-0" />
                             <span className="text-sm">{feature}</span>
-                          </li>
-                        ))}
+                          </li>)}
                       </ul>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold mb-3">Usage Limits</h4>
                       <ul className="space-y-2">
-                        {plan.usage.map((usage, index) => (
-                          <li key={index} className="flex items-center gap-3">
+                        {plan.usage.map((usage, index) => <li key={index} className="flex items-center gap-3">
                             <Check className="h-4 w-4 text-primary flex-shrink-0" />
                             <span className="text-sm">{usage}</span>
-                          </li>
-                        ))}
+                          </li>)}
                       </ul>
                     </div>
                     
-                    <Button 
-                      className="w-full mt-6"
-                      variant={plan.highlight ? "default" : "outline"}
-                      onClick={() => handleCTAClick(plan.name)}
-                    >
+                    <Button className="w-full mt-6" variant={plan.highlight ? "default" : "outline"} onClick={() => handleCTAClick(plan.name)}>
                       Get Started
                     </Button>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
 
@@ -279,8 +226,6 @@ const Pricing = () => {
           </div>
         </div>
       </footer>
-    </>
-  );
+    </>;
 };
-
 export default Pricing;
