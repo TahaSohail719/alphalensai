@@ -786,13 +786,25 @@ export default function AISetup() {
 
               <div className="space-y-2">
                 <Label htmlFor="customNotes">Custom Notes</Label>
-                <Textarea 
-                  id="customNotes"
-                  value={parameters.customNotes}
-                  onChange={(e) => setParameters({...parameters, customNotes: e.target.value})}
-                  placeholder="Add specific instructions for the AI..."
-                  rows={3}
-                />
+                <div className="relative">
+                  <Textarea 
+                    id="customNotes"
+                    value={parameters.customNotes}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 500) {
+                        setParameters({...parameters, customNotes: value});
+                      }
+                    }}
+                    placeholder="Add specific instructions for the AI..."
+                    rows={3}
+                    className="pb-8"
+                    maxLength={500}
+                  />
+                  <div className="absolute bottom-2 left-2 text-xs text-muted-foreground">
+                    {parameters.customNotes.length}/500
+                  </div>
+                </div>
               </div>
 
               <Button 
