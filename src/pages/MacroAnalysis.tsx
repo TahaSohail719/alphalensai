@@ -658,17 +658,21 @@ export default function MacroAnalysis() {
           if (job.status === 'completed' && job.response_payload) {
             console.log('📩 [Realtime] Processing completed response from websocket');
             try {
-              // Parse JSON payload if it's a string
+              // Parse JSON payload from response_payload (like Reports page)
               let parsedPayload = job.response_payload;
               if (typeof job.response_payload === 'string') {
                 parsedPayload = JSON.parse(job.response_payload);
               }
+              
+              // Use the parsed payload exactly as before for analysis logic
               handleRealtimeResponse(parsedPayload, responseJobId);
+              
               // Cleanup realtime channel after successful processing
               supabase.removeChannel(realtimeChannel);
             } catch (parseError) {
               console.error('❌ [Realtime] Error parsing response_payload:', parseError);
               handleRealtimeError('Invalid response format received');
+              supabase.removeChannel(realtimeChannel);
             }
           } else if (job.status === 'error') {
             console.log('❌ [Realtime] Job failed:', job.error_message);
