@@ -67,9 +67,7 @@ export default function MacroAnalysis() {
   const {
     logInteraction
   } = useAIInteractionLogger();
-  const {
-    createJob
-  } = useRealtimeJobManager();
+  const { createJob } = useRealtimeJobManager();
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -639,8 +637,36 @@ export default function MacroAnalysis() {
     setIsGenerating(true);
     setJobStatus("running");
     try {
-      // Generate job ID first
-      const responseJobId = Date.now().toString();
+      // 1. Build payload first
+      const payload = {
+        type: "RAG",
+        question: queryParams.query,
+        mode: "run",
+        filters: {
+          region: "All",
+          product: "All",
+          category: "All"
+        },
+        analysis: {
+          query: queryParams.query,
+          timestamp: new Date().toISOString()
+        },
+        user_id: "default_user",
+        instrument: selectedAsset.symbol,
+        timeframe: "1H",
+        assetType: queryParams.assetType,
+        analysisDepth: queryParams.analysisDepth,
+        period: queryParams.period,
+        adresse: queryParams.adresse
+      };
+      
+      // 2. Create job with payload using createJob hook (like Reports page)
+      const responseJobId = await createJob(
+        'macro_analysis',
+        selectedAsset.symbol,
+        payload,
+        'Macro Commentary'
+      );
 
       // 1. CRITICAL: Subscribe to Realtime BEFORE sending POST request
       console.log('📡 [Realtime] Subscribing to jobs updates before POST');
@@ -687,45 +713,22 @@ export default function MacroAnalysis() {
       }).subscribe();
       console.log('📡 [Realtime] Subscribed before POST');
 
-      // 2. Build payload
-      const payload = {
-        type: "RAG",
-        question: queryParams.query,
-        mode: "run",
-        filters: {
-          region: "All",
-          product: "All",
-          category: "All"
-        },
-        analysis: {
-          query: queryParams.query,
-          timestamp: new Date().toISOString()
-        },
-        user_id: "default_user",
-        instrument: selectedAsset.symbol,
-        timeframe: "1H",
-        assetType: queryParams.assetType,
-        analysisDepth: queryParams.analysisDepth,
-        period: queryParams.period,
-        adresse: queryParams.adresse
-      };
+      // 3. Send POST request after subscription is active (payload already contains job_id via createJob)
       console.log('📊 [MacroAnalysis] Analysis request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         payload: payload,
+        jobId: responseJobId,
         timestamp: new Date().toISOString()
       });
 
-      // 3. Send POST request after subscription is active
       const {
         response
-      } = await enhancedPostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', {
-        ...payload,
-        job_id: responseJobId
-      }, {
+      } = await enhancedPostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload, {
         enableJobTracking: true,
         jobType: 'macro_analysis',
         instrument: selectedAsset.symbol,
-        feature: 'Macro Commentary'
+        feature: 'Macro Commentary',
+        jobId: responseJobId
       });
 
       // 4. Handle HTTP response with proper error handling
