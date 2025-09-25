@@ -652,7 +652,7 @@ export default function MacroAnalysis() {
       }, payload => {
         console.log('📩 [Realtime] Payload received:', payload);
         const job = payload.new as any;
-        if (job && job.status && job.id === responseJobId) {
+        if (job && job.status && (job.id === responseJobId || job.request_payload?.job_id === responseJobId)) {
           console.log(`ℹ️ [Realtime] Event received - status: ${job.status}`);
           
           if (job.status === 'completed' && job.response_payload) {
@@ -664,6 +664,8 @@ export default function MacroAnalysis() {
                 parsedPayload = JSON.parse(job.response_payload);
               }
               handleRealtimeResponse(parsedPayload, responseJobId);
+              // Cleanup realtime channel after successful processing
+              supabase.removeChannel(realtimeChannel);
             } catch (parseError) {
               console.error('❌ [Realtime] Error parsing response_payload:', parseError);
               handleRealtimeError('Invalid response format received');
@@ -671,9 +673,11 @@ export default function MacroAnalysis() {
           } else if (job.status === 'error') {
             console.log('❌ [Realtime] Job failed:', job.error_message);
             handleRealtimeError(job.error_message || 'Analysis failed');
+            supabase.removeChannel(realtimeChannel);
           } else if (job.status === 'completed' && !job.response_payload) {
             console.log('⚠️ [Realtime] Job completed but no response_payload');
             handleRealtimeError('No macro analysis available yet.');
+            supabase.removeChannel(realtimeChannel);
           }
         }
       }).subscribe();
@@ -723,49 +727,16 @@ export default function MacroAnalysis() {
       // 4. Handle HTTP response with proper error handling
       try {
         if (response.ok) {
-          const responseText = await response.text();
-
-          // Validate JSON response
-          if (!responseText || responseText.trim() === '') {
-            throw new Error('Empty response from server');
-          }
-          let responseData;
-          try {
-            responseData = JSON.parse(responseText);
-          } catch (jsonError) {
-            throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
-          }
-
-          // Check for explicit error fields in the response
-          if (responseData && typeof responseData === 'object' && responseData.error) {
-            throw new Error(`Server error: ${responseData.error}`);
-          }
-          console.log('📩 [HTTP] Response (active):', responseData);
-
-          // Process the HTTP response immediately
-          await handleRealtimeResponse(responseData, responseJobId);
-
-          // Clean up the realtime channel since we got HTTP response
-          supabase.removeChannel(realtimeChannel);
+          console.log('📩 [HTTP] Response received (ignored, waiting for Realtime)');
+          // Intentionally ignore HTTP body to ensure WebSocket source of truth
         } else {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
       } catch (httpError) {
-        console.log(`❌ [HTTP] Request failed:`, httpError);
-
-        // Stop loading and show error to user
-        setIsGenerating(false);
-        setJobStatus("error");
-
-        // Clean up the realtime channel
-        supabase.removeChannel(realtimeChannel);
-        const errorMessage = httpError instanceof Error ? httpError.message : 'Request failed - please try again';
-        toast({
-          title: "Analysis Error",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        return; // Exit early, don't continue with realtime fallback
+        console.log(`❌ [HTTP] Request failed, continuing to wait for Realtime:`, httpError);
+        // Do not stop loading or remove channel; Realtime will handle the result
+        // Intentionally no state changes here
+        return; // keep waiting for Realtime
       }
     } catch (error) {
       console.error('Analysis error:', error);
