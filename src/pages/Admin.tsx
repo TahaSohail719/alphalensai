@@ -170,7 +170,7 @@ export default function Admin() {
       // Calculer les statistiques par jour (30 derniers jours)
       const dailyStatsMap = new Map<string, DailyCostStats>();
       const last30Days = Array.from({ length: 30 }, (_, i) => {
-        const date = subDays(new Date(), i);
+        const date = subDays(new Date(), 29 - i); // Changé pour avoir l'ordre croissant
         const dateStr = format(date, 'yyyy-MM-dd');
         dailyStatsMap.set(dateStr, {
           date: dateStr,
@@ -178,7 +178,7 @@ export default function Admin() {
           requests: 0
         });
         return dateStr;
-      }).reverse();
+      }); // Supprimé le .reverse() pour garder l'ordre croissant
 
       jobsData?.forEach(job => {
         const jobDate = format(parseISO(job.created_at), 'yyyy-MM-dd');
