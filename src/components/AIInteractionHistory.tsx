@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, Trash2, Eye } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -38,15 +38,49 @@ const FEATURE_COLORS = {
   report: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
 };
 
+const ITEMS_PER_PAGE_OPTIONS = [
+  { value: '10', label: '10 items' },
+  { value: '20', label: '20 items' },
+  { value: '50', label: '50 items' },
+  { value: '100', label: '100 items' }
+];
+
 export function AIInteractionHistory() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [interactions, setInteractions] = useState<AIInteraction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState('all');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    return parseInt(sessionStorage.getItem('history-items-per-page') || '20');
+  });
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchTotalCount = async () => {
+    if (!user?.id) return 0;
+
+    let query = supabase
+      .from('ai_interactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if (selectedFeature !== 'all') {
+      query = query.eq('feature_name', selectedFeature);
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      console.error('Error fetching total count:', error);
+      return 0;
+    }
+
+    return count || 0;
+  };
 
   const fetchInteractions = async (offset = 0, limit = 20) => {
     if (!user?.id) return [];
@@ -79,27 +113,58 @@ export function AIInteractionHistory() {
 
   const loadInitialData = async () => {
     setLoading(true);
-    const data = await fetchInteractions(0, 20);
+    const [data, count] = await Promise.all([
+      fetchInteractions(0, itemsPerPage),
+      fetchTotalCount()
+    ]);
     setInteractions(data);
-    setHasMore(data.length === 20);
+    setTotalCount(count);
+    setHasMore(data.length === itemsPerPage);
     setLoading(false);
+  };
+
+  const refreshData = async () => {
+    setRefreshing(true);
+    const [data, count] = await Promise.all([
+      fetchInteractions(0, itemsPerPage),
+      fetchTotalCount()
+    ]);
+    setInteractions(data);
+    setTotalCount(count);
+    setHasMore(data.length === itemsPerPage);
+    setRefreshing(false);
+    toast({
+      title: "Refreshed",
+      description: "History updated with latest data"
+    });
   };
 
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
     
     setLoadingMore(true);
-    const newData = await fetchInteractions(interactions.length, 20);
+    const newData = await fetchInteractions(interactions.length, itemsPerPage);
     setInteractions(prev => [...prev, ...newData]);
-    setHasMore(newData.length === 20);
+    setHasMore(newData.length === itemsPerPage);
     setLoadingMore(false);
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    const newItemsPerPage = parseInt(value);
+    setItemsPerPage(newItemsPerPage);
+    sessionStorage.setItem('history-items-per-page', value);
+    
+    // Reset and reload with new page size
+    setInteractions([]);
+    setExpandedItems(new Set());
+    loadInitialData();
   };
 
   useEffect(() => {
     if (user?.id) {
       loadInitialData();
     }
-  }, [user?.id, selectedFeature]);
+  }, [user?.id, selectedFeature, itemsPerPage]);
 
   const toggleExpanded = (id: string) => {
     setExpandedItems(prev => {
@@ -715,7 +780,18 @@ export function AIInteractionHistory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-2xl font-bold">AI Interaction History</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshData}
+            disabled={refreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          
           <Select value={selectedFeature} onValueChange={setSelectedFeature}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by feature" />
@@ -728,6 +804,7 @@ export function AIInteractionHistory() {
               ))}
             </SelectContent>
           </Select>
+          
           {interactions.length > 0 && (
             <Button 
               variant="outline" 
@@ -739,6 +816,32 @@ export function AIInteractionHistory() {
               Clear All
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* Controls and Stats Row */}
+      <div className="flex items-center justify-between flex-wrap gap-4 p-4 bg-muted/30 rounded-lg border border-border/20">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>
+            Showing <span className="font-medium text-foreground">{interactions.length}</span> of{' '}
+            <span className="font-medium text-foreground">{totalCount}</span> items
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">Items per page:</span>
+          <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ITEMS_PER_PAGE_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
