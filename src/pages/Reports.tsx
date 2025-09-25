@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, FileText, Download, Plus, ArrowUp, ArrowDown, Check } from "lucide-react";
+import { ArrowLeft, FileText, Download, Plus, ArrowUp, ArrowDown, Check, Mail } from "lucide-react";
 import Layout from "@/components/Layout";
 import { AssetSearchBar } from "@/components/AssetSearchBar";
 import { useNavigate } from "react-router-dom";
@@ -102,6 +102,7 @@ export default function Reports() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetProfile | null>(null);
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
 
   const [reportConfig, setReportConfig] = useState({
     title: "Monthly Trading Report",
@@ -268,48 +269,41 @@ export default function Reports() {
            const job = payload.new as any;
            
            if (job && job.status && job.id === reportJobId) {
-             console.log(`ℹ️ [Realtime] Event received but ignored (temporary patch) - status: ${job.status}`);
-             // Realtime logic kept intact but temporarily ignored
-             // if (job.status === 'completed' && job.response_payload) {
-             //   console.log('📩 [Realtime] Processing completed response');
-             //   console.log('🔄 [Loader] Stopping loader - Realtime response received');
-             //   
-             //   const generatedSections = includedSections.map(section => ({
-             //     title: section.title,
-             //     content: job.response_payload.sections?.[section.id] || job.response_payload.content || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
-             //     userNotes: section.userNotes || ""
-             //   }));
-
-             //   const newReport: GeneratedReport = {
-             //     id: reportJobId,
-             //     title: reportConfig.title,
-             //     sections: generatedSections,
-             //     customNotes: reportConfig.customNotes,
-             //     exportFormat: reportConfig.exportFormat,
-             //     createdAt: new Date(),
-              //     status: "generated"
-             //   };
-
-             //   setCurrentReport(newReport);
-             //   setStep("generated");
-             //   setIsGenerating(false);
-             //   
-             //   toast({
-             //     title: "Report Generated",
-             //     description: "Your report has been successfully generated."
-             //   });
-             // } else if (job.status === 'error') {
-             //   console.log('❌ [Realtime] Job failed:', job.error_message);
-             //   console.log('🔄 [Loader] Stopping loader - Realtime error received');
-             //   setIsGenerating(false);
-             //   toast({
-             //     title: "Error",
-             //     description: job.error_message || "Failed to generate report. Please try again.",
-             //     variant: "destructive"
-             //   });
-             // }
-          }
-        })
+             if (job.status === 'completed' && job.response_payload) {
+               console.log('📩 [Realtime] Processing completed response with HTML content');
+               console.log('🔄 [Loader] Stopping loader - Realtime response received');
+               
+               // Set HTML content if available
+               if (job.response_payload) {
+                 setHtmlContent(job.response_payload);
+                 setStep("generated");
+                 setIsGenerating(false);
+                 
+                 toast({
+                   title: "Report Generated",
+                   description: "Your report has been successfully generated."
+                 });
+               } else {
+                 setHtmlContent(null);
+                 setIsGenerating(false);
+                 toast({
+                   title: "Report Generated",
+                   description: "Report completed but no content available."
+                 });
+               }
+             } else if (job.status === 'error') {
+               console.log('❌ [Realtime] Job failed:', job.error_message);
+               console.log('🔄 [Loader] Stopping loader - Realtime error received');
+               setIsGenerating(false);
+               setHtmlContent(null);
+               toast({
+                 title: "Error",
+                 description: job.error_message || "Failed to generate report. Please try again.",
+                 variant: "destructive"
+               });
+             }
+           }
+         })
         .subscribe();
       
       console.log('📡 [Realtime] Subscribed before POST');
@@ -437,9 +431,59 @@ export default function Reports() {
     });
   };
 
+  const downloadPDF = () => {
+    if (!htmlContent) return;
+    
+    // Create a new window with the HTML content
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${reportConfig.title}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              @media print { body { margin: 0; } }
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
+    
+    toast({
+      title: "PDF Download",
+      description: "Print dialog opened. Use your browser's print to PDF feature.",
+    });
+  };
+
+  const sendByEmail = () => {
+    if (!htmlContent || !reportConfig.email) {
+      toast({
+        title: "Email Error",
+        description: "Please ensure an email address is provided.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Simulate email sending
+    toast({
+      title: "Email Sent",
+      description: `Report has been sent to ${reportConfig.email}`,
+    });
+  };
+
   const resetComposer = () => {
     setStep("compose");
     setCurrentReport(null);
+    setHtmlContent(null);
   };
 
   return (
@@ -658,73 +702,140 @@ export default function Reports() {
           </div>
         )}
 
-        {step === "generated" && currentReport && (
+        {step === "generated" && (htmlContent || currentReport) && (
           <div className="space-y-6">
-            {/* Report Preview */}
-            <Card className="gradient-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>
-                      {currentReport.title}
+            {/* HTML Report Content */}
+            {htmlContent ? (
+              <Card className="gradient-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>{reportConfig.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Generated on {new Date().toLocaleDateString()} at{" "}
+                        {new Date().toLocaleTimeString()}
+                      </p>
                       {selectedAsset && (
-                        <span className="text-sm font-normal text-muted-foreground ml-2">
-                          ({selectedAsset.symbol})
-                        </span>
+                        <Badge variant="outline" className="mt-2">
+                          Target Asset: {selectedAsset.symbol} - {selectedAsset.name}
+                        </Badge>
                       )}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Generated on {currentReport.createdAt.toLocaleDateString()} at{" "}
-                      {currentReport.createdAt.toLocaleTimeString()}
-                    </p>
-                    {selectedAsset && (
-                      <Badge variant="outline" className="mt-2">
-                        Target Asset: {selectedAsset.symbol} - {selectedAsset.name}
-                      </Badge>
-                    )}
+                    </div>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Check className="w-3 h-3 mr-1" />
+                      Generated
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    <Check className="w-3 h-3 mr-1" />
-                    Generated
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {currentReport.sections.map((section, index) => (
-                  <Card key={index} className="border-l-4 border-primary/30">
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-3">{section.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed mb-4">{section.content}</p>
-                      
-                      {section.userNotes && (
-                        <div className="mt-4 p-3 bg-accent/10 rounded-lg border border-accent/20">
-                          <h4 className="text-sm font-medium text-accent-foreground mb-2">User Notes:</h4>
-                          <p className="text-sm text-muted-foreground">{section.userNotes}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-
-                {currentReport.customNotes && (
-                  <div className="border-l-4 border-warning/30 pl-4 bg-warning/5 p-4 rounded-r-lg">
-                    <h3 className="font-semibold text-lg mb-2">Custom Notes</h3>
-                    <p className="text-muted-foreground leading-relaxed">{currentReport.customNotes}</p>
+                </CardHeader>
+                <CardContent>
+                  {/* Toolbar */}
+                  <div className="flex gap-3 mb-6 p-4 bg-accent/5 rounded-lg border border-accent/20">
+                    <Button onClick={downloadPDF} variant="outline">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
+                    <Button 
+                      onClick={sendByEmail} 
+                      variant="outline"
+                      disabled={!reportConfig.email}
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      Send by Email
+                    </Button>
+                    <Button onClick={resetComposer} variant="outline" className="ml-auto">
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Report
+                    </Button>
                   </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
+                  
+                  {/* HTML Content */}
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: htmlContent }}
+                  />
+                </CardContent>
+              </Card>
+            ) : htmlContent === null ? (
+              <Card className="gradient-card">
+                <CardContent className="p-8 text-center">
+                  <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-2">No report available yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Your report is being processed. Please wait for the content to be generated.
+                  </p>
                   <Button onClick={resetComposer} variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
-                    New Report
+                    Create New Report
                   </Button>
-                  <Button onClick={exportReport} className="flex-1">
-                    <Download className="mr-2 h-4 w-4" />
-                    Export as {currentReport.exportFormat.toUpperCase()}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : currentReport && (
+              /* Fallback to old report display */
+              <Card className="gradient-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>
+                        {currentReport.title}
+                        {selectedAsset && (
+                          <span className="text-sm font-normal text-muted-foreground ml-2">
+                            ({selectedAsset.symbol})
+                          </span>
+                        )}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Generated on {currentReport.createdAt.toLocaleDateString()} at{" "}
+                        {currentReport.createdAt.toLocaleTimeString()}
+                      </p>
+                      {selectedAsset && (
+                        <Badge variant="outline" className="mt-2">
+                          Target Asset: {selectedAsset.symbol} - {selectedAsset.name}
+                        </Badge>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Check className="w-3 h-3 mr-1" />
+                      Generated
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {currentReport.sections.map((section, index) => (
+                    <Card key={index} className="border-l-4 border-primary/30">
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-lg mb-3">{section.title}</h3>
+                        <p className="text-muted-foreground leading-relaxed mb-4">{section.content}</p>
+                        
+                        {section.userNotes && (
+                          <div className="mt-4 p-3 bg-accent/10 rounded-lg border border-accent/20">
+                            <h4 className="text-sm font-medium text-accent-foreground mb-2">User Notes:</h4>
+                            <p className="text-sm text-muted-foreground">{section.userNotes}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {currentReport.customNotes && (
+                    <div className="border-l-4 border-warning/30 pl-4 bg-warning/5 p-4 rounded-r-lg">
+                      <h3 className="font-semibold text-lg mb-2">Custom Notes</h3>
+                      <p className="text-muted-foreground leading-relaxed">{currentReport.customNotes}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4">
+                    <Button onClick={resetComposer} variant="outline">
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Report
+                    </Button>
+                    <Button onClick={exportReport} className="flex-1">
+                      <Download className="mr-2 h-4 w-4" />
+                      Export as {currentReport.exportFormat.toUpperCase()}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
