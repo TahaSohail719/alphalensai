@@ -136,17 +136,15 @@ const Pricing = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
+                {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
                   {plan.highlight && (
-                    <div className="premium-card-header relative flex items-center justify-center h-10 pt-3">
-                      <Badge 
-                        variant="default" 
-                        className="px-3 py-1 text-xs whitespace-nowrap z-10" 
-                        aria-label="Most Complete"
-                      >
-                        Most Complete
-                      </Badge>
-                    </div>
+                    <Badge 
+                      variant="default" 
+                      className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs whitespace-nowrap z-10 shadow-md" 
+                      aria-label="Most Complete"
+                    >
+                      Most Complete
+                    </Badge>
                   )}
                   <CardHeader className={`text-center ${plan.highlight ? 'pb-6 pt-2' : 'pb-6'}`}>
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
