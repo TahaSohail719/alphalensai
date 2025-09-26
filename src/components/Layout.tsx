@@ -76,6 +76,22 @@ export default function Layout({ children, activeModule, onModuleChange, complet
               </div>
             </button>
 
+            {/* Desktop Navigation Items */}
+            <div className="hidden lg:flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/about")} className="h-8 px-3 text-sm">
+                About
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/features")} className="h-8 px-3 text-sm">
+                Features
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/pricing")} className="h-8 px-3 text-sm">
+                Pricing
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/contact")} className="h-8 px-3 text-sm">
+                Contact
+              </Button>
+            </div>
+
             {/* Mobile Navigation + Auth + Status */}
             <div className="flex items-center gap-2">
               {/* AI History Button with Notification Counter */}
@@ -164,56 +180,71 @@ export default function Layout({ children, activeModule, onModuleChange, complet
             <div className="absolute top-full left-0 right-0 bg-card/95 backdrop-blur-xl border-b border-border/50 shadow-xl md:hidden z-40">
               <div className="p-3 space-y-3">
                 <div className="grid grid-cols-1 gap-2">
+                  {/* Public navigation items */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      navigate('/dashboard');
+                      navigate('/about');
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
                   >
-                    <Activity className="h-4 w-4 mr-2" />
-                    Trading Dashboard
+                    <Building2 className="h-4 w-4 mr-2" />
+                    About
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      navigate('/history');
+                      navigate('/features');
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
                   >
-                    <FileText className="h-4 w-4 mr-2" />
-                    History
+                    <Zap className="h-4 w-4 mr-2" />
+                    Features
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      navigate('/macro-analysis');
+                      navigate('/pricing');
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Macro Analysis
+                    Pricing
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      navigate('/reports');
+                      navigate('/contact');
                       setIsMobileMenuOpen(false);
                     }}
                     className="justify-start text-sm"
                   >
-                    <Activity className="h-4 w-4 mr-2" />
-                    Reports
+                    <FileText className="h-4 w-4 mr-2" />
+                    Contact
                   </Button>
+                  
+                  {/* App navigation items for authenticated users */}
                   {user && (
                     <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigate('/dashboard');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="justify-start text-sm"
+                      >
+                        <Activity className="h-4 w-4 mr-2" />
+                        Trading Dashboard
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -232,6 +263,42 @@ export default function Layout({ children, activeModule, onModuleChange, complet
                           </span>
                         )}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigate('/macro-analysis');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="justify-start text-sm"
+                      >
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Macro Analysis
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigate('/reports');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="justify-start text-sm"
+                      >
+                        <Activity className="h-4 w-4 mr-2" />
+                        Reports
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          onModuleChange?.("ai-setup");
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="justify-start text-sm"
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        AI Setup
+                      </Button>
                       {(isAdmin || isSuperUser) && (
                         <Button
                           variant="outline"
@@ -248,30 +315,6 @@ export default function Layout({ children, activeModule, onModuleChange, complet
                       )}
                     </>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      onModuleChange?.("ai-setup");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="justify-start text-sm"
-                  >
-                    <Zap className="h-4 w-4 mr-2" />
-                    AI Setup
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigate('/about');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="justify-start text-sm"
-                  >
-                    <Building2 className="h-4 w-4 mr-2" />
-                    About
-                  </Button>
                 </div>
                 <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border/30 truncate">
                   {selectedAsset} • {timeframe}
