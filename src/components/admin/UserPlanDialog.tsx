@@ -122,52 +122,91 @@ export function UserPlanDialog({
   const handleUpdatePlan = async () => {
     if (!user || !selectedPlan) return;
 
+    // Validate plan exists in parameters
+    const selectedPlanParams = planParameters.find(p => p.plan_type === selectedPlan);
+    if (!selectedPlanParams) {
+      toast({
+        title: "Error",
+        description: `Invalid plan type: ${selectedPlan}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate credit values
+    const queriesCredit = customCredits.queries ? parseInt(customCredits.queries) : selectedPlanParams.max_queries;
+    const ideasCredit = customCredits.ideas ? parseInt(customCredits.ideas) : selectedPlanParams.max_ideas;
+    const reportsCredit = customCredits.reports ? parseInt(customCredits.reports) : selectedPlanParams.max_reports;
+
+    if (isNaN(queriesCredit) || isNaN(ideasCredit) || isNaN(reportsCredit) || 
+        queriesCredit < 0 || ideasCredit < 0 || reportsCredit < 0) {
+      toast({
+        title: "Error",
+        description: "Credit values must be valid non-negative numbers",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Update user plan in profiles table
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ user_plan: selectedPlan as any })
+        .update({ 
+          user_plan: selectedPlan as 'basic' | 'broker_free' | 'free_trial' | 'premium' | 'standard',
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', user.user_id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        toast({
+          title: "Error",
+          description: `Failed to update user plan: ${profileError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // Get plan parameters for the selected plan
-      const selectedPlanParams = planParameters.find(p => p.plan_type === selectedPlan);
-      
-      if (selectedPlanParams) {
-        // Update credits based on plan or custom values
-        const creditsUpdate = {
-          plan_type: selectedPlan,
-          credits_queries_remaining: customCredits.queries ? parseInt(customCredits.queries) : selectedPlanParams.max_queries,
-          credits_ideas_remaining: customCredits.ideas ? parseInt(customCredits.ideas) : selectedPlanParams.max_ideas,
-          credits_reports_remaining: customCredits.reports ? parseInt(customCredits.reports) : selectedPlanParams.max_reports,
-          last_reset_date: new Date().toISOString()
-        };
+      // Update credits based on plan or custom values
+      const creditsUpdate = {
+        user_id: user.user_id,
+        plan_type: selectedPlan as 'basic' | 'broker_free' | 'free_trial' | 'premium' | 'standard',
+        credits_queries_remaining: queriesCredit,
+        credits_ideas_remaining: ideasCredit,
+        credits_reports_remaining: reportsCredit,
+        last_reset_date: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-        // Upsert user credits
-        const { error: creditsError } = await supabase
-          .from('user_credits')
-          .upsert({
-            ...creditsUpdate,
-            user_id: user.user_id
-          } as any);
+      // Upsert user credits
+      const { error: creditsError } = await supabase
+        .from('user_credits')
+        .upsert([creditsUpdate]);
 
-        if (creditsError) throw creditsError;
+      if (creditsError) {
+        console.error('Credits update error:', creditsError);
+        toast({
+          title: "Error",
+          description: `Failed to update user credits: ${creditsError.message}`,
+          variant: "destructive",
+        });
+        return;
       }
 
       toast({
         title: "Success",
-        description: "User plan and credits updated successfully",
+        description: `User plan updated to ${selectedPlan} with ${queriesCredit} queries, ${ideasCredit} ideas, and ${reportsCredit} reports.`,
       });
 
       onRefresh();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user plan:', error);
       toast({
         title: "Error",
-        description: "Failed to update user plan",
+        description: `An unexpected error occurred: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
