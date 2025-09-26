@@ -69,18 +69,20 @@ export default function Layout({ children, activeModule, onModuleChange, complet
             {/* Logo - Mobile optimized */}
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 hover:opacity-90 transition-all duration-200 group min-w-0"
+              className="flex items-center gap-1 sm:gap-2 hover:opacity-90 transition-all duration-200 group"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 shrink-0 p-1">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 shrink-0 p-1">
                 <img src="/lovable-uploads/56d2c4af-fb26-47d8-8419-779a1da01775.png" alt="alphaLens.ai" className="w-full h-full object-contain" />
               </div>
-              <div className="hidden xs:block min-w-0">
+              <div className="hidden xs:flex items-center shrink-0">
                 <img 
                   src="/lovable-uploads/Only_text_white_BG_FINAL-2.png" 
                   alt="alphaLens.ai" 
-                  className="h-6 sm:h-8 w-auto"
+                  className="h-5 sm:h-8 w-auto object-contain max-w-none"
                 />
-                <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Intelligence</p>
+              </div>
+              <div className="hidden sm:block shrink-0">
+                <p className="text-xs text-muted-foreground whitespace-nowrap">AI Trading Intelligence</p>
               </div>
             </button>
 
