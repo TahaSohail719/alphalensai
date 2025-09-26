@@ -149,28 +149,30 @@ export default function Layout({ children, activeModule, onModuleChange, complet
                       <span className="text-sm">Admin</span>
                     </Button>
                   )}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 px-3 text-sm">
-                        About Us
-                        <ChevronDown className="ml-1 h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48 bg-white">
-                      <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
-                        About
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/features")} className="cursor-pointer">
-                        Features
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/pricing")} className="cursor-pointer">
-                        Pricing
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/contact")} className="cursor-pointer">
-                        Contact
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="hidden sm:block">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 px-3 text-sm">
+                          About Us
+                          <ChevronDown className="ml-1 h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-48 bg-white">
+                        <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
+                          About
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/features")} className="cursor-pointer">
+                          Features
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/pricing")} className="cursor-pointer">
+                          Pricing
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/contact")} className="cursor-pointer">
+                          Contact
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
