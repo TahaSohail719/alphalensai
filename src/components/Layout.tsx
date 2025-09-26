@@ -84,11 +84,13 @@ export default function Layout({ children, activeModule, onModuleChange, complet
               </div>
             </button>
 
+            {/* Credits Display - Always visible after logos */}
+            {user && <CreditsNavbar />}
+
             {/* Desktop Navigation Items */}
             <div className="hidden lg:flex items-center gap-1">
               {user && (
                 <>
-                  <CreditsNavbar />
                   <Button
                     variant="ghost"
                     size="sm"
