@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getFeatureDisplayName, normalizeFeatureName } from '@/lib/feature-mapper';
+import { TradeSetupDisplay } from '@/components/TradeSetupDisplay';
 
 interface AIInteraction {
   id: string;
@@ -276,57 +277,73 @@ export function AIInteractionHistory() {
     return 'N/A';
   };
 
-  const extractSummary = (response: any): string => {
-    if (typeof response === 'string') {
-      return response.slice(0, 150) + (response.length > 150 ? '...' : '');
-    }
+  const extractSummary = (response: any, featureName: string): string => {
+    if (!response) return 'No response available';
     
-    if (typeof response === 'object' && response !== null) {
-      // Try to extract meaningful content from different response types
-      if (response.summary && typeof response.summary === 'string') {
-        return response.summary.slice(0, 150) + '...';
-      }
-      if (response.content && typeof response.content === 'string') {
-        return response.content.slice(0, 150) + '...';
-      }
-      if (response.analysis && typeof response.analysis === 'string') {
-        return response.analysis.slice(0, 150) + '...';
-      }
-      if (response.commentary && typeof response.commentary === 'string') {
-        return response.commentary.slice(0, 150) + '...';
-      }
-      if (response.conclusion && typeof response.conclusion === 'string') {
-        return response.conclusion.slice(0, 150) + '...';
-      }
-      if (response.recommendation && typeof response.recommendation === 'string') {
-        return response.recommendation.slice(0, 150) + '...';
-      }
+    try {
+      const normalizedFeature = normalizeFeatureName(featureName);
       
-      // Handle nested response structures (like message.content.content)
-      if (response.message?.content?.content) {
-        const nestedContent = response.message.content.content;
-        if (typeof nestedContent === 'object') {
-          // Try to extract summary from nested object
-          if (nestedContent['Executive Summary']) {
-            return nestedContent['Executive Summary'].slice(0, 150) + '...';
-          }
-          if (nestedContent['Fundamental Analysis']) {
-            return nestedContent['Fundamental Analysis'].slice(0, 150) + '...';
-          }
+      if (normalizedFeature === 'ai_trade_setup' && typeof response === 'object') {
+        const { instrument, strategy, direction } = response;
+        if (instrument) {
+          return `${instrument}${strategy ? ` • ${strategy}` : ''}${direction ? ` • ${direction}` : ''}`;
         }
       }
       
-      // Try to find any text content
-      const textContent = Object.values(response).find(value => 
-        typeof value === 'string' && value.length > 20
-      ) as string;
-      
-      if (textContent) {
-        return textContent.slice(0, 150) + (textContent.length > 150 ? '...' : '');
+      if (normalizedFeature === 'macro_commentary' && typeof response === 'object') {
+        const { asset, summary, market_outlook } = response;
+        if (asset) {
+          const preview = summary || market_outlook || 'Market analysis';
+          return `${asset} • ${typeof preview === 'string' ? preview.substring(0, 80) : 'Analysis available'}`;
+        }
       }
+      
+      if (normalizedFeature === 'report' && typeof response === 'string') {
+        // Extract title or first meaningful text from HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = response;
+        const h1 = tempDiv.querySelector('h1');
+        const h2 = tempDiv.querySelector('h2');
+        const title = h1?.textContent || h2?.textContent;
+        if (title) {
+          return title.substring(0, 100);
+        }
+        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+        return textContent.substring(0, 100) + (textContent.length > 100 ? '...' : '');
+      }
+      
+      // Fallback for other cases
+      if (typeof response === 'string') {
+        return response.slice(0, 150) + (response.length > 150 ? '...' : '');
+      }
+      
+      if (typeof response === 'object' && response !== null) {
+        // Try to extract meaningful content from different response types
+        if (response.summary && typeof response.summary === 'string') {
+          return response.summary.slice(0, 150) + '...';
+        }
+        if (response.content && typeof response.content === 'string') {
+          return response.content.slice(0, 150) + '...';
+        }
+        if (response.analysis && typeof response.analysis === 'string') {
+          return response.analysis.slice(0, 150) + '...';
+        }
+        
+        // Try to find any text content
+        const textContent = Object.values(response).find(value => 
+          typeof value === 'string' && value.length > 20
+        ) as string;
+        
+        if (textContent) {
+          return textContent.slice(0, 150) + (textContent.length > 150 ? '...' : '');
+        }
+      }
+      
+      return 'AI analysis completed successfully';
+    } catch (error) {
+      console.error('Error extracting summary:', error);
+      return 'Response parsing error';
     }
-    
-    return 'AI analysis completed successfully';
   };
 
   // Note: Jobs cannot be deleted as they are managed by n8n
@@ -356,6 +373,11 @@ export function AIInteractionHistory() {
     }
 
     const normalizedFeature = normalizeFeatureName(featureName);
+
+    // Handle AI Trade Setup with specialized component
+    if (normalizedFeature === 'ai_trade_setup' && typeof response === 'object') {
+      return <TradeSetupDisplay data={response} />;
+    }
 
     // For reports - render HTML directly
     if (normalizedFeature === 'report') {
@@ -389,8 +411,8 @@ export function AIInteractionHistory() {
       }
     }
 
-    // For macro-analysis and ai-setup - render JSON in structured format
-    if (normalizedFeature === 'macro_commentary' || normalizedFeature === 'ai_trade_setup') {
+    // For macro-analysis - render JSON in structured format
+    if (normalizedFeature === 'macro_commentary') {
       if (typeof response === 'string') {
         try {
           const parsed = JSON.parse(response);
@@ -586,7 +608,7 @@ export function AIInteractionHistory() {
                         {interaction.user_query}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {extractSummary(interaction.ai_response)}
+                        {extractSummary(interaction.ai_response, interaction.feature_name)}
                       </p>
                     </div>
                   </div>
