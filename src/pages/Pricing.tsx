@@ -137,13 +137,12 @@ const Pricing = () => {
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
-                  {plan.highlight && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge variant="default" className="px-4 py-1">
-                        Most Complete
-                      </Badge>
-                    </div>}
-                  
-                  <CardHeader className="text-center pb-6">
+                  <CardHeader className="text-center pb-6 relative">
+                    {plan.highlight && <div className="absolute top-3 right-3 z-10">
+                        <Badge variant="default" className="px-3 py-1 text-xs">
+                          Most Complete
+                        </Badge>
+                      </div>}
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <div className="mt-4">
                       <span className="text-4xl font-bold text-foreground">{plan.price}</span>
