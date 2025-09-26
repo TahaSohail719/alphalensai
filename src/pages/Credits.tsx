@@ -90,20 +90,23 @@ export default function Credits() {
     }
   }, [user?.id]);
 
-  // Listen for credit updates
+  // Fetch usage stats when component mounts or user changes
+  useEffect(() => {
+    if (user?.id) {
+      fetchUsageStats();
+    }
+  }, [user?.id, fetchUsageStats]);
+
+  // Listen for credit updates and refresh both credits and usage stats
   useEffect(() => {
     const handleCreditsUpdate = () => {
-      fetchCredits();
-      fetchUsageStats(); // Also refresh usage stats when credits update
+      if (fetchCredits) fetchCredits();
+      if (fetchUsageStats) fetchUsageStats();
     };
 
     window.addEventListener('creditsUpdated', handleCreditsUpdate);
     return () => window.removeEventListener('creditsUpdated', handleCreditsUpdate);
-  }, [fetchCredits, fetchUsageStats]);
-
-  useEffect(() => {
-    fetchUsageStats();
-  }, [fetchUsageStats]);
+  }, []); // Empty dependency array to avoid re-creating the listener
 
   if (loading) {
     return (
