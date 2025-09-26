@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, Eye, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -586,40 +585,91 @@ export function AIInteractionHistory() {
             {interactions.map((interaction) => (
               <Card key={interaction.id} className="overflow-x-hidden">
                 <CardContent className="p-4 sm:p-6">
-                  <div className="space-y-4">
-                    {/* Query Section */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          {getFeatureIcon(interaction.feature_name)}
+                  {/* Header Section - Always Visible */}
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex-shrink-0">
+                        {getFeatureIcon(interaction.feature_name)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <Badge className={getFeatureColor(interaction.feature_name)}>
                             {getFeatureLabel(interaction.feature_name)}
                           </Badge>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(interaction.created_at)}
+                          </span>
+                          {interaction.job_id && (
+                            <Badge variant="outline" className="text-xs">
+                              Job: {interaction.job_id.slice(0, 8)}...
+                            </Badge>
+                          )}
                         </div>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(interaction.created_at)}
-                        </span>
-                        {interaction.job_id && (
-                          <Badge variant="outline" className="text-xs">
-                            Job: {interaction.job_id.slice(0, 8)}...
-                          </Badge>
+                        
+                        {/* Query Preview */}
+                        <div className="bg-muted/30 p-2 rounded text-xs">
+                          <p className="font-medium text-muted-foreground mb-1">Query:</p>
+                          <p className="line-clamp-2 break-words text-foreground">
+                            {interaction.user_query}
+                          </p>
+                        </div>
+                        
+                        {/* Response Preview when collapsed */}
+                        {!expandedItems.has(interaction.id) && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            <p className="font-medium">Response Preview:</p>
+                            <p className="line-clamp-2 break-words">
+                              {extractSummary(interaction.ai_response, interaction.feature_name)}
+                            </p>
+                          </div>
                         )}
                       </div>
-                      
-                      <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Query</p>
-                        <p className="text-sm font-mono break-words">
-                          {interaction.user_query}
-                        </p>
+                    </div>
+                    
+                    {/* Toggle Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleExpanded(interaction.id)}
+                      className="shrink-0 h-8 px-2"
+                    >
+                      {expandedItems.has(interaction.id) ? (
+                        <>
+                          <ChevronUp className="h-4 w-4 mr-1" />
+                          <span className="text-xs">Collapse</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4 mr-1" />
+                          <span className="text-xs">Expand</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Expandable Content */}
+                  {expandedItems.has(interaction.id) && (
+                    <div className="border-t pt-4 animate-accordion-down">
+                      <div className="space-y-4">
+                        {/* Full Query Display */}
+                        <div>
+                          <div className="bg-muted/50 p-3 rounded-lg">
+                            <p className="text-sm font-medium text-muted-foreground mb-1">Complete Query</p>
+                            <p className="text-sm font-mono break-words">
+                              {interaction.user_query}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Full Response Display */}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">AI Response</h4>
+                          {renderFormattedResponse(interaction)}
+                        </div>
                       </div>
                     </div>
-
-                    {/* Response Section */}
-                    <div>
-                      {renderFormattedResponse(interaction)}
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
