@@ -1,108 +1,178 @@
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface TradeSetupDisplayProps {
   data: any;
+  originalQuery?: string;
 }
 
-export const TradeSetupDisplay: React.FC<TradeSetupDisplayProps> = ({ data }) => {
+export function TradeSetupDisplay({ data, originalQuery }: TradeSetupDisplayProps) {
   if (!data) {
-    return <div className="text-muted-foreground">No trade setup data available</div>;
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-muted-foreground">No trade setup data available.</p>
+        </CardContent>
+      </Card>
+    );
   }
 
+  // Map both old and new field names for backward compatibility
   const {
     instrument,
     timeframe,
     horizon,
     strategy,
     direction,
-    entry,
+    entry_price,
+    entry, // Alternative field name
     stop_loss,
     targets,
     key_levels,
-    risk_reward,
+    risk_reward_ratio,
+    risk_reward, // Alternative field name
     confidence,
     position_size,
-    context,
-    reasoning
+    market_context,
+    context, // Alternative field name
+    trade_reasoning,
+    reasoning, // Alternative field name
+    as_of,
+    atr_multiple_sl
   } = data;
 
+  const getDirectionIcon = (dir: string) => {
+    return dir?.toLowerCase() === 'long' ? (
+      <TrendingUp className="h-4 w-4 text-emerald-500" />
+    ) : (
+      <TrendingDown className="h-4 w-4 text-red-500" />
+    );
+  };
+
+  const getDirectionColor = (dir: string) => {
+    return dir?.toLowerCase() === 'long' 
+      ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950" 
+      : "text-red-600 bg-red-50 dark:bg-red-950";
+  };
+
+  const finalEntry = entry_price || entry;
+  const finalRiskReward = risk_reward_ratio || risk_reward;
+  const finalContext = market_context || context;
+  const finalReasoning = trade_reasoning || reasoning;
+
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-semibold">Trade Setup Overview</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Instrument</span>
-              <p className="text-lg font-semibold">{instrument}</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Timeframe</span>
-              <p className="text-lg font-semibold">{timeframe}</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Horizon</span>
-              <p className="text-lg font-semibold">{horizon}</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Strategy</span>
-              <p className="text-lg font-semibold">{strategy}</p>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-muted-foreground">Direction</span>
-              <Badge variant={direction?.toLowerCase() === 'long' ? 'default' : 'destructive'} className="text-sm">
-                {direction}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trade Levels Section */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold">Trade Levels</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-muted-foreground">Entry Level</span>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xl font-bold text-primary">{entry}</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-muted-foreground">Stop Loss</span>
-              <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                <p className="text-xl font-bold text-destructive">{stop_loss}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Targets Section */}
-      {targets && targets.length > 0 && (
+    <div className="space-y-4">
+      {/* Original Query */}
+      {originalQuery && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold">Price Targets</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Original Query</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm bg-muted/50 p-3 rounded-lg font-mono break-words">
+              {originalQuery}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Trade Metadata */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Trade Setup</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {instrument && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Instrument</span>
+                <p className="font-medium break-words">{instrument}</p>
+              </div>
+            )}
+            {timeframe && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Timeframe</span>
+                <p className="font-medium">{timeframe}</p>
+              </div>
+            )}
+            {horizon && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Horizon</span>
+                <p className="font-medium">{horizon}</p>
+              </div>
+            )}
+            {strategy && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Strategy</span>
+                <p className="font-medium break-words">{strategy}</p>
+              </div>
+            )}
+            {as_of && (
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">As Of</span>
+                <p className="font-medium text-xs">{new Date(as_of).toLocaleString()}</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Direction - Prominently displayed */}
+          {direction && (
+            <div className="pt-2 border-t">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Direction:</span>
+                <div className="flex items-center gap-2">
+                  {getDirectionIcon(direction)}
+                  <Badge className={`${getDirectionColor(direction)} border-0 font-semibold`}>
+                    {direction.toUpperCase()}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Trade Levels */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Trade Levels</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {finalEntry && (
+              <div className="p-3 bg-muted/30 rounded-lg">
+                <span className="text-sm font-medium text-muted-foreground">Entry</span>
+                <p className="font-semibold text-lg">{finalEntry}</p>
+              </div>
+            )}
+            {stop_loss && (
+              <div className="p-3 bg-red-50 dark:bg-red-950 rounded-lg">
+                <span className="text-sm font-medium text-muted-foreground">Stop Loss</span>
+                <p className="font-semibold text-lg text-red-600 dark:text-red-400">{stop_loss}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Price Targets */}
+      {targets && targets.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Targets</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {targets.map((target: any, index: number) => (
-                <div key={index} className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      TP{index + 1}
-                    </span>
-                    <span className="text-lg font-bold text-primary">{target}</span>
-                  </div>
+                <div key={index} className="p-3 bg-emerald-50 dark:bg-emerald-950 rounded-lg">
+                  <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                    TP{index + 1}
+                  </span>
+                  <p className="font-semibold text-emerald-800 dark:text-emerald-200">
+                    {typeof target === 'object' ? target.price || target.level || target : target}
+                  </p>
                 </div>
               ))}
             </div>
@@ -110,33 +180,34 @@ export const TradeSetupDisplay: React.FC<TradeSetupDisplayProps> = ({ data }) =>
         </Card>
       )}
 
-      {/* Key Levels Section */}
+      {/* Key Levels */}
       {key_levels && (
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader>
             <CardTitle className="text-lg font-semibold">Key Levels</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {key_levels.support && key_levels.support.length > 0 && (
               <div>
-                <span className="text-sm font-medium text-muted-foreground mb-2 block">Support Levels</span>
-                <div className="flex flex-wrap gap-2">
-                  {key_levels.support.map((level: string, index: number) => (
-                    <Badge key={index} variant="outline" className="bg-primary/5 border-primary/20">
-                      {level}
-                    </Badge>
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Supports</h4>
+                <div className="space-y-1">
+                  {key_levels.support.map((level: any, index: number) => (
+                    <div key={index} className="p-2 bg-muted/50 rounded text-sm break-words">
+                      {typeof level === 'object' ? level.price || level.level || level : level}
+                    </div>
                   ))}
                 </div>
               </div>
             )}
+            
             {key_levels.resistance && key_levels.resistance.length > 0 && (
               <div>
-                <span className="text-sm font-medium text-muted-foreground mb-2 block">Resistance Levels</span>
-                <div className="flex flex-wrap gap-2">
-                  {key_levels.resistance.map((level: string, index: number) => (
-                    <Badge key={index} variant="outline" className="bg-destructive/5 border-destructive/20">
-                      {level}
-                    </Badge>
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Resistances</h4>
+                <div className="space-y-1">
+                  {key_levels.resistance.map((level: any, index: number) => (
+                    <div key={index} className="p-2 bg-muted/50 rounded text-sm break-words">
+                      {typeof level === 'object' ? level.price || level.level || level : level}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -145,52 +216,58 @@ export const TradeSetupDisplay: React.FC<TradeSetupDisplayProps> = ({ data }) =>
         </Card>
       )}
 
-      {/* Risk Metrics Section */}
+      {/* Risk Metrics */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold">Risk Assessment</CardTitle>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Risk Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {risk_reward && (
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-muted-foreground">Risk/Reward</span>
-                <p className="text-2xl font-bold text-primary">{risk_reward}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {finalRiskReward && (
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <span className="text-xs font-medium text-muted-foreground block">Risk:Reward</span>
+                <p className="font-bold text-lg">{finalRiskReward}</p>
               </div>
             )}
             {confidence && (
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-muted-foreground">Confidence</span>
-                <p className="text-2xl font-bold text-primary">{confidence}</p>
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <span className="text-xs font-medium text-muted-foreground block">Confidence</span>
+                <p className="font-bold text-lg">{confidence}%</p>
               </div>
             )}
             {position_size && (
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-muted-foreground">Position Size</span>
-                <p className="text-2xl font-bold text-primary">{position_size}</p>
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <span className="text-xs font-medium text-muted-foreground block">Position Size</span>
+                <p className="font-bold text-sm break-words">{position_size}</p>
+              </div>
+            )}
+            {atr_multiple_sl && (
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <span className="text-xs font-medium text-muted-foreground block">ATR Multiple SL</span>
+                <p className="font-bold text-lg">{atr_multiple_sl}</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Context & Reasoning */}
-      {(context || reasoning) && (
+      {/* Context */}
+      {(finalContext || finalReasoning) && (
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold">Analysis</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Context</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {context && (
+            {finalContext && (
               <div>
-                <span className="text-sm font-medium text-muted-foreground mb-2 block">Market Context</span>
-                <p className="text-sm leading-relaxed">{context}</p>
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Market Context</h4>
+                <p className="text-foreground leading-relaxed break-words">{finalContext}</p>
               </div>
             )}
-            {reasoning && (
+            {finalReasoning && (
               <div>
-                <span className="text-sm font-medium text-muted-foreground mb-2 block">Trade Reasoning</span>
-                <p className="text-sm leading-relaxed">{reasoning}</p>
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Trade Reasoning</h4>
+                <p className="text-foreground leading-relaxed break-words">{finalReasoning}</p>
               </div>
             )}
           </CardContent>
@@ -198,4 +275,4 @@ export const TradeSetupDisplay: React.FC<TradeSetupDisplayProps> = ({ data }) =>
       )}
     </div>
   );
-};
+}

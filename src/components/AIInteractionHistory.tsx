@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getFeatureDisplayName, normalizeFeatureName } from '@/lib/feature-mapper';
 import { TradeSetupDisplay } from '@/components/TradeSetupDisplay';
+import { MacroCommentaryDisplay } from '@/components/MacroCommentaryDisplay';
 
 interface AIInteraction {
   id: string;
@@ -363,91 +364,91 @@ export function AIInteractionHistory() {
     return FEATURE_COLORS[normalized as keyof typeof FEATURE_COLORS] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   };
 
-  const renderFormattedResponse = (response: any, featureName: string) => {
-    if (!response || response === 'Unavailable') {
+  const renderFormattedResponse = (interaction: AIInteraction) => {
+    if (!interaction.ai_response) return null;
+
+    const feature = getFeatureDisplayName(interaction.feature_name);
+    
+    if (feature === 'AI Trade Setup') {
+      try {
+        const parsedResponse = typeof interaction.ai_response === 'string' 
+          ? JSON.parse(interaction.ai_response) 
+          : interaction.ai_response;
+        return <TradeSetupDisplay data={parsedResponse} originalQuery={interaction.user_query} />;
+      } catch (error) {
+        console.error('Error parsing AI Trade Setup response:', error);
+        return (
+          <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap overflow-x-auto break-words">
+            {typeof interaction.ai_response === 'string' ? interaction.ai_response : JSON.stringify(interaction.ai_response, null, 2)}
+          </pre>
+        );
+      }
+    }
+
+    if (feature === 'Macro Commentary') {
+      try {
+        const parsedResponse = typeof interaction.ai_response === 'string' 
+          ? JSON.parse(interaction.ai_response) 
+          : interaction.ai_response;
+        return <MacroCommentaryDisplay data={parsedResponse} originalQuery={interaction.user_query} />;
+      } catch (error) {
+        console.error('Error parsing Macro Commentary response:', error);
+        return (
+          <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap overflow-x-auto break-words">
+            {typeof interaction.ai_response === 'string' ? interaction.ai_response : JSON.stringify(interaction.ai_response, null, 2)}
+          </pre>
+        );
+      }
+    }
+
+    if (feature === 'Report') {
+      try {
+        const responseContent = typeof interaction.ai_response === 'string' 
+          ? interaction.ai_response 
+          : JSON.stringify(interaction.ai_response, null, 2);
+        
+        // For HTML content, render it directly in a contained, scrollable area
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Report</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="max-h-96 overflow-y-auto overflow-x-hidden">
+                <div 
+                  className="prose prose-sm max-w-none dark:prose-invert break-words"
+                  dangerouslySetInnerHTML={{ __html: responseContent }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      } catch (error) {
+        console.error('Error rendering report:', error);
+        return (
+          <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap overflow-x-auto break-words">
+            {typeof interaction.ai_response === 'string' ? interaction.ai_response : JSON.stringify(interaction.ai_response, null, 2)}
+          </pre>
+        );
+      }
+    }
+
+    // For other features, try to parse JSON first, then fall back to plain text
+    try {
+      const parsedResponse = typeof interaction.ai_response === 'string' 
+        ? JSON.parse(interaction.ai_response) 
+        : interaction.ai_response;
+      return <div className="break-words">{renderJSONResponse(parsedResponse)}</div>;
+    } catch {
+      const responseContent = typeof interaction.ai_response === 'string' 
+        ? interaction.ai_response 
+        : JSON.stringify(interaction.ai_response, null, 2);
       return (
-        <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-muted/50">
-          <p className="text-sm text-muted-foreground">Unavailable</p>
+        <div className="text-sm space-y-2">
+          <p className="leading-relaxed whitespace-pre-wrap break-words">{responseContent}</p>
         </div>
       );
     }
-
-    const normalizedFeature = normalizeFeatureName(featureName);
-
-    // Handle AI Trade Setup with specialized component
-    if (normalizedFeature === 'ai_trade_setup' && typeof response === 'object') {
-      return <TradeSetupDisplay data={response} />;
-    }
-
-    // For reports - render HTML directly
-    if (normalizedFeature === 'report') {
-      if (typeof response === 'string') {
-        // Check if it's HTML content
-        if (response.includes('<html>') || response.includes('<!DOCTYPE') || response.includes('<body>')) {
-          return (
-            <div className="border rounded-lg overflow-hidden">
-              <div 
-                className="prose prose-sm max-w-none dark:prose-invert report-content"
-                dangerouslySetInnerHTML={{ __html: response }}
-              />
-            </div>
-          );
-        }
-        // If not HTML, try to parse as JSON first
-        try {
-          const parsed = JSON.parse(response);
-          return renderJSONResponse(parsed);
-        } catch {
-          // Plain text response
-          return (
-            <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-primary/30">
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{response}</p>
-            </div>
-          );
-        }
-      }
-      if (typeof response === 'object') {
-        return renderJSONResponse(response);
-      }
-    }
-
-    // For macro-analysis - render JSON in structured format
-    if (normalizedFeature === 'macro_commentary') {
-      if (typeof response === 'string') {
-        try {
-          const parsed = JSON.parse(response);
-          return renderJSONResponse(parsed);
-        } catch {
-          return (
-            <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-primary/30">
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{response}</p>
-            </div>
-          );
-        }
-      }
-      if (typeof response === 'object') {
-        return renderJSONResponse(response);
-      }
-    }
-
-    // Default fallback
-    if (typeof response === 'string') {
-      return (
-        <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-primary/30">
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{response}</p>
-        </div>
-      );
-    }
-
-    if (typeof response === 'object') {
-      return renderJSONResponse(response);
-    }
-
-    return (
-      <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-muted/50">
-        <p className="text-sm text-muted-foreground">Unable to display response</p>
-      </div>
-    );
   };
 
   const renderJSONResponse = (data: any) => {
@@ -583,17 +584,18 @@ export function AIInteractionHistory() {
         ) : (
           <>
             {interactions.map((interaction) => (
-              <div key={interaction.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="flex-shrink-0">
-                      {getFeatureIcon(interaction.feature_name)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge className={getFeatureColor(interaction.feature_name)}>
-                          {getFeatureLabel(interaction.feature_name)}
-                        </Badge>
+              <Card key={interaction.id} className="overflow-x-hidden">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4">
+                    {/* Query Section */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          {getFeatureIcon(interaction.feature_name)}
+                          <Badge className={getFeatureColor(interaction.feature_name)}>
+                            {getFeatureLabel(interaction.feature_name)}
+                          </Badge>
+                        </div>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {formatDate(interaction.created_at)}
@@ -604,48 +606,22 @@ export function AIInteractionHistory() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {interaction.user_query}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {extractSummary(interaction.ai_response, interaction.feature_name)}
-                      </p>
+                      
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Query</p>
+                        <p className="text-sm font-mono break-words">
+                          {interaction.user_query}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Response Section */}
+                    <div>
+                      {renderFormattedResponse(interaction)}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Collapsible>
-                      <CollapsibleTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleExpanded(interaction.id)}
-                        >
-                          <Eye className="h-4 w-4" />
-                          {expandedItems.has(interaction.id) ? (
-                            <ChevronUp className="h-4 w-4 ml-1" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4 ml-1" />
-                          )}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-4">
-                        <div className="border-t pt-4 space-y-4">
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Query</h4>
-                            <div className="bg-muted/30 p-3 rounded-lg text-sm">
-                              {interaction.user_query}
-                            </div>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Response</h4>
-                            {renderFormattedResponse(interaction.ai_response, interaction.feature_name)}
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
             
             {hasMore && (
