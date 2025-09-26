@@ -284,12 +284,38 @@ export function AIInteractionHistory() {
     
     if (typeof response === 'object' && response !== null) {
       // Try to extract meaningful content from different response types
-      if (response.summary) return response.summary.slice(0, 150) + '...';
-      if (response.content) return response.content.slice(0, 150) + '...';
-      if (response.analysis) return response.analysis.slice(0, 150) + '...';
-      if (response.commentary) return response.commentary.slice(0, 150) + '...';
-      if (response.conclusion) return response.conclusion.slice(0, 150) + '...';
-      if (response.recommendation) return response.recommendation.slice(0, 150) + '...';
+      if (response.summary && typeof response.summary === 'string') {
+        return response.summary.slice(0, 150) + '...';
+      }
+      if (response.content && typeof response.content === 'string') {
+        return response.content.slice(0, 150) + '...';
+      }
+      if (response.analysis && typeof response.analysis === 'string') {
+        return response.analysis.slice(0, 150) + '...';
+      }
+      if (response.commentary && typeof response.commentary === 'string') {
+        return response.commentary.slice(0, 150) + '...';
+      }
+      if (response.conclusion && typeof response.conclusion === 'string') {
+        return response.conclusion.slice(0, 150) + '...';
+      }
+      if (response.recommendation && typeof response.recommendation === 'string') {
+        return response.recommendation.slice(0, 150) + '...';
+      }
+      
+      // Handle nested response structures (like message.content.content)
+      if (response.message?.content?.content) {
+        const nestedContent = response.message.content.content;
+        if (typeof nestedContent === 'object') {
+          // Try to extract summary from nested object
+          if (nestedContent['Executive Summary']) {
+            return nestedContent['Executive Summary'].slice(0, 150) + '...';
+          }
+          if (nestedContent['Fundamental Analysis']) {
+            return nestedContent['Fundamental Analysis'].slice(0, 150) + '...';
+          }
+        }
+      }
       
       // Try to find any text content
       const textContent = Object.values(response).find(value => 
