@@ -49,11 +49,22 @@ export default function Auth() {
       }
     });
 
-    // Load active brokers
-    fetchActiveBrokers().then(setActiveBrokers);
-
     return () => subscription.unsubscribe();
-  }, [navigate, fetchActiveBrokers]);
+  }, [navigate]);
+
+  // Separate effect for loading brokers
+  useEffect(() => {
+    const loadBrokers = async () => {
+      try {
+        const brokers = await fetchActiveBrokers();
+        setActiveBrokers(brokers);
+      } catch (error) {
+        console.error('Failed to load brokers:', error);
+      }
+    };
+
+    loadBrokers();
+  }, []);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,7 +233,7 @@ export default function Auth() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select your broker" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50 bg-white">
                       {activeBrokers.map((broker: any) => (
                         <SelectItem key={broker.id} value={broker.id}>
                           {broker.name}

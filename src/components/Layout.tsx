@@ -83,8 +83,32 @@ export default function Layout({ children, activeModule, onModuleChange, complet
               </div>
             </button>
 
-            {/* Desktop Navigation Items - Empty for authenticated users */}
+            {/* Desktop Navigation Items */}
             <div className="hidden lg:flex items-center gap-1">
+              {user && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/dashboard')}
+                    className="h-8 px-3 text-sm"
+                  >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Trading Dashboard
+                  </Button>
+                  {(isAdmin || isSuperUser) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate('/admin')}
+                      className="h-8 px-3 text-sm"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Mobile Navigation + Auth + Status */}
