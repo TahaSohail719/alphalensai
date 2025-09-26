@@ -32,28 +32,6 @@ export default function PublicNavbar() {
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo - Mobile optimized */}
         <div className="flex items-center gap-2">
-          {/* Mobile hamburger menu */}
-          <div className="md:hidden">
-            <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="mr-2">
-                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-white">
-                {navigationItems.map((item) => (
-                  <DropdownMenuItem 
-                    key={item.name}
-                    onClick={() => handleNavigation(item.path)}
-                    className="cursor-pointer"
-                  >
-                    {item.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
@@ -71,6 +49,28 @@ export default function PublicNavbar() {
               <p className="text-xs text-muted-foreground hidden sm:block">AI Trading Intelligence</p>
             </div>
           </button>
+
+          {/* Mobile hamburger menu */}
+          <div className="md:hidden ml-2">
+            <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-white">
+                {navigationItems.map((item) => (
+                  <DropdownMenuItem 
+                    key={item.name}
+                    onClick={() => handleNavigation(item.path)}
+                    className="cursor-pointer"
+                  >
+                    {item.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         
         {/* Navigation - Desktop */}
