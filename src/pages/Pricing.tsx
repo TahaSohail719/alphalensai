@@ -136,9 +136,9 @@ const Pricing = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
-                  {plan.highlight && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge variant="default" className="px-4 py-1">
+              {b2cPlans.map(plan => <Card key={plan.name} className={`relative ${plan.highlight ? 'border-primary shadow-lg scale-105 mt-6' : 'border-border'}`}>
+                  {plan.highlight && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                      <Badge variant="default" className="px-4 py-1 shadow-md">
                         Most Complete
                       </Badge>
                     </div>}
