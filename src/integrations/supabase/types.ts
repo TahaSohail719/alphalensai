@@ -482,6 +482,42 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_parameters: {
+        Row: {
+          created_at: string
+          id: string
+          max_ideas: number
+          max_queries: number
+          max_reports: number
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          renewal_cycle_days: number | null
+          trial_duration_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_ideas?: number
+          max_queries?: number
+          max_reports?: number
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          renewal_cycle_days?: number | null
+          trial_duration_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_ideas?: number
+          max_queries?: number
+          max_reports?: number
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          renewal_cycle_days?: number | null
+          trial_duration_days?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portfolios: {
         Row: {
           created_at: string
@@ -663,6 +699,42 @@ export type Database = {
           },
         ]
       }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits_ideas_remaining: number
+          credits_queries_remaining: number
+          credits_reports_remaining: number
+          id: string
+          last_reset_date: string
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_ideas_remaining?: number
+          credits_queries_remaining?: number
+          credits_reports_remaining?: number
+          id?: string
+          last_reset_date?: string
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_ideas_remaining?: number
+          credits_queries_remaining?: number
+          credits_reports_remaining?: number
+          id?: string
+          last_reset_date?: string
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_requests: {
         Row: {
           completed_at: string | null
@@ -768,6 +840,10 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      decrement_credit: {
+        Args: { credit_type: string; target_user_id: string }
+        Returns: boolean
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown
@@ -806,6 +882,13 @@ export type Database = {
       hnswhandler: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      initialize_user_credits: {
+        Args: {
+          target_plan_type: Database["public"]["Enums"]["plan_type"]
+          target_user_id: string
+        }
+        Returns: undefined
       }
       invalidate_previous_sessions: {
         Args: { current_session_id: string; current_user_id: string }
@@ -884,6 +967,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "super_user"
+      plan_type: "basic" | "standard" | "premium" | "free_trial" | "broker_free"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1012,6 +1096,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "super_user"],
+      plan_type: ["basic", "standard", "premium", "free_trial", "broker_free"],
     },
   },
 } as const

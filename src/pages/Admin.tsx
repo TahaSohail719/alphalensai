@@ -26,6 +26,7 @@ import { UsersTable } from "@/components/admin/UsersTable";
 import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { JobsMonitoring } from "@/components/admin/JobsMonitoring";
 import { BrokersManagement } from "@/components/admin/BrokersManagement";
+import { PlanParametersManagement } from "@/components/admin/PlanParametersManagement";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -569,7 +570,7 @@ export default function Admin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-4' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-5' : 'grid-cols-2'}`}>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
@@ -582,6 +583,12 @@ export default function Admin() {
               <TabsTrigger value="brokers" className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 Brokers
+              </TabsTrigger>
+            )}
+            {isSuperUser && (
+              <TabsTrigger value="plan-parameters" className="flex items-center gap-2">
+                <Calculator className="h-4 w-4" />
+                Plan Parameters
               </TabsTrigger>
             )}
             {isSuperUser && (
@@ -678,6 +685,12 @@ export default function Admin() {
           {isSuperUser && (
             <TabsContent value="brokers">
               <BrokersManagement />
+            </TabsContent>
+          )}
+
+          {isSuperUser && (
+            <TabsContent value="plan-parameters">
+              <PlanParametersManagement />
             </TabsContent>
           )}
 

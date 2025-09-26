@@ -15,6 +15,7 @@ import { getSymbolForAsset } from "@/lib/assetMapping";
 import AssetInfoCard from "@/components/AssetInfoCard";
 import { JobStatusCard } from "@/components/JobStatusCard";
 import { useJobStatusManager } from "@/hooks/useJobStatusManager";
+import { CreditDisplay } from "@/components/CreditDisplay";
 
 // Popular assets with their categories
 const assetCategories = {
@@ -308,6 +309,9 @@ export default function TradingDashboard() {
         </section>
 
 
+
+        {/* Credit Display */}
+        <CreditDisplay />
 
         {/* Navigation Cards */}
         <section aria-label="Quick navigation" className="mt-16 md:mt-24">

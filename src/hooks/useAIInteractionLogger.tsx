@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useCreditManager, CreditType } from '@/hooks/useCreditManager';
 
 type FeatureName = 'trade_setup' | 'market_commentary' | 'report';
 
@@ -14,17 +15,50 @@ interface LogInteractionParams {
 export function useAIInteractionLogger() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { decrementCredit, checkCredits } = useCreditManager();
 
-  const logInteraction = useCallback(async ({ 
+  const getCreditTypeForFeature = (featureName: FeatureName): CreditType => {
+    switch (featureName) {
+      case 'trade_setup':
+        return 'queries';
+      case 'market_commentary':
+        return 'queries';
+      case 'report':
+        return 'reports';
+      default:
+        return 'queries';
+    }
+  };
+
+  const checkAndLogInteraction = useCallback(async ({ 
     featureName, 
     userQuery, 
     aiResponse 
-  }: LogInteractionParams) => {
+  }: LogInteractionParams): Promise<boolean> => {
     if (!user?.id) {
       console.warn('No authenticated user found for AI interaction logging');
-      return;
+      return false;
     }
 
+    const creditType = getCreditTypeForFeature(featureName);
+    
+    // Check if user has credits before processing
+    if (!checkCredits(creditType)) {
+      toast({
+        title: "Credit limit reached",
+        description: "Please upgrade your plan to continue using this feature",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    // Decrement credit
+    const success = await decrementCredit(creditType);
+    if (!success) {
+      return false;
+    }
+
+    // Log the interaction
     try {
       const { error } = await supabase
         .from('ai_interactions')
@@ -43,10 +77,23 @@ export function useAIInteractionLogger() {
           variant: "destructive"
         });
       }
+      return true;
     } catch (err) {
       console.error('Error logging AI interaction:', err);
+      return false;
     }
-  }, [user?.id, toast]);
+  }, [user?.id, toast, decrementCredit, checkCredits]);
 
-  return { logInteraction };
+  const logInteraction = useCallback(async ({ 
+    featureName, 
+    userQuery, 
+    aiResponse 
+  }: LogInteractionParams) => {
+    return checkAndLogInteraction({ featureName, userQuery, aiResponse });
+  }, [checkAndLogInteraction]);
+
+  return { 
+    logInteraction, 
+    checkCredits: (featureName: FeatureName) => checkCredits(getCreditTypeForFeature(featureName)) 
+  };
 }
