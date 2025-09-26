@@ -295,7 +295,7 @@ export default function AISetup() {
   }, [parameters.instrument]);
   const generateTradeSetup = async () => {
     // CRITICAL: Check credits before allowing request (Investment Ideas)
-    if (!checkCredits('trade_setup')) {
+    if (!checkCredits('ai_trade_setup')) {
       toast({
         title: "No credits remaining",
         description: "You have no remaining credits for AI Setup. Please upgrade your plan.",
@@ -442,7 +442,7 @@ export default function AISetup() {
 
       // 2. Create second job for trade setup
       const tradeJobId = await createJob(
-        'trade_setup',
+        'ai_trade_setup',
         parameters.instrument,
         tradePayload,
         'AI Trade Setup'
@@ -463,7 +463,7 @@ export default function AISetup() {
               table: 'jobs',
               filter: `id=eq.${tradeJobId}`
             },
-            (payload) => {
+            async (payload) => {
               const job = payload.new as any;
               console.log(`📡 [Realtime] Trade job update received:`, job);
               
@@ -492,6 +492,14 @@ export default function AISetup() {
                     setN8nResult(normalized);
                     setTradeSetup(null);
                     globalLoading.completeRequest(requestId, normalized);
+                    
+                    // Log AI interaction and decrement credit
+                    await logInteraction({
+                      featureName: 'ai_trade_setup',
+                      userQuery: `Generate AI trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskLevel} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
+                      aiResponse: normalized,
+                      jobId: tradeJobId
+                    });
                     
                     toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
                   } else {
@@ -528,7 +536,7 @@ export default function AISetup() {
         tradePayload,
         {
           enableJobTracking: true,
-          jobType: 'trade_setup',
+          jobType: 'ai_trade_setup',
           instrument: parameters.instrument,
           feature: 'ai_trade_setup',
           jobId: tradeJobId
