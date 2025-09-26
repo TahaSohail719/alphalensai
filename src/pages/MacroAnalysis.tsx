@@ -65,7 +65,8 @@ export default function MacroAnalysis() {
     user
   } = useAuth();
   const {
-    logInteraction
+    logInteraction,
+    checkCredits
   } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -635,7 +636,6 @@ export default function MacroAnalysis() {
     if (!queryParams.query.trim()) return;
     
     // CRITICAL: Check credits before allowing request (Queries)
-    const { checkCredits } = useAIInteractionLogger();
     if (!checkCredits('market_commentary')) {
       toast({
         title: "No credits remaining",

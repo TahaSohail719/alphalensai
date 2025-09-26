@@ -61,7 +61,7 @@ export default function Reports() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { logInteraction } = useAIInteractionLogger();
+  const { logInteraction, checkCredits } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
 
   // Set up automatic response injection from Supabase
@@ -221,7 +221,6 @@ export default function Reports() {
 
   const generateReport = async () => {
     // CRITICAL: Check credits before allowing request (Reports)
-    const { checkCredits } = useAIInteractionLogger();
     if (!checkCredits('report')) {
       toast({
         title: "No credits remaining",

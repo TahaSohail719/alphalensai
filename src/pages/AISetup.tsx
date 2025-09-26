@@ -187,7 +187,8 @@ export default function AISetup() {
   } = useAuth();
   const globalLoading = useGlobalLoading();
   const {
-    logInteraction
+    logInteraction,
+    checkCredits
   } = useAIInteractionLogger();
   const {
     createJob
@@ -294,7 +295,6 @@ export default function AISetup() {
   }, [parameters.instrument]);
   const generateTradeSetup = async () => {
     // CRITICAL: Check credits before allowing request (Investment Ideas)
-    const { checkCredits } = useAIInteractionLogger();
     if (!checkCredits('trade_setup')) {
       toast({
         title: "No credits remaining",
