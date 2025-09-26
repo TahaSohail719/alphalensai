@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, MessageSquare, TrendingUp, FileText, Eye, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -18,16 +18,10 @@ interface AIInteraction {
   ai_response: any;
   created_at: string;
   user_id: string;
-  job_id: string | null;
-}
-
-interface JobFallback {
-  id: string;
-  feature: string;
+  job_id: string;
+  status: string;
   request_payload: any;
   response_payload: any;
-  created_at: string;
-  updated_at: string;
 }
 
 const FEATURES = [
@@ -77,28 +71,58 @@ export function AIInteractionHistory() {
 
   // Helper function to extract user query from job request payload
   const extractUserQuery = (requestPayload: any): string => {
-    if (!requestPayload) return 'No query available';
+    if (!requestPayload) return 'Unavailable';
     
+    // Standard patterns from jobs.request_payload
+    if (requestPayload.question) return requestPayload.question;
     if (requestPayload.query) return requestPayload.query;
     if (requestPayload.user_query) return requestPayload.user_query;
     if (requestPayload.message) return requestPayload.message;
     if (requestPayload.content) return requestPayload.content;
     if (requestPayload.text) return requestPayload.text;
     
+    // Handle nested analysis queries
+    if (requestPayload.analysis?.query) return requestPayload.analysis.query;
+    if (requestPayload.analysis?.question) return requestPayload.analysis.question;
+    
     const fallback = JSON.stringify(requestPayload);
     return fallback.length > 200 ? fallback.substring(0, 200) + '...' : fallback;
+  };
+
+  // Helper function to extract AI response from job response payload
+  const extractAIResponse = (responsePayload: any): any => {
+    if (!responsePayload) return 'Unavailable';
+    
+    // Handle nested response structures (like message.content.content)
+    if (responsePayload.message?.content?.content) {
+      return responsePayload.message.content.content;
+    }
+    
+    // Direct response content
+    if (responsePayload.content) return responsePayload.content;
+    if (responsePayload.response) return responsePayload.response;
+    if (responsePayload.analysis) return responsePayload.analysis;
+    if (responsePayload.result) return responsePayload.result;
+    
+    return responsePayload;
   };
 
   const fetchTotalCount = async () => {
     if (!user?.id) return 0;
 
     let query = supabase
-      .from('ai_interactions')
+      .from('jobs')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('status', 'completed')
+      .not('response_payload', 'is', null);
 
     if (selectedFeature !== 'all') {
-      query = query.eq('feature_name', selectedFeature);
+      // Map selected feature to jobs.feature format
+      const jobsFeature = selectedFeature === 'ai_trade_setup' ? 'AI Trade Setup' :
+                          selectedFeature === 'macro_commentary' ? 'Macro Commentary' :
+                          selectedFeature === 'report' ? 'Report' : selectedFeature;
+      query = query.eq('feature', jobsFeature);
     }
 
     const { count, error } = await query;
@@ -114,22 +138,28 @@ export function AIInteractionHistory() {
   const fetchInteractions = async (offset = 0, limit = 20) => {
     if (!user?.id) return [];
 
-    // Primary: fetch from ai_interactions table
+    // Fetch directly from jobs table only
     let query = supabase
-      .from('ai_interactions')
-      .select('*')
+      .from('jobs')
+      .select('id, feature, request_payload, response_payload, created_at, updated_at, status, user_id')
       .eq('user_id', user.id)
+      .eq('status', 'completed')
+      .not('response_payload', 'is', null)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (selectedFeature !== 'all') {
-      query = query.eq('feature_name', selectedFeature);
+      // Map selected feature to jobs.feature format
+      const jobsFeature = selectedFeature === 'ai_trade_setup' ? 'AI Trade Setup' :
+                          selectedFeature === 'macro_commentary' ? 'Macro Commentary' :
+                          selectedFeature === 'report' ? 'Report' : selectedFeature;
+      query = query.eq('feature', jobsFeature);
     }
 
-    const { data: aiInteractions, error } = await query;
+    const { data: jobs, error } = await query;
 
     if (error) {
-      console.error('Error fetching AI interactions:', error);
+      console.error('Error fetching jobs:', error);
       toast({
         title: "Error",
         description: "Failed to load interaction history",
@@ -138,52 +168,21 @@ export function AIInteractionHistory() {
       return [];
     }
 
-    let combinedInteractions = aiInteractions || [];
+    // Convert jobs to AIInteraction format
+    const interactions: AIInteraction[] = (jobs || []).map(job => ({
+      id: job.id,
+      feature_name: normalizeFeatureName(job.feature || 'unknown'),
+      user_query: extractUserQuery(job.request_payload),
+      ai_response: extractAIResponse(job.response_payload),
+      created_at: job.updated_at || job.created_at,
+      user_id: job.user_id,
+      job_id: job.id,
+      status: job.status,
+      request_payload: job.request_payload,
+      response_payload: job.response_payload
+    }));
 
-    // Fallback: fetch missing interactions from jobs table (only if we have fewer than expected)
-    if (combinedInteractions.length < limit && offset === 0) {
-      try {
-        const { data: jobs, error: jobsError } = await supabase
-          .from('jobs')
-          .select('id, feature, request_payload, response_payload, created_at, updated_at')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .not('response_payload', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        if (!jobsError && jobs) {
-          // Find jobs that don't have corresponding ai_interactions
-          const existingJobIds = new Set(combinedInteractions.map(ai => ai.job_id).filter(Boolean));
-          const missingJobs = jobs.filter(job => !existingJobIds.has(job.id));
-
-          // Convert missing jobs to ai_interaction format
-          const fallbackInteractions: AIInteraction[] = missingJobs.map(job => ({
-            id: job.id,
-            feature_name: normalizeFeatureName(job.feature || 'unknown'),
-            user_query: extractUserQuery(job.request_payload),
-            ai_response: job.response_payload,
-            created_at: job.updated_at || job.created_at,
-            user_id: user.id,
-            job_id: job.id
-          }));
-
-          // Filter by selected feature if needed
-          const filteredFallbacks = selectedFeature === 'all' 
-            ? fallbackInteractions 
-            : fallbackInteractions.filter(fb => fb.feature_name === selectedFeature);
-
-          // Combine and sort by created_at
-          combinedInteractions = [...combinedInteractions, ...filteredFallbacks]
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, limit);
-        }
-      } catch (fallbackError) {
-        console.error('Error fetching fallback from jobs:', fallbackError);
-      }
-    }
-
-    return combinedInteractions;
+    return interactions;
   };
 
   const loadInitialData = async () => {
@@ -330,26 +329,7 @@ export function AIInteractionHistory() {
     return 'AI analysis completed successfully';
   };
 
-  const deleteInteraction = async (id: string) => {
-    const { error } = await supabase
-      .from('ai_interactions')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete interaction",
-        variant: "destructive"
-      });
-    } else {
-      setInteractions(prev => prev.filter(item => item.id !== id));
-      toast({
-        title: "Deleted",
-        description: "Interaction removed from history"
-      });
-    }
-  };
+  // Note: Jobs cannot be deleted as they are managed by n8n
 
   const getFeatureIcon = (featureName: string) => {
     const normalized = normalizeFeatureName(featureName);
@@ -538,14 +518,6 @@ export function AIInteractionHistory() {
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteInteraction(interaction.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               </div>
