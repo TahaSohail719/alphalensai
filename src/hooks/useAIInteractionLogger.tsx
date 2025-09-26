@@ -3,13 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditManager, CreditType } from '@/hooks/useCreditManager';
+import { normalizeFeatureName } from '@/lib/feature-mapper';
 
-type FeatureName = 'trade_setup' | 'market_commentary' | 'report';
+type FeatureName = 'trade_setup' | 'ai_trade_setup' | 'market_commentary' | 'macro_commentary' | 'report';
 
 interface LogInteractionParams {
   featureName: FeatureName;
   userQuery: string;
   aiResponse: any;
+  jobId?: string;
 }
 
 export function useAIInteractionLogger() {
@@ -18,10 +20,11 @@ export function useAIInteractionLogger() {
   const { decrementCredit, checkCredits } = useCreditManager();
 
   const getCreditTypeForFeature = (featureName: FeatureName): CreditType => {
-    switch (featureName) {
-      case 'trade_setup':
+    const normalized = normalizeFeatureName(featureName);
+    switch (normalized) {
+      case 'ai_trade_setup':
         return 'ideas'; // AI Setup → Investment Ideas
-      case 'market_commentary':
+      case 'macro_commentary':
         return 'queries'; // Macro Commentary → Queries
       case 'report':
         return 'reports'; // Reports → Reports
@@ -33,7 +36,8 @@ export function useAIInteractionLogger() {
   const checkAndLogInteraction = useCallback(async ({ 
     featureName, 
     userQuery, 
-    aiResponse 
+    aiResponse,
+    jobId 
   }: LogInteractionParams): Promise<boolean> => {
     if (!user?.id) {
       console.warn('No authenticated user found for AI interaction logging');
@@ -58,13 +62,15 @@ export function useAIInteractionLogger() {
       return false;
     }
 
-    // Log the interaction
+    // Log the interaction with normalized feature name
     try {
+      const normalizedFeatureName = normalizeFeatureName(featureName);
       const { error } = await supabase
         .from('ai_interactions')
         .insert({
           user_id: user.id,
-          feature_name: featureName,
+          job_id: jobId || null,
+          feature_name: normalizedFeatureName,
           user_query: userQuery,
           ai_response: aiResponse
         });
@@ -87,9 +93,10 @@ export function useAIInteractionLogger() {
   const logInteraction = useCallback(async ({ 
     featureName, 
     userQuery, 
-    aiResponse 
+    aiResponse,
+    jobId 
   }: LogInteractionParams) => {
-    return checkAndLogInteraction({ featureName, userQuery, aiResponse });
+    return checkAndLogInteraction({ featureName, userQuery, aiResponse, jobId });
   }, [checkAndLogInteraction]);
 
   return { 

@@ -1,6 +1,7 @@
 import { safePostRequest } from '@/lib/safe-request';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeFeatureName } from '@/lib/feature-mapper';
 
 /**
  * Enhanced POST request that supports both traditional HTTP response 
@@ -125,12 +126,16 @@ export async function handleResponseWithFallback(
           table: 'jobs',
           filter: `id=eq.${jobId}`
         },
-        (payload) => {
+        async (payload) => {
           const job = payload.new as any;
           console.log(`📡 [Realtime] Job update received:`, job);
           
           if (job.status === 'completed' && job.response_payload) {
             console.log(`✅ [Realtime] Job completed successfully: ${jobId}`, job.response_payload);
+            
+            // Synchronize with ai_interactions table
+            await syncAiInteraction(job);
+            
             onRealtimeResult(job.response_payload);
             supabase.removeChannel(channel);
           } else if (job.status === 'error') {
@@ -175,4 +180,56 @@ export async function handleResponseWithFallback(
   
   // If both failed and no realtime fallback, throw the HTTP error
   throw httpError;
+}
+
+/**
+ * Synchronize completed job with ai_interactions table
+ */
+async function syncAiInteraction(job: any) {
+  try {
+    if (!job.feature || !job.user_id) {
+      console.log('⚠️ [Sync] Skipping ai_interactions sync - missing feature or user_id');
+      return;
+    }
+
+    const normalizedFeatureName = normalizeFeatureName(job.feature);
+    
+    // Extract meaningful content from request and response
+    const userQuery = extractUserQuery(job.request_payload);
+    const aiResponse = job.response_payload;
+
+    await supabase
+      .from('ai_interactions')
+      .insert({
+        user_id: job.user_id,
+        job_id: job.id,
+        feature_name: normalizedFeatureName,
+        user_query: userQuery,
+        ai_response: aiResponse,
+        created_at: job.updated_at || new Date().toISOString()
+      });
+
+    console.log(`✅ [Sync] ai_interactions updated for job: ${job.id}`);
+  } catch (error) {
+    console.error('❌ [Sync] Failed to sync ai_interactions:', error);
+    // Don't throw - this is a non-critical operation
+  }
+}
+
+/**
+ * Extract user query from request payload
+ */
+function extractUserQuery(requestPayload: any): string {
+  if (!requestPayload) return 'No query available';
+  
+  // Try common query fields
+  if (requestPayload.query) return requestPayload.query;
+  if (requestPayload.user_query) return requestPayload.user_query;
+  if (requestPayload.message) return requestPayload.message;
+  if (requestPayload.content) return requestPayload.content;
+  if (requestPayload.text) return requestPayload.text;
+  
+  // Fallback to stringified payload (truncated)
+  const fallback = JSON.stringify(requestPayload);
+  return fallback.length > 500 ? fallback.substring(0, 500) + '...' : fallback;
 }

@@ -126,6 +126,7 @@ export type Database = {
           created_at: string
           feature_name: string
           id: string
+          job_id: string | null
           user_id: string
           user_query: string
         }
@@ -134,6 +135,7 @@ export type Database = {
           created_at?: string
           feature_name: string
           id?: string
+          job_id?: string | null
           user_id: string
           user_query: string
         }
@@ -142,10 +144,19 @@ export type Database = {
           created_at?: string
           feature_name?: string
           id?: string
+          job_id?: string | null
           user_id?: string
           user_query?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_ai_interactions_job_id"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_recommendations: {
         Row: {
