@@ -17,13 +17,15 @@ import {
   Activity,
   Euro,
   Calculator,
-  BarChart3
+  BarChart3,
+  Building2
 } from "lucide-react";
 import { useAdminActions } from "@/hooks/useAdminActions";
 import { useProfile } from "@/hooks/useProfile";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { CreateUserDialog } from "@/components/admin/CreateUserDialog";
 import { JobsMonitoring } from "@/components/admin/JobsMonitoring";
+import { BrokersManagement } from "@/components/admin/BrokersManagement";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -34,6 +36,7 @@ interface AdminUser {
   id: string;
   user_id: string;
   broker_name: string | null;
+  broker_id: string | null;
   status: 'pending' | 'approved' | 'rejected';
   role: 'user' | 'admin' | 'super_user';
   created_at: string;
@@ -64,7 +67,8 @@ export default function Admin() {
   const [loadingCosts, setLoadingCosts] = useState(false);
   const [dailyCostStats, setDailyCostStats] = useState<DailyCostStats[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<number>(30);
-  const { isSuperUser } = useProfile();
+  const [userBroker, setUserBroker] = useState<any>(null);
+  const { profile, isSuperUser, isAdmin } = useProfile();
   const { 
     fetchUsers, 
     updateUserStatus, 
@@ -79,6 +83,23 @@ export default function Admin() {
     const userData = await fetchUsers();
     setUsers(userData);
     setLoading(false);
+  };
+
+  const loadUserBroker = async () => {
+    if (!profile?.broker_id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('brokers')
+        .select('*')
+        .eq('id', profile.broker_id)
+        .single();
+      
+      if (error) throw error;
+      setUserBroker(data);
+    } catch (error) {
+      console.error('Error loading user broker:', error);
+    }
   };
 
   const loadCostStats = async () => {
@@ -207,10 +228,11 @@ export default function Admin() {
 
   useEffect(() => {
     loadUsers();
+    loadUserBroker();
     if (isSuperUser) {
       loadCostStats();
     }
-  }, [isSuperUser, selectedPeriod]);
+  }, [isSuperUser, selectedPeriod, profile]);
 
   const stats = {
     total: users.length,
@@ -238,13 +260,27 @@ export default function Admin() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-              Admin Dashboard
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                Admin Dashboard
+              </h1>
+              {isAdmin && userBroker && (
+                <Badge variant="outline" className="text-xs">
+                  Broker: {userBroker.name}
+                </Badge>
+              )}
+            </div>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Manage users, approvals, and system permissions
+              {isAdmin ? `Manage users and approvals for ${userBroker?.name || 'your broker'}` : 'Manage users, approvals, and system permissions'}
             </p>
+            {isAdmin && !profile?.broker_id && (
+              <div className="mt-2 p-2 border border-warning rounded-md bg-warning/10">
+                <p className="text-sm text-warning-foreground">
+                  Broker not assigned. Please contact a super user to assign a broker.
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <CreateUserDialog
@@ -533,7 +569,7 @@ export default function Admin() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-4' : 'grid-cols-2'}`}>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
@@ -542,6 +578,12 @@ export default function Admin() {
               <Activity className="h-4 w-4" />
               Jobs Monitoring
             </TabsTrigger>
+            {isSuperUser && (
+              <TabsTrigger value="brokers" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Brokers
+              </TabsTrigger>
+            )}
             {isSuperUser && (
               <TabsTrigger value="realtime-diagnostic" className="flex items-center gap-2">
                 🔍 Realtime Diagnostic
@@ -632,6 +674,12 @@ export default function Admin() {
           <TabsContent value="monitoring">
             <JobsMonitoring />
           </TabsContent>
+
+          {isSuperUser && (
+            <TabsContent value="brokers">
+              <BrokersManagement />
+            </TabsContent>
+          )}
 
           {isSuperUser && (
             <TabsContent value="realtime-diagnostic">

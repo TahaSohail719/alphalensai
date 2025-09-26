@@ -332,6 +332,42 @@ export type Database = {
         }
         Relationships: []
       }
+      brokers: {
+        Row: {
+          code: string | null
+          contact_email: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          metadata: Json | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          metadata?: Json | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          metadata?: Json | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       indicators_tv: {
         Row: {
           adx: number | null
@@ -588,6 +624,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          broker_id: string | null
           broker_name: string | null
           created_at: string
           id: string
@@ -597,6 +634,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          broker_id?: string | null
           broker_name?: string | null
           created_at?: string
           id?: string
@@ -606,6 +644,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          broker_id?: string | null
           broker_name?: string | null
           created_at?: string
           id?: string
@@ -614,7 +653,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "brokers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_requests: {
         Row: {

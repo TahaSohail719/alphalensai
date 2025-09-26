@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import newLogo from '@/assets/new-logo.png';
 import PublicNavbar from '@/components/PublicNavbar';
+import { useBrokerActions } from '@/hooks/useBrokerActions';
 
 const { useState, useEffect } = React;
 
@@ -18,11 +20,14 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [brokerName, setBrokerName] = useState('');
+  const [selectedBrokerId, setSelectedBrokerId] = useState('');
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(null);
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
+  const [activeBrokers, setActiveBrokers] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { fetchActiveBrokers } = useBrokerActions();
 
   useEffect(() => {
     // Set up auth state listener
@@ -44,35 +49,20 @@ export default function Auth() {
       }
     });
 
+    // Load active brokers
+    fetchActiveBrokers().then(setActiveBrokers);
+
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, fetchActiveBrokers]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate broker name
-    if (!brokerName.trim()) {
+    // Validate broker selection
+    if (!selectedBrokerId) {
       toast({
         title: "Validation Error",
-        description: "Broker name is required.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (brokerName.length < 2 || brokerName.length > 80) {
-      toast({
-        title: "Validation Error", 
-        description: "Broker name must be between 2 and 80 characters.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!/^[a-zA-Z0-9\s\-&]+$/.test(brokerName)) {
-      toast({
-        title: "Validation Error",
-        description: "Broker name can only contain letters, numbers, spaces, hyphens, and ampersands.",
+        description: "Please select a broker.",
         variant: "destructive"
       });
       return;
@@ -80,6 +70,7 @@ export default function Auth() {
 
     setLoading(true);
 
+    const selectedBroker = activeBrokers.find((b: any) => b.id === selectedBrokerId);
     const redirectUrl = `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
@@ -88,7 +79,8 @@ export default function Auth() {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          broker_name: brokerName.trim()
+          broker_id: selectedBrokerId,
+          broker_name: selectedBroker?.name || null
         }
       }
     });
@@ -225,17 +217,24 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-broker">Broker Name *</Label>
-                  <Input
-                    id="signup-broker"
-                    type="text"
-                    value={brokerName}
-                    onChange={(e) => setBrokerName(e.target.value)}
-                    placeholder="Enter your broker name"
-                    required
-                    minLength={2}
-                    maxLength={80}
-                  />
+                  <Label htmlFor="signup-broker">Broker *</Label>
+                  <Select value={selectedBrokerId} onValueChange={setSelectedBrokerId} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your broker" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeBrokers.map((broker: any) => (
+                        <SelectItem key={broker.id} value={broker.id}>
+                          {broker.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {activeBrokers.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      My broker is not listed? Contact support for assistance.
+                    </p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

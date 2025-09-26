@@ -6,6 +6,7 @@ interface AdminUser {
   id: string;
   user_id: string;
   broker_name: string | null;
+  broker_id: string | null;
   status: 'pending' | 'approved' | 'rejected';
   role: 'user' | 'admin' | 'super_user';
   created_at: string;
