@@ -86,7 +86,7 @@ export default function Layout({ children, activeModule, onModuleChange, complet
 
             {/* Credits Display - Rapproché des logos */}
             {user && (
-              <div className="ml-3">
+              <div className="ml-1">
                 <CreditsNavbar />
               </div>
             )}
