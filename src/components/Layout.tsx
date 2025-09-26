@@ -65,7 +65,7 @@ export default function Layout({ children, activeModule, onModuleChange, complet
       {/* Mobile-First Responsive Header */}
       <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-sm">
         <div className="h-full px-4 sm:px-6 max-w-screen-lg mx-auto">
-          <div className="flex items-center justify-between h-full">
+          <div className="flex items-center h-full">
             {/* Logo - Mobile optimized */}
             <button
               onClick={() => navigate('/dashboard')}
@@ -84,8 +84,15 @@ export default function Layout({ children, activeModule, onModuleChange, complet
               </div>
             </button>
 
-            {/* Credits Display - Always visible after logos */}
-            {user && <CreditsNavbar />}
+            {/* Credits Display - Rapproché des logos */}
+            {user && (
+              <div className="ml-3">
+                <CreditsNavbar />
+              </div>
+            )}
+
+            {/* Spacer pour pousser les éléments à droite */}
+            <div className="flex-1" />
 
             {/* Desktop Navigation Items */}
             <div className="hidden lg:flex items-center gap-1">
