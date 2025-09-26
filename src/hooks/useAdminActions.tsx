@@ -76,6 +76,34 @@ export function useAdminActions() {
   const updateUserRole = async (userId: string, role: 'user' | 'admin' | 'super_user') => {
     setLoading(true);
     try {
+      // Get current user's profile to check permissions
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('No authenticated user');
+      }
+
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error('Failed to fetch current user profile');
+      }
+
+      // Security check: Prevent admin self-escalation to super_user
+      if (currentUserProfile.role === 'admin' && 
+          currentUserProfile.user_id === userId && 
+          role === 'super_user') {
+        throw new Error('Forbidden: self-escalation to superUser is not allowed.');
+      }
+
+      // Security check: Only super_users can assign super_user role
+      if (role === 'super_user' && currentUserProfile.role !== 'super_user') {
+        throw new Error('Forbidden: only Super Users can assign the Super User role.');
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({ role, updated_at: new Date().toISOString() })
@@ -89,11 +117,11 @@ export function useAdminActions() {
       });
 
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user role:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role",
+        description: error.message || "Failed to update user role",
         variant: "destructive",
       });
       return { success: false, error };

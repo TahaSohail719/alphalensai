@@ -75,9 +75,18 @@ export function UserActionsDialog({
 }: UserActionsDialogProps) {
   const [selectedStatus, setSelectedStatus] = useState<'pending' | 'approved' | 'rejected'>();
   const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'super_user'>();
-  const { isSuperUser } = useProfile();
+  const { isSuperUser, profile } = useProfile();
 
   if (!user) return null;
+
+  // Check if current user is editing their own account
+  const isEditingSelf = profile?.user_id === user.user_id;
+  // Check if admin is trying to edit roles (only superUsers can assign superUser role)
+  const canEditRoles = isSuperUser || (profile?.role === 'admin' && !isEditingSelf);
+  // Available roles based on permissions
+  const availableRoles = isSuperUser 
+    ? ['user', 'admin', 'super_user'] 
+    : ['user', 'admin']; // Admins can only assign user/admin roles
 
   const handleUpdateStatus = async () => {
     if (!selectedStatus) return;
@@ -169,26 +178,44 @@ export function UserActionsDialog({
           {/* Role Update */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Update Role</label>
-            <Select value={selectedRole} onValueChange={(value: any) => setSelectedRole(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select new role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="super_user">Super User</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={handleUpdateRole} 
-              disabled={!selectedRole || loading}
-              size="sm"
-              variant="outline"
-              className="w-full"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Update Role
-            </Button>
+            {isEditingSelf && profile?.role === 'admin' ? (
+              <div className="p-3 border border-muted rounded-md bg-muted/20">
+                <p className="text-sm text-muted-foreground">
+                  You cannot modify your own role. Contact a Super User to change your role.
+                </p>
+              </div>
+            ) : canEditRoles ? (
+              <>
+                <Select value={selectedRole} onValueChange={(value: any) => setSelectedRole(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select new role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRoles.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role === 'super_user' ? 'Super User' : role.charAt(0).toUpperCase() + role.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  onClick={handleUpdateRole} 
+                  disabled={!selectedRole || loading}
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Update Role
+                </Button>
+              </>
+            ) : (
+              <div className="p-3 border border-muted rounded-md bg-muted/20">
+                <p className="text-sm text-muted-foreground">
+                  You don't have permission to modify roles.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
