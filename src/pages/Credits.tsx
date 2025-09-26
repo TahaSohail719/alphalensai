@@ -28,33 +28,64 @@ export default function Credits() {
 
     const fetchUsageStats = async () => {
       try {
-        const { data: jobs } = await supabase
-          .from('jobs')
-          .select('feature')
-          .eq('user_id', user.id)
-          .eq('status', 'completed');
+        // Récupérer les données des deux tables
+        const [jobsResult, interactionsResult] = await Promise.all([
+          supabase
+            .from('jobs')
+            .select('feature')
+            .eq('user_id', user.id)
+            .eq('status', 'completed'),
+          supabase
+            .from('ai_interactions')
+            .select('feature_name')
+            .eq('user_id', user.id)
+        ]);
 
-        if (jobs) {
-          const stats = jobs.reduce((acc, job) => {
+        const stats = { queries: 0, ideas: 0, reports: 0 };
+
+        // Compter depuis la table jobs
+        if (jobsResult.data) {
+          jobsResult.data.forEach((job) => {
             switch (job.feature) {
+              case 'Macro Commentary':
               case 'macro_commentary':
               case 'queries':
-                acc.queries++;
+                stats.queries++;
                 break;
+              case 'AI Trade Setup':
               case 'ai_setup':
               case 'ideas':
-                acc.ideas++;
+                stats.ideas++;
                 break;
+              case 'Report':
               case 'report':
               case 'reports':
-                acc.reports++;
+                stats.reports++;
                 break;
             }
-            return acc;
-          }, { queries: 0, ideas: 0, reports: 0 });
-
-          setUsageStats(stats);
+          });
         }
+
+        // Compter depuis la table ai_interactions
+        if (interactionsResult.data) {
+          interactionsResult.data.forEach((interaction) => {
+            switch (interaction.feature_name) {
+              case 'market_commentary':
+              case 'macro_commentary':
+                stats.queries++;
+                break;
+              case 'trade_setup':
+              case 'ai_setup':
+                stats.ideas++;
+                break;
+              case 'report':
+                stats.reports++;
+                break;
+            }
+          });
+        }
+
+        setUsageStats(stats);
       } catch (error) {
         console.error('Error fetching usage stats:', error);
       }
