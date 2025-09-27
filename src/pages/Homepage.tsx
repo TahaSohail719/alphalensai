@@ -9,16 +9,16 @@ export default function Homepage() {
       <PublicNavbar />
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-24 px-4 text-center bg-white">
+      <section className="relative pt-6 pb-16 px-4 text-center bg-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="mb-8">
-            <img src="/lovable-uploads/Full_logi_white_BG_FINAL.png" alt="alphaLens.ai logo" loading="lazy" className="w-full h-auto mx-auto mb-6 max-w-[280px] sm:max-w-[360px] md:max-w-[480px] lg:max-w-[640px] object-contain" />
+          <div className="mb-3">
+            <img src="/lovable-uploads/Full_logi_white_BG_FINAL.png" alt="alphaLens.ai logo" loading="lazy" className="w-full h-auto mx-auto mb-4 max-w-[280px] sm:max-w-[360px] md:max-w-[480px] lg:max-w-[640px] object-contain" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-4 leading-tight">
             Intelligent Financial Research
             <span className="text-primary"> Powered by AI</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
             Advanced FX, crypto, and macro analysis with institutional-grade insights, 
             AI-powered trade setups, and comprehensive research reports for financial professionals.
           </p>
