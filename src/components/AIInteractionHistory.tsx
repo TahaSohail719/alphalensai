@@ -74,6 +74,11 @@ export function AIInteractionHistory() {
   const extractUserQuery = (requestPayload: any): string => {
     if (!requestPayload) return 'Unavailable';
     
+    // Handle nested macroInsight structure
+    if (requestPayload.macroInsight?.message?.content) {
+      return requestPayload.macroInsight.message.content;
+    }
+    
     // Standard patterns from jobs.request_payload
     if (requestPayload.question) return requestPayload.question;
     if (requestPayload.query) return requestPayload.query;
@@ -85,6 +90,17 @@ export function AIInteractionHistory() {
     // Handle nested analysis queries
     if (requestPayload.analysis?.query) return requestPayload.analysis.query;
     if (requestPayload.analysis?.question) return requestPayload.analysis.question;
+    
+    // For AI Trade Setup, try to reconstruct from instrument and other fields
+    if (requestPayload.instrument) {
+      const parts = [];
+      if (requestPayload.instrument) parts.push(`Instrument: ${requestPayload.instrument}`);
+      if (requestPayload.strategy) parts.push(`Strategy: ${requestPayload.strategy}`);
+      if (requestPayload.timeframe) parts.push(`Timeframe: ${requestPayload.timeframe}`);
+      if (parts.length > 0) {
+        return parts.join(', ');
+      }
+    }
     
     const fallback = JSON.stringify(requestPayload);
     return fallback.length > 200 ? fallback.substring(0, 200) + '...' : fallback;
@@ -375,28 +391,27 @@ export function AIInteractionHistory() {
     
     if (feature === 'AI Trade Setup') {
       try {
-        let tradeSetupData = interaction.ai_response;
+        // Pass the complete content structure to TradeSetupDisplay
+        const content = interaction.response_payload?.content;
         
-        // Parse if string
-        if (typeof tradeSetupData === 'string') {
-          tradeSetupData = JSON.parse(tradeSetupData);
+        if (content && content.setups && content.setups.length > 0) {
+          // TradeSetupDisplay expects the first setup data
+          const setupData = content.setups[0];
+          // Add additional context from the full response
+          const enrichedData = {
+            ...setupData,
+            instrument: content.instrument,
+            disclaimer: content.disclaimer,
+            market_commentary_anchor: content.market_commentary_anchor,
+            data_fresheners: content.data_fresheners
+          };
+          
+          return <TradeSetupDisplay data={enrichedData} originalQuery={interaction.user_query} />;
         }
-        
-        // Handle nested response structures from response_payload
-        if (interaction.response_payload?.content?.setups && Array.isArray(interaction.response_payload.content.setups)) {
-          tradeSetupData = interaction.response_payload.content.setups[0];
-        } else if (interaction.response_payload?.message?.content?.content?.setups) {
-          tradeSetupData = interaction.response_payload.message.content.content.setups[0];
-        } else if (interaction.response_payload?.content) {
-          tradeSetupData = interaction.response_payload.content;
-        }
-        
-        return <TradeSetupDisplay data={tradeSetupData} originalQuery={interaction.user_query} />;
       } catch (error) {
-        console.error('Error parsing AI Trade Setup response:', error);
-        // Render structured fallback instead of raw JSON
-        return renderStructuredFallback(interaction.ai_response, 'AI Trade Setup');
+        console.error('Error rendering AI Trade Setup:', error);
       }
+      return renderTradeSetupFallback(interaction.response_payload, interaction.user_query);
     }
 
     if (feature === 'Macro Commentary') {
@@ -459,6 +474,135 @@ export function AIInteractionHistory() {
         </Card>
       );
     }
+  };
+
+  // Render specialized fallback for AI Trade Setup
+  const renderTradeSetupFallback = (responsePayload: any, originalQuery: string) => {
+    const content = responsePayload?.content;
+    
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-lg">AI Trade Setup Response</CardTitle>
+          {originalQuery && originalQuery !== 'Unavailable' && (
+            <p className="text-sm text-muted-foreground">Query: {originalQuery}</p>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {content?.instrument && (
+            <div>
+              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">Instrument</h4>
+              <p className="text-lg font-mono">{content.instrument}</p>
+            </div>
+          )}
+          
+          {content?.setups && content.setups.length > 0 && (
+            <div className="space-y-6">
+              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Trade Setups</h4>
+              {content.setups.map((setup: any, index: number) => (
+                <Card key={index} className="bg-muted/30">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="font-semibold">Direction:</span> 
+                        <span className={`ml-2 capitalize ${setup.direction === 'long' ? 'text-green-600' : 'text-red-600'}`}>
+                          {setup.direction}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Strategy:</span> 
+                        <span className="ml-2 capitalize">{setup.strategy}</span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Timeframe:</span> 
+                        <span className="ml-2 font-mono">{setup.timeframe}</span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Horizon:</span> 
+                        <span className="ml-2 capitalize">{setup.horizon}</span>
+                      </div>
+                    </div>
+                    
+                    {setup.entryPrice && (
+                      <div>
+                        <span className="font-semibold">Entry Price:</span> 
+                        <span className="ml-2 font-mono text-lg">{setup.entryPrice}</span>
+                      </div>
+                    )}
+                    
+                    {setup.stopLoss && (
+                      <div>
+                        <span className="font-semibold">Stop Loss:</span> 
+                        <span className="ml-2 font-mono text-red-600">{setup.stopLoss}</span>
+                      </div>
+                    )}
+                    
+                    {setup.takeProfits && setup.takeProfits.length > 0 && (
+                      <div>
+                        <span className="font-semibold">Take Profits:</span>
+                        <div className="ml-2 flex gap-2 flex-wrap">
+                          {setup.takeProfits.map((tp: number, tpIndex: number) => (
+                            <span key={tpIndex} className="font-mono text-green-600 bg-green-50 px-2 py-1 rounded">
+                              {tp}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {setup.levels && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {setup.levels.supports && setup.levels.supports.length > 0 && (
+                          <div>
+                            <span className="font-semibold">Supports:</span>
+                            <div className="ml-2">
+                              {setup.levels.supports.map((support: number, idx: number) => (
+                                <span key={idx} className="block font-mono text-sm">{support}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {setup.levels.resistances && setup.levels.resistances.length > 0 && (
+                          <div>
+                            <span className="font-semibold">Resistances:</span>
+                            <div className="ml-2">
+                              {setup.levels.resistances.map((resistance: number, idx: number) => (
+                                <span key={idx} className="block font-mono text-sm">{resistance}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {setup.context && (
+                      <div>
+                        <span className="font-semibold">Context:</span>
+                        <p className="ml-2 mt-1 text-sm text-muted-foreground break-words">{setup.context}</p>
+                      </div>
+                    )}
+                    
+                    {setup.riskNotes && (
+                      <div>
+                        <span className="font-semibold">Risk Notes:</span>
+                        <p className="ml-2 mt-1 text-sm text-muted-foreground break-words">{setup.riskNotes}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          
+          {content?.disclaimer && (
+            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground italic">{content.disclaimer}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   // Structured fallback for parsing errors
