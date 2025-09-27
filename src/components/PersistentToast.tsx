@@ -51,8 +51,8 @@ export function PersistentToast() {
             </div>
             <p className="text-sm text-muted-foreground mb-3">
               {isCompleted 
-                ? `${mostRecentJob.instrument} ${getFeatureDisplayName(mostRecentJob.feature)} completed — click to view result`
-                : `${mostRecentJob.instrument} ${getFeatureDisplayName(mostRecentJob.feature)} in progress`
+                ? `${getFeatureDisplayName(mostRecentJob.feature)} completed — click to view result`
+                : `${getFeatureDisplayName(mostRecentJob.feature)} in progress`
               }
             </p>
             
