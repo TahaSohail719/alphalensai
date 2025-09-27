@@ -64,11 +64,11 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
     setFlashMessages(prev => prev.filter(msg => msg.id !== id));
   };
 
-  // Map job types to originating features
-  const mapTypeToFeature = (type: string): 'ai-setup' | 'macro-analysis' | 'reports' => {
-    if (type.includes('trade_setup') || type.includes('ai_trade_setup')) return 'ai-setup';
-    if (type.includes('macro') || type.includes('commentary')) return 'macro-analysis';
-    if (type.includes('report')) return 'reports';
+  // Map job features to originating features
+  const mapFeatureToOriginatingFeature = (feature: string): 'ai-setup' | 'macro-analysis' | 'reports' => {
+    if (feature === 'AI Trade Setup') return 'ai-setup';
+    if (feature === 'Macro Commentary') return 'macro-analysis';
+    if (feature === 'Report') return 'reports';
     return 'ai-setup'; // fallback
   };
 
@@ -100,12 +100,12 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
           
           const activeJob: ActiveJob = {
             id: newJob.id,
-            type: newJob.type || 'Unknown',
-            feature: newJob.feature || newJob.type || 'analysis',
+            type: newJob.feature || 'Unknown',
+            feature: newJob.feature || 'analysis',
             instrument: newJob.instrument || 'Unknown',
             status: 'pending',
             createdAt: new Date(),
-            originatingFeature: mapTypeToFeature(newJob.type || '')
+            originatingFeature: mapFeatureToOriginatingFeature(newJob.feature || '')
           };
 
           // Add flash message for job start
@@ -148,12 +148,12 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
             
             const completedJob: CompletedJob = {
               id: updatedJob.id,
-              type: updatedJob.type || 'Unknown',
-              feature: updatedJob.feature || updatedJob.type || 'analysis',
+              type: updatedJob.feature || 'Unknown',
+              feature: updatedJob.feature || 'analysis',
               instrument: updatedJob.instrument || 'Unknown',
               resultData: updatedJob.response_payload,
               completedAt: new Date(),
-              originatingFeature: mapTypeToFeature(updatedJob.type || '')
+              originatingFeature: mapFeatureToOriginatingFeature(updatedJob.feature || '')
             };
 
             // Add flash message for completion
