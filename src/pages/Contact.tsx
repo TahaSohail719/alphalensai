@@ -8,7 +8,6 @@ import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PublicNavbar from "@/components/PublicNavbar";
-
 export default function Contact() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -18,10 +17,9 @@ export default function Contact() {
     company: "",
     message: ""
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast.error("Please fill in all required fields.");
@@ -34,18 +32,15 @@ export default function Contact() {
       toast.error("Please enter a valid email address.");
       return;
     }
-
     setLoading(true);
-
     try {
       // TODO: Implement backend integration
       console.warn("TODO: Implement contact form backend integration", formData);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
       toast.success("Message sent successfully! We'll get back to you soon.");
-      
+
       // Reset form
       setFormData({
         name: "",
@@ -59,13 +54,13 @@ export default function Contact() {
       setLoading(false);
     }
   };
-
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <PublicNavbar />
 
       {/* Hero Section */}
@@ -99,63 +94,32 @@ export default function Contact() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name *</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        placeholder="Your full name"
-                        required
-                      />
+                      <Input id="name" type="text" value={formData.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Your full name" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="your.email@company.com"
-                        required
-                      />
+                      <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange("email", e.target.value)} placeholder="your.email@company.com" required />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="company">Company / Broker</Label>
-                    <Input
-                      id="company"
-                      type="text"
-                      value={formData.company}
-                      onChange={(e) => handleInputChange("company", e.target.value)}
-                      placeholder="Your company or broker name"
-                    />
+                    <Input id="company" type="text" value={formData.company} onChange={e => handleInputChange("company", e.target.value)} placeholder="Your company or broker name" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Message *</Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      placeholder="Tell us about your trading needs, questions about features, or demo requirements..."
-                      rows={5}
-                      required
-                    />
+                    <Textarea id="message" value={formData.message} onChange={e => handleInputChange("message", e.target.value)} placeholder="Tell us about your trading needs, questions about features, or demo requirements..." rows={5} required />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
+                    {loading ? <>
                         <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
                         Sending...
-                      </>
-                    ) : (
-                      <>
+                      </> : <>
                         <Send className="w-4 h-4 mr-2" />
                         Send Message
-                      </>
-                    )}
+                      </>}
                   </Button>
                 </form>
               </CardContent>
@@ -174,7 +138,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Email</h3>
-                      <p className="text-muted-foreground">contact@alphalens.ai</p>
+                      <p className="text-muted-foreground">research@albaricg.com</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         We typically respond within 24 hours
                       </p>
@@ -187,7 +151,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Phone</h3>
-                      <p className="text-muted-foreground">Available upon request</p>
+                      <p className="text-muted-foreground">+92-315-452-1099</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         Schedule a call through our contact form
                       </p>
@@ -286,6 +250,5 @@ export default function Contact() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
