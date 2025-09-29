@@ -12,7 +12,7 @@ export default function Homepage() {
       <section className="relative pt-6 pb-16 px-4 text-center bg-white">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-3">
-            <img src="/lovable-uploads/Full_logi_white_BG_FINAL.png" alt="alphaLens.ai logo" loading="lazy" className="w-full h-auto mx-auto mb-4 max-w-[227px] sm:max-w-[292px] md:max-w-[389px] lg:max-w-[518px] object-contain" />
+            <img src="/lovable-uploads/Full_logi_white_BG_FINAL.png" alt="alphaLens.ai logo" loading="lazy" className="w-full h-auto mx-auto mb-4 max-w-[238px] sm:max-w-[307px] md:max-w-[408px] lg:max-w-[544px] object-contain" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight">
             Intelligent Financial Research
