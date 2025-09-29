@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CreditCard, Brain, Zap, FileText } from "lucide-react";
+import { RefreshCw, CreditCard, Brain, Zap, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -19,6 +22,9 @@ interface UserCreditData {
 export function UserCreditsOverview() {
   const [userCredits, setUserCredits] = useState<UserCreditData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [planFilter, setPlanFilter] = useState<string>('all');
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const { isSuperUser, isAdmin } = useProfile();
 
   const loadUserCredits = async () => {
@@ -120,6 +126,55 @@ export function UserCreditsOverview() {
     }
   };
 
+  // Filter and search logic
+  const filteredUsers = userCredits.filter(user => {
+    const matchesSearch = 
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.broker_name && user.broker_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesPlan = planFilter === 'all' || user.plan_type === planFilter;
+    
+    return matchesSearch && matchesPlan;
+  });
+
+  // Sort logic
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!sortConfig) return 0;
+    
+    const { key, direction } = sortConfig;
+    let aValue: any = a[key as keyof UserCreditData];
+    let bValue: any = b[key as keyof UserCreditData];
+    
+    if (typeof aValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+    
+    if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return current.direction === 'asc' 
+          ? { key, direction: 'desc' }
+          : null;
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortConfig?.key !== columnKey) return <ArrowUpDown className="h-4 w-4" />;
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp className="h-4 w-4" />
+      : <ArrowDown className="h-4 w-4" />;
+  };
+
+  const uniquePlans = [...new Set(userCredits.map(user => user.plan_type))];
+
   return (
     <Card className="rounded-2xl shadow-sm border">
       <CardHeader className="p-4 sm:p-6">
@@ -142,36 +197,110 @@ export function UserCreditsOverview() {
             No credit data available
           </div>
         ) : (
-          <div className="rounded-xl border">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-3 font-medium text-sm">User</th>
-                    <th className="text-left p-3 font-medium text-sm">Plan</th>
-                    <th className="text-center p-3 font-medium text-sm">
-                      <div className="flex items-center justify-center gap-1">
-                        <Brain className="h-4 w-4" />
-                        Macro
-                      </div>
-                    </th>
-                    <th className="text-center p-3 font-medium text-sm">
-                      <div className="flex items-center justify-center gap-1">
-                        <Zap className="h-4 w-4" />
-                        AI Trade
-                      </div>
-                    </th>
-                    <th className="text-center p-3 font-medium text-sm">
-                      <div className="flex items-center justify-center gap-1">
-                        <FileText className="h-4 w-4" />
-                        Reports
-                      </div>
-                    </th>
-                    <th className="text-center p-3 font-medium text-sm">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userCredits.slice(0, 20).map((user) => ( // Show top 20 users
+          <div className="space-y-4">
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by email or broker..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={planFilter} onValueChange={setPlanFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Plans ({userCredits.length})</SelectItem>
+                  {uniquePlans.map(plan => (
+                    <SelectItem key={plan} value={plan}>
+                      {formatPlanName(plan)} ({userCredits.filter(u => u.plan_type === plan).length})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="rounded-xl border">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('email')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          User {getSortIcon('email')}
+                        </Button>
+                      </th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('plan_type')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          Plan {getSortIcon('plan_type')}
+                        </Button>
+                      </th>
+                      <th className="text-center p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('credits_queries_remaining')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <Brain className="h-4 w-4" />
+                            Macro {getSortIcon('credits_queries_remaining')}
+                          </div>
+                        </Button>
+                      </th>
+                      <th className="text-center p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('credits_ideas_remaining')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <Zap className="h-4 w-4" />
+                            AI Trade {getSortIcon('credits_ideas_remaining')}
+                          </div>
+                        </Button>
+                      </th>
+                      <th className="text-center p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('credits_reports_remaining')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <FileText className="h-4 w-4" />
+                            Reports {getSortIcon('credits_reports_remaining')}
+                          </div>
+                        </Button>
+                      </th>
+                      <th className="text-center p-3 font-medium text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSort('total_credits')}
+                          className="h-auto p-0 font-medium"
+                        >
+                          Total {getSortIcon('total_credits')}
+                        </Button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedUsers.slice(0, 20).map((user) => ( // Show top 20 users
                     <tr key={user.user_id} className="border-b hover:bg-muted/50">
                       <td className="p-3">
                         <div className="font-medium text-sm">{user.email}</div>
@@ -221,11 +350,12 @@ export function UserCreditsOverview() {
                 </tbody>
               </table>
             </div>
-            {userCredits.length > 20 && (
-              <div className="p-3 text-center text-sm text-muted-foreground border-t">
-                Showing top 20 users by total credits. Total users: {userCredits.length}
-              </div>
-            )}
+              {sortedUsers.length > 20 && (
+                <div className="p-3 text-center text-sm text-muted-foreground border-t">
+                  Showing top 20 users. Found {sortedUsers.length} matching users.
+                </div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
