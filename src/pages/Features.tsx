@@ -90,14 +90,14 @@ export default function Features() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 justify-items-center">
             {features.map((feature, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow border-border bg-card">
+              <Card key={index} className="p-6 hover:shadow-lg transition-shadow border-border bg-card flex flex-col h-full">
                 <CardHeader className="pb-4">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <feature.icon className="h-8 w-8 text-primary" />
                   </div>
                   <CardTitle className="text-xl text-foreground">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 flex-1 flex flex-col">
                   <p className="text-muted-foreground">
                     {feature.description}
                   </p>
@@ -111,7 +111,7 @@ export default function Features() {
                   </ul>
                   <Button 
                     variant="outline" 
-                    className="w-full mt-4"
+                    className="w-full mt-auto"
                     onClick={() => navigate(feature.ctaRoute)}
                   >
                     {feature.ctaText}
