@@ -46,8 +46,8 @@ export function CreditsNavbar() {
           className="h-8 px-3 text-sm relative"
           onClick={() => navigate('/credits')}
         >
-          <Zap className="h-4 w-4 mr-1" />
-          <Badge variant="secondary" className="min-w-[2rem]">
+          Credits
+          <Badge variant="secondary" className="min-w-[2rem] ml-1">
             {totalCredits}
           </Badge>
         </Button>
