@@ -83,8 +83,11 @@ export function UserCreditsOverview() {
         if (p?.user_id) brokerByUserId.set(p.user_id, p.broker_name);
       });
 
-      // Combine data and calculate totals
-      const userCreditsWithInfo: UserCreditData[] = creditsData?.map(credit => {
+      // Combine data and calculate totals - only include users from filtered profiles
+      const validUserIds = new Set(profilesData?.map(p => p.user_id) || []);
+      const filteredCreditsData = creditsData?.filter(credit => validUserIds.has(credit.user_id)) || [];
+      
+      const userCreditsWithInfo: UserCreditData[] = filteredCreditsData.map(credit => {
         const email = emailByUserId.get(credit.user_id) || 'N/A';
         const broker_name = brokerByUserId.get(credit.user_id) || null;
         const total_credits = credit.credits_queries_remaining + credit.credits_ideas_remaining + credit.credits_reports_remaining;
@@ -99,7 +102,7 @@ export function UserCreditsOverview() {
           plan_type: credit.plan_type,
           total_credits
         };
-      }) || [];
+      });
 
       // Sort by total credits descending
       userCreditsWithInfo.sort((a, b) => b.total_credits - a.total_credits);
