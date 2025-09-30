@@ -334,161 +334,65 @@ export default function AISetup() {
     // Start processing immediately
     const progressInterval = globalLoading.startProcessing(requestId);
     
-    let macroChannel: any = null;
-    let tradeChannel: any = null;
+    let channel: any = null;
     
     try {
-      // STEP 1: Macro commentary with exclusive websocket processing
+      // SINGLE JOB: Merged macro commentary + trade setup request
       
-      // 1. Build macro payload first
-      const macroPayload = {
+      // 1. Build merged payload with macro structure as base
+      const mergedPayload = {
+        // Macro commentary structure (base)
         type: "RAG",
         mode: "run",
         instrument: parameters.instrument,
-        question: buildQuestion(parameters)
+        question: buildQuestion(parameters),
+        
+        // Trade query flag
+        isTradeQuery: true,
+        
+        // Trade setup request data
+        tradeSetupRequest: {
+          instrument: parameters.instrument,
+          timeframe: parameters.timeframe,
+          riskLevel: parameters.riskLevel,
+          positionSize: parameters.positionSize,
+          strategy: parameters.strategy,
+          customNotes: parameters.customNotes,
+          mode: "run",
+          type: "trade"
+        }
       };
 
-      // 2. Create job with payload using createJob hook (like MacroAnalysis page)
-      const macroJobId = await createJob(
+      // 2. Create single job with macro_commentary type
+      const jobId = await createJob(
         'macro_commentary',
         parameters.instrument,
-        macroPayload,
-        'Macro Commentary'
-      );
-
-      console.log('📊[AISetup] STEP1 Request macro-commentary, jobId =', macroJobId);
-      
-      let macroResult: any = null;
-      const macroResponsePromise = new Promise<void>((resolve, reject) => {
-        // 3. Subscribe to Realtime BEFORE sending POST request
-        console.log('📡 [Realtime] Subscribing to macro job updates before POST');
-        macroChannel = supabase
-          .channel(`ai-setup-macro-${macroJobId}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'jobs',
-              filter: `id=eq.${macroJobId}`
-            },
-            (payload) => {
-              const job = payload.new as any;
-              console.log(`📡 [Realtime] Macro job update received:`, job);
-              
-              if (job.status === 'completed' && job.response_payload) {
-                try {
-                  console.log('✅ [Realtime] Macro response received first');
-                  
-                  // Parse response_payload JSON if it's a string
-                  let parsedPayload = job.response_payload;
-                  if (typeof job.response_payload === 'string') {
-                    try {
-                      parsedPayload = JSON.parse(job.response_payload);
-                    } catch (parseError) {
-                      console.error('❌ [Realtime] Failed to parse macro response_payload JSON:', parseError);
-                      macroResult = { _rawText: job.response_payload };
-                      resolve();
-                      return;
-                    }
-                  }
-                  
-                  macroResult = parsedPayload;
-                  resolve();
-                } catch (error) {
-                  console.error('❌ [Realtime] Error processing macro response:', error);
-                  reject(error);
-                }
-              } else if (job.status === 'error') {
-                console.log('❌ [Realtime] Macro job failed:', job.error_message || 'Unknown error');
-                reject(new Error(job.error_message || 'Macro job failed'));
-              }
-            }
-          )
-          .subscribe();
-      });
-
-      // 4. Send POST request after subscription is active (payload already contains job_id via createJob)
-      console.log('📊 [AISetup] Macro analysis request:', {
-        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: macroPayload,
-        jobId: macroJobId,
-        timestamp: new Date().toISOString()
-      });
-
-      const { response: macroResponse } = await enhancedPostRequest(
-        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        macroPayload,
-        {
-          enableJobTracking: true,
-          jobType: 'macro_commentary',
-          instrument: parameters.instrument,
-          feature: 'Macro Commentary',
-          jobId: macroJobId
-        }
-      );
-
-      // 5. Ignore HTTP response, wait for websocket response only
-      console.log('📩 [HTTP] Macro response ignored, waiting for websocket...');
-
-      // 6. Wait for websocket response
-      await macroResponsePromise;
-      
-      // Clean up macro channel
-      if (macroChannel) {
-        supabase.removeChannel(macroChannel);
-        macroChannel = null;
-      }
-
-      // 7. Process macro result
-      if (!macroResult) {
-        setError("No macro analysis available yet.");
-        throw new Error("No macro analysis received");
-      }
-
-      const macroInsight = extractMacroInsight(macroResult);
-      console.log('📊[AISetup] STEP1 macroInsight length =', macroInsight?.length);
-
-      // STEP 2: Trade setup with exclusive websocket processing
-      
-      // 1. Build trade setup payload
-      const tradePayload = {
-        ...parameters,
-        mode: "run",
-        type: "trade",
-        macroInsight
-      };
-
-      // 2. Create second job for trade setup
-      const tradeJobId = await createJob(
-        'ai_trade_setup',
-        parameters.instrument,
-        tradePayload,
+        mergedPayload,
         'AI Trade Setup'
       );
 
-      console.log('📊[AISetup] STEP2 Request trade-setup, jobId =', tradeJobId, 'macroInsight length =', macroInsight?.length);
-
-      const tradeResponsePromise = new Promise<void>((resolve, reject) => {
-        // 3. Subscribe to trade setup job updates BEFORE sending POST
-        console.log('📡 [Realtime] Subscribing to trade setup job updates before POST');
-        tradeChannel = supabase
-          .channel(`ai-setup-trade-${tradeJobId}`)
+      console.log('📊[AISetup] Single request with trade query, jobId =', jobId);
+      
+      const responsePromise = new Promise<void>((resolve, reject) => {
+        // 3. Subscribe to Realtime BEFORE sending POST request
+        console.log('📡 [Realtime] Subscribing to job updates before POST');
+        channel = supabase
+          .channel(`ai-setup-${jobId}`)
           .on(
             'postgres_changes',
             {
               event: 'UPDATE',
               schema: 'public',
               table: 'jobs',
-              filter: `id=eq.${tradeJobId}`
+              filter: `id=eq.${jobId}`
             },
             async (payload) => {
               const job = payload.new as any;
-              console.log(`📡 [Realtime] Trade job update received:`, job);
+              console.log(`📡 [Realtime] Job update received:`, job);
               
               if (job.status === 'completed' && job.response_payload) {
                 try {
-                  console.log('✅ [Realtime] Trade setup response received first');
+                  console.log('✅ [Realtime] Trade setup response received');
                   console.log('🔄 [Loader] Stopping loader - Realtime response received');
                   
                   // Parse response_payload JSON if it's a string
@@ -497,7 +401,7 @@ export default function AISetup() {
                     try {
                       parsedPayload = JSON.parse(job.response_payload);
                     } catch (parseError) {
-                      console.error('❌ [Realtime] Failed to parse trade response_payload JSON:', parseError);
+                      console.error('❌ [Realtime] Failed to parse response_payload JSON:', parseError);
                       setError("No result available yet.");
                       resolve();
                       return;
@@ -517,7 +421,7 @@ export default function AISetup() {
                       featureName: 'ai_trade_setup',
                       userQuery: `Generate AI trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskLevel} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
                       aiResponse: normalized,
-                      jobId: tradeJobId
+                      jobId: jobId
                     });
                     
                     toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
@@ -537,36 +441,43 @@ export default function AISetup() {
                   reject(error);
                 }
               } else if (job.status === 'error') {
-                console.log('❌ [Realtime] Trade job failed:', job.error_message);
+                console.log('❌ [Realtime] Job failed:', job.error_message);
                 console.log('🔄 [Loader] Stopping loader - Realtime error received');
                 setIsGenerating(false);
                 setError(job.error_message || 'Job failed');
                 globalLoading.failRequest(requestId, job.error_message || 'Job failed');
-                reject(new Error(job.error_message || 'Trade job failed'));
+                reject(new Error(job.error_message || 'Job failed'));
               }
             }
           )
           .subscribe();
       });
 
-      // 4. Send trade setup POST request after subscription is active
-      const { response: tradeResponse } = await enhancedPostRequest(
+      // 4. Send POST request after subscription is active
+      console.log('📊 [AISetup] Trade setup request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        payload: mergedPayload,
+        jobId: jobId,
+        timestamp: new Date().toISOString()
+      });
+
+      const { response } = await enhancedPostRequest(
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        tradePayload,
+        mergedPayload,
         {
           enableJobTracking: true,
-          jobType: 'ai_trade_setup',
+          jobType: 'macro_commentary',
           instrument: parameters.instrument,
-          feature: 'ai_trade_setup',
-          jobId: tradeJobId
+          feature: 'AI Trade Setup',
+          jobId: jobId
         }
       );
 
       // 5. Ignore HTTP response, wait for websocket response only
-      console.log('📩 [HTTP] Trade setup response ignored, waiting for websocket...');
+      console.log('📩 [HTTP] Response ignored, waiting for websocket...');
 
       // 6. Wait for websocket response
-      await tradeResponsePromise;
+      await responsePromise;
     } catch (error) {
       console.error('Error generating trade setup:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -579,12 +490,9 @@ export default function AISetup() {
         variant: "destructive"
       });
     } finally {
-      // Clean up channels
-      if (macroChannel) {
-        supabase.removeChannel(macroChannel);
-      }
-      if (tradeChannel) {
-        supabase.removeChannel(tradeChannel);
+      // Clean up channel
+      if (channel) {
+        supabase.removeChannel(channel);
       }
       setIsGenerating(false);
     }
