@@ -448,7 +448,7 @@ export default function AISetup() {
           .subscribe();
       });
 
-      // 4. Send POST request after subscription is active
+      // 4. Send POST request after subscription is active (fire-and-forget)
       console.log('📊 [AISetup] Trade setup request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         payload: mergedPayload,
@@ -456,36 +456,36 @@ export default function AISetup() {
         timestamp: new Date().toISOString()
       });
 
-      const { response } = await enhancedPostRequest(
-        'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        mergedPayload,
-        {
-          enableJobTracking: true,
-          jobType: 'macro_commentary',
-          instrument: parameters.instrument,
-          feature: 'AI Trade Setup',
-          jobId: jobId
-        }
-      );
+      // HTTP request: log timeouts internally, don't break workflow
+      try {
+        const { response } = await enhancedPostRequest(
+          'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+          mergedPayload,
+          {
+            enableJobTracking: true,
+            jobType: 'macro_commentary',
+            instrument: parameters.instrument,
+            feature: 'AI Trade Setup',
+            jobId: jobId
+          }
+        );
+        console.log('📩 [HTTP] Response received (ignored, waiting for Realtime)');
+      } catch (httpError) {
+        // Expected timeout - log internally, don't stop workflow
+        console.log('⏱️ [HTTP] Request timeout (expected, waiting for Realtime)', httpError);
+      }
 
-      // 5. Ignore HTTP response, wait for websocket response only
-      console.log('📩 [HTTP] Response ignored, waiting for websocket...');
-
-      // 6. Wait for websocket response
+      // 5. Wait for Realtime response (source of truth)
       await responsePromise;
+      
+      // Clean up channel after response
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     } catch (error) {
-      console.error('Error generating trade setup:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(errorMessage);
+      // This catch only handles unexpected errors (not HTTP timeouts)
+      console.error('❌ [AISetup] Unexpected error:', error);
       clearInterval(progressInterval);
-      globalLoading.failRequest(requestId, errorMessage);
-      toast({
-        title: "Generation Failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      // Clean up channel
       if (channel) {
         supabase.removeChannel(channel);
       }
