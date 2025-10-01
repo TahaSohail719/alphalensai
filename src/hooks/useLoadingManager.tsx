@@ -1,6 +1,7 @@
 import * as React from "react";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const { useState, useCallback } = React;
 
@@ -20,6 +21,7 @@ interface LoadingRequest {
 
 export function useLoadingManager() {
   const [requests, setRequests] = useState<LoadingRequest[]>([]);
+  const { toast } = useToast();
 
   const createRequest = useCallback(async (
     type: LoadingRequest['type'],
@@ -104,6 +106,11 @@ export function useLoadingManager() {
           status: 'completed', 
           progress: 100 
         });
+        
+        toast({
+          title: "Analysis Complete",
+          description: "Your request has been processed successfully"
+        });
       } else {
         updateRequest(id, { 
           status: 'processing', 
@@ -113,7 +120,7 @@ export function useLoadingManager() {
     }, Math.random() * 3000 + 2000); // 2-5 second intervals
 
     return interval;
-  }, [updateRequest]);
+  }, [updateRequest, toast]);
 
   const startProcessing = useCallback((id: string) => {
     updateRequest(id, { status: 'processing', progress: 5 });
@@ -126,11 +133,22 @@ export function useLoadingManager() {
       progress: 100, 
       resultData 
     });
-  }, [updateRequest]);
+    
+    toast({
+      title: "Analysis Complete",
+      description: "Your request has been processed successfully"
+    });
+  }, [updateRequest, toast]);
 
   const failRequest = useCallback((id: string, error?: string) => {
     updateRequest(id, { status: 'failed' });
-  }, [updateRequest]);
+    
+    toast({
+      title: "Analysis Failed",
+      description: error || "The request could not be processed",
+      variant: "destructive"
+    });
+  }, [updateRequest, toast]);
 
   const getActiveRequests = useCallback(() => {
     return requests.filter(req => req.status === 'pending' || req.status === 'processing');
