@@ -90,6 +90,12 @@ export default function Reports() {
       setCurrentReport(newReport);
       setStep("generated");
       setIsGenerating(false);
+      
+      toast({
+        title: "Report Generated",
+        description: "Your report has been successfully generated from realtime data",
+        duration: 5000
+      });
     }
   });
 
@@ -316,12 +322,17 @@ export default function Reports() {
                
                // Set HTML content if available
                if (job.response_payload) {
-                   setHtmlContent(job.response_payload);
-                   setStep("generated");
-                   setIsGenerating(false);
-                   
-                    // Credit logging handled by dual response handler to avoid duplicates
-                } else {
+                  setHtmlContent(job.response_payload);
+                  setStep("generated");
+                  setIsGenerating(false);
+                  
+                   // Credit logging handled by dual response handler to avoid duplicates
+                  
+                  toast({
+                    title: "Report Generated",
+                    description: "Your report has been successfully generated."
+                  });
+               } else {
                  setHtmlContent(null);
                  setIsGenerating(false);
                  toast({
@@ -382,6 +393,11 @@ export default function Reports() {
           userQuery: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. Custom notes: ${reportConfig.customNotes}`,
           aiResponse: data
         });
+        
+        toast({
+          title: "Report Generated",
+          description: "Your report has been successfully generated."
+        });
       });
 
       // 2. Send POST request after subscription is active
@@ -438,6 +454,11 @@ export default function Reports() {
       }
 
       // Credit logging handled by dual response handler to avoid duplicates
+
+      toast({
+        title: "Report Generated",
+        description: "Your report has been successfully generated.",
+      });
     } catch (error) {
       console.error('Error generating report:', error);
       

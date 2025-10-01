@@ -176,6 +176,10 @@ export default function MacroAnalysis() {
     setJobStatus("done");
     console.log('🔄 [Loader] Stopping loader - Realtime response received');
     setIsGenerating(false);
+    toast({
+      title: "Analysis Completed",
+      description: "Your macro analysis is ready"
+    });
 
     // Log interaction to Supabase history
     await logInteraction({

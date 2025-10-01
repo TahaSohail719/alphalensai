@@ -419,11 +419,14 @@ export default function AISetup() {
                       aiResponse: normalized,
                       jobId: jobId
                     });
+                    
+                    toast({ title: "Trade Setup Generated", description: "AI trade setup generated successfully." });
                   } else {
                     setN8nResult(null);
                     setTradeSetup(null);
                     setError("No result available yet.");
                     globalLoading.failRequest(requestId, "No exploitable setups returned");
+                    toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
                   }
                   
                   setStep("generated");
