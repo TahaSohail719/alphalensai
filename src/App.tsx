@@ -7,7 +7,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { GlobalLoadingProvider } from "@/components/GlobalLoadingProvider";
 import { PersistentNotificationProvider } from "@/components/PersistentNotificationProvider";
-import { PersistentToast } from "@/components/PersistentToast";
 import { JobStatusCards } from "@/components/JobStatusCards";
 import AdminGuard from "./components/AdminGuard";
 import AuthGuard from "./components/AuthGuard";
@@ -45,7 +44,6 @@ const App = () => {
               <BrowserRouter>
                 <PersistentNotificationProvider>
                   <JobStatusCards />
-                  <PersistentToast />
                   <Toaster />
                   <Sonner />
                   <Routes>
