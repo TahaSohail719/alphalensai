@@ -327,13 +327,7 @@ export default function AISetup() {
     setIsGenerating(true);
     setError(null);
     setN8nResult(null);
-    console.log('🔄 [Loader] Starting AI trade setup generation');
-
-    // Create loading request
-    const requestId = await globalLoading.createRequest('ai_trade_setup', parameters.instrument, `Generate AI trade setup for ${parameters.instrument} with ${parameters.strategy} strategy`, parameters);
-
-    // Start processing immediately
-    const progressInterval = globalLoading.startProcessing(requestId);
+    console.log('🔄 Starting AI trade setup generation');
     
     let channel: any = null;
     
@@ -410,7 +404,6 @@ export default function AISetup() {
                   if (normalized && normalized.setups && normalized.setups.length > 0) {
                     setN8nResult(normalized);
                     setTradeSetup(null);
-                    globalLoading.completeRequest(requestId, normalized);
                     
                     // Log AI interaction and decrement credit
                     await logInteraction({
@@ -425,7 +418,6 @@ export default function AISetup() {
                     setN8nResult(null);
                     setTradeSetup(null);
                     setError("No result available yet.");
-                    globalLoading.failRequest(requestId, "No exploitable setups returned");
                     toast({ title: "No Setups Returned", description: "The response contains no setups.", variant: "destructive" });
                   }
                   
@@ -438,10 +430,8 @@ export default function AISetup() {
                 }
               } else if (job.status === 'error') {
                 console.log('❌ [Realtime] Job failed:', job.error_message);
-                console.log('🔄 [Loader] Stopping loader - Realtime error received');
                 setIsGenerating(false);
                 setError(job.error_message || 'Job failed');
-                globalLoading.failRequest(requestId, job.error_message || 'Job failed');
                 reject(new Error(job.error_message || 'Job failed'));
               }
             }
@@ -486,7 +476,6 @@ export default function AISetup() {
     } catch (error) {
       // This catch only handles unexpected errors (not HTTP timeouts)
       console.error('❌ [AISetup] Unexpected error:', error);
-      clearInterval(progressInterval);
       if (channel) {
         supabase.removeChannel(channel);
       }
