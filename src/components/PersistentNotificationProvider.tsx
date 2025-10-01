@@ -188,13 +188,21 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
     setActiveJobs(prev => prev.filter(job => job.id !== jobId));
   };
 
+  // Normalize feature type for consistent checking in destination pages
+  const normalizeFeatureType = (feature: string): string => {
+    // Convert "AI Trade Setup" -> "ai_trade_setup"
+    // Convert "Macro Commentary" -> "macro_commentary"
+    // Convert "Report" -> "report"
+    return feature.toLowerCase().replace(/\s+/g, '_');
+  };
+
   const navigateToResult = (job: CompletedJob) => {
     const route = mapFeatureToRoute(job.originatingFeature);
     
     // Store result data in sessionStorage for the target page to pick up
     sessionStorage.setItem('pendingResult', JSON.stringify({
       jobId: job.id,
-      type: job.type,
+      type: normalizeFeatureType(job.type), // Normalize the type
       instrument: job.instrument,
       resultData: job.resultData,
       timestamp: job.completedAt.toISOString()
