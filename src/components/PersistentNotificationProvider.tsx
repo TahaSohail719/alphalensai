@@ -108,14 +108,6 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
             originatingFeature: mapFeatureToOriginatingFeature(newJob.feature || '')
           };
 
-          // Add flash message for job start
-          addFlashMessage({
-            type: 'info',
-            title: 'Analysis Started',
-            description: `${activeJob.instrument} analysis has begun`,
-            duration: 3000
-          });
-
           setActiveJobs(prev => {
             // Avoid duplicates
             const exists = prev.some(job => job.id === activeJob.id);
