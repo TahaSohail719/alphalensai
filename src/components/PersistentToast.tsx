@@ -9,6 +9,8 @@ import { getFeatureDisplayName } from '@/lib/feature-mapper';
 export function PersistentToast() {
   const { activeJobs, completedJobs, markJobAsViewed, navigateToResult } = usePersistentNotifications();
   const isMobile = useIsMobile();
+  
+  // All hooks MUST be called before any conditional returns
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -17,8 +19,7 @@ export function PersistentToast() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const totalJobs = activeJobs.length + completedJobs.length;
-  if (totalJobs === 0) return null;
-
+  
   // Show the most recent job (prioritize completed over active)
   const isCompleted = completedJobs.length > 0;
   const mostRecentJob = isCompleted 
@@ -113,6 +114,9 @@ export function PersistentToast() {
       document.removeEventListener('touchend', handleEnd);
     };
   }, [isDragging, dragOffset]);
+
+  // Early return AFTER all hooks have been called
+  if (totalJobs === 0) return null;
 
   return (
     <Card 
