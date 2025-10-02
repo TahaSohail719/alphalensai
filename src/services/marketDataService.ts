@@ -20,7 +20,7 @@ export const INSTRUMENTS = {
     'NZD/USD', 'USD/CHF', 'EUR/GBP', 'EUR/JPY'
   ],
   crypto: ['BTC/USD', 'ETH/USD', 'BNB/USD', 'SOL/USD', 'XRP/USD'],
-  commodities: ['GOLD', 'SILVER', 'CRUDE_OIL', 'NATURAL_GAS']
+  commodities: ['XAU/USD', 'XAG/USD', 'WTI/USD', 'NG']
 };
 
 function cleanRateLimit() {
@@ -88,7 +88,8 @@ export async function getInstrumentPrice(symbol: string): Promise<number> {
 export function getInstrumentType(symbol: string): 'fx' | 'crypto' | 'commodity' {
   if (INSTRUMENTS.fx.includes(symbol)) return 'fx';
   if (INSTRUMENTS.crypto.includes(symbol)) return 'crypto';
-  return 'commodity';
+  if (INSTRUMENTS.commodities.includes(symbol)) return 'commodity';
+  return 'fx'; // default fallback
 }
 
 export function getAllInstruments(): string[] {
