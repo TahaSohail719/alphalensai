@@ -161,15 +161,7 @@ export function TradingViewWidget({
     try {
       await ensureTvJs();
       // Map timeframe to TradingView intervals
-      const interval = timeframe === '1m' ? '1' : 
-                      timeframe === '5m' ? '5' : 
-                      timeframe === '15m' ? '15' : 
-                      timeframe === '30m' ? '30' : 
-                      timeframe === '1h' ? '60' : 
-                      timeframe === '4h' ? '240' : 
-                      timeframe === 'D' ? 'D' : 
-                      timeframe === 'W' ? 'W' : 
-                      timeframe === 'M' ? 'M' : '60';
+      const interval = timeframe === '1m' ? '1' : timeframe === '5m' ? '5' : timeframe === '15m' ? '15' : timeframe === '30m' ? '30' : timeframe === '1h' ? '60' : timeframe === '4h' ? '240' : timeframe === 'D' ? 'D' : timeframe === 'W' ? 'W' : timeframe === 'M' ? 'M' : '60';
       // Initialize widget
       // @ts-ignore
       const widget = new window.TradingView.widget({
@@ -204,35 +196,25 @@ export function TradingViewWidget({
   // WebSocket for real-time Binance prices
   useEffect(() => {
     if (!onPriceUpdate) return;
-
     const symbol = currentSymbol;
     let ws: WebSocket | null = null;
     let isMounted = true;
     let messageReceived = false;
     let fallbackInterval: number | null = null;
     let fallbackTimer: number | null = null;
-
     const deriveStreamSymbol = (sym: string) => {
       const upper = sym.toUpperCase();
-      const cryptoBases = ['BTC','ETH','BNB','SOL','ADA','XRP','DOGE','TON','DOT','MATIC','LTC','LINK','AVAX','TRX','BCH'];
-      const base = cryptoBases.find((t) => upper.startsWith(t));
+      const cryptoBases = ['BTC', 'ETH', 'BNB', 'SOL', 'ADA', 'XRP', 'DOGE', 'TON', 'DOT', 'MATIC', 'LTC', 'LINK', 'AVAX', 'TRX', 'BCH'];
+      const base = cryptoBases.find(t => upper.startsWith(t));
       if (base) return `${base}USDT`;
       return upper; // likely unsupported on Binance; will trigger fallback
     };
-
     const startFallback = () => {
       if (!onPriceUpdate) return;
       if (fallbackInterval) return;
       console.log(`⚠️ No Binance data for ${symbol}. Starting simulated realtime fallback.`);
       // Choose a seed/base price similar to previous behavior
-      const basePrice = symbol === 'BTCUSD' ? 95247.50 :
-                        symbol === 'EURUSD' ? 1.0856 :
-                        symbol === 'GBPUSD' ? 1.2734 :
-                        symbol === 'XAUUSD' ? 2687.45 :
-                        symbol === 'USDJPY' ? 154.23 :
-                        symbol === 'ETHUSD' ? 3421.67 :
-                        symbol === 'XAGUSD' ? 31.45 :
-                        symbol === 'USOIL' ? 68.92 : 1.0000;
+      const basePrice = symbol === 'BTCUSD' ? 95247.50 : symbol === 'EURUSD' ? 1.0856 : symbol === 'GBPUSD' ? 1.2734 : symbol === 'XAUUSD' ? 2687.45 : symbol === 'USDJPY' ? 154.23 : symbol === 'ETHUSD' ? 3421.67 : symbol === 'XAGUSD' ? 31.45 : symbol === 'USOIL' ? 68.92 : 1.0000;
       const decimals = symbol.includes('JPY') ? 2 : 4;
       const tick = () => {
         const variation = (Math.random() - 0.5) * 0.004; // ±0.2%
@@ -242,18 +224,15 @@ export function TradingViewWidget({
       tick();
       fallbackInterval = window.setInterval(tick, 2000);
     };
-
     const connectWebSocket = () => {
       // Clean up previous connection
       if (ws) {
         ws.close();
       }
-
       const streamSymbol = deriveStreamSymbol(symbol);
       const url = `wss://stream.binance.com:9443/ws/${streamSymbol.toLowerCase()}@ticker`;
       console.log(`🔌 Connecting to Binance WS: ${url}`);
       ws = new WebSocket(url);
-      
       ws.onopen = () => {
         if (isMounted) {
           console.log(`✅ Connected to ${streamSymbol} price feed (source: Binance)`);
@@ -263,10 +242,8 @@ export function TradingViewWidget({
           }, 5000);
         }
       };
-
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         if (!isMounted) return;
-        
         try {
           const data = JSON.parse(event.data);
           // Verify the symbol matches current stream symbol
@@ -277,14 +254,13 @@ export function TradingViewWidget({
               fallbackInterval = null;
             }
             const price = parseFloat(data.c);
-            const decimals = streamSymbol.includes('JPY') ? 2 : (streamSymbol.startsWith('BTC') ? 2 : 4);
+            const decimals = streamSymbol.includes('JPY') ? 2 : streamSymbol.startsWith('BTC') ? 2 : 4;
             onPriceUpdate(price.toFixed(decimals));
           }
         } catch (error) {
           console.error('Error parsing Binance price data:', error);
         }
       };
-
       ws.onclose = () => {
         if (isMounted) {
           console.log(`🔌 Disconnected from ${streamSymbol} price feed`);
@@ -296,16 +272,13 @@ export function TradingViewWidget({
           }, 3000);
         }
       };
-
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         if (isMounted) {
           console.error('WebSocket error:', error);
         }
       };
     };
-
     connectWebSocket();
-
     return () => {
       isMounted = false;
       if (ws) {
@@ -322,12 +295,7 @@ export function TradingViewWidget({
     };
   }, [currentSymbol, onPriceUpdate]);
   return <Card className={`w-full ${className}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          Market Chart
-        </CardTitle>
-      </CardHeader>
+      
       <CardContent className="pb-0">
         {loading && <div className="flex items-center justify-center h-64 sm:h-80 lg:h-96">
             <Loader2 className="h-8 w-8 animate-spin" />
