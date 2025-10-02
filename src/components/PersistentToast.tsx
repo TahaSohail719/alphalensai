@@ -166,7 +166,7 @@ export function PersistentToast() {
           
           {/* Desktop hover preview */}
           {!isMobile && (
-            <div className="absolute left-full ml-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+            <div className="absolute right-full mr-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
               <Card className="w-60 shadow-elegant border-primary/20 bg-card/95 backdrop-blur-sm">
                 <div className="p-3">
                   <div className="flex items-start gap-2">
