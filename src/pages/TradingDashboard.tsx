@@ -292,7 +292,7 @@ export default function TradingDashboard() {
       </div>
 
       {/* Market Chart - Full Width Section - Outside constrained container */}
-      <section aria-label="Market chart" className="w-full -mx-4 sm:-mx-6 px-4 sm:px-6 my-6">
+      <section aria-label="Market chart" className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-0 my-6">
         <CandlestickChart 
           asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
           showHeader={true}
