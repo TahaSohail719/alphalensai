@@ -79,7 +79,42 @@ export default function PNLCalculator({
       pnl = positionSize * change;
     }
 
-    const margin = (positionSize * currentPrice) / leverage;
+    // Calculate margin correctly based on instrument type
+    let margin = 0;
+    if (isFX) {
+      // FX: 1 lot = 100,000 units of base currency
+      // Margin = (lot size * contract size) / leverage
+      margin = (positionSize * 100000) / leverage;
+    } else {
+      // Crypto/Commodities: margin based on notional value
+      margin = (positionSize * currentPrice) / leverage;
+    }
+
+    const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
+
+    return { pnl, pnlPercent };
+  };
+
+  const calculatePNLForProjection = (change: number, entryPrice: number): { pnl: number; pnlPercent: number } => {
+    let pnl = 0;
+
+    if (isFX) {
+      const isJPYPair = instrument.includes('JPY');
+      const pipSize = isJPYPair ? 0.01 : 0.0001;
+      const pipValue = (positionSize * 100000 * pipSize);
+      pnl = change * pipValue;
+    } else {
+      pnl = positionSize * change;
+    }
+
+    // Calculate margin using entry price
+    let margin = 0;
+    if (isFX) {
+      margin = (positionSize * 100000) / leverage;
+    } else {
+      margin = (positionSize * entryPrice) / leverage;
+    }
+
     const pnlPercent = margin > 0 ? (pnl / margin) * 100 : 0;
 
     return { pnl, pnlPercent };
@@ -97,7 +132,7 @@ export default function PNLCalculator({
       const slChange = isFX 
         ? (prefilledStopLoss - prefilledEntry) * (isJPYPair ? 100 : 10000) // pips (JPY vs others)
         : (prefilledStopLoss - prefilledEntry); // points
-      const slPNL = calculatePNL(slChange);
+      const slPNL = calculatePNLForProjection(slChange, prefilledEntry);
       results.push({ label: 'Stop Loss', level: prefilledStopLoss, ...slPNL });
     }
 
@@ -105,7 +140,7 @@ export default function PNLCalculator({
       const tpChange = isFX
         ? (target - prefilledEntry) * (isJPYPair ? 100 : 10000) // pips (JPY vs others)
         : (target - prefilledEntry); // points
-      const tpPNL = calculatePNL(tpChange);
+      const tpPNL = calculatePNLForProjection(tpChange, prefilledEntry);
       results.push({ label: `TP${idx + 1}`, level: target, ...tpPNL });
     });
 
@@ -209,7 +244,7 @@ export default function PNLCalculator({
 
         {/* Price Change Input */}
         <div className="space-y-2">
-          <Label>Price Change ({isFX ? 'pips' : '%'})</Label>
+          <Label>Price Change ({isFX ? 'pips' : 'points'})</Label>
           <Input
             type="number"
             value={priceChange}
