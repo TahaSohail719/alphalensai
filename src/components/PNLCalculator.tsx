@@ -145,23 +145,23 @@ export default function PNLCalculator({
   const { pnl, pnlPercent } = calculatePNL(priceChange);
 
   const calculateTPSL = () => {
-    if (!currentPrice) return [];
+    if (!currentPrice || !prefilledEntry) return [];
 
     const results = [];
     const isJPYPair = instrument.includes('JPY');
 
     if (prefilledStopLoss) {
       const slChange = isFX 
-        ? (prefilledStopLoss - currentPrice) * (isJPYPair ? 100 : 10000) // pips from current price
-        : (prefilledStopLoss - currentPrice); // points from current price
+        ? (prefilledStopLoss - prefilledEntry) * (isJPYPair ? 100 : 10000) // pips from entry price
+        : (prefilledStopLoss - prefilledEntry); // points from entry price
       const slPNL = calculatePNL(slChange);
       results.push({ label: 'Stop Loss', level: prefilledStopLoss, ...slPNL });
     }
 
     prefilledTargets.forEach((target, idx) => {
       const tpChange = isFX
-        ? (target - currentPrice) * (isJPYPair ? 100 : 10000) // pips from current price
-        : (target - currentPrice); // points from current price
+        ? (target - prefilledEntry) * (isJPYPair ? 100 : 10000) // pips from entry price
+        : (target - prefilledEntry); // points from entry price
       const tpPNL = calculatePNL(tpChange);
       results.push({ label: `TP${idx + 1}`, level: target, ...tpPNL });
     });
