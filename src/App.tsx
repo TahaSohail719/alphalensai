@@ -32,6 +32,7 @@ import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
 import Credits from "./pages/Credits";
+import PNLCalculatorPage from "./pages/PNLCalculatorPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ const App = () => {
                     <Route path="/features" element={<Features />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/pnl-calculator" element={<PNLCalculatorPage />} />
                     <Route path="/product" element={<ProductPresentation />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

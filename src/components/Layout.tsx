@@ -4,7 +4,7 @@ const {
   useEffect
 } = React;
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Menu, X, ChevronRight, ChevronDown, Activity, Zap, User, LogOut, Building2, Shield, FileText, History } from "lucide-react";
+import { TrendingUp, Menu, X, ChevronRight, ChevronDown, Activity, Zap, User, LogOut, Building2, Shield, FileText, History, Calculator } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { BubbleSystem } from "./BubbleSystem";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +82,15 @@ export default function Layout({
 
             {/* Desktop Navigation Items */}
             <div className="hidden lg:flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/pnl-calculator')}
+                className="h-8 px-3"
+              >
+                <Calculator className="h-4 w-4 mr-2" />
+                PNL Calculator
+              </Button>
             </div>
 
             {/* Mobile Navigation + Auth + Status */}
@@ -184,6 +193,13 @@ export default function Layout({
               }} className="justify-start text-sm">
                     <FileText className="h-4 w-4 mr-2" />
                     Contact
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => {
+                navigate('/pnl-calculator');
+                setIsMobileMenuOpen(false);
+              }} className="justify-start text-sm">
+                    <Calculator className="h-4 w-4 mr-2" />
+                    PNL Calculator
                   </Button>
                   
                   {/* App navigation items for authenticated users */}

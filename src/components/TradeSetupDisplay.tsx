@@ -1,7 +1,9 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Calculator, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import PNLCalculator from "@/components/PNLCalculator";
 
 interface TradeSetupDisplayProps {
   data: any;
@@ -300,6 +302,33 @@ export function TradeSetupDisplay({ data, originalQuery }: TradeSetupDisplayProp
           </CardContent>
         </Card>
       )}
+
+      {/* PNL Calculator Section */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Card className="cursor-pointer hover:bg-primary/5 transition-colors">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Calculator className="h-5 w-5 text-primary" />
+                  Risk Management Calculator
+                </CardTitle>
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </CardHeader>
+          </Card>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="mt-4">
+          <PNLCalculator
+            defaultInstrument={instrument}
+            prefilledEntry={finalEntry}
+            prefilledStopLoss={finalStopLoss}
+            prefilledTargets={finalTargets}
+            showInstrumentPicker={false}
+          />
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
