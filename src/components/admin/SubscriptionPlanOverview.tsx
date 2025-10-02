@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Users, TrendingUp } from "lucide-react";
+import { RefreshCw, Users, TrendingUp, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -11,8 +11,15 @@ interface PlanStats {
   percentage: number;
 }
 
+interface PlanPrice {
+  plan_type: string;
+  monthly_price_usd: number;
+}
+
 export function SubscriptionPlanOverview() {
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
+  const [planPrices, setPlanPrices] = useState<Record<string, number>>({});
+  const [estimatedRevenue, setEstimatedRevenue] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { isSuperUser, isAdmin } = useProfile();
 
@@ -76,6 +83,30 @@ export function SubscriptionPlanOverview() {
       stats.sort((a, b) => b.user_count - a.user_count);
       
       setPlanStats(stats);
+
+      // Fetch plan prices for revenue calculation (superuser only)
+      if (isSuperUser) {
+        const { data: pricesData, error: pricesError } = await supabase
+          .from('plan_parameters')
+          .select('plan_type, monthly_price_usd');
+
+        if (!pricesError && pricesData) {
+          const prices: Record<string, number> = {};
+          pricesData.forEach(plan => {
+            prices[plan.plan_type] = plan.monthly_price_usd || 0;
+          });
+          // Add broker_free fixed price
+          prices['broker_free'] = 3;
+          setPlanPrices(prices);
+
+          // Calculate estimated monthly revenue
+          const revenue = stats.reduce((total, stat) => {
+            const price = prices[stat.plan_type] || 0;
+            return total + (stat.user_count * price);
+          }, 0);
+          setEstimatedRevenue(revenue);
+        }
+      }
     } catch (error) {
       console.error('Error loading plan statistics:', error);
     } finally {
@@ -135,29 +166,48 @@ export function SubscriptionPlanOverview() {
             No subscription data available
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {planStats.map((plan) => (
-              <div 
-                key={plan.plan_type}
-                className="flex items-center justify-between p-4 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <div className="font-medium text-sm">
-                      {formatPlanName(plan.plan_type)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {plan.percentage.toFixed(1)}% of users
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {planStats.map((plan) => (
+                <div 
+                  key={plan.plan_type}
+                  className="flex items-center justify-between p-4 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium text-sm">
+                        {formatPlanName(plan.plan_type)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {plan.percentage.toFixed(1)}% of users
+                      </div>
                     </div>
                   </div>
+                  <Badge variant={getPlanColor(plan.plan_type) as any} className="font-semibold">
+                    {plan.user_count}
+                  </Badge>
                 </div>
-                <Badge variant={getPlanColor(plan.plan_type) as any} className="font-semibold">
-                  {plan.user_count}
-                </Badge>
+              ))}
+            </div>
+            
+            {isSuperUser && estimatedRevenue > 0 && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="font-semibold text-base">Estimated Monthly Revenue</div>
+                      <div className="text-xs text-muted-foreground">Based on current user distribution</div>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-primary">
+                    ${estimatedRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
