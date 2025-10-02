@@ -10,8 +10,17 @@ const priceCache = new Map<string, PriceCache>();
 const CACHE_TTL = 30000; // 30 seconds
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_MINUTE = 8;
+const TWELVE_API_KEY = 'e40fcead02054731aef55d2dfe01cf47';
 
 let requestTimestamps: number[] = [];
+
+// Map instruments to Twelve Data API symbols
+function mapToTwelveDataSymbol(original: string): string {
+  const overrides: Record<string, string> = {
+    'NG': 'NATGAS/USD',
+  };
+  return overrides[original] ?? original; // FX/crypto/other commodities keep their format
+}
 
 // Major instruments supported
 export const INSTRUMENTS = {
@@ -49,15 +58,13 @@ export async function getInstrumentPrice(symbol: string): Promise<number> {
     throw new Error('Rate limit exceeded. Please wait a moment.');
   }
 
-  try {
-    // Convert symbol format for API
-    const apiSymbol = symbol.replace('/', '');
-    
+  const apiSymbol = mapToTwelveDataSymbol(symbol);
+  
+  const doFetch = async (sym: string): Promise<number> => {
     recordRequest();
     
-    const response = await fetch(
-      `https://api.twelvedata.com/price?symbol=${apiSymbol}&apikey=e40fcead02054731aef55d2dfe01cf47`
-    );
+    const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(sym)}&apikey=${TWELVE_API_KEY}`;
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error('Failed to fetch price');
@@ -75,11 +82,28 @@ export async function getInstrumentPrice(symbol: string): Promise<number> {
       throw new Error('Invalid price data');
     }
 
+    return price;
+  };
+
+  try {
+    const price = await doFetch(apiSymbol);
+    
     // Cache the result
     priceCache.set(symbol, { price, timestamp: Date.now() });
     
     return price;
   } catch (error) {
+    // Fallback for NG: if NATGAS/USD fails, try 'NG'
+    if (symbol === 'NG' && apiSymbol !== 'NG') {
+      try {
+        const price = await doFetch('NG');
+        priceCache.set(symbol, { price, timestamp: Date.now() });
+        return price;
+      } catch (fallbackError) {
+        console.error('Error fetching NG with fallback:', fallbackError);
+        throw fallbackError;
+      }
+    }
     console.error('Error fetching instrument price:', error);
     throw error;
   }
