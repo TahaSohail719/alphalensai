@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Edit, Building2 } from "lucide-react";
 import { useBrokerActions } from "@/hooks/useBrokerActions";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,10 @@ export function BrokersManagement() {
     contact_email: '',
     logo_url: ''
   });
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number | 'all'>(10);
 
   const { fetchBrokers, createBroker, updateBroker, loading: actionLoading } = useBrokerActions();
   const { toast } = useToast();
@@ -115,6 +120,12 @@ export function BrokersManagement() {
       minute: '2-digit'
     });
   };
+
+  // Pagination logic
+  const totalPages = itemsPerPage === 'all' ? 1 : Math.ceil(brokers.length / itemsPerPage);
+  const paginatedBrokers = itemsPerPage === 'all' 
+    ? brokers 
+    : brokers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (loading) {
     return (
@@ -234,55 +245,118 @@ export function BrokersManagement() {
             <p className="text-muted-foreground">No brokers found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {brokers.map((broker) => (
-                  <TableRow key={broker.id}>
-                    <TableCell className="font-medium">{broker.name}</TableCell>
-                    <TableCell>
-                      {broker.code ? (
-                        <Badge variant="outline">{broker.code}</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={broker.status === 'active' ? 'default' : 'secondary'}>
-                        {broker.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {broker.contact_email || <span className="text-muted-foreground">-</span>}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(broker.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenDialog(broker)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <>
+            <ScrollArea className="h-[500px]">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedBrokers.map((broker) => (
+                      <TableRow key={broker.id}>
+                        <TableCell className="font-medium">{broker.name}</TableCell>
+                        <TableCell>
+                          {broker.code ? (
+                            <Badge variant="outline">{broker.code}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={broker.status === 'active' ? 'default' : 'secondary'}>
+                            {broker.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {broker.contact_email || <span className="text-muted-foreground">-</span>}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatDate(broker.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDialog(broker)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+            
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Items per page:</span>
+                <Select 
+                  value={itemsPerPage.toString()} 
+                  onValueChange={(value) => {
+                    setItemsPerPage(value === 'all' ? 'all' : parseInt(value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                    <SelectItem value="all">Show All</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {itemsPerPage === 'all' 
+                    ? `Showing all ${brokers.length} brokers`
+                    : `Showing ${((currentPage - 1) * itemsPerPage) + 1}-${Math.min(currentPage * itemsPerPage, brokers.length)} of ${brokers.length}`
+                  }
+                </span>
+              </div>
+
+              {itemsPerPage !== 'all' && totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

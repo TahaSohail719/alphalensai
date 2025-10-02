@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, 
   Shield, 
@@ -555,60 +556,62 @@ export default function Admin() {
                     Cost by User
                   </h3>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[600px]">
-                    <thead>
-                      <tr className="border-b bg-muted/30">
-                        <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">User</th>
-                        <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">AI Trade</th>
-                        <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Macro</th>
-                        <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Reports</th>
-                        <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Total Cost</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loadingCosts ? (
-                        <tr>
-                          <td colSpan={5} className="text-center p-6 sm:p-8">
-                            <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 animate-spin mx-auto mb-2" />
-                            <div className="text-xs sm:text-sm">Loading cost data...</div>
-                          </td>
+                <ScrollArea className="h-[500px]">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
+                      <thead>
+                        <tr className="border-b bg-muted/30">
+                          <th className="text-left p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">User</th>
+                          <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">AI Trade</th>
+                          <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Macro</th>
+                          <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Reports</th>
+                          <th className="text-right p-2 sm:p-3 font-medium text-xs sm:text-sm whitespace-nowrap">Total Cost</th>
                         </tr>
-                      ) : costStats.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="text-center p-6 sm:p-8 text-muted-foreground text-xs sm:text-sm">
-                            No cost data available
-                          </td>
-                        </tr>
-                      ) : (
-                        costStats
-                          .sort((a, b) => b.totalCost - a.totalCost)
-                          .map((userStat) => (
-                            <tr key={userStat.user_id} className="border-b hover:bg-muted/50">
-                              <td className="p-2 sm:p-3">
-                                <div className="font-medium text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none">{userStat.email}</div>
-                              </td>
-                              <td className="text-right p-2 sm:p-3">
-                                <div className="text-xs sm:text-sm">{userStat.aiTradeSetupCount}</div>
-                                <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.aiTradeSetupCount * 0.06).toFixed(2)}</div>
-                              </td>
-                              <td className="text-right p-2 sm:p-3">
-                                <div className="text-xs sm:text-sm">{userStat.macroCommentaryCount}</div>
-                                <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.macroCommentaryCount * 0.07).toFixed(2)}</div>
-                              </td>
-                              <td className="text-right p-2 sm:p-3">
-                                <div className="text-xs sm:text-sm">{userStat.reportCount}</div>
-                                <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.reportCount * 0.14).toFixed(2)}</div>
-                              </td>
-                              <td className="text-right p-2 sm:p-3">
-                                <div className="font-semibold text-xs sm:text-sm">${userStat.totalCost.toFixed(2)}</div>
-                              </td>
-                            </tr>
-                          ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {loadingCosts ? (
+                          <tr>
+                            <td colSpan={5} className="text-center p-6 sm:p-8">
+                              <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 animate-spin mx-auto mb-2" />
+                              <div className="text-xs sm:text-sm">Loading cost data...</div>
+                            </td>
+                          </tr>
+                        ) : costStats.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="text-center p-6 sm:p-8 text-muted-foreground text-xs sm:text-sm">
+                              No cost data available
+                            </td>
+                          </tr>
+                        ) : (
+                          costStats
+                            .sort((a, b) => b.totalCost - a.totalCost)
+                            .map((userStat) => (
+                              <tr key={userStat.user_id} className="border-b hover:bg-muted/50">
+                                <td className="p-2 sm:p-3">
+                                  <div className="font-medium text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none">{userStat.email}</div>
+                                </td>
+                                <td className="text-right p-2 sm:p-3">
+                                  <div className="text-xs sm:text-sm">{userStat.aiTradeSetupCount}</div>
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.aiTradeSetupCount * 0.06).toFixed(2)}</div>
+                                </td>
+                                <td className="text-right p-2 sm:p-3">
+                                  <div className="text-xs sm:text-sm">{userStat.macroCommentaryCount}</div>
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.macroCommentaryCount * 0.07).toFixed(2)}</div>
+                                </td>
+                                <td className="text-right p-2 sm:p-3">
+                                  <div className="text-xs sm:text-sm">{userStat.reportCount}</div>
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground">${(userStat.reportCount * 0.14).toFixed(2)}</div>
+                                </td>
+                                <td className="text-right p-2 sm:p-3">
+                                  <div className="font-semibold text-xs sm:text-sm">${userStat.totalCost.toFixed(2)}</div>
+                                </td>
+                              </tr>
+                            ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </ScrollArea>
               </div>
             </CardContent>
           </Card>

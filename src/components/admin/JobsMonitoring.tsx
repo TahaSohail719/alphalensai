@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Activity,
   Users, 
@@ -77,6 +78,12 @@ export function JobsMonitoring() {
   const [featureFilter, setFeatureFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pagination
+  const [userStatsPage, setUserStatsPage] = useState(1);
+  const [userStatsPerPage, setUserStatsPerPage] = useState<number | 'all'>(10);
+  const [jobsPage, setJobsPage] = useState(1);
+  const [jobsPerPage, setJobsPerPage] = useState<number | 'all'>(10);
 
   // Feature mapping for harmonized labels
   const mapFeatureToLabel = (feature: string): string => {
@@ -337,6 +344,17 @@ export function JobsMonitoring() {
     (job.feature || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalUserStatsPages = userStatsPerPage === 'all' ? 1 : Math.ceil(userStats.length / userStatsPerPage);
+  const paginatedUserStats = userStatsPerPage === 'all' 
+    ? userStats 
+    : userStats.slice((userStatsPage - 1) * userStatsPerPage, userStatsPage * userStatsPerPage);
+
+  const totalJobsPages = jobsPerPage === 'all' ? 1 : Math.ceil(filteredJobs.length / jobsPerPage);
+  const paginatedJobs = jobsPerPage === 'all' 
+    ? filteredJobs 
+    : filteredJobs.slice((jobsPage - 1) * jobsPerPage, jobsPage * jobsPerPage);
+
   useEffect(() => {
     loadData();
   }, [dateFilter, featureFilter, userFilter]);
@@ -480,32 +498,93 @@ export function JobsMonitoring() {
               <CardDescription>Usage breakdown by user</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Last Request</TableHead>
-                    <TableHead>Avg Duration</TableHead>
-                    <TableHead>AI Trade</TableHead>
-                    <TableHead>Report</TableHead>
-                    <TableHead>Macro</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {userStats.map((user) => (
-                    <TableRow key={user.userId}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{user.totalJobs}</TableCell>
-                      <TableCell>{formatDate(user.lastRequest)}</TableCell>
-                      <TableCell>{formatDuration(user.avgDuration)}</TableCell>
-                      <TableCell>{user.aiTradeCount}</TableCell>
-                      <TableCell>{user.reportCount}</TableCell>
-                      <TableCell>{user.macroCount}</TableCell>
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Last Request</TableHead>
+                      <TableHead>Avg Duration</TableHead>
+                      <TableHead>AI Trade</TableHead>
+                      <TableHead>Report</TableHead>
+                      <TableHead>Macro</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedUserStats.map((user) => (
+                      <TableRow key={user.userId}>
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>{user.totalJobs}</TableCell>
+                        <TableCell>{formatDate(user.lastRequest)}</TableCell>
+                        <TableCell>{formatDuration(user.avgDuration)}</TableCell>
+                        <TableCell>{user.aiTradeCount}</TableCell>
+                        <TableCell>{user.reportCount}</TableCell>
+                        <TableCell>{user.macroCount}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+              
+              {/* Pagination */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Items per page:</span>
+                  <Select 
+                    value={userStatsPerPage.toString()} 
+                    onValueChange={(value) => {
+                      setUserStatsPerPage(value === 'all' ? 'all' : parseInt(value));
+                      setUserStatsPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="all">Show All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {userStatsPerPage === 'all' 
+                      ? `Showing all ${userStats.length} users`
+                      : `Showing ${((userStatsPage - 1) * userStatsPerPage) + 1}-${Math.min(userStatsPage * userStatsPerPage, userStats.length)} of ${userStats.length}`
+                    }
+                  </span>
+                </div>
+
+                {userStatsPerPage !== 'all' && totalUserStatsPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserStatsPage(prev => Math.max(1, prev - 1))}
+                      disabled={userStatsPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm">
+                      Page {userStatsPage} of {totalUserStatsPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserStatsPage(prev => Math.min(totalUserStatsPages, prev + 1))}
+                      disabled={userStatsPage === totalUserStatsPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -528,69 +607,130 @@ export function JobsMonitoring() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Feature</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Prompt Summary</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Result</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredJobs.map((job) => (
-                    <TableRow key={job.id}>
-                      <TableCell>{formatDate(job.created_at)}</TableCell>
-                      <TableCell className="font-medium">{job.email}</TableCell>
-                      <TableCell>
-                        <Badge className={cn("text-white", getFeatureBadgeColor(job.feature))}>
-                          {mapFeatureToLabel(job.feature)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatDuration(job.duration)}</TableCell>
-                      <TableCell className="max-w-xs truncate">{job.promptSummary}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(job.status)}>
-                          {job.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Job Details - {job.id}</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div>
-                                <h4 className="font-medium mb-2">Request Payload:</h4>
-                                <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-                                  {JSON.stringify(job.request_payload, null, 2)}
-                                </pre>
-                              </div>
-                              {job.response_payload && (
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Feature</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Prompt Summary</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Result</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedJobs.map((job) => (
+                      <TableRow key={job.id}>
+                        <TableCell>{formatDate(job.created_at)}</TableCell>
+                        <TableCell className="font-medium">{job.email}</TableCell>
+                        <TableCell>
+                          <Badge className={cn("text-white", getFeatureBadgeColor(job.feature))}>
+                            {mapFeatureToLabel(job.feature)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDuration(job.duration)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{job.promptSummary}</TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(job.status)}>
+                            {job.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Job Details - {job.id}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
                                 <div>
-                                  <h4 className="font-medium mb-2">Response Payload:</h4>
+                                  <h4 className="font-medium mb-2">Request Payload:</h4>
                                   <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-                                    {JSON.stringify(job.response_payload, null, 2)}
+                                    {JSON.stringify(job.request_payload, null, 2)}
                                   </pre>
                                 </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                                {job.response_payload && (
+                                  <div>
+                                    <h4 className="font-medium mb-2">Response Payload:</h4>
+                                    <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
+                                      {JSON.stringify(job.response_payload, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+              
+              {/* Pagination */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Items per page:</span>
+                  <Select 
+                    value={jobsPerPage.toString()} 
+                    onValueChange={(value) => {
+                      setJobsPerPage(value === 'all' ? 'all' : parseInt(value));
+                      setJobsPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="all">Show All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {jobsPerPage === 'all' 
+                      ? `Showing all ${filteredJobs.length} jobs`
+                      : `Showing ${((jobsPage - 1) * jobsPerPage) + 1}-${Math.min(jobsPage * jobsPerPage, filteredJobs.length)} of ${filteredJobs.length}`
+                    }
+                  </span>
+                </div>
+
+                {jobsPerPage !== 'all' && totalJobsPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setJobsPage(prev => Math.max(1, prev - 1))}
+                      disabled={jobsPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm">
+                      Page {jobsPage} of {totalJobsPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setJobsPage(prev => Math.min(totalJobsPages, prev + 1))}
+                      disabled={jobsPage === totalJobsPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
