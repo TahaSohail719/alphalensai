@@ -13,9 +13,9 @@ export default function PNLCalculatorPage() {
       <div className="flex h-full relative">
         {/* Main Content */}
         <div className={cn('flex-1 transition-all duration-300', isCoPilotExpanded ? 'md:mr-[33.333%]' : 'mr-0')}>
-          <div className="container-wrapper space-y-6">
+          <div className="container-wrapper space-y-6 flex flex-col items-center justify-center min-h-screen py-8">
             {/* Page Header */}
-            <header className="space-y-2">
+            <header className="space-y-2 w-full max-w-4xl">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Calculator className="h-6 w-6 text-primary" />
@@ -30,15 +30,15 @@ export default function PNLCalculatorPage() {
             </header>
 
             {/* Tabs: Calculator vs Portfolio Analysis */}
-            <Tabs defaultValue="calculator" className="space-y-6">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
+            <Tabs defaultValue="calculator" className="space-y-6 w-full max-w-4xl">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
                 <TabsTrigger value="calculator">PNL Calculator</TabsTrigger>
                 <TabsTrigger value="portfolio">Portfolio Analysis</TabsTrigger>
               </TabsList>
 
               <TabsContent value="calculator" className="space-y-6">
                 {/* Calculator Component */}
-                <div className="max-w-2xl">
+                <div className="w-full max-w-2xl mx-auto">
                   <PNLCalculator defaultInstrument="EUR/USD" showInstrumentPicker={true} />
                 </div>
 
