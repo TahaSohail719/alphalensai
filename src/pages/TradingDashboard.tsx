@@ -291,10 +291,11 @@ export default function TradingDashboard() {
         />
 
         {/* Market Chart */}
-        <section aria-label="Market chart">
+        <section aria-label="Market chart" className="w-full">
           <CandlestickChart 
             asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
             showHeader={true}
+            height={500}
             tradeLevels={activeTradeLevels}
             onLevelUpdate={(type, value) => {
               if (activeTradeLevels) {

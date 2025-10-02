@@ -136,7 +136,7 @@ export function CandlestickChart({
   const handleTimeframeChange = (newTimeframe: string) => {
     setTimeframe(newTimeframe);
   };
-  return <Card className="gradient-card border-border-light shadow-medium">
+  return <Card className="w-full gradient-card border-border-light shadow-medium">
       {showHeader && <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-3">
