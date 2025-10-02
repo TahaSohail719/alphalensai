@@ -164,7 +164,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">Office</h3>
-                      <p className="text-muted-foreground">Remote-first company</p>
+                      <p className="text-muted-foreground">86, 90 Paul St, London EC2A 4NE, United Kingdom</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         Global team serving worldwide
                       </p>
