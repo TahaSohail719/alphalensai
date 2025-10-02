@@ -148,7 +148,7 @@ export default function Homepage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens.ai. All rights reserved.</p>
+            <p>© 2025 alphaLens AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
