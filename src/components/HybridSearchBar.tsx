@@ -314,7 +314,7 @@ export function HybridSearchBar({
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search instruments, ask AI, or search financial assets..."
+            placeholder="Search instruments or financial assets..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
