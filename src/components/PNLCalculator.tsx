@@ -86,27 +86,28 @@ export default function PNLCalculator({
   const calculatePNL = (change: number): { pnl: number; pnlPercent: number } => {
     if (!currentPrice) return { pnl: 0, pnlPercent: 0 };
 
+    // ===== ABSOLUTE PNL (dépend de positionSize) =====
     let pnl = 0;
 
     if (isFX) {
-      // FX: calculate in pips
-      // JPY pairs: 1 pip = 0.01, others: 1 pip = 0.0001
+      // FX: PNL en pips
       const isJPYPair = instrument.includes('JPY');
       const pipSize = isJPYPair ? 0.01 : 0.0001;
+      // PNL = variation (pips) × valeur d'un pip × positionSize
       const pipValueUSD = (positionSize * 100000 * pipSize) * quoteToUSD;
       pnl = change * pipValueUSD;
     } else {
-      // Crypto/Commodities: use points (1 point = 1 USD)
+      // Crypto/Commodities: PNL = positionSize × variation (points)
       pnl = positionSize * change;
     }
 
-    // Calculate margin correctly based on instrument type
+    // ===== PNL% (dépend de leverage via margin) =====
     let margin = 0;
     if (isFX) {
-      // Notional in USD = contract size * current price (in quote) * quote->USD conversion
+      // Marge FX = (positionSize × contract size × prix × conversion) / leverage
       margin = (positionSize * 100000 * currentPrice * quoteToUSD) / leverage;
     } else {
-      // Crypto/Commodities: margin based on notional value
+      // Marge Crypto/Commodities = (positionSize × prix) / leverage
       margin = (positionSize * currentPrice) / leverage;
     }
 
