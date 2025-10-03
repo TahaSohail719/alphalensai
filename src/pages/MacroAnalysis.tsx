@@ -348,6 +348,38 @@ export default function MacroAnalysis() {
     display: "Solana",
     market: "CRYPTO",
     tradingViewSymbol: "SOLUSD"
+  },
+  // Commodities
+  {
+    symbol: "GOLD",
+    display: "Gold",
+    market: "COMMODITY",
+    tradingViewSymbol: "XAUUSD"
+  }, {
+    symbol: "SILVER",
+    display: "Silver",
+    market: "COMMODITY",
+    tradingViewSymbol: "XAGUSD"
+  }, {
+    symbol: "CRUDE",
+    display: "Crude Oil",
+    market: "COMMODITY",
+    tradingViewSymbol: "USOIL"
+  }, {
+    symbol: "NATGAS",
+    display: "Natural Gas",
+    market: "COMMODITY",
+    tradingViewSymbol: "NATURALGAS"
+  }, {
+    symbol: "COPPER",
+    display: "Copper",
+    market: "COMMODITY",
+    tradingViewSymbol: "COPPER"
+  }, {
+    symbol: "PLATINUM",
+    display: "Platinum",
+    market: "COMMODITY",
+    tradingViewSymbol: "XPTUSD"
   }, {
     symbol: "DOT-USD",
     display: "Polkadot",
@@ -1028,13 +1060,17 @@ export default function MacroAnalysis() {
                   <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="max-h-60 bg-card z-50">
                     <div className="p-2 font-semibold text-xs text-muted-foreground border-b">FX PAIRS</div>
                     {assets.filter(a => a.market === "FX").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
                         {asset.display}
                       </SelectItem>)}
                     <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">CRYPTO</div>
                     {assets.filter(a => a.market === "CRYPTO").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
+                        {asset.display}
+                      </SelectItem>)}
+                    <div className="p-2 font-semibold text-xs text-muted-foreground border-b border-t">COMMODITIES</div>
+                    {assets.filter(a => a.market === "COMMODITY").map(asset => <SelectItem key={asset.symbol} value={asset.symbol}>
                         {asset.display}
                       </SelectItem>)}
                   </SelectContent>
