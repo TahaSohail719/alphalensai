@@ -116,7 +116,15 @@ serve(async (req) => {
     const subscription = subscriptions.data[0];
     const priceId = subscription.items.data[0]?.price?.id;
     const planType = PRICE_TO_PLAN[priceId as keyof typeof PRICE_TO_PLAN] || 'unknown';
-    const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    
+    let subscriptionEnd: string | null = null;
+    if (subscription.current_period_end) {
+      try {
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      } catch (err) {
+        logStep("Error parsing subscription end date", { error: err instanceof Error ? err.message : String(err) });
+      }
+    }
 
     logStep("Active subscription found", { 
       subscriptionId: subscription.id,
