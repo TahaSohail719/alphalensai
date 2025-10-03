@@ -84,6 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear stay logged in preference
     localStorage.removeItem('alphalens_stay_logged_in');
     
+    // Mark session as voluntary logout to prevent error toast
+    localStorage.setItem('alphalens_voluntary_logout', 'true');
+    
     // Clean up current session in database before signing out
     if (user) {
       const sessionId = getSessionId(user.id);
@@ -101,6 +104,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    
+    // Clear voluntary logout flag after signout
+    setTimeout(() => {
+      localStorage.removeItem('alphalens_voluntary_logout');
+    }, 1000);
   };
 
   const value = {

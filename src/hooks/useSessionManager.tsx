@@ -157,11 +157,14 @@ export function useSessionManager() {
 
               if (data.is_active === false) {
                 console.log('🚫 [SessionManager] Session deactivated, signing out');
-                toast({
-                  title: "Session Expired",
-                  description: "Your account has been signed in from another device.",
-                  variant: "destructive",
-                });
+                const isVoluntaryLogout = localStorage.getItem('alphalens_voluntary_logout') === 'true';
+                if (!isVoluntaryLogout) {
+                  toast({
+                    title: "Session Expired",
+                    description: "Your account has been signed in from another device.",
+                    variant: "destructive",
+                  });
+                }
                 await signOut();
               } else {
                 console.log('✅ [SessionManager] Session is valid');
@@ -211,11 +214,14 @@ export function useSessionManager() {
               !updatedSession.is_active && 
               updatedSession.session_id === currentSessionRef.current
             ) {
-              toast({
-                title: "Session Expired",
-                description: "Your account has been signed in from another device.",
-                variant: "destructive",
-              });
+              const isVoluntaryLogout = localStorage.getItem('alphalens_voluntary_logout') === 'true';
+              if (!isVoluntaryLogout) {
+                toast({
+                  title: "Session Expired",
+                  description: "Your account has been signed in from another device.",
+                  variant: "destructive",
+                });
+              }
               signOut();
             }
           }
