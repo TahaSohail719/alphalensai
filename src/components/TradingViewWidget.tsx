@@ -176,7 +176,7 @@ export function TradingViewWidget({
         hide_top_toolbar: false,
         allow_symbol_change: false,
         withdateranges: true,
-        studies: ['RSI@tv-basicstudies', 'ATR@tv-basicstudies', 'ADX@tv-basicstudies'],
+        studies: ['RSI@tv-basicstudies', 'ADX@tv-basicstudies'],
         container_id: CONTAINER_ID,
         onChartReady: () => {
           console.log('TradingView chart ready');
