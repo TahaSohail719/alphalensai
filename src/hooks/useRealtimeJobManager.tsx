@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCreditManager, CreditType } from "@/hooks/useCreditManager";
 import { subscribeToPostgresChanges, initializeRealtimeAuthManager, unsubscribeChannel } from "@/utils/supabaseRealtimeManager";
 
 const { useState, useCallback, useEffect } = React;
@@ -48,10 +49,20 @@ const mapTypeToFeature = (type: string): string => {
   }
 };
 
+// Map feature to credit type
+const getCreditTypeForFeature = (feature?: string): CreditType => {
+  const f = (feature || '').toLowerCase();
+  if (f.includes('trade') || f.includes('ai_trade_setup')) return 'ideas';
+  if (f.includes('macro') || f.includes('commentary')) return 'queries';
+  if (f.includes('report')) return 'reports';
+  return 'queries'; // fallback
+};
+
 export function useRealtimeJobManager() {
   const [activeJobs, setActiveJobs] = useState<ActiveJob[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkCredits, decrementCredit } = useCreditManager();
 
   // Initialize realtime auth manager once
   useEffect(() => {
@@ -194,6 +205,34 @@ export function useRealtimeJobManager() {
 
     // Map type to feature if not explicitly provided
     const jobFeature = feature || mapTypeToFeature(type);
+    
+    // Debit credits BEFORE creating the job
+    const creditType = getCreditTypeForFeature(jobFeature);
+    
+    console.log('💳 [RealtimeJobManager] Checking credits:', { feature: jobFeature, creditType });
+    
+    if (!checkCredits(creditType)) {
+      toast({
+        title: "No credits remaining",
+        description: "Please upgrade your plan to continue using this feature.",
+        variant: "destructive",
+        duration: 5000
+      });
+      throw new Error('Insufficient credits');
+    }
+    
+    const debited = await decrementCredit(creditType);
+    if (!debited) {
+      toast({
+        title: "Credit error",
+        description: "Unable to process credit. Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
+      throw new Error('Unable to process credits');
+    }
+    
+    console.log('✅ [RealtimeJobManager] Credit debited:', { creditType, jobId });
 
     // Create job in database with feature field
     const { error } = await supabase
@@ -223,7 +262,7 @@ export function useRealtimeJobManager() {
     setActiveJobs(prev => [...prev, newJob]);
 
     return jobId;
-  }, [user?.id]);
+  }, [user?.id, checkCredits, decrementCredit, toast]);
 
   const removeJob = useCallback((jobId: string) => {
     setActiveJobs(prev => prev.filter(job => job.id !== jobId));
