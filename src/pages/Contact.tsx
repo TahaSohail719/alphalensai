@@ -34,22 +34,17 @@ export default function Contact() {
     }
     setLoading(true);
     try {
-      const response = await fetch(
-        `https://jqrlegdulnnrpiixiecf.supabase.co/functions/v1/send-contact-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcmxlZ2R1bG5ucnBpaXhpZWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDYzNDgsImV4cCI6MjA2OTk4MjM0OH0.on2S0WpM45atAYvLU8laAZJ-abS4RcMmfiqW7mLtT_4'}`
-          },
-          body: JSON.stringify(formData)
-        }
-      );
-
+      const response = await fetch(`https://jqrlegdulnnrpiixiecf.supabase.co/functions/v1/send-contact-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcmxlZ2R1bG5ucnBpaXhpZWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDYzNDgsImV4cCI6MjA2OTk4MjM0OH0.on2S0WpM45atAYvLU8laAZJ-abS4RcMmfiqW7mLtT_4'}`
+        },
+        body: JSON.stringify(formData)
+      });
       if (!response.ok) {
         throw new Error('Failed to send email');
       }
-
       toast.success("Message sent successfully! We'll get back to you soon.");
 
       // Reset form
@@ -237,7 +232,7 @@ export default function Contact() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><button onClick={() => navigate("/features")} className="hover:text-foreground transition-colors">Features</button></li>
                 <li><button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">Pricing</button></li>
-                <li><button onClick={() => navigate("/api")} className="hover:text-foreground transition-colors">API</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">API</button></li>
               </ul>
             </div>
             <div>
@@ -245,20 +240,20 @@ export default function Contact() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><button onClick={() => navigate("/about")} className="hover:text-foreground transition-colors">About</button></li>
                 <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Contact</button></li>
-                <li><button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">Privacy</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Privacy</button></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Support</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/documentation")} className="hover:text-foreground transition-colors">Documentation</button></li>
-                <li><button onClick={() => navigate("/help-center")} className="hover:text-foreground transition-colors">Help Center</button></li>
-                <li><button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors">Terms of Service</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Documentation</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Help Center</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Terms of Service</button></li>
               </ul>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens.ai. All rights reserved.</p>
+            <p>© 2025 alphaLens AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
