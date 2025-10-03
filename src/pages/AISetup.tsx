@@ -795,7 +795,7 @@ export default function AISetup() {
                           {s.horizon ? <Badge variant="secondary">{s.horizon}</Badge> : null}
                           {s.timeframe ? <Badge variant="secondary">{s.timeframe}</Badge> : null}
                           {s.strategy ? <Badge variant="secondary">{s.strategy}</Badge> : null}
-                          {s.direction ? <Badge variant="secondary" className={s.direction.toLowerCase() === 'buy' ? 'text-green-700' : 'text-red-700'}>
+                          {s.direction ? <Badge variant="secondary" className={s.direction.toLowerCase() === 'long' ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'}>
                             {s.direction.toUpperCase()}
                           </Badge> : null}
                           {s.strategyMeta?.confidence != null ? <Badge variant="outline" className="ml-auto">Confidence: {pct(s.strategyMeta.confidence)}</Badge> : null}
