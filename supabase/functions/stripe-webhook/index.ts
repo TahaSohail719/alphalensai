@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getStripeConfig } from "../_shared/stripe-config.ts";
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -15,15 +16,15 @@ serve(async (req) => {
   try {
     logStep("Webhook received");
 
-    // Initialize Stripe
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    // Get Stripe configuration based on environment
+    const config = getStripeConfig();
+    logStep("Stripe config loaded", { mode: config.mode });
     
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    
-    const stripe = new Stripe(stripeKey, { 
+    const stripe = new Stripe(config.secretKey, { 
       apiVersion: "2025-08-27.basil",
     });
+    
+    const webhookSecret = config.webhookSecret;
 
     // Create Supabase client with service role
     const supabase = createClient(

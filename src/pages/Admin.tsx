@@ -19,7 +19,8 @@ import {
   Euro,
   Calculator,
   BarChart3,
-  Building2
+  Building2,
+  CreditCard
 } from "lucide-react";
 import { useAdminActions } from "@/hooks/useAdminActions";
 import { useProfile } from "@/hooks/useProfile";
@@ -74,6 +75,7 @@ export default function Admin() {
   const [costTablePage, setCostTablePage] = useState(1);
   const [costTableItemsPerPage] = useState(5);
   const [userBroker, setUserBroker] = useState<any>(null);
+  const [stripeMode, setStripeMode] = useState<'test' | 'live'>('test');
   const { profile, isSuperUser, isAdmin } = useProfile();
   const { 
     fetchUsers, 
@@ -83,6 +85,19 @@ export default function Admin() {
     createUser, 
     loading: actionLoading 
   } = useAdminActions();
+
+  const loadStripeMode = async () => {
+    if (isSuperUser) {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-stripe-mode');
+        if (!error && data?.mode) {
+          setStripeMode(data.mode);
+        }
+      } catch (err) {
+        console.error('Failed to fetch Stripe mode:', err);
+      }
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -275,6 +290,7 @@ export default function Admin() {
     loadUserBroker();
     if (isSuperUser) {
       loadCostStats();
+      loadStripeMode();
     }
   }, [isSuperUser, selectedPeriod, profile]);
 
@@ -394,6 +410,44 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Stripe Environment Status (Super Users Only) */}
+        {isSuperUser && (
+          <Card className="rounded-2xl shadow-sm border bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Stripe Environment
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Current payment processing mode
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="flex items-center gap-3">
+                <Badge 
+                  variant={stripeMode === 'live' ? 'default' : 'secondary'}
+                  className="text-sm px-3 py-1"
+                >
+                  {stripeMode === 'live' ? '🟢 LIVE MODE' : '🔵 TEST MODE'}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {stripeMode === 'live' 
+                    ? 'Production payments are active - Real money processing' 
+                    : 'Using test data and keys - No real money'}
+                </span>
+              </div>
+              {stripeMode === 'live' && (
+                <div className="mt-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                  <p className="text-xs text-warning-foreground flex items-center gap-2">
+                    <Activity className="h-3 w-3" />
+                    All payments are being processed in production mode
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Role Distribution */}
         <Card className="rounded-2xl shadow-sm border">

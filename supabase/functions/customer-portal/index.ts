@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getStripeConfig } from "../_shared/stripe-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,14 +21,13 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // Initialize Stripe
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    // Get Stripe configuration based on environment
+    const config = getStripeConfig();
+    logStep("Stripe config loaded", { mode: config.mode });
     
-    const stripe = new Stripe(stripeKey, { 
+    const stripe = new Stripe(config.secretKey, { 
       apiVersion: "2025-08-27.basil",
     });
-    logStep("Stripe initialized");
 
     // Create Supabase client
     const supabaseClient = createClient(

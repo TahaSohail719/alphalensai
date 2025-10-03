@@ -1,0 +1,31 @@
+export interface StripeConfig {
+  secretKey: string;
+  webhookSecret: string | null;
+  mode: 'test' | 'live';
+}
+
+/**
+ * Get Stripe configuration based on STRIPE_MODE environment variable
+ * @returns StripeConfig object with secretKey, webhookSecret, and mode
+ * @throws Error if the required secret key is not set
+ */
+export function getStripeConfig(): StripeConfig {
+  const mode = (Deno.env.get("STRIPE_MODE") || "test") as 'test' | 'live';
+  
+  let secretKey: string;
+  let webhookSecret: string | null;
+  
+  if (mode === "live") {
+    secretKey = Deno.env.get("STRIPE_SECRET_KEY_LIVE") || "";
+    webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET_LIVE") || null;
+  } else {
+    secretKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
+    webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || null;
+  }
+  
+  if (!secretKey) {
+    throw new Error(`STRIPE_SECRET_KEY${mode === 'live' ? '_LIVE' : ''} is not set`);
+  }
+  
+  return { secretKey, webhookSecret, mode };
+}
