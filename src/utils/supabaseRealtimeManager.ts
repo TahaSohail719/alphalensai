@@ -128,14 +128,20 @@ export function initializeRealtimeAuthManager(): void {
   supabase.auth.onAuthStateChange(async (event, session) => {
     console.log(`🔄 [RealtimeManager] Auth state changed:`, { event, hasSession: !!session });
     
-    if (session?.access_token) {
-      await refreshRealtimeAuth(session.access_token);
-    } else if (event === 'SIGNED_OUT') {
+    // Only handle actual sign out, not token refresh events
+    if (event === 'SIGNED_OUT') {
       // Clean up all channels on sign out
       console.log(`🔄 [RealtimeManager] Cleaning up channels on sign out`);
       for (const [channelName] of activeChannels) {
         unsubscribeChannel(channelName);
       }
+    } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
+      // Silent token refresh - update auth without disrupting channels
+      console.log(`🔄 [RealtimeManager] Token refreshed, updating realtime auth silently`);
+      supabase.realtime.setAuth(session.access_token);
+    } else if (session?.access_token && activeChannels.size > 0) {
+      // Initial sign-in or session recovery with active channels
+      await refreshRealtimeAuth(session.access_token);
     }
   });
   

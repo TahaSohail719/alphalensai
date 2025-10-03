@@ -81,7 +81,10 @@ export function useSessionManager() {
                 last_seen: updatePayload.last_seen,
               });
             if (insertError) {
-              console.error('Session insert error:', insertError);
+              // Ignore RLS violations during token refresh - session will be recreated on next cycle
+              if (insertError.code !== 'PGRST301' && insertError.code !== '42501') {
+                console.error('Session insert error:', insertError);
+              }
             }
           }
 
@@ -116,17 +119,24 @@ export function useSessionManager() {
                   .select('user_id');
 
                 if (!updatedRows || updatedRows.length === 0) {
-                  const { error: insertError } = await supabase
-                    .from('user_sessions')
-                    .insert({
-                      user_id: user.id,
-                      session_id: sessionId,
-                      device_info: updatePayload.device_info,
-                      is_active: true,
-                      last_seen: updatePayload.last_seen,
-                    });
-                  if (insertError) {
-                    console.error('Session re-create error:', insertError);
+                  // Only recreate if user is still authenticated
+                  const { data: { session: currentSession } } = await supabase.auth.getSession();
+                  if (currentSession) {
+                    const { error: insertError } = await supabase
+                      .from('user_sessions')
+                      .insert({
+                        user_id: user.id,
+                        session_id: sessionId,
+                        device_info: updatePayload.device_info,
+                        is_active: true,
+                        last_seen: updatePayload.last_seen,
+                      });
+                    if (insertError) {
+                      // Ignore RLS violations during token refresh
+                      if (insertError.code !== 'PGRST301' && insertError.code !== '42501') {
+                        console.error('Session re-create error:', insertError);
+                      }
+                    }
                   }
                 }
                 return;
@@ -145,8 +155,8 @@ export function useSessionManager() {
             }
           };
 
-          // Check session validity every 30 seconds
-          intervalRef.current = setInterval(validateSession, 30000);
+          // Check session validity every 60 seconds to avoid triggering during requests
+          intervalRef.current = setInterval(validateSession, 60000);
         } catch (error) {
           console.error('Error managing session:', error);
         }
