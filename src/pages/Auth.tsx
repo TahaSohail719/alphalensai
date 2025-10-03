@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import newLogo from '@/assets/new-logo.png';
 import PublicNavbar from '@/components/PublicNavbar';
 import { useBrokerActions } from '@/hooks/useBrokerActions';
+import { useCreditManager } from '@/hooks/useCreditManager';
 
 const { useState, useEffect } = React;
 
@@ -27,6 +28,9 @@ export default function Auth() {
   const [activeBrokers, setActiveBrokers] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const { activateFreeTrial } = useCreditManager();
+  const intent = searchParams.get('intent');
   const { fetchActiveBrokers } = useBrokerActions();
 
   useEffect(() => {
@@ -107,6 +111,20 @@ export default function Auth() {
         title: "Registration Successful",
         description: "Check your email to confirm your account. Your account will be reviewed for approval."
       });
+      
+      // If intent is free_trial, activate it after successful signup
+      if (intent === 'free_trial' && !error) {
+        setTimeout(async () => {
+          const { error: trialError } = await activateFreeTrial();
+          if (!trialError) {
+            toast({
+              title: "🎁 Free Trial Activated!",
+              description: "Your account is ready with Free Trial access.",
+            });
+            navigate('/payment-success?type=free_trial');
+          }
+        }, 1000);
+      }
     }
 
     setLoading(false);
@@ -135,6 +153,20 @@ export default function Auth() {
     } else if (data.user && !data.user.email_confirmed_at) {
       // User exists but email not confirmed, redirect to confirmation page
       navigate('/email-confirmation');
+    } else if (data.user) {
+      // If intent is free_trial, activate it after successful signin
+      if (intent === 'free_trial') {
+        const { error: trialError } = await activateFreeTrial();
+        if (!trialError) {
+          toast({
+            title: "🎁 Free Trial Activated!",
+            description: "Start exploring all features now!",
+          });
+          navigate('/payment-success?type=free_trial');
+          setLoading(false);
+          return;
+        }
+      }
     }
 
     setLoading(false);

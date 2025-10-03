@@ -140,12 +140,38 @@ export function useCreditManager() {
     }
   }, [user?.id, loading, credits, initializeCredits]);
 
+  const activateFreeTrial = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('activate-free-trial');
+      
+      if (error) {
+        console.error('Error activating free trial:', error);
+        toast({
+          title: "Activation Failed",
+          description: error.message || "Could not activate Free Trial. Please try again.",
+          variant: "destructive"
+        });
+        return { data: null, error };
+      }
+      
+      // Refresh credits after activation
+      await fetchCredits();
+      window.dispatchEvent(new Event('creditsUpdated'));
+      
+      return { data, error: null };
+    } catch (err) {
+      console.error('Free trial activation error:', err);
+      return { data: null, error: err };
+    }
+  }, [toast, fetchCredits]);
+
   return {
     credits,
     loading,
     fetchCredits,
     decrementCredit,
     checkCredits,
-    initializeCredits
+    initializeCredits,
+    activateFreeTrial
   };
 }

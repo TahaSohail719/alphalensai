@@ -3,27 +3,44 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, CreditCard, Calendar, ArrowRight, AlertTriangle, User } from 'lucide-react';
+import { CheckCircle, CreditCard, Calendar, ArrowRight, AlertTriangle, User, Gift } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import PublicNavbar from '@/components/PublicNavbar';
 import GuestSignupForm from '@/components/GuestSignupForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCreditManager } from '@/hooks/useCreditManager';
+import { useToast } from '@/hooks/use-toast';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const { fetchCredits } = useCreditManager();
+  const { toast } = useToast();
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   
   const sessionId = searchParams.get('session_id');
+  const type = searchParams.get('type'); // 'free_trial' or undefined
+  const isFreeTrial = type === 'free_trial';
 
   useEffect(() => {
     if (user) {
-      checkSubscriptionStatus();
+      // Force refresh credits to get updated plan
+      fetchCredits();
+      
+      if (!isFreeTrial) {
+        checkSubscriptionStatus();
+      } else {
+        setLoading(false);
+        toast({
+          title: "🎁 Free Trial Active",
+          description: "Your Free Trial is ready. Explore all features!",
+        });
+      }
     } else {
       // For unauthenticated users, try to get session email if available
       if (sessionId) {
@@ -32,7 +49,7 @@ const PaymentSuccess = () => {
         setLoading(false);
       }
     }
-  }, [user, sessionId]);
+  }, [user, sessionId, isFreeTrial]);
 
   const fetchSessionEmail = async () => {
     try {
@@ -86,14 +103,18 @@ const PaymentSuccess = () => {
           <div className="max-w-2xl mx-auto">
             {/* Success Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className={`inline-flex items-center justify-center w-16 h-16 ${isFreeTrial ? 'bg-purple-100' : 'bg-green-100'} rounded-full mb-4`}>
+                {isFreeTrial ? (
+                  <Gift className="h-8 w-8 text-purple-600" />
+                ) : (
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                )}
               </div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Payment Successful!
+                {isFreeTrial ? "Free Trial Activated!" : "Payment Successful!"}
               </h1>
               <p className="text-lg text-muted-foreground">
-                Welcome to Alphalens AI. Your subscription is now active.
+                {isFreeTrial ? "Start exploring all features now" : "Welcome to Alphalens AI. Your subscription is now active."}
               </p>
             </div>
 

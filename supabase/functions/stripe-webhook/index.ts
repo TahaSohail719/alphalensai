@@ -142,18 +142,35 @@ serve(async (req) => {
             }
             
             if (user) {
-              // Get plan type from subscription
+              // Get plan type from subscription price ID
               const priceId = subscription.items.data[0]?.price?.id;
-              let planType = 'premium'; // default fallback
               
-              // Map price ID to plan type
-              const priceToplan = {
-                "price_1SC398Bbyt0kGZ1fmyLGVmWa": "basic",
-                "price_1SC39lBbyt0kGZ1fUhOBloBb": "standard", 
-                "price_1SC39zBbyt0kGZ1fvhRYyA0x": "premium"
-              };
+              // Dynamically fetch plan type from database
+              const { data: planData, error: planError } = await supabase
+                .from('plan_parameters')
+                .select('plan_type')
+                .eq('stripe_price_id', priceId)
+                .single();
               
-              planType = priceToplan[priceId as keyof typeof priceToplan] || 'premium';
+              let planType = planData?.plan_type || 'premium'; // fallback to premium
+              
+              if (planError) {
+                console.log(`⚠️ Could not find plan for price ${priceId}, using fallback`);
+              }
+              
+              console.log(`📦 Determined plan type: ${planType} for price ${priceId}`);
+              
+              // Update user profile with new plan
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ user_plan: planType })
+                .eq('user_id', user.id);
+              
+              if (profileError) {
+                console.error('❌ Error updating profile:', profileError);
+              } else {
+                console.log(`✅ Profile updated to plan: ${planType}`);
+              }
               
               // Update user credits
               const { error: creditsError } = await supabase.rpc('initialize_user_credits', {
@@ -194,15 +211,19 @@ serve(async (req) => {
             if (user) {
               // Reset credits for the billing period
               const priceId = subscription.items.data[0]?.price?.id;
-              let planType = 'premium';
               
-              const priceToplan = {
-                "price_1SC398Bbyt0kGZ1fmyLGVmWa": "basic",
-                "price_1SC39lBbyt0kGZ1fUhOBloBb": "standard", 
-                "price_1SC39zBbyt0kGZ1fvhRYyA0x": "premium"
-              };
+              // Dynamically fetch plan type from database
+              const { data: planData, error: planError } = await supabase
+                .from('plan_parameters')
+                .select('plan_type')
+                .eq('stripe_price_id', priceId)
+                .single();
               
-              planType = priceToplan[priceId as keyof typeof priceToplan] || 'premium';
+              let planType = planData?.plan_type || 'premium';
+              
+              if (planError) {
+                console.log(`⚠️ Could not find plan for price ${priceId}, using fallback`);
+              }
               
               const { error: creditsError } = await supabase.rpc('initialize_user_credits', {
                 target_user_id: user.id,

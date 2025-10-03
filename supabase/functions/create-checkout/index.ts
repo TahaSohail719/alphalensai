@@ -109,6 +109,7 @@ serve(async (req) => {
         plan_type: plan,
         origin: origin,
         user_authenticated: userEmail ? 'true' : 'false',
+        user_id: customerId || 'guest',
         timestamp: new Date().toISOString(),
         checkout_type: userEmail ? 'authenticated' : 'guest'
       }

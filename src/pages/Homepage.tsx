@@ -3,8 +3,32 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BarChart3, Brain, FileText, TrendingUp, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
+import { useAuth } from "@/hooks/useAuth";
+import { useCreditManager } from "@/hooks/useCreditManager";
+import { useToast } from "@/hooks/use-toast";
+
 export default function Homepage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { activateFreeTrial } = useCreditManager();
+  const { toast } = useToast();
+
+  const handleFreeTrialClick = async () => {
+    if (!user) {
+      // Not logged in - redirect to auth with intent
+      navigate('/auth?intent=free_trial');
+    } else {
+      // Already logged in - activate free trial directly
+      const { error } = await activateFreeTrial();
+      if (!error) {
+        toast({
+          title: "🎁 Free Trial Started!",
+          description: "You now have access to all features. Start exploring!",
+        });
+        navigate('/payment-success?type=free_trial');
+      }
+    }
+  };
   return <div className="min-h-screen bg-background">
       <PublicNavbar />
 
@@ -23,7 +47,7 @@ export default function Homepage() {
             AI-powered trade setups, and comprehensive research reports for financial professionals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8 py-3 bg-primary hover:bg-primary/90" onClick={() => navigate("/contact")}>
+            <Button size="lg" className="text-lg px-8 py-3 bg-primary hover:bg-primary/90" onClick={handleFreeTrialClick}>
               Try Demo <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={() => navigate("/auth")}>
@@ -103,7 +127,7 @@ export default function Homepage() {
             <Button size="lg" variant="secondary" className="text-lg px-8 py-3" onClick={() => navigate("/contact")}>
               Request Demo
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-3 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" onClick={() => navigate("/auth")}>
+            <Button size="lg" variant="outline" className="text-lg px-8 py-3 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" onClick={handleFreeTrialClick}>
               Start Free Trial
             </Button>
           </div>
