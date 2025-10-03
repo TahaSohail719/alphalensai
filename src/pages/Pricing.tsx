@@ -108,15 +108,11 @@ const Pricing = () => {
     return descriptions[planType as keyof typeof descriptions] || 'Professional trading solution';
   };
   const getPlanUsage = (plan: any): string[] => {
-    const usage = [];
-    if (plan.max_queries === 0) {
-      usage.push('Unlimited queries');
-    } else {
-      usage.push(`${plan.max_queries} queries per month`);
-    }
-    usage.push(`${plan.max_ideas} investment ideas per month`);
-    usage.push(`${plan.max_reports} reports per month`);
-    return usage;
+    return [
+      `${plan.max_queries} queries per month`,
+      `${plan.max_ideas} investment ideas per month`,
+      `${plan.max_reports} reports per month`
+    ];
   };
   const handleCTAClick = async (plan: string) => {
     console.log(`📊 [Pricing] CTA clicked: ${plan}`);
