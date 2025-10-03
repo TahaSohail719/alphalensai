@@ -104,8 +104,36 @@ serve(async (req) => {
           logStep("Created new user", { userId, email: customerEmail });
         }
 
-        // Get plan type from metadata
-        const planType = session.metadata?.plan_type;
+        // Get plan type from metadata or fallback to line items
+        let planType = session.metadata?.plan_type;
+        
+        if (!planType) {
+          logStep("No plan_type in metadata, fetching from line items");
+          
+          // Retrieve the session with line items
+          const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+            expand: ['line_items']
+          });
+          
+          const priceId = fullSession.line_items?.data[0]?.price?.id;
+          
+          if (priceId) {
+            // Fetch plan type from database
+            const { data: planData, error: planError } = await supabase
+              .from('plan_parameters')
+              .select('plan_type')
+              .eq('stripe_price_id', priceId)
+              .single();
+            
+            if (planData?.plan_type) {
+              planType = planData.plan_type;
+              logStep("Determined plan from price_id", { priceId, planType });
+            } else {
+              logStep("Could not determine plan from price_id", { priceId, error: planError });
+            }
+          }
+        }
+        
         if (planType) {
           // Initialize user credits based on plan
           const { error: creditsError } = await supabase.rpc('initialize_user_credits', {
@@ -131,7 +159,7 @@ serve(async (req) => {
             logStep("Profile plan updated", { userId, planType });
           }
         } else {
-          logStep("WARNING: No plan_type in metadata", { sessionId: session.id });
+          logStep("ERROR: Could not determine plan_type", { sessionId: session.id });
         }
 
         break;

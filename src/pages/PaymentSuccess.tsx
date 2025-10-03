@@ -29,18 +29,32 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     if (user) {
-      // Force refresh credits to get updated plan
-      fetchCredits();
+      // Force refresh credits and subscription status to get updated plan
+      const refreshUserData = async () => {
+        // First refresh credits
+        await fetchCredits();
+        
+        // Then check subscription (which will also trigger another refresh)
+        if (!isFreeTrial) {
+          await checkSubscriptionStatus();
+          
+          // Final refresh after a short delay to ensure webhook has processed
+          setTimeout(async () => {
+            await fetchCredits();
+            
+            // Dispatch a global event to notify other components
+            window.dispatchEvent(new CustomEvent('creditsUpdated'));
+          }, 2000);
+        } else {
+          setLoading(false);
+          toast({
+            title: "🎁 Free Trial Active",
+            description: "Your Free Trial is ready. Explore all features!",
+          });
+        }
+      };
       
-      if (!isFreeTrial) {
-        checkSubscriptionStatus();
-      } else {
-        setLoading(false);
-        toast({
-          title: "🎁 Free Trial Active",
-          description: "Your Free Trial is ready. Explore all features!",
-        });
-      }
+      refreshUserData();
     } else {
       // For unauthenticated users, try to get session email if available
       if (sessionId) {

@@ -38,6 +38,7 @@ import Terms from "./pages/Terms";
 import Documentation from "./pages/Documentation";
 import HelpCenter from "./pages/HelpCenter";
 import API from "./pages/API";
+import TestWebhook from "./pages/TestWebhook";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ const App = () => {
                     <Route path="/api" element={<API />} />
                     <Route path="/pnl-calculator" element={<PNLCalculatorPage />} />
                     <Route path="/product" element={<ProductPresentation />} />
+                    <Route path="/test-webhook" element={<AuthGuard><TestWebhook /></AuthGuard>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PersistentNotificationProvider>
