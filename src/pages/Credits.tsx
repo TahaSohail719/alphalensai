@@ -9,6 +9,7 @@ import { useJobStatusManager } from '@/hooks/useJobStatusManager';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 
 interface JobUsageStats {
   queries: number;
@@ -19,9 +20,12 @@ interface JobUsageStats {
 export default function Credits() {
   const { credits, loading, fetchCredits } = useCreditManager();
   const { user } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const jobManager = useJobStatusManager();
   const [usageStats, setUsageStats] = useState<JobUsageStats>({ queries: 0, ideas: 0, reports: 0 });
+  const [renewalDate, setRenewalDate] = useState<string>('');
+  const [planParams, setPlanParams] = useState<any>(null);
 
   const fetchUsageStats = useCallback(async () => {
     if (!user?.id) return;
@@ -97,6 +101,41 @@ export default function Credits() {
     }
   }, [user?.id, fetchUsageStats]);
 
+  // Fetch plan parameters and calculate renewal date
+  useEffect(() => {
+    const fetchPlanData = async () => {
+      if (!credits?.plan_type) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('plan_parameters')
+          .select('*')
+          .eq('plan_type', credits.plan_type)
+          .single();
+
+        if (!error && data) {
+          setPlanParams(data);
+          
+          // Calculate renewal date
+          const lastReset = new Date(credits.last_reset_date);
+          const renewalDays = data.renewal_cycle_days || 30;
+          const nextRenewal = new Date(lastReset);
+          nextRenewal.setDate(nextRenewal.getDate() + renewalDays);
+          
+          setRenewalDate(nextRenewal.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching plan parameters:', err);
+      }
+    };
+
+    fetchPlanData();
+  }, [credits]);
+
   // Listen for credit updates and refresh both credits and usage stats
   useEffect(() => {
     const handleCreditsUpdate = () => {
@@ -144,13 +183,24 @@ export default function Credits() {
     );
   }
 
-  const planDisplayName = {
-    free_trial: 'Free Trial',
-    broker_free: 'Broker Free',
-    basic: 'Basic',
-    standard: 'Standard',
-    premium: 'Premium'
-  }[credits.plan_type] || credits.plan_type;
+  // Get display name for plan
+  const getPlanDisplayName = () => {
+    if (credits.plan_type === 'broker_free' && profile?.broker_name) {
+      return `${profile.broker_name} Free Plan`;
+    }
+    
+    const planNames = {
+      free_trial: 'Free Trial',
+      broker_free: 'Broker Free',
+      basic: 'Basic',
+      standard: 'Standard',
+      premium: 'Premium'
+    };
+    
+    return planNames[credits.plan_type as keyof typeof planNames] || credits.plan_type;
+  };
+
+  const planDisplayName = getPlanDisplayName();
 
   const totalCredits = credits.credits_queries_remaining + 
                       credits.credits_ideas_remaining + 
@@ -184,20 +234,43 @@ export default function Credits() {
         {/* Current Plan */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Current Plan</span>
-              <Badge variant="secondary" className="text-sm">
-                {planDisplayName}
-              </Badge>
-            </CardTitle>
+            <CardTitle>Plan Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {totalCredits} credits remaining
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Plan actif</div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-base">
+                    {planDisplayName}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Crédits restants</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {totalCredits}
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Prochain renouvellement</div>
+                <div className="text-base font-medium text-foreground">
+                  {renewalDate || 'Chargement...'}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/pricing')}
+                  className="w-full"
+                >
+                  Upgrade Plan
+                </Button>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Last reset: {new Date(credits.last_reset_date).toLocaleDateString()}
-            </p>
           </CardContent>
         </Card>
 

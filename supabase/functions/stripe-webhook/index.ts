@@ -118,6 +118,20 @@ serve(async (req) => {
           } else {
             logStep("User credits initialized", { userId, planType });
           }
+
+          // Update user profile with purchased plan
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ user_plan: planType })
+            .eq('user_id', userId);
+
+          if (profileError) {
+            logStep("Failed to update profile plan", { error: profileError });
+          } else {
+            logStep("Profile plan updated", { userId, planType });
+          }
+        } else {
+          logStep("WARNING: No plan_type in metadata", { sessionId: session.id });
         }
 
         break;
