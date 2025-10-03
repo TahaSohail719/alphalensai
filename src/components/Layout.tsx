@@ -11,7 +11,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
 import { useResultNotifications } from "@/hooks/useResultNotifications";
-import { ResultNotification } from "./ResultNotification";
 import { DiscreetJobStatus } from "./DiscreetJobStatus";
 import { CreditsNavbar } from "./CreditsNavbar";
 interface LayoutProps {
@@ -44,18 +43,7 @@ export default function Layout({
   const navigate = useNavigate();
 
   // Result notification system
-  const {
-    hasNewResults,
-    notificationCount,
-    markResultsAsSeen
-  } = useResultNotifications();
-  const handleViewResult = () => {
-    markResultsAsSeen();
-    navigate('/history');
-  };
-  const handleDismissNotification = () => {
-    markResultsAsSeen();
-  };
+  const { markResultsAsSeen } = useResultNotifications();
   return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 overflow-x-hidden">
       {/* Mobile-First Responsive Header */}
       <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-sm">
@@ -103,8 +91,8 @@ export default function Layout({
             }} className="relative h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 hidden md:inline-flex">
                     <History className="h-4 w-4" />
                     <span className="hidden sm:inline ml-2">History</span>
-                    {(completedJobsCount > 0 || notificationCount > 0) && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[1.25rem]">
-                        {Math.max(completedJobsCount, notificationCount) > 9 ? '9+' : Math.max(completedJobsCount, notificationCount)}
+                    {completedJobsCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[1.25rem]">
+                        {completedJobsCount > 9 ? '9+' : completedJobsCount}
                       </span>}
                   </Button>}
 
@@ -218,9 +206,6 @@ export default function Layout({
                 }} className="justify-start text-sm relative">
                         <History className="h-4 w-4 mr-2" />
                         History
-                        {notificationCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[1rem]">
-                            {notificationCount > 9 ? '9+' : notificationCount}
-                          </span>}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                   navigate('/macro-analysis');
@@ -263,8 +248,8 @@ export default function Layout({
       {/* Discreet Job Status - shows when jobs are running */}
       <DiscreetJobStatus activeJobsCount={activeJobsCount} />
 
-      {/* Result Notification - shows when new results are available */}
-      <ResultNotification show={hasNewResults} onDismiss={handleDismissNotification} onViewResult={handleViewResult} />
+      {/* Discreet Job Status - shows when jobs are running */}
+      <DiscreetJobStatus activeJobsCount={activeJobsCount} />
 
       {/* Main Content - Mobile responsive */}
       <main className="flex-1 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
