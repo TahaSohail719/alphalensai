@@ -3,72 +3,44 @@ import { Button } from "@/components/ui/button";
 import { Brain, BarChart3, FileText, Target, TrendingUp, Globe2, Zap, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
-
 export default function Features() {
   const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: Brain,
-      title: "AI Trade Setups",
-      description: "Advanced algorithms analyze market conditions to identify optimal entry and exit points with clear stop-loss, take-profit, and risk-reward rationales.",
-      details: [
-        "Directional signals with confidence scores",
-        "Clear SL/TP levels with risk-reward ratios",
-        "AI-powered trade rationales and market context",
-        "Real-time signal updates and notifications"
-      ],
-      ctaText: "View Dashboard",
-      ctaRoute: "/dashboard"
-    },
-    {
-      icon: BarChart3,
-      title: "Macro Commentary",
-      description: "Institutional-grade macroeconomic analysis with integrated economic calendars and real-time market impact assessments.",
-      details: [
-        "Daily and weekly institutional research notes",
-        "Integrated macroeconomic calendar with impact analysis",
-        "Central bank policy tracking and implications",
-        "Global market interconnection analysis"
-      ],
-      ctaText: "View Macro Analysis",
-      ctaRoute: "/macro-analysis"
-    },
-    {
-      icon: FileText,
-      title: "Research Reports",
-      description: "Comprehensive market analysis and research reports with PDF/HTML export capabilities and professional formatting.",
-      details: [
-        "Weekly and daily research briefs",
-        "PDF and HTML export functionality",
-        "Professional report formatting",
-        "Historical report archive and search"
-      ],
-      ctaText: "View Reports",
-      ctaRoute: "/reports"
-    }
-  ];
-
-  const additionalFeatures = [
-    {
-      icon: Globe2,
-      title: "Multi-Asset Coverage",
-      description: "FX, cryptocurrencies, and major indices with comprehensive market coverage."
-    },
-    {
-      icon: Zap,
-      title: "Real-Time Updates",
-      description: "Live market data integration with instant notifications and alerts."
-    },
-    {
-      icon: Shield,
-      title: "Institutional Grade",
-      description: "Professional-level analysis tools trusted by financial institutions worldwide."
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const features = [{
+    icon: Brain,
+    title: "AI Trade Setups",
+    description: "Advanced algorithms analyze market conditions to identify optimal entry and exit points with clear stop-loss, take-profit, and risk-reward rationales.",
+    details: ["Directional signals with confidence scores", "Clear SL/TP levels with risk-reward ratios", "AI-powered trade rationales and market context", "Real-time signal updates and notifications"],
+    ctaText: "View Dashboard",
+    ctaRoute: "/dashboard"
+  }, {
+    icon: BarChart3,
+    title: "Macro Commentary",
+    description: "Institutional-grade macroeconomic analysis with integrated economic calendars and real-time market impact assessments.",
+    details: ["Daily and weekly institutional research notes", "Integrated macroeconomic calendar with impact analysis", "Central bank policy tracking and implications", "Global market interconnection analysis"],
+    ctaText: "View Macro Analysis",
+    ctaRoute: "/macro-analysis"
+  }, {
+    icon: FileText,
+    title: "Research Reports",
+    description: "Comprehensive market analysis and research reports with PDF/HTML export capabilities and professional formatting.",
+    details: ["Weekly and daily research briefs", "PDF and HTML export functionality", "Professional report formatting", "Historical report archive and search"],
+    ctaText: "View Reports",
+    ctaRoute: "/reports"
+  }];
+  const additionalFeatures = [{
+    icon: Globe2,
+    title: "Multi-Asset Coverage",
+    description: "FX, cryptocurrencies, and major indices with comprehensive market coverage."
+  }, {
+    icon: Zap,
+    title: "Real-Time Updates",
+    description: "Live market data integration with instant notifications and alerts."
+  }, {
+    icon: Shield,
+    title: "Institutional Grade",
+    description: "Professional-level analysis tools trusted by financial institutions worldwide."
+  }];
+  return <div className="min-h-screen bg-background">
       <PublicNavbar />
 
       {/* Hero Section */}
@@ -89,8 +61,7 @@ export default function Features() {
       <section className="py-16 px-4 bg-background">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 justify-items-center">
-            {features.map((feature, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow border-border bg-card flex flex-col h-full">
+            {features.map((feature, index) => <Card key={index} className="p-6 hover:shadow-lg transition-shadow border-border bg-card flex flex-col h-full">
                 <CardHeader className="pb-4">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <feature.icon className="h-8 w-8 text-primary" />
@@ -102,23 +73,16 @@ export default function Features() {
                     {feature.description}
                   </p>
                   <ul className="space-y-2 flex-1">
-                    {feature.details.map((detail, idx) => (
-                      <li key={idx} className="text-sm text-muted-foreground flex items-start">
+                    {feature.details.map((detail, idx) => <li key={idx} className="text-sm text-muted-foreground flex items-start">
                         <span className="w-1 h-1 bg-primary rounded-full mt-2 mr-2 flex-shrink-0"></span>
                         {detail}
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-auto"
-                    onClick={() => navigate(feature.ctaRoute)}
-                  >
+                  <Button variant="outline" className="w-full mt-auto" onClick={() => navigate(feature.ctaRoute)}>
                     {feature.ctaText}
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -136,8 +100,7 @@ export default function Features() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {additionalFeatures.map((feature, index) => (
-              <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow border-border">
+            {additionalFeatures.map((feature, index) => <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow border-border">
                 <CardContent className="p-0">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -147,8 +110,7 @@ export default function Features() {
                     {feature.description}
                   </p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -163,20 +125,10 @@ export default function Features() {
             Join thousands of professionals who trust Alphalens for their trading decisions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary" 
-              className="text-lg px-8 py-3"
-              onClick={() => navigate("/auth")}
-            >
+            <Button size="lg" variant="secondary" className="text-lg px-8 py-3" onClick={() => navigate("/auth")}>
               Start Free Trial
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-lg px-8 py-3 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-              onClick={() => navigate("/contact")}
-            >
+            <Button size="lg" variant="outline" className="text-lg px-8 py-3 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" onClick={() => navigate("/contact")}>
               Request Demo
             </Button>
           </div>
@@ -221,10 +173,9 @@ export default function Features() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens.ai. All rights reserved.</p>
+            <p>© 2025 alphaLens AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
