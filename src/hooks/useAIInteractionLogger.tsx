@@ -48,20 +48,26 @@ export function useAIInteractionLogger() {
 
     const creditType = getCreditTypeForFeature(featureName);
     
-    // Check if user has credits before processing
-    if (!checkCredits(creditType)) {
-      toast({
-        title: "Credit limit reached",
-        description: "Please upgrade your plan to continue using this feature",
-        variant: "destructive"
-      });
-      return false;
-    }
+    // PATCH: If we have a jobId, credit was already decremented when job was created
+    // Only check and decrement credit for NEW interactions without a jobId
+    if (!jobId) {
+      // Check if user has credits before processing
+      if (!checkCredits(creditType)) {
+        toast({
+          title: "Credit limit reached",
+          description: "Please upgrade your plan to continue using this feature",
+          variant: "destructive"
+        });
+        return false;
+      }
 
-    // Decrement credit
-    const success = await decrementCredit(creditType);
-    if (!success) {
-      return false;
+      // Decrement credit for new interaction
+      const success = await decrementCredit(creditType);
+      if (!success) {
+        return false;
+      }
+    } else {
+      console.log(`💳 [Credits] Skipping credit decrement - already done for job ${jobId}`);
     }
 
     // Log the interaction with normalized feature name
