@@ -15,7 +15,6 @@ import { getSymbolForAsset, getNormalizedSymbol } from "@/lib/assetMapping";
 import AssetInfoCard from "@/components/AssetInfoCard";
 import { JobStatusCard } from "@/components/JobStatusCard";
 import { useJobStatusManager } from "@/hooks/useJobStatusManager";
-import { usePopularAssets } from "@/hooks/usePopularAssets";
 
 interface PriceData {
   symbol: string;
@@ -27,7 +26,32 @@ interface PriceData {
 export default function TradingDashboard() {
   const navigate = useNavigate();
   const jobManager = useJobStatusManager();
-  const { assets: allAssets, isLoading: assetsLoading } = usePopularAssets();
+  
+  // Hardcoded list of major assets compatible with Binance and TradingView
+  const allAssets = [
+    // G10 Forex (principales paires)
+    { symbol: "EUR/USD", name: "Euro / US Dollar", icon: "💱" },
+    { symbol: "GBP/USD", name: "British Pound / US Dollar", icon: "💱" },
+    { symbol: "USD/JPY", name: "US Dollar / Japanese Yen", icon: "💱" },
+    { symbol: "AUD/USD", name: "Australian Dollar / US Dollar", icon: "💱" },
+    { symbol: "USD/CAD", name: "US Dollar / Canadian Dollar", icon: "💱" },
+    { symbol: "USD/CHF", name: "US Dollar / Swiss Franc", icon: "💱" },
+    
+    // Crypto majeures
+    { symbol: "Bitcoin", name: "Bitcoin", icon: "₿" },
+    { symbol: "Ethereum", name: "Ethereum", icon: "Ξ" },
+    { symbol: "BNB-USD", name: "Binance Coin", icon: "🔶" },
+    { symbol: "XRP-USD", name: "Ripple", icon: "💧" },
+    { symbol: "ADA-USD", name: "Cardano", icon: "🔷" },
+    { symbol: "SOL-USD", name: "Solana", icon: "🌞" },
+    { symbol: "DOGE-USD", name: "Dogecoin", icon: "🐕" },
+    
+    // Commodités principales
+    { symbol: "GOLD", name: "Gold", icon: "🥇" },
+    { symbol: "SILVER", name: "Silver", icon: "🥈" },
+    { symbol: "CRUDE", name: "Crude Oil", icon: "🛢️" }
+  ];
+  
   const [selectedAsset, setSelectedAsset] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("4h");
   const [priceData, setPriceData] = useState<PriceData | null>(null);
@@ -258,15 +282,8 @@ export default function TradingDashboard() {
 
         {/* Popular assets - Mobile-first horizontal scroll */}
         <div className="w-full -mx-2 sm:mx-0">
-          {assetsLoading ? (
-            <div className="flex gap-2 pb-2 px-2 sm:px-0">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-10 w-24 bg-muted/50 animate-pulse rounded-lg shrink-0" />
-              ))}
-            </div>
-          ) : (
-            <div className="flex gap-2 overflow-x-auto pb-2 px-2 sm:px-0 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {allAssets.slice(0, 10).map((asset) => (
+          <div className="flex gap-2 overflow-x-auto pb-2 px-2 sm:px-0 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {allAssets.slice(0, 10).map((asset) => (
               <button
                 key={asset.symbol}
                 onClick={() => setSelectedAsset(asset.symbol)}
@@ -280,9 +297,8 @@ export default function TradingDashboard() {
                 >
                 <span className="font-semibold">{asset.symbol}</span>
               </button>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Asset Information Card - Moved before chart to prevent overlap */}
