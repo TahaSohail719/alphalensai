@@ -47,6 +47,8 @@ export function useSessionManager() {
       // Register this session and invalidate others
       const registerSession = async () => {
         try {
+          console.log('🔐 [SessionManager] Registering session:', { userId: user.id, sessionId });
+          
           // First, invalidate previous sessions
           await supabase.rpc('invalidate_previous_sessions', {
             current_user_id: user.id,
@@ -67,10 +69,13 @@ export function useSessionManager() {
             .select('user_id'); // returns rows if any updated
 
           if (updateError) {
-            console.error('Session update error:', updateError);
+            console.error('❌ [SessionManager] Session update error:', updateError);
+          } else {
+            console.log('✅ [SessionManager] Session updated:', { rowsUpdated: updatedRows?.length });
           }
 
           if (!updatedRows || updatedRows.length === 0) {
+            console.log('➕ [SessionManager] Creating new session record');
             const { error: insertError } = await supabase
               .from('user_sessions')
               .insert({
@@ -83,14 +88,20 @@ export function useSessionManager() {
             if (insertError) {
               // Ignore RLS violations during token refresh - session will be recreated on next cycle
               if (insertError.code !== 'PGRST301' && insertError.code !== '42501') {
-                console.error('Session insert error:', insertError);
+                console.error('❌ [SessionManager] Session insert error:', insertError);
+              } else {
+                console.log('⚠️ [SessionManager] RLS prevented insert, will retry');
               }
+            } else {
+              console.log('✅ [SessionManager] Session created');
             }
           }
 
           // Set up periodic session validation
           const validateSession = async () => {
             try {
+              console.log('🔍 [SessionManager] Validating session:', { userId: user.id, sessionId });
+              
               const { data, error } = await supabase
                 .from('user_sessions')
                 .select('is_active')
@@ -99,11 +110,12 @@ export function useSessionManager() {
                 .maybeSingle();
 
               if (error) {
-                console.error('Session validate error:', error);
+                console.error('❌ [SessionManager] Session validate error:', error);
                 return;
               }
 
               if (!data) {
+                console.log('⚠️ [SessionManager] No session data found, recreating...');
                 // If missing, recreate/activate without disconnecting the user
                 const updatePayload = {
                   device_info: getDeviceInfo(),
@@ -122,6 +134,7 @@ export function useSessionManager() {
                   // Only recreate if user is still authenticated
                   const { data: { session: currentSession } } = await supabase.auth.getSession();
                   if (currentSession) {
+                    console.log('➕ [SessionManager] Recreating session record');
                     const { error: insertError } = await supabase
                       .from('user_sessions')
                       .insert({
@@ -134,7 +147,7 @@ export function useSessionManager() {
                     if (insertError) {
                       // Ignore RLS violations during token refresh
                       if (insertError.code !== 'PGRST301' && insertError.code !== '42501') {
-                        console.error('Session re-create error:', insertError);
+                        console.error('❌ [SessionManager] Session re-create error:', insertError);
                       }
                     }
                   }
@@ -143,15 +156,18 @@ export function useSessionManager() {
               }
 
               if (data.is_active === false) {
+                console.log('🚫 [SessionManager] Session deactivated, signing out');
                 toast({
                   title: "Session Expired",
                   description: "Your account has been signed in from another device.",
                   variant: "destructive",
                 });
                 await signOut();
+              } else {
+                console.log('✅ [SessionManager] Session is valid');
               }
             } catch (e) {
-              console.error('Session validate exception:', e);
+              console.error('❌ [SessionManager] Session validate exception:', e);
             }
           };
 
@@ -212,24 +228,6 @@ export function useSessionManager() {
     }
   }, [user, toast, signOut]);
 
-  // Clean up session on sign out
-  useEffect(() => {
-    const cleanup = () => {
-      if (currentSessionRef.current && user) {
-        supabase
-          .from('user_sessions')
-          .update({ is_active: false, last_seen: new Date().toISOString() })
-          .eq('session_id', currentSessionRef.current)
-          .eq('user_id', user.id);
-      }
-      // Clear interval on cleanup
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-
-    // Cleanup on component unmount or user change
-    return cleanup;
-  }, [user?.id]);
+  // Note: Session deactivation is now only handled explicitly in useAuth.signOut()
+  // Removed automatic is_active=false on unmount to prevent ghost logouts during token refresh
 }
