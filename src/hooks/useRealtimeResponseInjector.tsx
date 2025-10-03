@@ -67,6 +67,8 @@ export function useRealtimeResponseInjector({
 
       case 'report':
       case 'Report':
+      case 'reports':
+      case 'Reports':
         if (onReportResult) {
           console.log('📄 [ResponseInjector] Injecting report result');
           onReportResult(job.responsePayload, job.jobId);
