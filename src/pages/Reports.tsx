@@ -391,7 +391,8 @@ export default function Reports() {
         logInteraction({
           featureName: 'report',
           userQuery: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. Custom notes: ${reportConfig.customNotes}`,
-          aiResponse: data
+          aiResponse: data,
+          jobId: reportJobId
         });
         
         toast({

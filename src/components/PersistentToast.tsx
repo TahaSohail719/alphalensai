@@ -193,6 +193,11 @@ export function PersistentToast() {
                             <span>Elapsed time</span>
                             <span className="font-mono">{formatTime(elapsedTime)}</span>
                           </div>
+                          {'progressMessage' in mostRecentJob && mostRecentJob.progressMessage && (
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              {mostRecentJob.progressMessage}
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
@@ -240,6 +245,13 @@ export function PersistentToast() {
                     <span className="font-mono">{formatTime(elapsedTime)}</span>
                   </div>
                 </div>
+              )}
+              
+              {/* Progress message for active jobs */}
+              {!isCompleted && 'progressMessage' in mostRecentJob && mostRecentJob.progressMessage && (
+                <p key={mostRecentJob.progressMessage} className="text-xs text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-200 mb-2">
+                  {mostRecentJob.progressMessage}
+                </p>
               )}
               
               {isCompleted && (

@@ -12,6 +12,7 @@ interface ActiveJob {
   status: 'pending' | 'running';
   createdAt: Date;
   originatingFeature: 'ai-setup' | 'macro-analysis' | 'reports';
+  progressMessage?: string;
 }
 
 interface CompletedJob {
@@ -128,10 +129,17 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
           const updatedJob = payload.new as any;
           
           if (updatedJob.status === 'running') {
-            // Update active job status
+            // Update active job status and progress message
             setActiveJobs(prev => prev.map(job => 
               job.id === updatedJob.id 
-                ? { ...job, status: 'running' }
+                ? { ...job, status: 'running', progressMessage: updatedJob.progress_message }
+                : job
+            ));
+          } else if (updatedJob.progress_message) {
+            // Update progress message for pending/running jobs
+            setActiveJobs(prev => prev.map(job => 
+              job.id === updatedJob.id 
+                ? { ...job, progressMessage: updatedJob.progress_message }
                 : job
             ));
           } else if (updatedJob.status === 'completed' && updatedJob.response_payload) {

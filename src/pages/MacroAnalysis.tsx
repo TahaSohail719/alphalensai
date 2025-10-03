@@ -185,7 +185,8 @@ export default function MacroAnalysis() {
     await logInteraction({
       featureName: 'market_commentary',
       userQuery: `${queryParams.query} for ${selectedAsset.display}`,
-      aiResponse: realAnalysis
+      aiResponse: realAnalysis,
+      jobId
     });
     setQueryParams(prev => ({
       ...prev,
