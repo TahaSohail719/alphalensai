@@ -16,6 +16,7 @@ interface JobStatus {
   updated_at: string;
   feature?: string;
   user_id: string;
+  progress_message?: string;
 }
 
 interface ActiveJob {
@@ -25,6 +26,7 @@ interface ActiveJob {
   status: 'pending' | 'running' | 'completed' | 'error';
   startTime: Date;
   resultData?: any;
+  progressMessage?: string;
 }
 
 // Map job types to features for backward compatibility
@@ -84,6 +86,29 @@ export function useRealtimeJobManager() {
         });
 
         const job = payload.new as JobStatus;
+        
+        // Handle progress message updates
+        if (job.progress_message) {
+          console.log('📝 [RealtimeJobManager] Progress update:', {
+            jobId: job.id,
+            progressMessage: job.progress_message,
+            status: job.status
+          });
+
+          setActiveJobs(prev => prev.map(activeJob => 
+            activeJob.id === job.id 
+              ? { ...activeJob, progressMessage: job.progress_message }
+              : activeJob
+          ));
+
+          // Show progress update in toast
+          toast({
+            title: "Processing...",
+            description: job.progress_message,
+            duration: 3000,
+            className: "fixed top-4 left-4 z-[100] max-w-sm animate-fade-in"
+          });
+        }
         
         if (job.status === 'completed' && job.response_payload) {
           console.log('✅ [RealtimeJobManager] Job completed:', {

@@ -465,6 +465,7 @@ export type Database = {
           created_at: string
           feature: string | null
           id: string
+          progress_message: string | null
           request_payload: Json
           response_payload: Json | null
           status: string
@@ -475,6 +476,7 @@ export type Database = {
           created_at?: string
           feature?: string | null
           id?: string
+          progress_message?: string | null
           request_payload: Json
           response_payload?: Json | null
           status?: string
@@ -485,6 +487,7 @@ export type Database = {
           created_at?: string
           feature?: string | null
           id?: string
+          progress_message?: string | null
           request_payload?: Json
           response_payload?: Json | null
           status?: string
