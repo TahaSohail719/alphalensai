@@ -776,11 +776,24 @@ export default function MacroAnalysis() {
       }).subscribe();
       console.log('📡 [Realtime] Subscribed before POST');
 
-      // 3. Send POST request after subscription is active (payload already contains job_id via createJob)
-      console.log('📊 [MacroAnalysis] Analysis request:', {
+      // 3. Log session status before request
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      console.log('📊 [MacroAnalysis] Pre-request auth check:', {
+        hasSession: !!currentSession,
+        expiresAt: currentSession?.expires_at,
+        expiresIn: currentSession?.expires_at ? Math.floor((currentSession.expires_at * 1000 - Date.now()) / 1000) : 0,
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
+
+      // 4. Send POST request after subscription is active (payload already contains job_id via createJob)
+      console.log('📊 [MacroAnalysis] Sending request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: payload,
         jobId: responseJobId,
+        hasJobId: !!responseJobId,
+        payloadContainsJobId: !!(payload as any).job_id,
+        userId: user?.id,
+        sessionValid: !!currentSession,
         timestamp: new Date().toISOString()
       });
 
@@ -794,7 +807,7 @@ export default function MacroAnalysis() {
         jobId: responseJobId
       });
 
-      // 4. Handle HTTP response with proper error handling
+      // 5. Handle HTTP response with proper error handling
       try {
         if (response.ok) {
           console.log('📩 [HTTP] Response received (ignored, waiting for Realtime)');

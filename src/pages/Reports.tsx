@@ -400,7 +400,27 @@ export default function Reports() {
         });
       });
 
-      // 2. Send POST request after subscription is active
+      // 2. Log session status before request
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      console.log('📊 [Reports] Pre-request auth check:', {
+        hasSession: !!currentSession,
+        expiresAt: currentSession?.expires_at,
+        expiresIn: currentSession?.expires_at ? Math.floor((currentSession.expires_at * 1000 - Date.now()) / 1000) : 0,
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log('📊 [Reports] Sending request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        jobId: reportJobId,
+        hasJobId: !!reportJobId,
+        payloadContainsJobId: !!(reportPayload as any).job_id,
+        userId: user?.id,
+        sessionValid: !!currentSession,
+        timestamp: new Date().toISOString()
+      });
+
+      // 3. Send POST request after subscription is active
       const { response } = await enhancedPostRequest(
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         {
@@ -416,7 +436,7 @@ export default function Reports() {
         }
       );
 
-      // 3. Handle HTTP response (secondary path)
+      // 4. Handle HTTP response (secondary path)
       try {
         if (response.ok) {
           const responseData = await response.json();

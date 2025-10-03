@@ -25,6 +25,30 @@ export async function enhancedPostRequest(
   
   // If job tracking is enabled, create a job record and inject job_id
   if (options.enableJobTracking) {
+    // CRITICAL: Verify session is valid before proceeding
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (!session || sessionError) {
+      console.error('❌ [Auth] No valid session before request:', sessionError);
+      throw new Error('Authentication required. Please sign in again.');
+    }
+
+    // If token is close to expiry (within 60s), refresh it now
+    const expiresAt = session.expires_at || 0;
+    const now = Math.floor(Date.now() / 1000);
+    if (expiresAt - now < 60) {
+      console.log('🔄 [Auth] Token close to expiry, refreshing proactively...', {
+        expiresIn: expiresAt - now,
+        expiresAt: new Date(expiresAt * 1000).toISOString()
+      });
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError || !refreshData.session) {
+        console.error('❌ [Auth] Token refresh failed:', refreshError);
+        throw new Error('Session expired. Please sign in again.');
+      }
+      console.log('✅ [Auth] Token refreshed successfully');
+    }
+
     const { data: user } = await supabase.auth.getUser();
     
     if (user.user) {
@@ -38,7 +62,7 @@ export async function enhancedPostRequest(
       
       // Create job record in Supabase only if we don't already have one
       if (!options.jobId) {
-        await supabase
+        const { data: jobData, error: jobError } = await supabase
           .from('jobs')
           .insert({
             id: jobId,
@@ -46,7 +70,20 @@ export async function enhancedPostRequest(
             request_payload: enhancedPayload,
             user_id: user.user.id,
             feature: options.feature
-          });
+          })
+          .select()
+          .single();
+
+        if (jobError || !jobData) {
+          console.error('❌ [Job] Failed to create job record:', jobError);
+          throw new Error('Failed to create job. Please check your session and try again.');
+        }
+        
+        console.log(`✅ [Job] Created job record: ${jobId}`, {
+          user_id: user.user.id,
+          feature: options.feature,
+          timestamp: new Date().toISOString()
+        });
       }
       
       // CRITICAL: Set up Realtime subscription BEFORE sending POST request
@@ -55,6 +92,26 @@ export async function enhancedPostRequest(
         options.onRealtimeSetup(jobId);
       }
       
+      // CRITICAL: Final validation before sending request
+      if (!jobId) {
+        console.error('❌ [Request] CRITICAL: Attempting to send request without job_id!', {
+          enableJobTracking: options.enableJobTracking,
+          jobId: jobId,
+          hasUser: !!user.user,
+          feature: options.feature
+        });
+        throw new Error('Cannot send request without job_id. Job creation may have failed.');
+      }
+
+      console.log(`📤 [Request] Sending POST request:`, {
+        url: url,
+        jobId: jobId,
+        payloadHasJobId: !!(enhancedPayload as any).job_id,
+        feature: options.feature,
+        userId: user.user.id,
+        timestamp: new Date().toISOString()
+      });
+
       // Send the enhanced payload with job_id
       const response = await safePostRequest(url, enhancedPayload, options.headers);
       

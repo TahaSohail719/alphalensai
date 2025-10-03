@@ -423,10 +423,23 @@ export default function AISetup() {
       });
 
       // 4. Send POST request after subscription is active (fire-and-forget)
-      console.log('📊 [AISetup] Trade setup request:', {
+      // Log session status before request
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      console.log('📊 [AISetup] Pre-request auth check:', {
+        hasSession: !!currentSession,
+        expiresAt: currentSession?.expires_at,
+        expiresIn: currentSession?.expires_at ? Math.floor((currentSession.expires_at * 1000 - Date.now()) / 1000) : 0,
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log('📊 [AISetup] Sending request:', {
         url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
-        payload: mergedPayload,
         jobId: jobId,
+        hasJobId: !!jobId,
+        payloadContainsJobId: !!(mergedPayload as any).job_id,
+        userId: user?.id,
+        sessionValid: !!currentSession,
         timestamp: new Date().toISOString()
       });
 

@@ -126,7 +126,23 @@ export function initializeRealtimeAuthManager(): void {
   console.log(`🔄 [RealtimeManager] Initializing auth state listener`);
   
   supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log(`🔄 [RealtimeManager] Auth state changed:`, { event, hasSession: !!session });
+    console.log(`🔄 [RealtimeManager] Auth state changed:`, { 
+      event, 
+      hasSession: !!session,
+      expiresAt: session?.expires_at,
+      expiresIn: session?.expires_at ? Math.floor((session.expires_at * 1000 - Date.now()) / 1000) : 0,
+      activeChannels: activeChannels.size,
+      timestamp: new Date().toISOString()
+    });
+    
+    // CRITICAL: Log if session expires while channels are active
+    if (event === 'SIGNED_OUT' && activeChannels.size > 0) {
+      console.error('❌ [RealtimeManager] CRITICAL: User signed out with active channels!', {
+        activeChannelCount: activeChannels.size,
+        channels: Array.from(activeChannels.keys()),
+        timestamp: new Date().toISOString()
+      });
+    }
     
     // Only handle actual sign out, not token refresh events
     if (event === 'SIGNED_OUT') {
@@ -137,7 +153,7 @@ export function initializeRealtimeAuthManager(): void {
       }
     } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
       // Silent token refresh - update auth without disrupting channels
-      console.log(`🔄 [RealtimeManager] Token refreshed, updating realtime auth silently`);
+      console.log(`✅ [RealtimeManager] Token refreshed, updating realtime auth silently`);
       supabase.realtime.setAuth(session.access_token);
     } else if (session?.access_token && activeChannels.size > 0) {
       // Initial sign-in or session recovery with active channels
