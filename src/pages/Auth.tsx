@@ -167,6 +167,9 @@ export default function Auth() {
           return;
         }
       }
+      
+      // Redirect to dashboard after successful sign-in
+      navigate('/dashboard');
     }
 
     setLoading(false);
