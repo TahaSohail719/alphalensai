@@ -162,6 +162,85 @@ export default function Reports() {
     }
   }, [selectedAsset]);
 
+  // 🔄 Load persisted report results on mount or URL change
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const loadPersistedReport = async () => {
+      console.log('📄 [Reports] Checking for persisted report results...');
+
+      // Check URL for specific jobId
+      const searchParams = new URLSearchParams(window.location.search);
+      const jobIdFromUrl = searchParams.get('jobId');
+
+      let query = supabase
+        .from('jobs')
+        .select('*')
+        .eq('user_id', user.id)
+        .in('feature', ['report', 'Report', 'reports', 'Reports'])
+        .eq('status', 'completed')
+        .not('response_payload', 'is', null);
+
+      if (jobIdFromUrl) {
+        console.log('📄 [Reports] Loading specific job from URL:', jobIdFromUrl);
+        query = query.eq('id', jobIdFromUrl);
+      } else {
+        query = query.order('created_at', { ascending: false }).limit(1);
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (data && !error) {
+        console.log('📄 [Reports] Found persisted report:', {
+          jobId: data.id,
+          createdAt: data.created_at,
+          hasPayload: !!data.response_payload
+        });
+
+        const responseData = data.response_payload;
+        let htmlContentData = null;
+
+        // Use same extraction logic as realtime handler
+        if (typeof responseData === 'string') {
+          htmlContentData = responseData;
+        } else if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
+          const payload = responseData as Record<string, any>;
+          if (payload.output?.base_report) {
+            htmlContentData = payload.output.base_report;
+          } else if (payload.base_report) {
+            htmlContentData = payload.base_report;
+          } else if (payload.html || payload.content) {
+            htmlContentData = payload.html || payload.content;
+          }
+        }
+
+        console.log('📄 [Reports] Extracted HTML content:', {
+          hasHtml: !!htmlContentData,
+          contentType: typeof htmlContentData,
+          contentLength: htmlContentData?.length
+        });
+
+        if (htmlContentData) {
+          setHtmlContent(htmlContentData);
+          setStep("generated");
+          setIsGenerating(false);
+          
+          toast({
+            title: "Report Loaded",
+            description: "Previously generated report has been restored",
+            duration: 3000
+          });
+        }
+      } else if (error) {
+        console.error('📄 [Reports] Error loading persisted report:', error);
+      } else {
+        console.log('📄 [Reports] No persisted report found');
+      }
+    };
+
+    loadPersistedReport();
+  }, [user?.id, toast]);
+
   const [availableSections, setAvailableSections] = useState<ReportSection[]>([
     {
       id: "market",
