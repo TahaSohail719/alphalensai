@@ -554,27 +554,41 @@ export default function AISetup() {
                 <div className="space-y-2">
                   <Label htmlFor="instrument">Instrument</Label>
                   
-                  {/* Asset Search Bar */}
-                  <AssetSearchBar
-                    placeholder="Search instrument (EUR/USD, Bitcoin, Gold...)"
-                    onAssetSelect={(asset) => {
-                      console.log(`📊 [AISetup] Asset selected from search:`, asset);
-                      setParameters({
+                  {/* Unified Asset Search & Select */}
+                  <div className="relative">
+                    <AssetSearchBar
+                      placeholder="Search or select instrument..."
+                      selectedAsset={parameters.instrument ? {
+                        id: 0,
+                        symbol: parameters.instrument,
+                        name: parameters.instrument,
+                        sector: null,
+                        industry: null,
+                        country: null,
+                        market_cap: null,
+                        currency: null,
+                        exchange: null
+                      } : null}
+                      onAssetSelect={(asset) => {
+                        console.log(`📊 [AISetup] Asset selected:`, asset);
+                        setParameters({
+                          ...parameters,
+                          instrument: asset.symbol
+                        });
+                      }}
+                    />
+                    
+                    {/* Fallback Select (hidden but keeps value synced) */}
+                    <Select 
+                      value={parameters.instrument} 
+                      onValueChange={value => setParameters({
                         ...parameters,
-                        instrument: asset.symbol
-                      });
-                    }}
-                    className="mb-2"
-                  />
-                  
-                  {/* Existing Select Dropdown */}
-                  <Select value={parameters.instrument} onValueChange={value => setParameters({
-                ...parameters,
-                instrument: value
-              })}>
-                    <SelectTrigger className="h-11 text-sm touch-manipulation">
-                      <SelectValue />
-                    </SelectTrigger>
+                        instrument: value
+                      })}
+                    >
+                      <SelectTrigger className="h-0 w-0 opacity-0 absolute pointer-events-none">
+                        <SelectValue />
+                      </SelectTrigger>
                     <SelectContent>
                       {/* Forex Currencies */}
                       <SelectItem value="EUR/USD">EUR/USD</SelectItem>
@@ -655,6 +669,7 @@ export default function AISetup() {
                       <SelectItem value="LEAN_HOGS">Lean Hogs</SelectItem>
                     </SelectContent>
                   </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
