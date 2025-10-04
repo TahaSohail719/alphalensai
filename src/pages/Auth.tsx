@@ -48,14 +48,13 @@ export default function Auth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        // Redirect authenticated users to dashboard
-        // AuthGuard will handle approval status checks
-        navigate('/dashboard');
+        // Don't auto-navigate, let AuthGuard handle approval status
+        setSession(session);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   // Separate effect for loading brokers
   useEffect(() => {
