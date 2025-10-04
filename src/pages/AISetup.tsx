@@ -215,7 +215,37 @@ export default function AISetup() {
   });
 
 
-  // Map instrument to TradingView symbol
+  // Helper to add TradingView exchange prefix based on instrument type
+  const formatTradingViewSymbol = (baseSymbol: string): string => {
+    const upper = baseSymbol.toUpperCase();
+    
+    // Forex pairs (6 letters like EURUSD)
+    if (/^[A-Z]{6}$/.test(upper)) return `FX:${upper}`;
+    
+    // Crypto pairs
+    if (/^(BTC|ETH|BNB|ADA|SOL|DOT|MATIC|AVAX|LINK|UNI|ATOM|LTC|BCH|XRP|XLM|AXS|SAND|MANA|FTM|ALGO|VET|ICP|FIL|THETA|TRX|EOS|XTZ|NEAR|FLOW|EGLD|APE|CRV|LDO|ARB|OP|RNDR)USD$/.test(upper)) {
+      return `BINANCE:${upper}T`;
+    }
+    
+    // Precious metals
+    if (/^(XAUUSD|XAGUSD|XPTUSD|XPDUSD)$/.test(upper)) return `OANDA:${upper}`;
+    
+    // Oil & Energy
+    if (/^(USOIL|UKOIL|NATGAS|HEATING_OIL|GASOLINE)$/.test(upper)) return `TVC:${upper}`;
+    
+    // Industrial metals
+    if (/^(COPPER|ALUMINUM|ZINC|NICKEL)$/.test(upper)) return `TVC:${upper}`;
+    
+    // Agricultural commodities
+    if (/^(WHEAT|CORN|SOYBEANS|RICE|OATS|SUGAR|COFFEE|COCOA|COTTON|ORANGE_JUICE|LUMBER|LIVE_CATTLE|LEAN_HOGS)$/.test(upper)) {
+      return `TVC:${upper}`;
+    }
+    
+    // Default: assume forex
+    return `FX:${upper}`;
+  };
+
+  // Map instrument to TradingView symbol with exchange prefix
   const mapInstrumentToSymbol = (instrument: string): string => {
     const symbolMap: Record<string, string> = {
       "EUR/USD": "EURUSD",
@@ -228,42 +258,42 @@ export default function AISetup() {
       "EUR/GBP": "EURGBP",
       "EUR/JPY": "EURJPY",
       "GBP/JPY": "GBPJPY",
-      "BTC/USD": "BTCUSD",
-      "ETH/USD": "ETHUSD",
-      "BNB/USD": "BNBUSD",
-      "ADA/USD": "ADAUSD",
-      "SOL/USD": "SOLUSD",
-      "DOT/USD": "DOTUSD",
-      "MATIC/USD": "MATICUSD",
-      "AVAX/USD": "AVAXUSD",
-      "LINK/USD": "LINKUSD",
-      "UNI/USD": "UNIUSD",
-      "ATOM/USD": "ATOMUSD",
-      "LTC/USD": "LTCUSD",
-      "BCH/USD": "BCHUSD",
-      "XRP/USD": "XRPUSD",
-      "XLM/USD": "XLMUSD",
-      "AXS/USD": "AXSUSD",
-      "SAND/USD": "SANDUSD",
-      "MANA/USD": "MANAUSD",
-      "FTM/USD": "FTMUSD",
-      "ALGO/USD": "ALGOUSD",
-      "VET/USD": "VETUSD",
-      "ICP/USD": "ICPUSD",
-      "FIL/USD": "FILUSD",
-      "THETA/USD": "THETAUSD",
-      "TRX/USD": "TRXUSD",
-      "EOS/USD": "EOSUSD",
-      "XTZ/USD": "XTZUSD",
-      "NEAR/USD": "NEARUSD",
-      "FLOW/USD": "FLOWUSD",
-      "EGLD/USD": "EGLDUSD",
-      "APE/USD": "APEUSD",
-      "CRV/USD": "CRVUSD",
-      "LDO/USD": "LDOUSD",
-      "ARB/USD": "ARBUSD",
-      "OP/USD": "OPUSD",
-      "RNDR/USD": "RNDRUSD",
+      "BTC/USD": "BTCUSDT",
+      "ETH/USD": "ETHUSDT",
+      "BNB/USD": "BNBUSDT",
+      "ADA/USD": "ADAUSDT",
+      "SOL/USD": "SOLUSDT",
+      "DOT/USD": "DOTUSDT",
+      "MATIC/USD": "MATICUSDT",
+      "AVAX/USD": "AVAXUSDT",
+      "LINK/USD": "LINKUSDT",
+      "UNI/USD": "UNIUSDT",
+      "ATOM/USD": "ATOMUSDT",
+      "LTC/USD": "LTCUSDT",
+      "BCH/USD": "BCHUSDT",
+      "XRP/USD": "XRPUSDT",
+      "XLM/USD": "XLMUSDT",
+      "AXS/USD": "AXSUSDT",
+      "SAND/USD": "SANDUSDT",
+      "MANA/USD": "MANAUSDT",
+      "FTM/USD": "FTMUSDT",
+      "ALGO/USD": "ALGOUSDT",
+      "VET/USD": "VETUSDT",
+      "ICP/USD": "ICPUSDT",
+      "FIL/USD": "FILUSDT",
+      "THETA/USD": "THETAUSDT",
+      "TRX/USD": "TRXUSDT",
+      "EOS/USD": "EOSUSDT",
+      "XTZ/USD": "XTZUSDT",
+      "NEAR/USD": "NEARUSDT",
+      "FLOW/USD": "FLOWUSDT",
+      "EGLD/USD": "EGLDUSDT",
+      "APE/USD": "APEUSDT",
+      "CRV/USD": "CRVUSDT",
+      "LDO/USD": "LDOUSDT",
+      "ARB/USD": "ARBUSDT",
+      "OP/USD": "OPUSDT",
+      "RNDR/USD": "RNDRUSDT",
       "GOLD": "XAUUSD",
       "SILVER": "XAGUSD",
       "WTI": "USOIL",
@@ -292,25 +322,27 @@ export default function AISetup() {
       "LEAN_HOGS": "LEAN_HOGS"
     };
 
-    if (!instrument) return "EURUSD";
+    if (!instrument) return "FX:EURUSD";
     const upper = instrument.toUpperCase();
     const compact = upper.replace(/\s+/g, '').replace(/-/g, '').replace(/_/g, '');
 
     // 1) Exact mapping like "EUR/USD"
-    if (symbolMap[upper]) return symbolMap[upper];
+    if (symbolMap[upper]) return formatTradingViewSymbol(symbolMap[upper]);
 
     // 2) 6-letter forex like EURUSD
-    if (/^[A-Z]{6}$/.test(compact)) return compact;
+    if (/^[A-Z]{6}$/.test(compact)) return formatTradingViewSymbol(compact);
 
     // 3) Try converting 6-letter to slash form and map again
     const withSlash = compact.length === 6 ? `${compact.slice(0,3)}/${compact.slice(3)}` : upper;
-    if (symbolMap[withSlash]) return symbolMap[withSlash];
+    if (symbolMap[withSlash]) return formatTradingViewSymbol(symbolMap[withSlash]);
 
     // 4) Direct commodities/crypto symbols already in TradingView format
-    if (/^(XAUUSD|XAGUSD|USOIL|UKOIL|NATGAS|BTCUSD|ETHUSD|LTCUSD|XRPUSD|XPTUSD|XPDUSD)$/i.test(compact)) return compact;
+    if (/^(XAUUSD|XAGUSD|USOIL|UKOIL|NATGAS|BTCUSD|ETHUSD|LTCUSD|XRPUSD|XPTUSD|XPDUSD)$/i.test(compact)) {
+      return formatTradingViewSymbol(compact);
+    }
 
     // 5) Fallback: original lookup or default
-    return symbolMap[instrument] || "EURUSD";
+    return formatTradingViewSymbol(symbolMap[instrument] || "EURUSD");
   };
 
   // Update selected symbol when instrument changes

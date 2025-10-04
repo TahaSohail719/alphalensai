@@ -39,8 +39,19 @@ export function PersistentToast() {
     }
   }, [allJobs.length]);
   
+  // Surgical fix: Realign to first completed job when all active jobs finish
+  useEffect(() => {
+    if (activeJobs.length === 0 && completedJobs.length > 0) {
+      // If selectedJobIndex points outside completedJobs or to a non-existent job
+      if (selectedJobIndex >= completedJobs.length || 
+          !completedJobs.find(j => j.id === currentJob?.id)) {
+        setSelectedJobIndex(0); // Select first completed job
+      }
+    }
+  }, [activeJobs.length, completedJobs.length, selectedJobIndex]);
+  
   const currentJob = allJobs[selectedJobIndex];
-  const isCompleted = currentJob && 'resultData' in currentJob;
+  const isCompleted = currentJob && ('resultData' in currentJob || completedJobs.some(j => j.id === currentJob.id));
   const latestFlash = flashMessages.length > 0 ? flashMessages[flashMessages.length - 1] : null;
   
   // Navigation functions
