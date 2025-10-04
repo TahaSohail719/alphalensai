@@ -55,7 +55,7 @@ export default function Auth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   // Separate effect for loading brokers
   useEffect(() => {
