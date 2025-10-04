@@ -206,7 +206,7 @@ export default function AISetup() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSymbol, setSelectedSymbol] = useState("EURUSD");
   const [parameters, setParameters] = useState({
-    instrument: "EUR/USD",
+    instrument: "",
     timeframe: "4h",
     riskLevel: "medium",
     positionSize: "2",
