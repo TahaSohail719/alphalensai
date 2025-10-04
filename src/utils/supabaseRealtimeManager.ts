@@ -121,10 +121,15 @@ export function getActiveChannels(): Map<string, RealtimeChannel> {
 async function resubscribeAllChannels(): Promise<void> {
   const startTime = Date.now();
   const channelCount = activeChannels.size;
+  const channelNames = Array.from(activeChannels.keys());
   
   console.log(`🔄 [RealtimeManager] Re-subscribing to ${channelCount} channels`, {
     timestamp: new Date(startTime).toISOString(),
-    channels: Array.from(activeChannels.keys())
+    channels: channelNames,
+    channelDetails: channelNames.map(name => ({
+      name,
+      metrics: channelMetrics.get(name)
+    }))
   });
   
   const channelsToResubscribe = Array.from(activeChannels.entries());
@@ -134,7 +139,9 @@ async function resubscribeAllChannels(): Promise<void> {
   for (const [channelName, oldChannel] of channelsToResubscribe) {
     const channelStartTime = Date.now();
     try {
-      console.log(`🔄 [RealtimeManager] Re-subscribing channel: ${channelName}`);
+      console.log(`🔄 [RealtimeManager] Re-subscribing channel: ${channelName}`, {
+        currentMetrics: channelMetrics.get(channelName)
+      });
       
       // Get stored subscription options
       const subscriptionOptions = (oldChannel as any)._subscriptionOptions;
@@ -171,7 +178,8 @@ async function resubscribeAllChannels(): Promise<void> {
     duration: `${totalDuration}ms`,
     total: channelCount,
     success: successCount,
-    failed: failureCount
+    failed: failureCount,
+    finalChannels: Array.from(activeChannels.keys())
   });
 }
 
@@ -217,37 +225,60 @@ export function initializeRealtimeAuthManager(): void {
   console.log(`🔄 [RealtimeManager] Initializing auth state listener`);
   
   supabase.auth.onAuthStateChange(async (event, session) => {
+    const timestamp = new Date().toISOString();
+    const expiresIn = session?.expires_at ? Math.floor((session.expires_at * 1000 - Date.now()) / 1000) : 0;
+    const activeChannelNames = Array.from(activeChannels.keys());
+    
     console.log(`🔄 [RealtimeManager] Auth state changed:`, { 
       event, 
       hasSession: !!session,
+      hasPreviousSession: !!session, // will be enhanced with actual previous session tracking
       expiresAt: session?.expires_at,
-      expiresIn: session?.expires_at ? Math.floor((session.expires_at * 1000 - Date.now()) / 1000) : 0,
+      expiresIn: `${expiresIn}s`,
+      timeUntilExpiry: expiresIn > 0 ? `${Math.floor(expiresIn / 60)}m ${expiresIn % 60}s` : 'expired',
       activeChannels: activeChannels.size,
-      timestamp: new Date().toISOString()
+      channelNames: activeChannelNames,
+      timestamp
     });
     
     // CRITICAL: Log if session expires while channels are active
     if (event === 'SIGNED_OUT' && activeChannels.size > 0) {
       console.error('❌ [RealtimeManager] CRITICAL: User signed out with active channels!', {
         activeChannelCount: activeChannels.size,
-        channels: Array.from(activeChannels.keys()),
-        timestamp: new Date().toISOString()
+        channels: activeChannelNames,
+        timestamp
       });
     }
     
     // Only handle actual sign out, not token refresh events
     if (event === 'SIGNED_OUT') {
       // Clean up all channels on sign out
-      console.log(`🔄 [RealtimeManager] Cleaning up channels on sign out`);
+      console.log(`🔄 [RealtimeManager] Cleaning up ${activeChannels.size} channels on sign out`);
       for (const [channelName] of activeChannels) {
-        unsubscribeChannel(channelName);
+        unsubscribeChannel(channelName, 'SIGNED_OUT');
       }
     } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
       // Silent token refresh - update auth without disrupting channels
-      console.log(`✅ [RealtimeManager] Token refreshed, updating realtime auth silently`);
-      supabase.realtime.setAuth(session.access_token);
+      console.log(`✅ [RealtimeManager] Token refreshed, updating realtime auth silently for ${activeChannels.size} channels`);
+      
+      try {
+        supabase.realtime.setAuth(session.access_token);
+        console.log(`✅ [RealtimeManager] setAuth() successful for ${activeChannels.size} channels`, {
+          channels: activeChannelNames,
+          timestamp: new Date().toISOString()
+        });
+        
+        // DO NOT clear channels or job state during TOKEN_REFRESHED
+        // Channels remain subscribed with updated auth token
+        
+      } catch (error) {
+        console.error('❌ [RealtimeManager] setAuth() failed:', error, {
+          timestamp: new Date().toISOString()
+        });
+      }
     } else if (session?.access_token && activeChannels.size > 0) {
       // Initial sign-in or session recovery with active channels
+      console.log(`🔄 [RealtimeManager] Session recovery with ${activeChannels.size} active channels`);
       await refreshRealtimeAuth(session.access_token);
     }
   });

@@ -13,5 +13,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true, // Critical for OAuth and magic link flows
   }
+});
+
+// Log client configuration on startup for diagnostics
+console.log('[Supabase Client] Initialized with config:', {
+  autoRefreshToken: true,
+  persistSession: true,
+  detectSessionInUrl: true,
+  timestamp: new Date().toISOString()
 });

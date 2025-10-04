@@ -24,44 +24,96 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let debounceTimer: NodeJS.Timeout | null = null;
+    let previousSession: Session | null = null;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[Auth] event', event, { hasSession: !!session, expiresAt: session?.expires_at });
+        const timestamp = new Date().toISOString();
+        const expiresIn = session?.expires_at ? Math.floor((session.expires_at * 1000 - Date.now()) / 1000) : 0;
         
-        setLoading(false);
+        console.log('[Auth] Auth state change:', {
+          event,
+          hasSession: !!session,
+          hasPreviousSession: !!previousSession,
+          sessionChanged: session?.access_token !== previousSession?.access_token,
+          expiresAt: session?.expires_at,
+          expiresIn: `${expiresIn}s`,
+          timestamp
+        });
         
-        // Handle explicit sign out
-        if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setSession(null);
+        // CRITICAL: Ignore INITIAL_SESSION with null session (not a logout)
+        if (event === 'INITIAL_SESSION' && !session) {
+          console.log('[Auth] Ignoring INITIAL_SESSION with null session (not a logout)');
+          setLoading(false);
           return;
         }
         
-        // For all other events, update session if present
-        if (session) {
-          setSession(session);
-          setUser(session.user);
-        } else {
-          // On transient null session, verify before clearing user
-          const { data: { session: current } } = await supabase.auth.getSession();
-          if (current) {
-            setSession(current);
-            setUser(current.user);
-          }
-          // Avoid flipping to null during token refresh
+        // Handle explicit sign out ONLY if session is null AND event is SIGNED_OUT
+        if (event === 'SIGNED_OUT' && !session) {
+          console.log('[Auth] Explicit sign out detected');
+          setUser(null);
+          setSession(null);
+          previousSession = null;
+          setLoading(false);
+          return;
         }
+        
+        // Debounce rapid auth events to avoid race conditions
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        
+        debounceTimer = setTimeout(async () => {
+          setLoading(false);
+          
+          // For all other events, update session if present
+          if (session) {
+            console.log('[Auth] Updating session:', {
+              event,
+              isTokenRefresh: event === 'TOKEN_REFRESHED',
+              timestamp
+            });
+            setSession(session);
+            setUser(session.user);
+            previousSession = session;
+          } else {
+            // On transient null session, verify before clearing user
+            console.log('[Auth] Null session received, verifying...');
+            const { data: { session: current } } = await supabase.auth.getSession();
+            if (current) {
+              console.log('[Auth] Verified session exists, restoring');
+              setSession(current);
+              setUser(current.user);
+              previousSession = current;
+            } else {
+              console.log('[Auth] No session found after verification');
+            }
+            // Avoid flipping to null during token refresh
+          }
+        }, 200); // 200ms debounce
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[Auth] Initial session check:', {
+        hasSession: !!session,
+        timestamp: new Date().toISOString()
+      });
       setSession(session);
       setUser(session?.user ?? null);
+      previousSession = session;
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
   }, []);
 
   // Generate or retrieve stable device ID

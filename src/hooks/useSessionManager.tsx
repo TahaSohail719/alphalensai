@@ -156,6 +156,17 @@ export function useSessionManager() {
               }
 
               if (data.is_active === false) {
+                // CRITICAL: Check for active jobs before signing out
+                const activeJobsCount = parseInt(sessionStorage.getItem('activeJobsCount') || '0', 10);
+                
+                if (activeJobsCount > 0) {
+                  console.warn('⚠️ [SessionManager] Session deactivated but active jobs exist. DO NOT sign out.', {
+                    activeJobsCount,
+                    timestamp: new Date().toISOString()
+                  });
+                  return;
+                }
+                
                 console.log('🚫 [SessionManager] Session deactivated, signing out');
                 const isVoluntaryLogout = localStorage.getItem('alphalens_voluntary_logout') === 'true';
                 if (!isVoluntaryLogout) {
@@ -214,6 +225,17 @@ export function useSessionManager() {
               !updatedSession.is_active && 
               updatedSession.session_id === currentSessionRef.current
             ) {
+              // CRITICAL: Check for active jobs before signing out
+              const activeJobsCount = parseInt(sessionStorage.getItem('activeJobsCount') || '0', 10);
+              
+              if (activeJobsCount > 0) {
+                console.warn('⚠️ [SessionManager] Realtime session deactivation but active jobs exist. DO NOT sign out.', {
+                  activeJobsCount,
+                  timestamp: new Date().toISOString()
+                });
+                return;
+              }
+              
               const isVoluntaryLogout = localStorage.getItem('alphalens_voluntary_logout') === 'true';
               if (!isVoluntaryLogout) {
                 toast({
