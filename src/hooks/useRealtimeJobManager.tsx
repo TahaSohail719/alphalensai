@@ -133,13 +133,7 @@ export function useRealtimeJobManager() {
               : activeJob
           ));
 
-          // Show progress update in toast
-          toast({
-            title: "Processing...",
-            description: job.progress_message,
-            duration: 4000,
-            className: "fixed top-4 left-4 z-[100] max-w-sm animate-fade-in"
-          });
+          // Progress handled by PersistentNotificationProvider
         }
         
         if (job.status === 'completed' && job.response_payload) {
@@ -163,12 +157,7 @@ export function useRealtimeJobManager() {
               : activeJob
           ));
 
-          toast({
-            title: "Analysis Complete",
-            description: "Your request has been processed successfully",
-            duration: Infinity, // Reste visible jusqu'au clic
-            className: "fixed top-4 left-4 z-[100] max-w-sm"
-          });
+          // Completion handled by PersistentNotificationProvider
         } else if (job.status === 'error') {
           console.log('❌ [RealtimeJobManager] Job failed:', {
             jobId: job.id,
@@ -184,13 +173,7 @@ export function useRealtimeJobManager() {
               : activeJob
           ));
 
-          toast({
-            title: "Analysis Failed",
-            description: "The request could not be processed",
-            variant: "destructive",
-            duration: Infinity, // Reste visible jusqu'au clic
-            className: "fixed top-4 left-4 z-[100] max-w-sm"
-          });
+          // Error handled by PersistentNotificationProvider
         } else if (job.status === 'running') {
           console.log('🔄 [RealtimeJobManager] Job running:', {
             jobId: job.id,

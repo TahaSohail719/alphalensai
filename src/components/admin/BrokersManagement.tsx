@@ -53,6 +53,8 @@ export function BrokersManagement() {
     setLoading(true);
     const brokersData = await fetchBrokers();
     
+    console.log('📊 [BrokersManagement] isSuperUser:', isSuperUser);
+    
     // Si super user, enrichir avec les données de revenus
     if (isSuperUser) {
       console.log(`📊 [BrokersManagement] Enriching ${brokersData.length} brokers with revenue data...`);
@@ -376,7 +378,7 @@ export function BrokersManagement() {
                         </TableCell>
                         {isSuperUser && (
                           <TableCell className="text-center">
-                            <Badge variant="outline">{broker.user_count || 0}</Badge>
+                            <Badge variant="outline">{broker.user_count ?? 0}</Badge>
                           </TableCell>
                         )}
                         {isSuperUser && (
@@ -384,7 +386,7 @@ export function BrokersManagement() {
                             <div className="flex items-center justify-center gap-1">
                               <DollarSign className="h-3 w-3 text-green-600" />
                               <span className="font-semibold text-green-600">
-                                {(broker.estimated_revenue || 0).toFixed(2)}
+                                {(broker.estimated_revenue ?? 0).toFixed(2)}
                               </span>
                             </div>
                           </TableCell>
