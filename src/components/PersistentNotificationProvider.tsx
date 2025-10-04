@@ -121,14 +121,37 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
           
           console.log('📥 [PersistentNotifications] New job INSERT:', newJob);
           
+          // Extract real data from request_payload
+          const extractInstrument = (job: any): string => {
+            if (job.instrument) return job.instrument;
+            const payload = job.request_payload;
+            if (!payload) return 'Analysis';
+            return payload.instrument || payload.ticker || payload.symbol || payload.asset || 'Analysis';
+          };
+          
+          const extractFeature = (job: any): string => {
+            if (job.feature) return job.feature;
+            const payload = job.request_payload;
+            if (!payload || !payload.type) return 'analysis';
+            
+            // Map type to feature
+            const typeMap: Record<string, string> = {
+              'ai_trade_setup': 'AI Trade Setup',
+              'macro_commentary': 'Macro Commentary',
+              'report': 'Report',
+              'reports': 'Report'
+            };
+            return typeMap[payload.type] || payload.type;
+          };
+          
           const activeJob: ActiveJob = {
             id: newJob.id,
-            type: newJob.feature || 'Unknown',
-            feature: newJob.feature || 'analysis',
-            instrument: newJob.instrument || 'Unknown',
+            type: extractFeature(newJob),
+            feature: extractFeature(newJob),
+            instrument: extractInstrument(newJob),
             status: 'pending',
             createdAt: new Date(),
-            originatingFeature: mapFeatureToOriginatingFeature(newJob.feature || '')
+            originatingFeature: mapFeatureToOriginatingFeature(extractFeature(newJob))
           };
 
           setActiveJobs(prev => {
@@ -190,16 +213,39 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
             
             // Move from active to completed
             console.log('✅ [PersistentNotifications] Job completed, moving to completed list');
+            
+            // Extract real data from request_payload for completed job too
+            const extractInstrument = (job: any): string => {
+              if (job.instrument) return job.instrument;
+              const payload = job.request_payload;
+              if (!payload) return 'Analysis';
+              return payload.instrument || payload.ticker || payload.symbol || payload.asset || 'Analysis';
+            };
+            
+            const extractFeature = (job: any): string => {
+              if (job.feature) return job.feature;
+              const payload = job.request_payload;
+              if (!payload || !payload.type) return 'analysis';
+              
+              const typeMap: Record<string, string> = {
+                'ai_trade_setup': 'AI Trade Setup',
+                'macro_commentary': 'Macro Commentary',
+                'report': 'Report',
+                'reports': 'Report'
+              };
+              return typeMap[payload.type] || payload.type;
+            };
+            
             setActiveJobs(prev => prev.filter(job => job.id !== updatedJob.id));
             
             const completedJob: CompletedJob = {
               id: updatedJob.id,
-              type: updatedJob.feature || 'Unknown',
-              feature: updatedJob.feature || 'analysis',
-              instrument: updatedJob.instrument || 'Unknown',
+              type: extractFeature(updatedJob),
+              feature: extractFeature(updatedJob),
+              instrument: extractInstrument(updatedJob),
               resultData: updatedJob.response_payload,
               completedAt: new Date(),
-              originatingFeature: mapFeatureToOriginatingFeature(updatedJob.feature || '')
+              originatingFeature: mapFeatureToOriginatingFeature(extractFeature(updatedJob))
             };
 
             // Debit credits on successful completion

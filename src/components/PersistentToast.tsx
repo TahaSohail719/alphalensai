@@ -40,7 +40,7 @@ export function PersistentToast() {
   }, [allJobs.length]);
   
   const currentJob = allJobs[selectedJobIndex];
-  const isCompleted = currentJob && 'result' in currentJob;
+  const isCompleted = currentJob && 'resultData' in currentJob;
   const latestFlash = flashMessages.length > 0 ? flashMessages[flashMessages.length - 1] : null;
   
   // Navigation functions
@@ -271,7 +271,7 @@ export function PersistentToast() {
                 <ScrollArea className="max-h-64">
                   <div className="p-2">
                     {allJobs.map((job, index) => {
-                      const jobCompleted = 'result' in job;
+                      const jobCompleted = 'resultData' in job;
                       const isSelected = index === selectedJobIndex;
                       return (
                         <div 
@@ -440,7 +440,7 @@ export function PersistentToast() {
                     onClick={(e) => {
                       e.stopPropagation();
                       // Navigate to first completed job
-                      const firstCompletedIndex = allJobs.findIndex(job => 'result' in job);
+                      const firstCompletedIndex = allJobs.findIndex(job => 'resultData' in job);
                       if (firstCompletedIndex !== -1) {
                         setSelectedJobIndex(firstCompletedIndex);
                       }
