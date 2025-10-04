@@ -35,12 +35,24 @@ export function JobStatusCards() {
                   </span>
                 </div>
                 
-                <p className="text-xs text-muted-foreground mb-2">
-                  {job.status === 'pending' && "Query is being processed..."}
-                  {job.status === 'running' && "Analysis in progress..."}
-                  {job.status === 'completed' && "Analysis completed"}
-                  {job.status === 'error' && "Analysis failed"}
-                </p>
+                <div className="text-xs text-muted-foreground mb-2 min-h-[1rem]">
+                  {(job.status === 'pending' || job.status === 'running') && job.progressMessage ? (
+                    <p 
+                      key={job.progressMessage}
+                      className="animate-in slide-in-from-left-2 fade-in duration-300"
+                    >
+                      <span className="inline-block mr-1 text-primary">✨</span>
+                      {job.progressMessage}
+                    </p>
+                  ) : (
+                    <p>
+                      {job.status === 'pending' && "Query is being processed..."}
+                      {job.status === 'running' && "Analysis in progress..."}
+                      {job.status === 'completed' && "Analysis completed"}
+                      {job.status === 'error' && "Analysis failed"}
+                    </p>
+                  )}
+                </div>
 
                 {(job.status === 'pending' || job.status === 'running') && (
                   <Progress 

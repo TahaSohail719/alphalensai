@@ -339,20 +339,12 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
           
           console.log(`🔔 [MockProgress] ${job.feature} (${job.id}) - "${msg.text}"`);
           
-          // Update progress message in state
+          // 🔔 Update job with progress message (displayed in DiscreetJobStatus & JobStatusCards)
           setActiveJobs(prev => prev.map(activeJob => 
             activeJob.id === job.id 
               ? { ...activeJob, progressMessage: msg.text }
               : activeJob
           ));
-
-          // Show flash message
-          addFlashMessage({
-            type: 'info',
-            title: 'Processing...',
-            description: msg.text,
-            duration: 4000
-          });
           
           messageIndex++;
           scheduleNextMessage();
