@@ -373,7 +373,7 @@ export function PersistentToast() {
           
           <div className="flex items-start gap-2">
             <div className="flex-shrink-0 mt-0.5">
-              {isCompleted ? (
+              {(isCompleted || activeJobs.length === 0) ? (
                 <CheckCircle className="h-4 w-4 text-success" />
               ) : (
                 <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -392,7 +392,7 @@ export function PersistentToast() {
               </p>
               
               {/* Timer for active jobs */}
-              {!isCompleted && currentJob && (
+              {!isCompleted && currentJob && activeJobs.length > 0 && (
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                     <span>Elapsed time</span>
@@ -402,7 +402,7 @@ export function PersistentToast() {
               )}
               
               {/* Progress message for active jobs */}
-              {!isCompleted && currentJob && 'progressMessage' in currentJob && currentJob.progressMessage && (
+              {!isCompleted && currentJob && 'progressMessage' in currentJob && currentJob.progressMessage && activeJobs.length > 0 && (
                 <p key={currentJob.progressMessage} className="text-xs text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-200 mb-2">
                   {currentJob.progressMessage}
                 </p>

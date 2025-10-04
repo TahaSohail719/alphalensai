@@ -215,6 +215,27 @@ export default function AISetup() {
   });
 
 
+  // Helper to strip exchange prefixes
+  const stripPrefix = (s: string) => s.replace(/^(FX|OANDA|BINANCE|TVC|FOREX|CRYPTO):/i, '').trim();
+
+  // Helper to normalize timeframe to TradingView format
+  const normalizeTimeframe = (tf?: string): string => {
+    if (!tf) return '1h';
+    const t = tf.toString().toLowerCase().trim();
+    const map: Record<string, string> = {
+      '1': '1m', '1m': '1m',
+      '5': '5m', '5m': '5m',
+      '15': '15m', '15m': '15m',
+      '30': '30m', '30m': '30m',
+      '60': '1h', '1h': '1h', 'h1': '1h',
+      '240': '4h', '4h': '4h', 'h4': '4h',
+      'd': 'D', '1d': 'D', 'daily': 'D',
+      'w': 'W', '1w': 'W', 'weekly': 'W',
+      'm': 'M', '1mth': 'M', 'monthly': 'M',
+    };
+    return map[t] || (t.endsWith('h') || t.endsWith('m') || ['d','w','m'].includes(t) ? t : '1h');
+  };
+
   // Map instrument to TradingView symbol (raw symbols without exchange prefix)
   const mapInstrumentToSymbol = (instrument: string): string => {
     const symbolMap: Record<string, string> = {
@@ -293,7 +314,10 @@ export default function AISetup() {
     };
 
     if (!instrument) return "EURUSD";
-    const upper = instrument.toUpperCase();
+    
+    // Strip exchange prefix first
+    const base = stripPrefix(instrument);
+    const upper = base.toUpperCase();
     const compact = upper.replace(/\s+/g, '').replace(/-/g, '').replace(/_/g, '');
 
     // 1) Exact mapping like "EUR/USD"
@@ -543,6 +567,17 @@ export default function AISetup() {
             const sym = mapInstrumentToSymbol(ins);
             setSelectedSymbol(sym);
             console.log(`📊 [AISetup] Chart set from pending result: ${ins} -> ${sym}`);
+          }
+
+          // Extract and normalize timeframe from the result
+          const resultTimeframe = normalized?.setups?.[0]?.timeframe || 
+                                 result.resultData?.timeframe ||
+                                 result.requestPayload?.timeframe;
+          
+          if (resultTimeframe) {
+            const normalizedTf = normalizeTimeframe(resultTimeframe);
+            console.log('[AISetup] Setting timeframe from pending result:', { resultTimeframe, normalizedTf });
+            setParameters(prev => ({ ...prev, timeframe: normalizedTf }));
           }
 
           if (normalized && normalized.setups && normalized.setups.length > 0) {
@@ -829,7 +864,12 @@ export default function AISetup() {
             {/* TradingView Chart Integration */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 order-2 lg:order-none">
-                <TradingViewWidget selectedSymbol={selectedSymbol} onSymbolChange={setSelectedSymbol} className="h-[500px]" />
+                <TradingViewWidget 
+                  selectedSymbol={selectedSymbol} 
+                  timeframe={parameters.timeframe}
+                  onSymbolChange={setSelectedSymbol} 
+                  className="h-[500px]" 
+                />
               </div>
               
               <div className="space-y-4 order-1 lg:order-none">
