@@ -75,17 +75,36 @@ export default function Reports() {
       let htmlContentData = null;
       
       if (typeof responseData === 'string') {
-        // Direct HTML string
-        htmlContentData = responseData;
-      } else if (responseData?.output?.base_report) {
-        // Nested: { output: { base_report: "<html>..." } }
-        htmlContentData = responseData.output.base_report;
-      } else if (responseData?.base_report) {
-        // One level: { base_report: "<html>..." }
-        htmlContentData = responseData.base_report;
-      } else if (responseData?.html || responseData?.content) {
-        // Alternative keys
-        htmlContentData = responseData.html || responseData.content;
+        const trimmed = responseData.trim();
+        if (trimmed.startsWith('<')) {
+          // Direct HTML string
+          htmlContentData = trimmed;
+        } else {
+          // Try to parse stringified JSON payload
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (parsed?.output?.base_report) {
+              htmlContentData = parsed.output.base_report;
+            } else if (parsed?.base_report) {
+              htmlContentData = parsed.base_report;
+            } else if (parsed?.html || parsed?.content) {
+              htmlContentData = parsed.html || parsed.content;
+            } else if (typeof parsed === 'string' && parsed.trim().startsWith('<')) {
+              htmlContentData = parsed;
+            }
+          } catch (e) {
+            console.warn('📄 [Reports] String payload was not HTML nor JSON:', e);
+          }
+        }
+      } else if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
+        const payload = responseData as Record<string, any>;
+        if (payload.output?.base_report) {
+          htmlContentData = payload.output.base_report;
+        } else if (payload.base_report) {
+          htmlContentData = payload.base_report;
+        } else if (payload.html || payload.content) {
+          htmlContentData = payload.html || payload.content;
+        }
       }
       
       console.log('📄 [Reports] Extracted HTML content:', { 
@@ -200,9 +219,27 @@ export default function Reports() {
         const responseData = data.response_payload;
         let htmlContentData = null;
 
-        // Use same extraction logic as realtime handler
+        // Use same extraction logic as realtime handler (robust to stringified JSON)
         if (typeof responseData === 'string') {
-          htmlContentData = responseData;
+          const trimmed = responseData.trim();
+          if (trimmed.startsWith('<')) {
+            htmlContentData = trimmed;
+          } else {
+            try {
+              const parsed = JSON.parse(trimmed);
+              if (parsed?.output?.base_report) {
+                htmlContentData = parsed.output.base_report;
+              } else if (parsed?.base_report) {
+                htmlContentData = parsed.base_report;
+              } else if (parsed?.html || parsed?.content) {
+                htmlContentData = parsed.html || parsed.content;
+              } else if (typeof parsed === 'string' && parsed.trim().startsWith('<')) {
+                htmlContentData = parsed;
+              }
+            } catch (e) {
+              console.warn('📄 [Reports] Persisted payload was string but not valid JSON/HTML');
+            }
+          }
         } else if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
           const payload = responseData as Record<string, any>;
           if (payload.output?.base_report) {
@@ -346,12 +383,44 @@ export default function Reports() {
       try {
         const result = JSON.parse(pendingResult);
         if (result.type.includes('report')) {
-          // Process the report data similar to the realtime injector
+          // Prefer HTML content if available; fall back to structured sections
+          let data: any = result.resultData;
+          let html: string | null = null;
+
+          if (typeof data === 'string') {
+            const trimmed = data.trim();
+            if (trimmed.startsWith('<')) {
+              html = trimmed;
+            } else {
+              try {
+                data = JSON.parse(trimmed);
+              } catch (e) {
+                console.warn('📄 [Reports] pendingResult payload is non-HTML string and not JSON');
+              }
+            }
+          }
+
+          if (!html && data && typeof data === 'object') {
+            if (data?.output?.base_report) html = data.output.base_report;
+            else if (data?.base_report) html = data.base_report;
+            else if (data?.html || data?.content) html = data.html || data.content;
+          }
+
+          if (html) {
+            setHtmlContent(html);
+            setStep('generated');
+            setIsGenerating(false);
+            toast({ title: 'Report Loaded', description: 'Your report has been loaded.', duration: 3000 });
+            sessionStorage.removeItem('pendingResult');
+            return;
+          }
+
+          // Fallback: structured sections
           const includedSections = availableSections.filter(s => s.included);
           const generatedSections = includedSections.map(section => ({
             title: section.title,
-            content: result.resultData.sections?.[section.id] || result.resultData.content || `Generated content for the "${section.title}" section.`,
-            userNotes: section.userNotes || ""
+            content: data?.sections?.[section.id] || data?.content || `Generated content for the "${section.title}" section.`,
+            userNotes: section.userNotes || ''
           }));
 
           const newReport: GeneratedReport = {
@@ -361,11 +430,12 @@ export default function Reports() {
             customNotes: reportConfig.customNotes,
             exportFormat: reportConfig.exportFormat,
             createdAt: new Date(),
-            status: "generated"
+            status: 'generated'
           };
 
           setCurrentReport(newReport);
-          setStep("generated");
+          setStep('generated');
+          setIsGenerating(false);
           sessionStorage.removeItem('pendingResult');
         }
       } catch (error) {

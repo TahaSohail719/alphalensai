@@ -408,9 +408,9 @@ export default function TradingDashboard() {
             case 'macro_commentary':
               navigate('/macro-analysis');
               break;
-            case 'report':
-              navigate('/reports');
-              break;
+              case 'report':
+                navigate(`/reports?jobId=${job.id}`);
+                break;
           }
         }}
         onDismiss={jobManager.removeJob}

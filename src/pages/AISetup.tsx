@@ -291,6 +291,25 @@ export default function AISetup() {
       "LIVE_CATTLE": "LIVE_CATTLE",
       "LEAN_HOGS": "LEAN_HOGS"
     };
+
+    if (!instrument) return "EURUSD";
+    const upper = instrument.toUpperCase();
+    const compact = upper.replace(/\s+/g, '').replace(/-/g, '').replace(/_/g, '');
+
+    // 1) Exact mapping like "EUR/USD"
+    if (symbolMap[upper]) return symbolMap[upper];
+
+    // 2) 6-letter forex like EURUSD
+    if (/^[A-Z]{6}$/.test(compact)) return compact;
+
+    // 3) Try converting 6-letter to slash form and map again
+    const withSlash = compact.length === 6 ? `${compact.slice(0,3)}/${compact.slice(3)}` : upper;
+    if (symbolMap[withSlash]) return symbolMap[withSlash];
+
+    // 4) Direct commodities/crypto symbols already in TradingView format
+    if (/^(XAUUSD|XAGUSD|USOIL|UKOIL|NATGAS|BTCUSD|ETHUSD|LTCUSD|XRPUSD|XPTUSD|XPDUSD)$/i.test(compact)) return compact;
+
+    // 5) Fallback: original lookup or default
     return symbolMap[instrument] || "EURUSD";
   };
 
@@ -515,6 +534,14 @@ export default function AISetup() {
           // Inject the result data directly
           const parsedPayload = result.resultData;
           const normalized = normalizeN8n(parsedPayload);
+
+          // Update chart symbol from result.instrument even if normalized is missing it
+          const ins = (normalized?.instrument as string | undefined) || (result.instrument as string | undefined);
+          if (ins) {
+            const sym = mapInstrumentToSymbol(ins);
+            setSelectedSymbol(sym);
+            console.log(`📊 [AISetup] Chart set from pending result: ${ins} -> ${sym}`);
+          }
 
           if (normalized && normalized.setups && normalized.setups.length > 0) {
             setRawN8nResponse(parsedPayload);
