@@ -71,11 +71,49 @@ export default function Reports() {
     onReportResult: (responseData, jobId) => {
       console.log('📄 [Reports] Realtime response injected:', { responseData, jobId });
       
-      // Process the report data from Supabase exactly as HTTP response
+      // 🔹 STEP 1: Extract HTML content with multiple fallback paths
+      let htmlContentData = null;
+      
+      if (typeof responseData === 'string') {
+        // Direct HTML string
+        htmlContentData = responseData;
+      } else if (responseData?.output?.base_report) {
+        // Nested: { output: { base_report: "<html>..." } }
+        htmlContentData = responseData.output.base_report;
+      } else if (responseData?.base_report) {
+        // One level: { base_report: "<html>..." }
+        htmlContentData = responseData.base_report;
+      } else if (responseData?.html || responseData?.content) {
+        // Alternative keys
+        htmlContentData = responseData.html || responseData.content;
+      }
+      
+      console.log('📄 [Reports] Extracted HTML content:', { 
+        hasHtml: !!htmlContentData,
+        contentType: typeof htmlContentData,
+        contentLength: htmlContentData?.length 
+      });
+      
+      // 🔹 STEP 2: Set HTML content directly (primary path)
+      if (htmlContentData) {
+        setHtmlContent(htmlContentData);
+        setStep("generated");
+        setIsGenerating(false);
+        
+        toast({
+          title: "Report Generated",
+          description: "Your report has been successfully generated from realtime data",
+          duration: 5000
+        });
+        return; // Exit early - HTML path is primary
+      }
+      
+      // 🔹 STEP 3: Fallback to section-based report if no HTML
       const includedSections = availableSections.filter(s => s.included);
       const generatedSections = includedSections.map(section => ({
         title: section.title,
-        content: responseData.sections?.[section.id] || responseData.content || `Generated content for the "${section.title}" section. This section contains detailed analysis based on your recent trading data and current market conditions.`,
+        content: responseData.sections?.[section.id] || responseData.content || 
+                 `Generated content for the "${section.title}" section.`,
         userNotes: section.userNotes || ""
       }));
 
@@ -95,7 +133,7 @@ export default function Reports() {
       
       toast({
         title: "Report Generated",
-        description: "Your report has been successfully generated from realtime data",
+        description: "Your report has been successfully generated (structured format)",
         duration: 5000
       });
     }
@@ -303,6 +341,12 @@ export default function Reports() {
         reportPayload,
         'Report'
       );
+      
+      console.log('✅ [Reports] Job created:', { 
+        jobId: reportJobId, 
+        instrument: selectedAsset?.symbol || "Multi-Asset",
+        sections: includedSections.length 
+      });
 
       // 🔹 STEP 2: Engage credit IMMEDIATELY after job creation
       const engaged = await engageCredit('reports', reportJobId);
@@ -316,61 +360,7 @@ export default function Reports() {
         return;
       }
 
-      // 1. CRITICAL: Subscribe to jobs table BEFORE sending POST request
-      console.log('📡 [Realtime] Subscribing to jobs updates before POST');
-      
-      const realtimeChannel = supabase
-        .channel(`reports-${reportJobId}`)
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'jobs',
-          filter: `user_id=eq.${user?.id}`
-         }, (payload) => {
-           console.log('📩 [Realtime] Job update received:', payload);
-           const job = payload.new as any;
-           
-           if (job && job.status && job.id === reportJobId) {
-             if (job.status === 'completed' && job.response_payload) {
-               console.log('📩 [Realtime] Processing completed response with HTML content');
-               console.log('🔄 [Loader] Stopping loader - Realtime response received');
-               
-               // Set HTML content if available
-               if (job.response_payload) {
-                  setHtmlContent(job.response_payload);
-                  setStep("generated");
-                  setIsGenerating(false);
-                  
-                   // Credit logging handled by dual response handler to avoid duplicates
-                  
-                  toast({
-                    title: "Report Generated",
-                    description: "Your report has been successfully generated."
-                  });
-               } else {
-                 setHtmlContent(null);
-                 setIsGenerating(false);
-                 toast({
-                   title: "Report Generated",
-                   description: "Report completed but no content available."
-                 });
-               }
-             } else if (job.status === 'error') {
-               console.log('❌ [Realtime] Job failed:', job.error_message);
-               console.log('🔄 [Loader] Stopping loader - Realtime error received');
-               setIsGenerating(false);
-               setHtmlContent(null);
-               toast({
-                 title: "Error",
-                 description: job.error_message || "Failed to generate report. Please try again.",
-                 variant: "destructive"
-               });
-             }
-           }
-         })
-        .subscribe();
-      
-      console.log('📡 [Realtime] Subscribed before POST');
+      console.log('🚀 [Reports] Job created, realtime injection will handle response:', reportJobId);
 
       // Register dual response handler
       dualResponseHandler.registerHandler(reportJobId, (data, source) => {
@@ -789,10 +779,19 @@ export default function Reports() {
           </div>
         )}
 
-        {step === "generated" && (htmlContent || currentReport) && (
+        {step === "generated" && (() => {
+          console.log('📊 [Reports] Rendering decision:', { 
+            step, 
+            hasHtml: !!htmlContent, 
+            htmlLength: htmlContent?.length,
+            hasCurrentReport: !!currentReport, 
+            sectionsCount: currentReport?.sections?.length,
+            isGenerating 
+          });
+          return (
           <div className="space-y-6">
-            {/* HTML Report Content */}
-            {htmlContent ? (
+            {/* Priority 1: HTML Content (from backend) */}
+            {htmlContent && typeof htmlContent === 'string' && htmlContent.length > 0 ? (
               <Card className="gradient-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -842,22 +841,8 @@ export default function Reports() {
                   />
                 </CardContent>
               </Card>
-            ) : htmlContent === null ? (
-              <Card className="gradient-card">
-                <CardContent className="p-8 text-center">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">No report available yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Your report is being processed. Please wait for the content to be generated.
-                  </p>
-                  <Button onClick={resetComposer} variant="outline">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New Report
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : currentReport && (
-              /* Fallback to old report display */
+            ) : currentReport && currentReport.sections.length > 0 ? (
+              /* Priority 2: Structured Report (fallback) */
               <Card className="gradient-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -922,9 +907,35 @@ export default function Reports() {
                   </div>
                 </CardContent>
               </Card>
+            ) : (
+              /* Priority 3: Waiting/Error State */
+              <Card className="gradient-card">
+                <CardContent className="p-8 text-center">
+                  {isGenerating ? (
+                    <>
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
+                      <h3 className="text-lg font-medium mb-2">Generating Report...</h3>
+                      <p className="text-muted-foreground">Please wait while your report is being processed.</p>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-medium mb-2">No report available yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        The report generation completed but no content was returned.
+                      </p>
+                      <Button onClick={resetComposer} variant="outline">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create New Report
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </div>
-        )}
+          );
+        })()}
       </div>
     </Layout>
   );
