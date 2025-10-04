@@ -8,7 +8,7 @@ import { getFeatureDisplayName } from '@/lib/feature-mapper';
 import { MiniProgressBubble } from './MiniProgressBubble';
 
 export function PersistentToast() {
-  const { activeJobs, completedJobs, markJobAsViewed, navigateToResult } = usePersistentNotifications();
+  const { activeJobs, completedJobs, flashMessages, removeFlashMessage, markJobAsViewed, navigateToResult } = usePersistentNotifications();
   const isMobile = useIsMobile();
   
   // All hooks MUST be called before any conditional returns
@@ -21,14 +21,16 @@ export function PersistentToast() {
   const [showMiniBubble, setShowMiniBubble] = useState<{
     feature: string;
     message: string;
+    titleOverride?: string;
   } | null>(null);
 
-  const totalJobs = activeJobs.length + completedJobs.length;
+  const totalCount = activeJobs.length + completedJobs.length + flashMessages.length;
   
   console.log('🍞 [PersistentToast] Render check:', {
     activeJobsCount: activeJobs.length,
     completedJobsCount: completedJobs.length,
-    totalJobs,
+    flashMessagesCount: flashMessages.length,
+    totalCount,
     activeJobs,
     completedJobs
   });
@@ -38,7 +40,7 @@ export function PersistentToast() {
   const mostRecentJob = isCompleted 
     ? completedJobs[completedJobs.length - 1]
     : activeJobs[activeJobs.length - 1];
-
+  const latestFlash = flashMessages.length > 0 ? flashMessages[flashMessages.length - 1] : null;
   // Timer for active jobs
   useEffect(() => {
     if (!isCompleted && activeJobs.length > 0) {
@@ -65,6 +67,29 @@ export function PersistentToast() {
     }
   }, [isMinimized, isCompleted, mostRecentJob?.progressMessage]);
 
+  // Show mini bubble for flash messages when minimized
+  useEffect(() => {
+    if (isMinimized && flashMessages.length > 0) {
+      const last = flashMessages[flashMessages.length - 1];
+      setShowMiniBubble({
+        feature: 'notification',
+        message: last.description || last.title,
+        titleOverride: last.title
+      });
+    }
+  }, [isMinimized, flashMessages.length]);
+  
+  // Show mini bubble when a job completes (when minimized)
+  useEffect(() => {
+    if (isMinimized && completedJobs.length > 0) {
+      const job = completedJobs[completedJobs.length - 1];
+      setShowMiniBubble({
+        feature: job.feature || 'unknown',
+        message: `${getFeatureDisplayName(job.feature)} completed`
+      });
+    }
+  }, [isMinimized, completedJobs.length]);
+  
   // Format elapsed time
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -144,7 +169,7 @@ export function PersistentToast() {
   }, [isDragging, dragOffset]);
 
   // Early return AFTER all hooks have been called
-  if (totalJobs === 0) return null;
+  if (totalCount === 0) return null;
 
   return (
     <>
@@ -153,6 +178,7 @@ export function PersistentToast() {
         <MiniProgressBubble
           feature={showMiniBubble.feature}
           message={showMiniBubble.message}
+          titleOverride={showMiniBubble.titleOverride}
           onDismiss={() => setShowMiniBubble(null)}
         />
       )}
@@ -197,9 +223,9 @@ export function PersistentToast() {
           ) : (
             <div className="h-7 w-7 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
           )}
-          {totalJobs > 1 && (
+          {totalCount > 1 && (
             <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-md z-10">
-              {totalJobs}
+              {totalCount}
             </span>
           )}
           
@@ -263,9 +289,9 @@ export function PersistentToast() {
                 <h4 className="text-xs font-medium text-foreground">
                   {isCompleted ? 'Result Ready' : 'Processing...'}
                 </h4>
-                {totalJobs > 1 && (
+                {totalCount > 1 && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
-                    +{totalJobs - 1}
+                    +{totalCount - 1}
                   </span>
                 )}
               </div>
@@ -293,6 +319,29 @@ export function PersistentToast() {
                 </p>
               )}
               
+              {/* Latest flash notification */}
+              {latestFlash && (
+                <div className="mb-2 rounded-md border border-primary/20 bg-primary/5 p-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{latestFlash.title}</p>
+                      {latestFlash.description && (
+                        <p className="text-[11px] text-muted-foreground truncate">{latestFlash.description}</p>
+                      )}
+                    </div>
+                    <button
+                      className="opacity-70 hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFlashMessage(latestFlash.id);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {isCompleted && (
                 <Button 
                   size="sm" 

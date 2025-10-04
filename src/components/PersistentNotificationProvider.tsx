@@ -409,15 +409,7 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
     >
       {children}
       
-      {/* Render flash messages */}
-      {flashMessages.map((message, index) => (
-        <FlashMessage
-          key={message.id}
-          message={message}
-          onRemove={removeFlashMessage}
-          index={index}
-        />
-      ))}
+      {/* Flash messages are now handled within PersistentToast */}
     </PersistentNotificationContext.Provider>
   );
 }

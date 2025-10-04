@@ -6,9 +6,10 @@ interface MiniProgressBubbleProps {
   feature: string;
   message: string;
   onDismiss: () => void;
+  titleOverride?: string;
 }
 
-export function MiniProgressBubble({ feature, message, onDismiss }: MiniProgressBubbleProps) {
+export function MiniProgressBubble({ feature, message, onDismiss, titleOverride }: MiniProgressBubbleProps) {
   useEffect(() => {
     console.log(`💬 [MiniProgressBubble] Showing bubble: ${feature} - ${message}`);
     const timer = setTimeout(() => {
@@ -26,7 +27,7 @@ export function MiniProgressBubble({ feature, message, onDismiss }: MiniProgress
           <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-primary">
-              {getFeatureDisplayName(feature)}
+              {titleOverride ?? getFeatureDisplayName(feature)}
             </p>
             <p className="text-[10px] text-muted-foreground truncate">
               {message}
