@@ -12,8 +12,8 @@ export function PersistentToast() {
   const isMobile = useIsMobile();
   
   // All hooks MUST be called before any conditional returns
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isMinimized, setIsMinimized] = useState(true);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -168,8 +168,19 @@ export function PersistentToast() {
     };
   }, [isDragging, dragOffset]);
 
-  // Early return AFTER all hooks have been called
-  if (totalCount === 0) return null;
+  // Initialize position to bottom-right on first render
+  useEffect(() => {
+    if (position === null && cardRef.current) {
+      const cardWidth = isMinimized ? (isMobile ? 56 : 64) : (isMobile ? Math.min(window.innerWidth - 32, 384) : 320);
+      setPosition({
+        x: window.innerWidth - cardWidth - 24,
+        y: window.innerHeight - (isMinimized ? (isMobile ? 56 : 64) : 200) - 24
+      });
+    }
+  }, [position, isMinimized, isMobile]);
+
+  // Don't render anything until position is calculated
+  if (position === null) return null;
 
   return (
     <>
@@ -199,9 +210,8 @@ export function PersistentToast() {
         }
       `}
       style={{
-        left: position.x || (isMobile ? '1rem' : 'auto'),
-        right: position.x === 0 && !isMobile ? '1.5rem' : 'auto',
-        top: position.y || (isMobile ? '5rem' : '1.5rem'),
+        left: position.x,
+        top: position.y,
         touchAction: 'none'
       }}
       onMouseDown={handleMouseDown}
@@ -223,7 +233,7 @@ export function PersistentToast() {
           ) : (
             <div className="h-7 w-7 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
           )}
-          {totalCount > 1 && (
+          {totalCount > 0 && (
             <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-md z-10">
               {totalCount}
             </span>
