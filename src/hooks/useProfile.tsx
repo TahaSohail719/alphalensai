@@ -37,6 +37,7 @@ export function useProfile() {
 
         if (error) {
           console.error('Error fetching profile:', error);
+          setLoading(false);
           return;
         }
 
