@@ -296,6 +296,15 @@ export default function AISetup() {
     const newSymbol = mapInstrumentToSymbol(parameters.instrument);
     setSelectedSymbol(newSymbol);
   }, [parameters.instrument]);
+
+  // Update selected symbol when AI response arrives with instrument
+  React.useEffect(() => {
+    if (n8nResult?.instrument) {
+      const newSymbol = mapInstrumentToSymbol(n8nResult.instrument);
+      setSelectedSymbol(newSymbol);
+      console.log(`📊 [AISetup] Updating TradingView chart to ${n8nResult.instrument} -> ${newSymbol}`);
+    }
+  }, [n8nResult?.instrument]);
   const generateTradeSetup = async () => {
     // CRITICAL: Check credits before allowing request (Investment Ideas)
     if (!checkCredits('ai_trade_setup')) {
