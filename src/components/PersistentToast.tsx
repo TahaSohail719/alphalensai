@@ -439,10 +439,10 @@ export function PersistentToast() {
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Navigate to first completed job
-                      const firstCompletedIndex = allJobs.findIndex(job => 'resultData' in job);
-                      if (firstCompletedIndex !== -1) {
-                        setSelectedJobIndex(firstCompletedIndex);
+                      // Navigate to first completed job and remove it
+                      const firstCompleted = completedJobs[0];
+                      if (firstCompleted) {
+                        navigateToResult(firstCompleted);
                       }
                     }}
                     className="text-xs h-6 w-full"
