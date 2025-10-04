@@ -105,7 +105,7 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: 'eur',
+            currency: 'usd',
             product_data: {
               name: `AlphaLens ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
               description: `AlphaLens AI Subscription - ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
@@ -130,7 +130,7 @@ serve(async (req) => {
         user_id: customerId || 'guest',
         timestamp: new Date().toISOString(),
         checkout_type: userEmail ? 'authenticated' : 'guest',
-        price_eur: planParams.monthly_price_usd.toString()
+        price_usd: planParams.monthly_price_usd.toString()
       }
     };
 
