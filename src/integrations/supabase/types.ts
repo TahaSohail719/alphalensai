@@ -379,6 +379,30 @@ export type Database = {
         }
         Relationships: []
       }
+      credits_engaged: {
+        Row: {
+          engaged_at: string | null
+          feature: string
+          id: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          engaged_at?: string | null
+          feature: string
+          id?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          engaged_at?: string | null
+          feature?: string
+          id?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       indicators_tv: {
         Row: {
           adx: number | null

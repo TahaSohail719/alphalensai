@@ -21,6 +21,7 @@ import { useRealtimeResponseInjector } from "@/hooks/useRealtimeResponseInjector
 import { dualResponseHandler } from "@/lib/dual-response-handler";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 
 interface AssetProfile {
   id: number;
@@ -63,6 +64,7 @@ export default function Reports() {
   const { user } = useAuth();
   const { logInteraction, checkCredits } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
+  const { canLaunchJob, engageCredit } = useCreditEngagement();
 
   // Set up automatic response injection from Supabase
   useRealtimeResponseInjector({
@@ -257,11 +259,12 @@ export default function Reports() {
   }, [availableSections, reportConfig]);
 
   const generateReport = async () => {
-    // CRITICAL: Check credits before allowing request (Reports)
-    if (!checkCredits('report')) {
+    // 🔹 STEP 1: Pre-check with engagement logic
+    const creditCheck = await canLaunchJob('reports');
+    if (!creditCheck.canLaunch) {
       toast({
-        title: "No credits remaining",
-        description: "You have no remaining credits for Reports. Please upgrade your plan.",
+        title: "Insufficient Credits",
+        description: creditCheck.message || "You cannot launch this request.",
         variant: "destructive"
       });
       return;
@@ -300,6 +303,18 @@ export default function Reports() {
         reportPayload,
         'Report'
       );
+
+      // 🔹 STEP 2: Engage credit IMMEDIATELY after job creation
+      const engaged = await engageCredit('reports', reportJobId);
+      if (!engaged) {
+        toast({
+          title: "Error",
+          description: "Failed to reserve credit. Please try again.",
+          variant: "destructive"
+        });
+        setIsGenerating(false);
+        return;
+      }
 
       // 1. CRITICAL: Subscribe to jobs table BEFORE sending POST request
       console.log('📡 [Realtime] Subscribing to jobs updates before POST');

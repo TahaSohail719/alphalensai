@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import PNLCalculator from "@/components/PNLCalculator";
 import { AssetSearchBar } from "@/components/AssetSearchBar";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 const {
   useState,
   useEffect
@@ -196,6 +197,7 @@ export default function AISetup() {
   const {
     createJob
   } = useRealtimeJobManager();
+  const { canLaunchJob, engageCredit } = useCreditEngagement();
   const [step, setStep] = useState<"parameters" | "generated">("parameters");
   const [isGenerating, setIsGenerating] = useState(false);
   const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
@@ -307,11 +309,12 @@ export default function AISetup() {
     }
   }, [n8nResult?.instrument]);
   const generateTradeSetup = async () => {
-    // CRITICAL: Check credits before allowing request (Investment Ideas)
-    if (!checkCredits('ai_trade_setup')) {
+    // 🔹 STEP 1: Pre-check with engagement logic
+    const creditCheck = await canLaunchJob('ideas'); // AI Setup uses 'ideas'
+    if (!creditCheck.canLaunch) {
       toast({
-        title: "No credits remaining",
-        description: "You have no remaining credits for AI Setup. Please upgrade your plan.",
+        title: "Insufficient Credits",
+        description: creditCheck.message || "You cannot launch this request.",
         variant: "destructive"
       });
       return;
@@ -353,6 +356,18 @@ export default function AISetup() {
         mergedPayload,
         'AI Trade Setup'
       );
+
+      // 🔹 STEP 2: Engage credit IMMEDIATELY after job creation
+      const engaged = await engageCredit('ideas', jobId);
+      if (!engaged) {
+        toast({
+          title: "Error",
+          description: "Failed to reserve credit. Please try again.",
+          variant: "destructive"
+        });
+        setIsGenerating(false);
+        return;
+      }
 
       console.log('📊[AISetup] Single request with trade query, jobId =', jobId);
       

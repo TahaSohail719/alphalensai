@@ -22,6 +22,7 @@ import { useAIInteractionLogger } from "@/hooks/useAIInteractionLogger";
 import { dualResponseHandler } from "@/lib/dual-response-handler";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 const {
   useState,
   useEffect
@@ -69,6 +70,7 @@ export default function MacroAnalysis() {
     checkCredits
   } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
+  const { canLaunchJob, engageCredit } = useCreditEngagement();
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -686,11 +688,12 @@ export default function MacroAnalysis() {
   const generateAnalysis = async () => {
     if (!queryParams.query.trim()) return;
     
-    // CRITICAL: Check credits before allowing request (Queries)
-    if (!checkCredits('market_commentary')) {
+    // 🔹 STEP 1: Pre-check with engagement logic
+    const creditCheck = await canLaunchJob('queries'); // Macro uses 'queries'
+    if (!creditCheck.canLaunch) {
       toast({
-        title: "No credits remaining",
-        description: "You have no remaining credits for Macro Commentary. Please upgrade your plan.",
+        title: "Insufficient Credits",
+        description: creditCheck.message || "You cannot launch this request.",
         variant: "destructive"
       });
       return;
@@ -731,6 +734,18 @@ export default function MacroAnalysis() {
         payload,
         'Macro Commentary'
       );
+
+      // 🔹 STEP 2: Engage credit IMMEDIATELY after job creation
+      const engaged = await engageCredit('queries', responseJobId);
+      if (!engaged) {
+        toast({
+          title: "Error",
+          description: "Failed to reserve credit. Please try again.",
+          variant: "destructive"
+        });
+        setIsGenerating(false);
+        return;
+      }
 
       // 1. CRITICAL: Subscribe to Realtime BEFORE sending POST request
       console.log('📡 [Realtime] Subscribing to jobs updates before POST');

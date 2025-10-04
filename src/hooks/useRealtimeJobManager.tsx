@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { subscribeToPostgresChanges, initializeRealtimeAuthManager, unsubscribeChannel } from "@/utils/supabaseRealtimeManager";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 
 const { useState, useCallback, useEffect, useRef } = React;
 
@@ -51,6 +52,7 @@ const mapTypeToFeature = (type: string): string => {
 export function useRealtimeJobManager() {
   const [activeJobs, setActiveJobs] = useState<ActiveJob[]>([]);
   const { user } = useAuth();
+  const { releaseCredit } = useCreditEngagement();
 
   // Initialize realtime auth manager once
   useEffect(() => {
@@ -107,6 +109,12 @@ export function useRealtimeJobManager() {
               ? { ...activeJob, progressMessage: job.progress_message }
               : activeJob
           ));
+        }
+        
+        // Release engaged credit when job completes or errors
+        if (job.status === 'completed' || job.status === 'error') {
+          console.log(`[RealtimeJobManager] Job ${job.status}, releasing engaged credit for job ${job.id}`);
+          releaseCredit(job.id);
         }
         
         if (job.status === 'completed' && job.response_payload) {
