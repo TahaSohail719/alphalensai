@@ -29,6 +29,8 @@ export function PersistentToast() {
 
   const totalCount = activeJobs.length + completedJobs.length + flashMessages.length;
   const allJobs = [...activeJobs, ...completedJobs];
+  const hasActiveJobs = activeJobs.length > 0;
+  const hasCompletedJobs = completedJobs.length > 0;
   
   // Auto-select most recent job when jobs change
   useEffect(() => {
@@ -230,24 +232,41 @@ export function PersistentToast() {
           onClick={(e) => {
             if (!isDragging) {
               e.stopPropagation();
-              setIsMinimized(false);
+              // Smart click: if only 1 completed job, navigate directly
+              if (isMobile && completedJobs.length === 1 && activeJobs.length === 0) {
+                navigateToResult(completedJobs[0]);
+              } else {
+                setIsMinimized(false);
+              }
             }
           }}
         >
-          {isCompleted ? (
+          {/* Dynamic icon based on job states */}
+          {!hasActiveJobs && hasCompletedJobs ? (
             <CheckCircle className="h-7 w-7 text-success" />
           ) : (
             <div className="h-7 w-7 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
           )}
-          {totalCount > 1 && (
-            <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-md z-10">
-              {totalCount}
-            </span>
+          
+          {/* Smart badge counters */}
+          {totalCount > 0 && (
+            <div className="absolute -top-1 -right-1 flex gap-0.5 z-10">
+              {hasActiveJobs && (
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-md">
+                  {activeJobs.length}
+                </span>
+              )}
+              {hasCompletedJobs && (
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-success text-success-foreground text-[10px] font-bold shadow-md">
+                  {completedJobs.length}
+                </span>
+              )}
+            </div>
           )}
           
-          {/* Desktop hover preview - Jobs list */}
+          {/* Desktop hover preview - Clickable Jobs list */}
           {!isMobile && allJobs.length > 0 && (
-            <div className="absolute right-full mr-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+            <div className="absolute right-full mr-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-auto">
               <Card className="w-64 shadow-elegant border-primary/20 bg-card/95 backdrop-blur-sm">
                 <ScrollArea className="max-h-64">
                   <div className="p-2">
@@ -258,9 +277,18 @@ export function PersistentToast() {
                         <div 
                           key={job.id}
                           className={`
-                            p-2 rounded-md mb-1 last:mb-0 transition-colors
+                            p-2 rounded-md mb-1 last:mb-0 transition-colors cursor-pointer
                             ${isSelected ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50'}
                           `}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (jobCompleted) {
+                              navigateToResult(job as any);
+                            } else {
+                              setSelectedJobIndex(index);
+                              setIsMinimized(false);
+                            }
+                          }}
                         >
                           <div className="flex items-start gap-2">
                             <div className="flex-shrink-0 mt-0.5">
@@ -389,18 +417,40 @@ export function PersistentToast() {
                 </div>
               )}
 
-              {isCompleted && currentJob && (
-                <Button 
-                  size="sm" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigateToResult(currentJob as any);
-                  }}
-                  className="text-xs h-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                >
-                  View Result
-                </Button>
-              )}
+              {/* Action buttons */}
+              <div className="flex flex-col gap-1.5">
+                {isCompleted && currentJob && (
+                  <Button 
+                    size="sm" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToResult(currentJob as any);
+                    }}
+                    className="text-xs h-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  >
+                    View Result
+                  </Button>
+                )}
+                
+                {/* Quick access to completed jobs if current is active */}
+                {!isCompleted && hasCompletedJobs && (
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Navigate to first completed job
+                      const firstCompletedIndex = allJobs.findIndex(job => 'result' in job);
+                      if (firstCompletedIndex !== -1) {
+                        setSelectedJobIndex(firstCompletedIndex);
+                      }
+                    }}
+                    className="text-xs h-6 w-full"
+                  >
+                    View {completedJobs.length} Completed
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-1 flex-shrink-0">
@@ -423,8 +473,13 @@ export function PersistentToast() {
                   e.stopPropagation();
                   if (currentJob) {
                     markJobAsViewed(currentJob.id);
-                    if (allJobs.length > 1 && selectedJobIndex > 0) {
-                      setSelectedJobIndex(selectedJobIndex - 1);
+                    // Smart navigation on job removal
+                    if (allJobs.length > 1) {
+                      if (selectedJobIndex === allJobs.length - 1) {
+                        // If last job, select previous
+                        setSelectedJobIndex(selectedJobIndex - 1);
+                      }
+                      // Otherwise keep current index (which will show next job)
                     }
                   }
                 }}
