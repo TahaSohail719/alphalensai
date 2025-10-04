@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCreditManager, CreditType } from "@/hooks/useCreditManager";
 import { subscribeToPostgresChanges, initializeRealtimeAuthManager, unsubscribeChannel } from "@/utils/supabaseRealtimeManager";
-import { useMockProgressSimulator } from "@/hooks/useMockProgressSimulator";
+import { MOCK_PROGRESS_SEQUENCES } from "@/utils/mockProgressMessages";
 
 const { useState, useCallback, useEffect, useRef } = React;
 
@@ -68,6 +68,7 @@ export function useRealtimeJobManager() {
   
   // Track mock simulators state for each job
   const mockSimulatorsActive = useRef<Map<string, boolean>>(new Map());
+  const mockTimeouts = useRef<Map<string, NodeJS.Timeout[]>>(new Map());
 
   // Initialize realtime auth manager once
   useEffect(() => {
@@ -215,42 +216,102 @@ export function useRealtimeJobManager() {
       console.log('🔍 [RealtimeJobManager] Cleaning up subscription', { channelName });
       unsubscribeChannel(channelName, 'COMPONENT_UNMOUNT');
       
-      // Clean up all mock simulators
+      // Clean up all mock simulators and timeouts
       mockSimulatorsActive.current.forEach((_, jobId) => {
+        const timeouts = mockTimeouts.current.get(jobId) || [];
+        timeouts.forEach(id => clearTimeout(id));
+        mockTimeouts.current.delete(jobId);
         mockSimulatorsActive.current.set(jobId, false);
       });
       mockSimulatorsActive.current.clear();
     };
   }, [user?.id, toast]);
 
-  // Mock Progress Simulator for all active jobs
-  activeJobs.forEach((job) => {
-    const isSimulatorActive = mockSimulatorsActive.current.get(job.id) || false;
-    const shouldSimulate = job.status === 'pending' || job.status === 'running';
-    
-    useMockProgressSimulator({
-      jobId: job.id,
-      feature: job.feature || mapTypeToFeature(job.type),
-      onProgressUpdate: (message: string) => {
-        console.log(`📬 [RealtimeJobManager] Mock progress update for ${job.id}: "${message}"`);
-        
-        setActiveJobs(prev => prev.map(activeJob => 
-          activeJob.id === job.id 
-            ? { ...activeJob, progressMessage: message }
-            : activeJob
-        ));
+  // Mock Progress Simulator Effect - runs for all active jobs
+  useEffect(() => {
+    activeJobs.forEach((job) => {
+      const isSimulatorActive = mockSimulatorsActive.current.get(job.id) || false;
+      const shouldSimulate = (job.status === 'pending' || job.status === 'running') && isSimulatorActive;
+      
+      if (!shouldSimulate) {
+        // Clean up timeouts if simulator is inactive
+        const existingTimeouts = mockTimeouts.current.get(job.id) || [];
+        existingTimeouts.forEach(id => clearTimeout(id));
+        mockTimeouts.current.delete(job.id);
+        return;
+      }
 
-        // Show ephemeral toast for mock progress
-        toast({
-          title: "Processing...",
-          description: message,
-          duration: 4000,
-          className: "fixed top-4 left-4 z-[100] max-w-sm animate-fade-in"
-        });
-      },
-      isActive: isSimulatorActive && shouldSimulate
+      // Check if already running
+      if (mockTimeouts.current.has(job.id)) {
+        return; // Already running
+      }
+
+      const feature = job.feature || mapTypeToFeature(job.type);
+      const sequence = MOCK_PROGRESS_SEQUENCES[feature];
+      
+      if (!sequence) {
+        console.warn(`⚠️ [MockProgress] No sequence found for feature: ${feature}`);
+        return;
+      }
+
+      console.log(`🎬 [MockProgress] Starting simulator for ${feature} (job: ${job.id})`);
+      
+      const timeouts: NodeJS.Timeout[] = [];
+      let messageIndex = 0;
+      
+      const scheduleNextMessage = () => {
+        if (messageIndex >= sequence.messages.length) {
+          console.log(`✅ [MockProgress] Sequence completed for job ${job.id}`);
+          mockTimeouts.current.delete(job.id);
+          return;
+        }
+        
+        const msg = sequence.messages[messageIndex];
+        const delay = Math.random() * (msg.maxDelay - msg.minDelay) + msg.minDelay;
+        
+        console.log(`⏱️ [MockProgress] Scheduling message ${messageIndex + 1}/${sequence.messages.length} in ${Math.round(delay)}ms`);
+        
+        const timeoutId = setTimeout(() => {
+          // Check if simulator is still active
+          if (!mockSimulatorsActive.current.get(job.id)) {
+            console.log(`🛑 [MockProgress] Simulator stopped for job ${job.id}`);
+            return;
+          }
+          
+          console.log(`🔔 [MockProgress] ${feature} (${job.id}) - "${msg.text}"`);
+          
+          setActiveJobs(prev => prev.map(activeJob => 
+            activeJob.id === job.id 
+              ? { ...activeJob, progressMessage: msg.text }
+              : activeJob
+          ));
+
+          toast({
+            title: "Processing...",
+            description: msg.text,
+            duration: 4000,
+            className: "fixed top-4 left-4 z-[100] max-w-sm animate-fade-in"
+          });
+          
+          messageIndex++;
+          scheduleNextMessage();
+        }, delay);
+        
+        timeouts.push(timeoutId);
+      };
+      
+      scheduleNextMessage();
+      mockTimeouts.current.set(job.id, timeouts);
     });
-  });
+
+    // Cleanup function
+    return () => {
+      activeJobs.forEach(job => {
+        const timeouts = mockTimeouts.current.get(job.id) || [];
+        timeouts.forEach(id => clearTimeout(id));
+      });
+    };
+  }, [activeJobs, toast]);
 
   const createJob = useCallback(async (
     type: string,
