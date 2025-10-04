@@ -51,7 +51,10 @@ export function PersistentToast() {
   }, [activeJobs.length, completedJobs.length, selectedJobIndex]);
   
   const currentJob = allJobs[selectedJobIndex];
-  const isCompleted = currentJob && ('resultData' in currentJob || completedJobs.some(j => j.id === currentJob.id));
+  const isCompleted = currentJob && (
+    'resultData' in currentJob || 
+    completedJobs.some(j => j.id === currentJob.id)
+  );
   const latestFlash = flashMessages.length > 0 ? flashMessages[flashMessages.length - 1] : null;
   
   // Navigation functions
@@ -380,7 +383,7 @@ export function PersistentToast() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="text-xs font-medium text-foreground">
-                  {isCompleted ? 'Result Ready' : 'Processing...'}
+                  {(isCompleted || activeJobs.length === 0) ? 'Result Ready' : 'Processing...'}
                 </h4>
               </div>
               <p className="text-xs text-muted-foreground mb-2">

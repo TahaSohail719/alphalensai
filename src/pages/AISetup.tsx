@@ -215,37 +215,7 @@ export default function AISetup() {
   });
 
 
-  // Helper to add TradingView exchange prefix based on instrument type
-  const formatTradingViewSymbol = (baseSymbol: string): string => {
-    const upper = baseSymbol.toUpperCase();
-    
-    // Forex pairs (6 letters like EURUSD)
-    if (/^[A-Z]{6}$/.test(upper)) return `FX:${upper}`;
-    
-    // Crypto pairs
-    if (/^(BTC|ETH|BNB|ADA|SOL|DOT|MATIC|AVAX|LINK|UNI|ATOM|LTC|BCH|XRP|XLM|AXS|SAND|MANA|FTM|ALGO|VET|ICP|FIL|THETA|TRX|EOS|XTZ|NEAR|FLOW|EGLD|APE|CRV|LDO|ARB|OP|RNDR)USD$/.test(upper)) {
-      return `BINANCE:${upper}T`;
-    }
-    
-    // Precious metals
-    if (/^(XAUUSD|XAGUSD|XPTUSD|XPDUSD)$/.test(upper)) return `OANDA:${upper}`;
-    
-    // Oil & Energy
-    if (/^(USOIL|UKOIL|NATGAS|HEATING_OIL|GASOLINE)$/.test(upper)) return `TVC:${upper}`;
-    
-    // Industrial metals
-    if (/^(COPPER|ALUMINUM|ZINC|NICKEL)$/.test(upper)) return `TVC:${upper}`;
-    
-    // Agricultural commodities
-    if (/^(WHEAT|CORN|SOYBEANS|RICE|OATS|SUGAR|COFFEE|COCOA|COTTON|ORANGE_JUICE|LUMBER|LIVE_CATTLE|LEAN_HOGS)$/.test(upper)) {
-      return `TVC:${upper}`;
-    }
-    
-    // Default: assume forex
-    return `FX:${upper}`;
-  };
-
-  // Map instrument to TradingView symbol with exchange prefix
+  // Map instrument to TradingView symbol (raw symbols without exchange prefix)
   const mapInstrumentToSymbol = (instrument: string): string => {
     const symbolMap: Record<string, string> = {
       "EUR/USD": "EURUSD",
@@ -322,27 +292,27 @@ export default function AISetup() {
       "LEAN_HOGS": "LEAN_HOGS"
     };
 
-    if (!instrument) return "FX:EURUSD";
+    if (!instrument) return "EURUSD";
     const upper = instrument.toUpperCase();
     const compact = upper.replace(/\s+/g, '').replace(/-/g, '').replace(/_/g, '');
 
     // 1) Exact mapping like "EUR/USD"
-    if (symbolMap[upper]) return formatTradingViewSymbol(symbolMap[upper]);
+    if (symbolMap[upper]) return symbolMap[upper];
 
     // 2) 6-letter forex like EURUSD
-    if (/^[A-Z]{6}$/.test(compact)) return formatTradingViewSymbol(compact);
+    if (/^[A-Z]{6}$/.test(compact)) return compact;
 
     // 3) Try converting 6-letter to slash form and map again
     const withSlash = compact.length === 6 ? `${compact.slice(0,3)}/${compact.slice(3)}` : upper;
-    if (symbolMap[withSlash]) return formatTradingViewSymbol(symbolMap[withSlash]);
+    if (symbolMap[withSlash]) return symbolMap[withSlash];
 
     // 4) Direct commodities/crypto symbols already in TradingView format
-    if (/^(XAUUSD|XAGUSD|USOIL|UKOIL|NATGAS|BTCUSD|ETHUSD|LTCUSD|XRPUSD|XPTUSD|XPDUSD)$/i.test(compact)) {
-      return formatTradingViewSymbol(compact);
+    if (/^(XAUUSD|XAGUSD|USOIL|UKOIL|NATGAS|BTCUSDT|ETHUSDT|LTCUSDT|XRPUSDT|XPTUSD|XPDUSD)$/i.test(compact)) {
+      return compact;
     }
 
     // 5) Fallback: original lookup or default
-    return formatTradingViewSymbol(symbolMap[instrument] || "EURUSD");
+    return symbolMap[instrument] || "EURUSD";
   };
 
   // Update selected symbol when instrument changes
