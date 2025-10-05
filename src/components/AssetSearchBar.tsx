@@ -20,6 +20,7 @@ const TARGET_ASSETS = [
   { symbol: "ADA-USD", name: "Cardano", icon: "🔷", sector: "Cryptocurrency", exchange: "CRYPTO" },
   { symbol: "SOL-USD", name: "Solana", icon: "🌞", sector: "Cryptocurrency", exchange: "CRYPTO" },
   { symbol: "DOGE-USD", name: "Dogecoin", icon: "🐕", sector: "Cryptocurrency", exchange: "CRYPTO" },
+  { symbol: "XLM-USD", name: "Stellar", icon: "⭐", sector: "Cryptocurrency", exchange: "CRYPTO" },
   
   // Commodités principales
   { symbol: "GOLD", name: "Gold", icon: "🥇", sector: "Commodity", exchange: "COMEX" },

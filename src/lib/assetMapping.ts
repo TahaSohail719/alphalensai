@@ -29,6 +29,7 @@ export const assetToBinanceSymbol: Record<string, string> = {
   'SOL-USD': 'SOLUSDT',
   'DOT-USD': 'DOTUSDT',
   'DOGE-USD': 'DOGEUSDT',
+  'XLM-USD': 'XLMUSDT',
   
   // TradingView symbol mappings to Binance
   'EURUSD': 'EURUSD',
@@ -72,6 +73,7 @@ const symbolCorrections: Record<string, string> = {
   'SOL-USD': 'SOL-USD',
   'DOT-USD': 'DOT-USD',
   'DOGE-USD': 'DOGE-USD',
+  'XLM-USD': 'XLM-USD',
   'XRP-USD': 'XRP-USD',
   'BNB-USD': 'BNB-USD',
   'LINK-USD': 'LINK-USD',
