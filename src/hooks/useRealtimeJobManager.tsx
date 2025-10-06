@@ -96,71 +96,77 @@ export function useRealtimeJobManager() {
           }
         });
         
-        // Handle progress message updates
-        if (job.progress_message) {
-          console.log('📝 [RealtimeJobManager] Real progress message from backend:', {
-            jobId: job.id,
-            progressMessage: job.progress_message,
-            status: job.status
-          });
+        try {
+          // Handle progress message updates
+          if (job.progress_message) {
+            console.log('📝 [RealtimeJobManager] Real progress message from backend:', {
+              jobId: job.id,
+              progressMessage: job.progress_message,
+              status: job.status
+            });
 
-          setActiveJobs(prev => prev.map(activeJob => 
-            activeJob.id === job.id 
-              ? { ...activeJob, progressMessage: job.progress_message }
-              : activeJob
-          ));
-        }
-        
-        // Release engaged credit when job completes or errors
-        if (job.status === 'completed' || job.status === 'error') {
-          console.log(`[RealtimeJobManager] Job ${job.status}, releasing engaged credit for job ${job.id}`);
-          releaseCredit(job.id);
-        }
-        
-        if (job.status === 'completed' && job.response_payload) {
-          console.log('✅ [RealtimeJobManager] Job completed:', {
-            jobId: job.id,
-            feature: job.feature,
-            hasResponse: !!job.response_payload
-          });
+            setActiveJobs(prev => prev.map(activeJob => 
+              activeJob.id === job.id 
+                ? { ...activeJob, progressMessage: job.progress_message }
+                : activeJob
+            ));
+          }
+          
+          if (job.status === 'completed' && job.response_payload) {
+            console.log('✅ [RealtimeJobManager] Job completed:', {
+              jobId: job.id,
+              feature: job.feature,
+              hasResponse: !!job.response_payload
+            });
 
-          setActiveJobs(prev => prev.map(activeJob => 
-            activeJob.id === job.id 
-              ? { 
-                  ...activeJob, 
-                  status: 'completed', 
-                  resultData: job.response_payload 
-                }
-              : activeJob
-          ));
-        } else if (job.status === 'error') {
-          console.log('❌ [RealtimeJobManager] Job failed:', {
-            jobId: job.id,
-            feature: job.feature
-          });
+            setActiveJobs(prev => prev.map(activeJob => 
+              activeJob.id === job.id 
+                ? { 
+                    ...activeJob, 
+                    status: 'completed', 
+                    resultData: job.response_payload 
+                  }
+                : activeJob
+            ));
+          } else if (job.status === 'error') {
+            console.log('❌ [RealtimeJobManager] Job failed:', {
+              jobId: job.id,
+              feature: job.feature
+            });
 
-          setActiveJobs(prev => prev.map(activeJob => 
-            activeJob.id === job.id 
-              ? { ...activeJob, status: 'error' }
-              : activeJob
-          ));
-        } else if (job.status === 'running') {
-          console.log('🔄 [RealtimeJobManager] Job running:', {
-            jobId: job.id,
-            feature: job.feature
-          });
+            setActiveJobs(prev => prev.map(activeJob => 
+              activeJob.id === job.id 
+                ? { ...activeJob, status: 'error' }
+                : activeJob
+            ));
+          } else if (job.status === 'running') {
+            console.log('🔄 [RealtimeJobManager] Job running:', {
+              jobId: job.id,
+              feature: job.feature
+            });
 
-          setActiveJobs(prev => prev.map(activeJob => 
-            activeJob.id === job.id 
-              ? { ...activeJob, status: 'running' }
-              : activeJob
-          ));
-        } else {
-          console.log('ℹ️ [RealtimeJobManager] Job status update:', {
-            jobId: job.id,
-            status: job.status,
-            hasResponse: !!job.response_payload
-          });
+            setActiveJobs(prev => prev.map(activeJob => 
+              activeJob.id === job.id 
+                ? { ...activeJob, status: 'running' }
+                : activeJob
+            ));
+          } else {
+            console.log('ℹ️ [RealtimeJobManager] Job status update:', {
+              jobId: job.id,
+              status: job.status,
+              hasResponse: !!job.response_payload
+            });
+          }
+        } finally {
+          // ALWAYS release engaged credit when job completes or errors, even if there was an error updating state
+          if (job.status === 'completed' || job.status === 'error') {
+            console.log(`[RealtimeJobManager] Job ${job.status}, releasing engaged credit for job ${job.id}`);
+            // Fire-and-forget: release credit without blocking the handler
+            releaseCredit(job.id).catch(err => {
+              console.error('[RealtimeJobManager] Error releasing credit (non-critical):', err);
+              // Don't throw - we don't want to break the realtime handler if credit release fails
+            });
+          }
         }
       }
     );

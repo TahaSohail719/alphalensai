@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.update-stripe-mode]
 verify_jwt = false
+
+[functions.cleanup-stale-credits]
+verify_jwt = false
