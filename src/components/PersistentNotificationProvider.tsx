@@ -105,46 +105,6 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
     }
   };
 
-  // 🚨 LAYER 2: Emergency listener for immediate job creation events
-  // This guarantees toast display even if Realtime subscription isn't ready
-  useEffect(() => {
-    const handleImmediateJobCreation = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const { job } = customEvent.detail;
-      
-      console.log('🚨 [PersistentNotifications] Immediate job creation event received:', job);
-      
-      setActiveJobs(prev => {
-        // Prevent duplicates
-        const exists = prev.some(j => j.id === job.id);
-        if (exists) {
-          console.log('🚨 [PersistentNotifications] Job already exists, skipping duplicate');
-          return prev;
-        }
-        
-        console.log('🚨 [PersistentNotifications] Adding job immediately to guarantee toast display');
-        
-        // Activate mock simulator immediately
-        mockSimulatorsActive.current.set(job.id, true);
-        
-        // Transform job to match expected ActiveJob structure with createdAt
-        const activeJob: ActiveJob = {
-          ...job,
-          createdAt: job.startTime || new Date(), // Use startTime from original job or fallback to now
-          originatingFeature: job.originatingFeature || mapFeatureToOriginatingFeature(job.feature || job.type)
-        };
-        
-        return [...prev, activeJob];
-      });
-    };
-    
-    window.addEventListener('job-created-immediate', handleImmediateJobCreation);
-    
-    return () => {
-      window.removeEventListener('job-created-immediate', handleImmediateJobCreation);
-    };
-  }, []);
-
   useEffect(() => {
     if (!user) return;
 
