@@ -40,12 +40,15 @@ export function useCreditEngagement() {
 
       const totalCredits = credits?.[FEATURE_TO_CREDIT_COLUMN[feature]] || 0;
 
-      // 2. Get engaged credits for this feature
+      // 2. Get RECENT engaged credits for this feature (last 10 minutes only)
+      // This prevents stale engagements from blocking new jobs
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
       const { data: engaged, error: engagedError } = await supabase
         .from('credits_engaged')
         .select('id')
         .eq('user_id', user.id)
-        .eq('feature', feature);
+        .eq('feature', feature)
+        .gte('engaged_at', tenMinutesAgo);
 
       if (engagedError) {
         console.error('[CreditEngagement] Error fetching engaged credits:', engagedError);
@@ -55,13 +58,45 @@ export function useCreditEngagement() {
       const engagedCredits = engaged?.length || 0;
       const availableCredits = totalCredits - engagedCredits;
 
-      console.log(`[CreditEngagement] Credit check for ${feature}:`, {
+      console.debug(`[CreditEngagement] Credit check for ${feature}:`, {
         total: totalCredits,
         engaged: engagedCredits,
-        available: availableCredits
+        available: availableCredits,
+        timestamp: new Date().toISOString()
       });
 
+      // If we get a negative result, double-check with a fresh read to avoid false negatives
       if (availableCredits <= 0) {
+        console.debug('[CreditEngagement] Negative result, double-checking...');
+        
+        const { data: freshCredits } = await supabase
+          .from('user_credits')
+          .select(FEATURE_TO_CREDIT_COLUMN[feature])
+          .eq('user_id', user.id)
+          .single();
+
+        const { data: freshEngaged } = await supabase
+          .from('credits_engaged')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('feature', feature)
+          .gte('engaged_at', tenMinutesAgo);
+
+        const freshTotal = freshCredits?.[FEATURE_TO_CREDIT_COLUMN[feature]] || 0;
+        const freshEngagedCount = freshEngaged?.length || 0;
+        const freshAvailable = freshTotal - freshEngagedCount;
+
+        console.debug('[CreditEngagement] Double-check result:', {
+          freshTotal,
+          freshEngaged: freshEngagedCount,
+          freshAvailable
+        });
+
+        if (freshAvailable > 0) {
+          console.debug('[CreditEngagement] Double-check passed, allowing launch');
+          return { canLaunch: true };
+        }
+
         if (engagedCredits > 0) {
           return { 
             canLaunch: false, 
@@ -105,7 +140,9 @@ export function useCreditEngagement() {
         return false;
       }
 
-      console.log(`[CreditEngagement] Credit engaged for job ${jobId} (${feature})`);
+      console.debug(`[CreditEngagement] Credit engaged for job ${jobId} (${feature})`, {
+        timestamp: new Date().toISOString()
+      });
       return true;
     } catch (err) {
       console.error('[CreditEngagement] Unexpected error engaging credit:', err);
