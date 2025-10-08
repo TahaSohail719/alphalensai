@@ -220,6 +220,11 @@ export function useRealtimeJobManager() {
 
     setActiveJobs(prev => [...prev, newJob]);
 
+    // 🔥 LAYER 1: Dispatch immediate event to guarantee toast display
+    window.dispatchEvent(new CustomEvent('job-created-immediate', {
+      detail: { job: newJob }
+    }));
+
     console.log(`✅ [RealtimeJobManager] Job created: ${jobId}, feature: ${jobFeature}`);
 
     return jobId;
