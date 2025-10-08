@@ -127,7 +127,14 @@ export function PersistentNotificationProvider({ children }: PersistentNotificat
         // Activate mock simulator immediately
         mockSimulatorsActive.current.set(job.id, true);
         
-        return [...prev, job];
+        // Transform job to match expected ActiveJob structure with createdAt
+        const activeJob: ActiveJob = {
+          ...job,
+          createdAt: job.startTime || new Date(), // Use startTime from original job or fallback to now
+          originatingFeature: job.originatingFeature || mapFeatureToOriginatingFeature(job.feature || job.type)
+        };
+        
+        return [...prev, activeJob];
       });
     };
     
