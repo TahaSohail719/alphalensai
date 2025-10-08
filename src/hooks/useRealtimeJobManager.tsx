@@ -30,22 +30,23 @@ interface ActiveJob {
   feature?: string;
 }
 
-// Map job types to features for backward compatibility
+// Map job types to valid FeatureType values for credit engagement
+// CRITICAL: Must return 'queries' | 'ideas' | 'reports' to match useCreditEngagement.tsx
 const mapTypeToFeature = (type: string): string => {
   switch (type.toLowerCase()) {
     case 'macro_commentary':
     case 'macro-commentary':
     case 'macro_analysis':
-      return 'macro_commentary';
+      return 'queries'; // Maps to credits_queries_remaining
     case 'trade_setup':
     case 'tradesetup':
     case 'ai_trade_setup':
-      return 'ai_trade_setup';
+      return 'ideas'; // Maps to credits_ideas_remaining
     case 'reports':
     case 'report':
-      return 'report';
+      return 'reports'; // Maps to credits_reports_remaining
     default:
-      return 'macro_commentary'; // Default fallback
+      return 'queries'; // Default fallback
   }
 };
 
