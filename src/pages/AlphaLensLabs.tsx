@@ -19,7 +19,7 @@ export default function AlphaLensLabs() {
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
   const [trades, setTrades] = useState<MockTrade[]>(mockTrades);
   const [loading, setLoading] = useState(false);
-  const [isPortfolioOpen, setIsPortfolioOpen] = useState(true);
+  const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
 
   useEffect(() => {
     if (selectedPortfolioId) {
@@ -123,8 +123,8 @@ export default function AlphaLensLabs() {
             {/* AI Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
               
-              {/* Active Tool 1: Portfolio Analysis */}
-              <Card className="group hover:shadow-lg transition-all col-span-1 md:col-span-2 lg:col-span-3">
+              {/* Active Tool 1: Portfolio Analytics Suite */}
+              <Card className="group hover:shadow-lg transition-all">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -140,38 +140,33 @@ export default function AlphaLensLabs() {
                 
                 <CardContent>
                   <Collapsible open={isPortfolioOpen} onOpenChange={setIsPortfolioOpen}>
-                    <div className="flex items-center justify-between mb-4">
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          {isPortfolioOpen ? 'Hide Tools' : 'View Tools'}
-                          <ChevronDown className={cn('h-4 w-4 transition-transform', isPortfolioOpen && 'rotate-180')} />
-                        </Button>
-                      </CollapsibleTrigger>
-                      
-                      {/* Portfolio Selector */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Portfolio:</span>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full gap-2">
+                        {isPortfolioOpen ? 'Hide Tools' : 'View Tools'}
+                        <ChevronDown className={cn('h-4 w-4 transition-transform', isPortfolioOpen && 'rotate-180')} />
+                      </Button>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="space-y-4 mt-4">
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-sm font-medium">Portfolio:</span>
                         <PortfolioSelector
                           selectedId={selectedPortfolioId}
                           onSelect={setSelectedPortfolioId}
                         />
                       </div>
-                    </div>
-                    
-                    <CollapsibleContent className="space-y-4">
+                      
                       <Tabs defaultValue="calculator" className="w-full">
-                        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-2">
                           <TabsTrigger value="calculator">PNL Calculator</TabsTrigger>
                           <TabsTrigger value="analysis">Portfolio Analysis</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="calculator" className="space-y-4 mt-6">
-                          <div className="w-full max-w-2xl mx-auto">
-                            <PNLCalculator defaultInstrument="EUR/USD" showInstrumentPicker={true} />
-                          </div>
+                        <TabsContent value="calculator" className="space-y-4 mt-4">
+                          <PNLCalculator defaultInstrument="EUR/USD" showInstrumentPicker={true} />
                         </TabsContent>
 
-                        <TabsContent value="analysis" className="mt-6">
+                        <TabsContent value="analysis" className="mt-4">
                           {loading ? (
                             <div className="text-center py-8 text-muted-foreground">
                               Loading portfolio data...
