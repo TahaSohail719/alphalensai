@@ -46,7 +46,7 @@ export default function AlphaLensLabs() {
     <Layout>
       <div className="flex h-full relative">
         {/* Main Content */}
-        <div className={cn('flex-1 transition-all duration-300', isCoPilotExpanded ? 'md:mr-[33.333%]' : 'mr-0')}>
+        <div className={`flex-1 transition-all duration-300 ${isCoPilotExpanded ? 'md:mr-[33.333%]' : 'mr-0'}`}>
           <div className="container-wrapper space-y-6 sm:space-y-8 flex flex-col items-center min-h-screen py-6 sm:py-8 px-4">
             
             {/* Hero Section */}
