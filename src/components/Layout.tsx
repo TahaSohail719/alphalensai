@@ -78,11 +78,11 @@ export default function Layout({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => navigate('/pnl-calculator')}
+                onClick={() => navigate('/alphalens-labs')}
                 className="h-8 px-3"
               >
                 <Calculator className="h-4 w-4 mr-2" />
-                PNL Calculator
+                AlphaLens Labs
               </Button>
             </div>
 
@@ -188,11 +188,11 @@ export default function Layout({
                     Contact
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
-                navigate('/pnl-calculator');
+                navigate('/alphalens-labs');
                 setIsMobileMenuOpen(false);
               }} className="justify-start text-sm">
                     <Calculator className="h-4 w-4 mr-2" />
-                    PNL Calculator
+                    AlphaLens Labs
                   </Button>
                   
                   {/* App navigation items for authenticated users */}

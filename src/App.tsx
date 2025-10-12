@@ -32,7 +32,7 @@ import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
 import Credits from "./pages/Credits";
-import PNLCalculatorPage from "./pages/PNLCalculatorPage";
+import AlphaLensLabs from "./pages/AlphaLensLabs";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Documentation from "./pages/Documentation";
@@ -83,7 +83,7 @@ const App = () => {
                     <Route path="/documentation" element={<Documentation />} />
                     <Route path="/help-center" element={<HelpCenter />} />
                     <Route path="/api" element={<API />} />
-                    <Route path="/pnl-calculator" element={<PNLCalculatorPage />} />
+                    <Route path="/alphalens-labs" element={<AlphaLensLabs />} />
                     <Route path="/product" element={<ProductPresentation />} />
                     <Route path="/test-webhook" element={<AuthGuard><TestWebhook /></AuthGuard>} />
                     <Route path="*" element={<NotFound />} />
