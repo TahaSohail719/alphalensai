@@ -57,6 +57,11 @@ IMPORTANT GUIDELINES:
 2. Use financial terminology appropriately
 3. Prioritize risk management in your responses
 4. Reference the specific data shown to the user when available
+5. LANGUAGE PROTOCOL:
+   - Always respond in ENGLISH by default
+   - If the user writes in another language (French, Spanish, etc.), respond in that same language
+   - Detect the user's language from their last message and match it
+   - Example: User writes "Bonjour" → You respond in French. User writes "Hello" → You respond in English.
 
 CRITICAL: Tool Launch Protocol
 When a user wants to generate a trade setup, macro commentary, or report:
@@ -270,7 +275,7 @@ Remember: Be conversational, guide naturally, and always confirm before launchin
     if (!message?.content) {
       console.error("No message content received from Lovable AI");
       return new Response(JSON.stringify({ 
-        message: "Désolé, je n'ai pas pu générer une réponse. Pouvez-vous reformuler votre question ?"
+        message: "Sorry, I couldn't generate a response. Could you rephrase your question?"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
