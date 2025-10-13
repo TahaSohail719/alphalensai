@@ -16,9 +16,10 @@ serve(async (req) => {
     console.log("Method:", req.method);
     console.log("Timestamp:", new Date().toISOString());
     
-    const { question, context } = await req.json();
+    const { question, context, conversationHistory } = await req.json();
     console.log("Question received:", question);
     console.log("Context page:", typeof context === 'string' ? context : context?.page);
+    console.log("Conversation history length:", conversationHistory?.length || 0);
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
@@ -36,59 +37,93 @@ serve(async (req) => {
       );
     }
 
-    let systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), an AI assistant specialized in financial markets.
+    // 📝 Build messages array with conversation history
+    const messagesPayload = [];
+    
+    // System prompt
+    const systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), a highly specialized financial market AI assistant.
 
-CRITICAL CAPABILITIES:
-1. **Answer questions** about current page data (stats, trades, portfolios)
-2. **Launch features** using your tools:
-   - AI Trade Setup: Call launch_ai_trade_setup(instrument, timeframe, direction)
-   - Macro Commentary: Call launch_macro_commentary(focus)
-   - Reports: Call launch_report(report_type, instruments)
+CONTEXT:
+- User is viewing: ${contextPage}
 
-INTERACTION GUIDELINES:
-- If a user says "lance un trade setup sur EUR/USD H1", immediately call launch_ai_trade_setup
-- If missing parameters, ask conversationally: "Sur quelle timeframe ?" (not "Please specify timeframe")
-- After launching, confirm with: "✅ Trade setup lancé ! Vous recevrez les résultats dans votre dashboard."
-- Be concise (2-3 paragraphs max)
-- Focus on actionable insights, risk management, and trading psychology
-- For Backtester: analyze win rates, R/R ratios, recurring patterns
-- For Portfolio: emphasize position sizing and diversification
+YOUR CAPABILITIES:
+- Analyze market data and trading patterns
+- Provide macro commentary and market insights
+- Generate trade setups with entry/exit levels
+- Create comprehensive market reports
 
-Context: ${contextPage}`;
+IMPORTANT GUIDELINES:
+1. Always be concise and actionable
+2. Use financial terminology appropriately
+3. Prioritize risk management in your responses
+4. Reference the specific data shown to the user when available
+5. If asked to generate a trade setup, macro commentary, or report, use the corresponding tool
+6. When you detect the user wants to launch one of the features, ask clarifying questions FIRST to gather all necessary information before launching
 
-    // Enrich with contextual data
+TOOL USAGE:
+- Use 'launch_ai_trade_setup' when user wants to generate a trade idea/setup
+- Use 'launch_macro_commentary' when user wants macro analysis or market commentary
+- Use 'launch_report' when user wants a comprehensive market report
+
+Before launching any tool:
+1. Ask for the instrument (e.g., "Which instrument would you like to analyze?")
+2. Ask for specific parameters if needed (timeframe, risk level, strategy, etc.)
+3. Only launch the tool once you have all necessary information
+
+Remember: You are a professional financial assistant. Be helpful, precise, and always prioritize user safety and risk awareness.`;
+    
+    messagesPayload.push({ role: "system", content: systemPrompt });
+
+    // 📝 Add conversation history (last 7 messages)
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      conversationHistory.forEach((msg: any) => {
+        messagesPayload.push({
+          role: msg.role,
+          content: msg.content
+        });
+      });
+    } else {
+      // If no history, just add the current question
+      messagesPayload.push({ role: "user", content: question });
+    }
+    
+    // Enrich system prompt with contextual data
     if (contextData) {
-      systemPrompt += `\n\n--- Current Page Context ---`;
+      let contextInfo = `\n\n--- Current Page Context ---`;
       
       if (contextData.stats) {
-        systemPrompt += `\n\nPage Statistics:`;
+        contextInfo += `\n\nPage Statistics:`;
         if (contextData.stats.totalTrades !== undefined) {
-          systemPrompt += `\n- Total Trades: ${contextData.stats.totalTrades}`;
+          contextInfo += `\n- Total Trades: ${contextData.stats.totalTrades}`;
         }
         if (contextData.stats.winRate !== undefined) {
-          systemPrompt += `\n- Win Rate: ${contextData.stats.winRate.toFixed(1)}%`;
+          contextInfo += `\n- Win Rate: ${contextData.stats.winRate.toFixed(1)}%`;
         }
         if (contextData.stats.avgPnL !== undefined) {
-          systemPrompt += `\n- Average PnL: ${contextData.stats.avgPnL.toFixed(2)}%`;
+          contextInfo += `\n- Average PnL: ${contextData.stats.avgPnL.toFixed(2)}%`;
         }
         if (contextData.stats.totalValue !== undefined) {
-          systemPrompt += `\n- Total Value: ${contextData.stats.totalValue.toFixed(2)}`;
+          contextInfo += `\n- Total Value: ${contextData.stats.totalValue.toFixed(2)}`;
         }
         if (contextData.stats.activeTrades !== undefined) {
-          systemPrompt += `\n- Active Trades: ${contextData.stats.activeTrades}`;
+          contextInfo += `\n- Active Trades: ${contextData.stats.activeTrades}`;
         }
       }
       
       if (contextData.recentData && contextData.recentData.length > 0) {
-        systemPrompt += `\n\nRecent Data (last ${contextData.recentData.length} items):`;
-        systemPrompt += `\n${JSON.stringify(contextData.recentData.slice(0, 10), null, 2)}`;
+        contextInfo += `\n\nRecent Data (last ${contextData.recentData.length} items):`;
+        contextInfo += `\n${JSON.stringify(contextData.recentData.slice(0, 10), null, 2)}`;
       }
       
       if (contextData.filters) {
-        systemPrompt += `\n\nActive Filters: ${JSON.stringify(contextData.filters)}`;
+        contextInfo += `\n\nActive Filters: ${JSON.stringify(contextData.filters)}`;
       }
+      
+      // Update system message with context
+      messagesPayload[0].content += contextInfo;
     }
-
+    
+    console.log("📝 Messages payload length:", messagesPayload.length);
     console.log("Sending request to Lovable AI Gateway with tool calling...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -99,10 +134,7 @@ Context: ${contextPage}`;
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: question }
-        ],
+        messages: messagesPayload,
         stream: false, // Tool calling requires non-streaming
         tools: [
           {

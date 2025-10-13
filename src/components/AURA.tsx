@@ -11,6 +11,9 @@ import { getRandomTeaser, AURATeaser as TeaserType } from '@/lib/auraMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useGlobalLoading } from '@/components/GlobalLoadingProvider';
+import { useRealtimeJobManager } from '@/hooks/useRealtimeJobManager';
+import { useCreditEngagement } from '@/hooks/useCreditEngagement';
 
 interface AURAProps {
   context: string; // e.g., "Portfolio Analytics", "Backtester", "Scenario Simulator"
@@ -51,10 +54,14 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const [showTeaser, setShowTeaser] = useState(false);
   const [currentTeaser, setCurrentTeaser] = useState<TeaserType | null>(null);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const globalLoading = useGlobalLoading();
+  const { createJob } = useRealtimeJobManager();
+  const { canLaunchJob, engageCredit } = useCreditEngagement();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -101,19 +108,23 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     setInput('');
 
     try {
+      // 📝 Include last 7 messages as conversation history
+      const recentMessages = [...messages, userMsg].slice(-7);
+      
       // Timeout promise (30 seconds)
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), 30000)
       );
 
-      // Supabase invoke promise
+      // Supabase invoke promise with conversation history
       const invokePromise = supabase.functions.invoke('aura', {
         body: { 
           question, 
           context: {
             page: context,
             data: contextData,
-          }
+          },
+          conversationHistory: recentMessages // 📝 Send last 7 messages
         }
       });
 
@@ -130,6 +141,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
+          setIsLoading(false);
           return;
         }
         
@@ -140,6 +152,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
+          setIsLoading(false);
           return;
         }
         
@@ -149,22 +162,18 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       const data = result.data;
       console.log("AURA received data:", data);
 
-      // Handle tool calls
-      if (data.toolCalls) {
-        console.log("Tool calls received:", data.toolCalls);
-        setMessages(prev => [...prev, { role: 'assistant', content: data.message || "Feature launched successfully!" }]);
+      // Handle tool calls - launch the actual feature
+      if (data.toolCalls && data.toolCalls.length > 0) {
+        const toolCall = data.toolCalls[0];
+        console.log("AURA tool call detected:", toolCall);
         
-        toast({
-          title: '✅ Feature Launched',
-          description: 'Check your dashboard for results',
-          action: (
-            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
-              View Dashboard
-            </Button>
-          ),
-        });
-      } else if (data.message) {
-        // Normal response
+        // Launch the feature
+        await handleToolLaunch(toolCall);
+        return;
+      }
+
+      // Regular message response
+      if (data.message) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
       } else {
         throw new Error('Invalid response format');
@@ -194,6 +203,171 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       ]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToolLaunch = async (toolCall: any) => {
+    const { name: functionName, arguments: args } = toolCall.function;
+    
+    let parsedArgs: any = {};
+    try {
+      parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+    } catch (e) {
+      console.error("Failed to parse tool arguments:", e);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de lancer la requête.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const instrument = parsedArgs.instrument || '';
+    const timeframe = parsedArgs.timeframe || '4h';
+    const riskLevel = parsedArgs.riskLevel || 'medium';
+    const strategy = parsedArgs.strategy || 'breakout';
+    const positionSize = parsedArgs.positionSize || '2';
+    const customNotes = parsedArgs.customNotes || '';
+    
+    console.log('🚀 [AURA] Launching tool:', { functionName, instrument, parsedArgs });
+    
+    // Map tool function to feature type
+    let featureType: 'ai_trade_setup' | 'macro_commentary' | 'reports' = 'ai_trade_setup';
+    let creditType: 'ideas' | 'queries' | 'reports' = 'ideas';
+    
+    switch (functionName) {
+      case 'launch_ai_trade_setup':
+        featureType = 'ai_trade_setup';
+        creditType = 'ideas';
+        break;
+      case 'launch_macro_commentary':
+        featureType = 'macro_commentary';
+        creditType = 'queries';
+        break;
+      case 'launch_report':
+        featureType = 'reports';
+        creditType = 'reports';
+        break;
+      default:
+        console.warn("Unknown tool function:", functionName);
+        toast({
+          title: 'Erreur',
+          description: 'Fonction inconnue.',
+          variant: 'destructive',
+        });
+        return;
+    }
+
+    // 🔹 Pre-check credits
+    const creditCheck = await canLaunchJob(creditType);
+    if (!creditCheck.canLaunch) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `❌ ${creditCheck.message || "Crédits insuffisants."}` },
+      ]);
+      toast({
+        title: "Crédits Insuffisants",
+        description: creditCheck.message || "Impossible de lancer cette requête.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Show loading message in AURA
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `🚀 Lancement de la requête pour ${instrument}...` },
+      ]);
+      setActiveJobId('pending');
+
+      // Build request payload based on feature type
+      let requestPayload: any = {
+        instrument,
+        timeframe,
+        question: customNotes || `Analyze ${instrument}`
+      };
+
+      if (functionName === 'launch_ai_trade_setup') {
+        requestPayload = {
+          type: "RAG",
+          mode: "run",
+          instrument,
+          question: `Provide an institutional macro outlook and risks for ${instrument}, then a macro-grounded trade idea (entry/SL/TP).`,
+          isTradeQuery: true,
+          timeframe,
+          riskLevel,
+          positionSize,
+          strategy,
+          customNotes
+        };
+      } else if (functionName === 'launch_macro_commentary') {
+        requestPayload = {
+          type: "RAG",
+          mode: "run",
+          instrument,
+          question: `Provide comprehensive macro commentary for ${instrument}. ${customNotes}`,
+          timeframe
+        };
+      } else if (functionName === 'launch_report') {
+        requestPayload = {
+          mode: "run",
+          type: "reports",
+          question: `Generate report for ${instrument}. ${customNotes}`,
+          instrument,
+          timeframe: "1D",
+          exportFormat: "pdf"
+        };
+      }
+
+      // Create job using the job manager
+      const jobId = await createJob(
+        featureType === 'ai_trade_setup' ? 'macro_commentary' : featureType,
+        instrument,
+        requestPayload,
+        featureType === 'ai_trade_setup' ? 'AI Trade Setup' : 
+        featureType === 'macro_commentary' ? 'Macro Commentary' : 'Report'
+      );
+
+      // 🔹 Engage credit
+      const engaged = await engageCredit(creditType, jobId);
+      if (!engaged) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de réserver le crédit.",
+          variant: "destructive"
+        });
+        setMessages((prev) => prev.slice(0, -1));
+        setActiveJobId(null);
+        return;
+      }
+
+      setActiveJobId(jobId);
+      console.log('✅ [AURA] Job created:', { jobId, featureType });
+
+      // Update AURA message with job tracking
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        { role: 'assistant', content: `✅ Requête lancée pour ${instrument}. Vous pouvez suivre la progression dans les notifications en bas à droite.` },
+      ]);
+
+      toast({
+        title: 'Requête Lancée',
+        description: `Votre analyse pour ${instrument} est en cours...`,
+      });
+
+    } catch (error) {
+      console.error('❌ [AURA] Failed to launch job:', error);
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        { role: 'assistant', content: `❌ Erreur lors du lancement de la requête.` },
+      ]);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de lancer la requête.',
+        variant: 'destructive',
+      });
+      setActiveJobId(null);
     }
   };
 
@@ -328,7 +502,9 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
             <div className="flex justify-start">
               <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm text-muted-foreground">Analyzing...</span>
+                <span className="text-sm text-muted-foreground">
+                  {activeJobId ? 'Lancement en cours...' : 'Analyzing...'}
+                </span>
               </div>
             </div>
           )}
