@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, ChevronRight, Send, Loader2 } from 'lucide-react';
+import { MessageCircle, X, ChevronRight, Send, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { AURATeaser } from '@/components/aura/AURATeaser';
@@ -25,6 +25,14 @@ interface AURAProps {
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+}
+
+interface AuraJobBadge {
+  jobId: string;
+  type: 'ai_trade_setup' | 'macro_commentary' | 'reports';
+  instrument: string;
+  status: 'pending' | 'running' | 'completed' | 'error';
+  createdAt: Date;
 }
 
 const QUICK_ACTIONS: Record<string, string[]> = {
@@ -55,6 +63,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const [currentTeaser, setCurrentTeaser] = useState<TeaserType | null>(null);
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [jobBadges, setJobBadges] = useState<AuraJobBadge[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -67,7 +76,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, jobBadges]);
 
   // Reset teaser state when chat opens
   useEffect(() => {
@@ -98,6 +107,59 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       return () => clearTimeout(timer);
     }
   }, [isExpanded, teaserDismissed, context]);
+
+  // Save conversation to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('aura-conversation', JSON.stringify(messages.slice(-7)));
+    }
+  }, [messages]);
+
+  // Restore conversation from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('aura-conversation');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+      } catch (e) {
+        console.error('Failed to restore AURA conversation:', e);
+      }
+    }
+  }, []);
+
+  // Subscribe to job updates for badges
+  useEffect(() => {
+    if (!user?.id || !isExpanded) return;
+
+    const channel = supabase
+      .channel(`aura-job-badges-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'jobs',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const job = payload.new as any;
+          
+          setJobBadges((prev) =>
+            prev.map((badge) =>
+              badge.jobId === job.id
+                ? { ...badge, status: job.status }
+                : badge
+            )
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isExpanded]);
 
   const sendMessage = async (question: string) => {
     if (!question.trim()) return;
@@ -343,6 +405,19 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       }
 
       setActiveJobId(jobId);
+
+      // Add job badge to chat
+      setJobBadges((prev) => [
+        ...prev,
+        {
+          jobId,
+          type: featureType,
+          instrument,
+          status: 'pending',
+          createdAt: new Date()
+        }
+      ]);
+
       console.log('✅ [AURA] Job created:', { jobId, featureType });
 
       // Update AURA message with job tracking
@@ -419,14 +494,23 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   // Expanded panel
   return (
     <div className="fixed right-0 top-0 h-full w-full md:w-1/3 z-40 bg-background border-l border-border shadow-2xl flex flex-col">
-      {/* Header with gradient */}
-      <div className="bg-gradient-to-r from-blue-900 to-cyan-900 text-white p-4 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+      {/* Modern rounded header with gradient */}
+      <div className="relative p-4 rounded-t-2xl backdrop-blur-md bg-gradient-to-br from-blue-600/90 via-purple-600/80 to-cyan-500/90 shadow-lg">
+        {/* Subtle animated background glow */}
+        <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-br from-blue-400/20 to-purple-400/20 animate-pulse"></div>
+        
+        <div className="relative flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <MessageCircle className="h-5 w-5 text-white" />
+            </div>
             <div>
-              <h2 className="font-bold">AURA</h2>
-              <p className="text-xs opacity-80">AlphaLens Unified Research Assistant</p>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                🤖 AURA
+              </h2>
+              <p className="text-xs text-white/80 font-light">
+                AlphaLens Unified Research Assistant
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -434,7 +518,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="hidden md:flex text-white hover:bg-white/20"
+              className="hidden md:flex text-white hover:bg-white/20 rounded-lg"
               aria-label="Collapse to side"
             >
               <ChevronRight className="h-4 w-4" />
@@ -443,7 +527,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="md:hidden text-white hover:bg-white/20"
+              className="md:hidden text-white hover:bg-white/20 rounded-lg"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -494,6 +578,46 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
                 )}
               >
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* Job badges in chat */}
+          {jobBadges.map((badge) => (
+            <div key={badge.jobId} className="flex justify-center my-2">
+              <div
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  {
+                    "bg-yellow-100 text-yellow-800 animate-pulse": badge.status === 'pending',
+                    "bg-blue-100 text-blue-800 animate-pulse": badge.status === 'running',
+                    "bg-green-100 text-green-800 cursor-pointer hover:bg-green-200": badge.status === 'completed',
+                    "bg-red-100 text-red-800": badge.status === 'error'
+                  }
+                )}
+                onClick={() => {
+                  if (badge.status === 'completed') {
+                    const routes = {
+                      ai_trade_setup: '/ai-setup',
+                      macro_commentary: '/macro-analysis',
+                      reports: '/reports'
+                    };
+                    navigate(routes[badge.type]);
+                    onToggle();
+                  }
+                }}
+              >
+                {badge.status === 'pending' && <Loader2 className="h-4 w-4 animate-spin" />}
+                {badge.status === 'running' && <Loader2 className="h-4 w-4 animate-spin" />}
+                {badge.status === 'completed' && <CheckCircle className="h-4 w-4" />}
+                {badge.status === 'error' && <XCircle className="h-4 w-4" />}
+                
+                <span>
+                  {badge.status === 'pending' && `Queuing ${badge.instrument}...`}
+                  {badge.status === 'running' && `Processing ${badge.instrument}...`}
+                  {badge.status === 'completed' && `✅ ${badge.instrument} ready — click to view`}
+                  {badge.status === 'error' && `❌ ${badge.instrument} failed`}
+                </span>
               </div>
             </div>
           ))}
