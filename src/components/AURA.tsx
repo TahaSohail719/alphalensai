@@ -15,6 +15,7 @@ import { useGlobalLoading } from '@/components/GlobalLoadingProvider';
 import { useRealtimeJobManager } from '@/hooks/useRealtimeJobManager';
 import { useCreditEngagement } from '@/hooks/useCreditEngagement';
 import { enhancedPostRequest } from '@/lib/enhanced-request';
+import auraLogo from '@/assets/aura-logo.png';
 
 interface AURAProps {
   context: string; // e.g., "Portfolio Analytics", "Backtester", "Scenario Simulator"
@@ -73,11 +74,18 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const { createJob } = useRealtimeJobManager();
   const { canLaunchJob, engageCredit } = useCreditEngagement();
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
     }
-  }, [messages, jobBadges]);
+  }, [messages, jobBadges, isLoading]);
 
   // Reset teaser state when chat opens
   useEffect(() => {
@@ -569,7 +577,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <MessageCircle className="h-5 w-5 text-primary" />
+                <img src={auraLogo} alt="AURA" className="h-6 w-6" />
               </div>
               <div>
                 <CardTitle className="text-lg bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
