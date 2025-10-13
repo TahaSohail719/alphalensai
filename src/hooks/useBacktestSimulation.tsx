@@ -235,8 +235,17 @@ export function useBacktestSimulation() {
       const winners = simulatedTrades.filter(t => t.simulated_outcome === 'tp_hit');
       const losers = simulatedTrades.filter(t => t.simulated_outcome === 'sl_hit');
 
+      console.log('=== SIMULATION STATS ===');
+      console.log('Total trades:', simulatedTrades.length);
+      console.log('Resolved trades:', resolvedTrades.length);
+      console.log('Winners:', winners.length);
+      console.log('Losers:', losers.length);
+
       const totalPnL = simulatedTrades.reduce((sum, t) => sum + (t.simulated_pnl_usd || 0), 0);
       const winRate = resolvedTrades.length > 0 ? (winners.length / resolvedTrades.length) * 100 : 0;
+
+      console.log('Win Rate:', winRate.toFixed(1) + '%');
+      console.log('Total PnL:', totalPnL.toFixed(2));
       const avgWinPnL = winners.length > 0 
         ? winners.reduce((sum, t) => sum + (t.simulated_pnl_usd || 0), 0) / winners.length 
         : 0;

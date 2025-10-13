@@ -79,8 +79,24 @@ export const globalTradeSetups: BacktestTradeSetup[] = [
 
 export function calculateStats(trades: BacktestTradeSetup[]): BacktestStats {
   const totalTrades = trades.length;
-  const winningTrades = trades.filter(t => t.status === 'TP Hit').length;
-  const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+  
+  // Detect if trades are simulated
+  const isSimulated = trades.some(t => t.simulated === true);
+  
+  // Use simulated_outcome if simulated, otherwise status
+  const winningTrades = trades.filter(t => {
+    if (isSimulated && t.simulated_outcome) {
+      return t.simulated_outcome === 'tp_hit';
+    }
+    return t.status === 'TP Hit';
+  }).length;
+  
+  // Count only resolved trades for win rate
+  const resolvedTrades = isSimulated
+    ? trades.filter(t => t.simulated_outcome === 'tp_hit' || t.simulated_outcome === 'sl_hit').length
+    : trades.filter(t => t.status !== 'Open').length;
+  
+  const winRate = resolvedTrades > 0 ? (winningTrades / resolvedTrades) * 100 : 0;
   
   const totalRR = trades.reduce((sum, trade) => {
     const riskReward = Math.abs((trade.tp - trade.entry) / (trade.entry - trade.sl));
@@ -88,9 +104,18 @@ export function calculateStats(trades: BacktestTradeSetup[]): BacktestStats {
   }, 0);
   const avgRiskReward = totalTrades > 0 ? totalRR / totalTrades : 0;
   
-  const cumulativePnL = trades.reduce((sum, trade) => sum + trade.pnl_percent, 0);
+  // Use simulated_pnl_percent if available, otherwise pnl_percent
+  const cumulativePnL = trades.reduce((sum, trade) => {
+    if (isSimulated && trade.simulated_pnl_percent !== undefined) {
+      return sum + trade.simulated_pnl_percent;
+    }
+    return sum + trade.pnl_percent;
+  }, 0);
+  
   const avgPnL = totalTrades > 0 ? cumulativePnL / totalTrades : 0;
-  const activeTrades = trades.filter(t => t.status === 'Open').length;
+  const activeTrades = isSimulated
+    ? trades.filter(t => t.simulated_outcome === 'open').length
+    : trades.filter(t => t.status === 'Open').length;
   
   return {
     totalTrades,

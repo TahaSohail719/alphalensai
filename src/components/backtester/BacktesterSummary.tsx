@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Target, Scale, DollarSign } from 'lucide-react';
 import { BacktestStats } from '@/data/mockBacktesterData';
 
@@ -21,6 +22,8 @@ export function BacktesterSummary({ stats }: BacktesterSummaryProps) {
       label: 'Win Rate',
       value: `${stats.winRate.toFixed(1)}%`,
       delay: '100ms',
+      badge: isSimulated ? 'Real Data' : 'Mock',
+      badgeVariant: isSimulated ? 'default' : 'outline',
     },
     {
       icon: Scale,
@@ -56,6 +59,11 @@ export function BacktesterSummary({ stats }: BacktesterSummaryProps) {
                 <Icon className="h-5 w-5 text-primary" />
                 {stat.highlight && (
                   <span className="text-xs font-medium text-primary">Live</span>
+                )}
+                {stat.badge && (
+                  <Badge variant={stat.badgeVariant as any} className="text-[10px] px-1.5 py-0">
+                    {stat.badge}
+                  </Badge>
                 )}
               </div>
               <div className="space-y-1">
