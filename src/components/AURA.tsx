@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGlobalLoading } from '@/components/GlobalLoadingProvider';
 import { useRealtimeJobManager } from '@/hooks/useRealtimeJobManager';
 import { useCreditEngagement } from '@/hooks/useCreditEngagement';
+import { enhancedPostRequest } from '@/lib/enhanced-request';
 
 interface AURAProps {
   context: string; // e.g., "Portfolio Analytics", "Backtester", "Scenario Simulator"
@@ -418,7 +419,76 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         }
       ]);
 
-      console.log('✅ [AURA] Job created:', { jobId, featureType });
+      // 🔹 Subscribe to realtime updates (like AISetup.tsx)
+      const channel = supabase
+        .channel(`aura-job-${jobId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'jobs',
+            filter: `id=eq.${jobId}`
+          },
+          (payload) => {
+            const job = payload.new as any;
+            console.log(`📡 [AURA Realtime] Job update:`, job);
+            
+            // Update badge status
+            setJobBadges((prev) =>
+              prev.map((badge) =>
+                badge.jobId === job.id
+                  ? { ...badge, status: job.status }
+                  : badge
+              )
+            );
+
+            if (job.status === 'completed') {
+              setMessages((prev) => [
+                ...prev.slice(0, -1),
+                { role: 'assistant', content: `✅ Requête terminée pour ${instrument}. Vous pouvez consulter le résultat via les notifications en bas à droite ou cliquer sur le badge ci-dessus.` },
+              ]);
+              setActiveJobId(null);
+              supabase.removeChannel(channel);
+            } else if (job.status === 'error') {
+              setMessages((prev) => [
+                ...prev.slice(0, -1),
+                { role: 'assistant', content: `❌ Erreur lors du traitement pour ${instrument}.` },
+              ]);
+              setActiveJobId(null);
+              supabase.removeChannel(channel);
+            }
+          }
+        )
+        .subscribe();
+
+      // 🔹 CRITICAL: Send HTTP request to n8n (like AISetup.tsx)
+      console.log('📊 [AURA] Sending n8n request:', {
+        url: 'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+        jobId,
+        instrument,
+        timestamp: new Date().toISOString()
+      });
+
+      try {
+        const { response } = await enhancedPostRequest(
+          'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
+          requestPayload,
+          {
+            enableJobTracking: true,
+            jobType: featureType === 'ai_trade_setup' ? 'macro_commentary' : featureType,
+            instrument: instrument,
+            feature: featureType === 'ai_trade_setup' ? 'AI Trade Setup' : 
+                     featureType === 'macro_commentary' ? 'Macro Commentary' : 'Report',
+            jobId: jobId
+          }
+        );
+        console.log('📩 [AURA HTTP] Request sent to n8n (waiting for Realtime response)');
+      } catch (httpError) {
+        console.log('⏱️ [AURA HTTP] Request timeout (expected, waiting for Realtime)', httpError);
+      }
+
+      console.log('✅ [AURA] Job created and n8n request sent:', { jobId, featureType });
 
       // Update AURA message with job tracking
       setMessages((prev) => [
@@ -494,21 +564,14 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   // Expanded panel
   return (
     <div className="fixed right-0 top-0 h-full w-full md:w-1/3 z-40 bg-background border-l border-border shadow-2xl flex flex-col">
-      {/* Modern rounded header with gradient */}
-      <div className="relative p-4 rounded-t-2xl backdrop-blur-md bg-gradient-to-br from-blue-600/90 via-purple-600/80 to-cyan-500/90 shadow-lg">
-        {/* Subtle animated background glow */}
-        <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-br from-blue-400/20 to-purple-400/20 animate-pulse"></div>
-        
-        <div className="relative flex items-start justify-between">
+      {/* Professional corporate header */}
+      <CardHeader className="border-b">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-              <MessageCircle className="h-5 w-5 text-white" />
-            </div>
+            <MessageCircle className="h-5 w-5 text-primary" />
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                🤖 AURA
-              </h2>
-              <p className="text-xs text-white/80 font-light">
+              <CardTitle className="text-lg">AURA</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 AlphaLens Unified Research Assistant
               </p>
             </div>
@@ -518,7 +581,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="hidden md:flex text-white hover:bg-white/20 rounded-lg"
+              className="hidden md:flex"
               aria-label="Collapse to side"
             >
               <ChevronRight className="h-4 w-4" />
@@ -527,14 +590,14 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="md:hidden text-white hover:bg-white/20 rounded-lg"
+              className="md:hidden"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
-      </div>
+      </CardHeader>
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
