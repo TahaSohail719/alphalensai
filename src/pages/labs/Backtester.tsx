@@ -11,37 +11,93 @@ import { BacktesterInsights } from '@/components/backtester/BacktesterInsights';
 import { InstrumentSelector } from '@/components/backtester/InstrumentSelector';
 import { TradeChartPanel } from '@/components/backtester/TradeChartPanel';
 import { usePriceData } from '@/hooks/usePriceData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { calculateStats } from '@/data/mockBacktesterData';
 import { useBacktesterData } from '@/hooks/useBacktesterData';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { useBacktestSimulation, SimulatedTrade } from '@/hooks/useBacktestSimulation';
+import { useToast } from '@/hooks/use-toast';
+import { PlayCircle } from 'lucide-react';
 import AURA from '@/components/AURA';
 
 function BacktesterContent() {
+  const { toast } = useToast();
   const [isAURAExpanded, setIsAURAExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('my-setups');
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
   
+  // Simulation parameters
+  const [positionSize, setPositionSize] = useState(1);
+  const [leverage, setLeverage] = useState(100);
+  const [simulatedMyTrades, setSimulatedMyTrades] = useState<SimulatedTrade[]>([]);
+  const [simulatedGlobalTrades, setSimulatedGlobalTrades] = useState<SimulatedTrade[]>([]);
+  
   // Fetch real data
   const { data: myTradeSetups, loading: myLoading } = useBacktesterData({ mode: 'my-setups' });
   const { data: globalTradeSetups, loading: globalLoading } = useBacktesterData({ mode: 'global' });
+  
+  const { runSimulation, loading: simulating } = useBacktestSimulation();
 
+  // Use simulated trades if available, otherwise raw data
+  const displayMyTrades = simulatedMyTrades.length > 0 ? simulatedMyTrades : myTradeSetups;
+  const displayGlobalTrades = simulatedGlobalTrades.length > 0 ? simulatedGlobalTrades : globalTradeSetups;
+  
   // Calculate stats for both datasets
-  const myStats = useMemo(() => calculateStats(myTradeSetups), [myTradeSetups]);
-  const globalStats = useMemo(() => calculateStats(globalTradeSetups), [globalTradeSetups]);
+  const myStats = useMemo(() => calculateStats(displayMyTrades), [displayMyTrades]);
+  const globalStats = useMemo(() => calculateStats(displayGlobalTrades), [displayGlobalTrades]);
 
   // Get unique instruments
   const uniqueInstruments = useMemo(() => {
-    const data = activeTab === 'my-setups' ? myTradeSetups : globalTradeSetups;
+    const data = activeTab === 'my-setups' ? displayMyTrades : displayGlobalTrades;
     return Array.from(new Set(data.map(t => t.instrument))).sort();
-  }, [activeTab, myTradeSetups, globalTradeSetups]);
+  }, [activeTab, displayMyTrades, displayGlobalTrades]);
 
   // Filter trades by selected instrument
   const filteredTrades = useMemo(() => {
-    const data = activeTab === 'my-setups' ? myTradeSetups : globalTradeSetups;
+    const data = activeTab === 'my-setups' ? displayMyTrades : displayGlobalTrades;
     if (!selectedInstrument) return data;
     return data.filter(t => t.instrument === selectedInstrument);
-  }, [activeTab, myTradeSetups, globalTradeSetups, selectedInstrument]);
+  }, [activeTab, displayMyTrades, displayGlobalTrades, selectedInstrument]);
+  
+  // Run simulation
+  const handleRunSimulation = async () => {
+    try {
+      toast({
+        title: "Starting simulation...",
+        description: "Fetching historical prices and simulating trades"
+      });
+      
+      const myResult = await runSimulation({
+        trades: myTradeSetups,
+        positionSize,
+        leverage
+      });
+      
+      const globalResult = await runSimulation({
+        trades: globalTradeSetups,
+        positionSize,
+        leverage
+      });
+      
+      setSimulatedMyTrades(myResult.simulatedTrades);
+      setSimulatedGlobalTrades(globalResult.simulatedTrades);
+      
+      toast({
+        title: "Simulation complete!",
+        description: `Processed ${myTradeSetups.length} personal trades and ${globalTradeSetups.length} global trades`,
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Simulation failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Get date range for price data
   const dateRange = useMemo(() => {
@@ -64,7 +120,7 @@ function BacktesterContent() {
   const contextData = useMemo(() => {
     const isMySetups = activeTab === 'my-setups';
     const stats = isMySetups ? myStats : globalStats;
-    const data = isMySetups ? myTradeSetups : globalTradeSetups;
+    const data = isMySetups ? displayMyTrades : displayGlobalTrades;
 
     return {
       page: 'Backtester',
@@ -76,7 +132,7 @@ function BacktesterContent() {
       recentData: data.slice(0, 10),
       filters: { mode: activeTab },
     };
-  }, [activeTab, myStats, globalStats, myTradeSetups, globalTradeSetups]);
+  }, [activeTab, myStats, globalStats, displayMyTrades, displayGlobalTrades]);
 
   return (
     <Layout>
@@ -96,6 +152,73 @@ function BacktesterContent() {
               Discover strategy robustness and recurring alpha patterns.
             </p>
           </div>
+
+          {/* Simulation Parameters Card */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PlayCircle className="h-5 w-5" />
+                Real Market Simulation
+              </CardTitle>
+              <CardDescription>
+                Configure position sizing to simulate real PnL using historical TwelveData prices
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Position Size */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Position Size (lots)</Label>
+                    <span className="text-sm font-mono font-semibold">{positionSize.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    value={[positionSize]}
+                    onValueChange={([val]) => setPositionSize(val)}
+                    min={0.01}
+                    max={10}
+                    step={0.01}
+                    disabled={simulating}
+                  />
+                </div>
+
+                {/* Leverage */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Leverage</Label>
+                    <span className="text-sm font-mono font-semibold">{leverage}x</span>
+                  </div>
+                  <Slider
+                    value={[leverage]}
+                    onValueChange={([val]) => setLeverage(val)}
+                    min={1}
+                    max={500}
+                    step={1}
+                    disabled={simulating}
+                  />
+                </div>
+
+                {/* Run Simulation Button */}
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleRunSimulation} 
+                    disabled={simulating || myLoading || globalLoading}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {simulating ? 'Simulating...' : 'Run Backtest'}
+                  </Button>
+                </div>
+              </div>
+              {simulatedMyTrades.length > 0 && (
+                <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg">
+                  <p className="text-sm text-success font-medium">
+                    ✓ Simulation complete - Displaying real market results with {positionSize.toFixed(2)} lots @ {leverage}x leverage
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Tabs */}
           <Tabs defaultValue="my-setups" className="w-full" onValueChange={setActiveTab}>

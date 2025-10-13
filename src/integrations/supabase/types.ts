@@ -758,6 +758,45 @@ export type Database = {
           },
         ]
       }
+      price_history_cache: {
+        Row: {
+          close: number
+          date: string
+          fetched_at: string | null
+          high: number
+          id: string
+          instrument: string
+          interval: string
+          low: number
+          open: number
+          volume: number | null
+        }
+        Insert: {
+          close: number
+          date: string
+          fetched_at?: string | null
+          high: number
+          id?: string
+          instrument: string
+          interval: string
+          low: number
+          open: number
+          volume?: number | null
+        }
+        Update: {
+          close?: number
+          date?: string
+          fetched_at?: string | null
+          high?: number
+          id?: string
+          instrument?: string
+          interval?: string
+          low?: number
+          open?: number
+          volume?: number | null
+        }
+        Relationships: []
+      }
       prices: {
         Row: {
           close: number | null

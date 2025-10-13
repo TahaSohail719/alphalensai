@@ -10,6 +10,14 @@ export interface BacktestTradeSetup {
   pnl_percent: number;
   confidence: number;
   user_id?: string;
+  // Simulation fields
+  simulated?: boolean;
+  simulated_outcome?: 'tp_hit' | 'sl_hit' | 'open' | 'insufficient_data';
+  hit_date?: string;
+  hit_price?: number;
+  simulated_pnl_usd?: number;
+  simulated_pnl_percent?: number;
+  bars_to_resolution?: number;
 }
 
 export interface BacktestStats {

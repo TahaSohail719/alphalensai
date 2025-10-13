@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.cleanup-stale-credits]
 verify_jwt = false
+
+[functions.fetch-historical-prices]
+verify_jwt = true
