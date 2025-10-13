@@ -12,7 +12,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log("=== AURA REQUEST RECEIVED ===");
+    console.log("Method:", req.method);
+    console.log("Timestamp:", new Date().toISOString());
+    
     const { question, context } = await req.json();
+    console.log("Question received:", question);
+    console.log("Context page:", typeof context === 'string' ? context : context?.page);
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     const contextPage = typeof context === 'string' ? context : context?.page || 'General Analytics';

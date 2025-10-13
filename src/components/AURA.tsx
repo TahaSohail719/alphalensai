@@ -10,6 +10,7 @@ import { AURATeaser } from '@/components/aura/AURATeaser';
 import { getRandomTeaser, AURATeaser as TeaserType } from '@/lib/auraMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AURAProps {
   context: string; // e.g., "Portfolio Analytics", "Backtester", "Scenario Simulator"
@@ -99,51 +100,53 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    let assistantContent = '';
-
     try {
-      const resp = await fetch(
-        `https://jqrlegdulnnrpiixiecf.supabase.co/functions/v1/aura`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcmxlZ2R1bG5ucnBpaXhpZWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDYzNDgsImV4cCI6MjA2OTk4MjM0OH0.on2S0WpM45atAYvLU8laAZJ-abS4RcMmfiqW7mLtT_4`,
-            'user-id': user?.id || '',
-          },
-          body: JSON.stringify({ 
-            question, 
-            context: {
-              page: context,
-              data: contextData,
-            }
-          }),
-        }
+      // Timeout promise (30 seconds)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 30000)
       );
 
-      if (!resp.ok) {
-        if (resp.status === 429) {
+      // Supabase invoke promise
+      const invokePromise = supabase.functions.invoke('aura', {
+        body: { 
+          question, 
+          context: {
+            page: context,
+            data: contextData,
+          }
+        }
+      });
+
+      // Race between timeout and actual request
+      const result = await Promise.race([invokePromise, timeoutPromise]) as { data: any; error: any };
+
+      if (result.error) {
+        console.error('AURA invocation error:', result.error);
+        
+        if (result.error.message?.includes('429')) {
           toast({
-            title: 'Rate Limit Exceeded',
-            description: 'Please wait a moment before sending another message.',
+            title: 'Limite Atteinte',
+            description: 'Veuillez patienter avant d\'envoyer un autre message.',
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
           return;
         }
-        if (resp.status === 402) {
+        
+        if (result.error.message?.includes('402')) {
           toast({
-            title: 'Payment Required',
-            description: 'Please add credits to your Lovable AI workspace.',
+            title: 'Crédits Requis',
+            description: 'Veuillez ajouter des crédits à votre workspace Lovable AI.',
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
           return;
         }
-        throw new Error('Failed to get response');
+        
+        throw result.error;
       }
 
-      const data = await resp.json();
+      const data = result.data;
       console.log("AURA received data:", data);
 
       // Handle tool calls
@@ -168,12 +171,27 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       }
     } catch (error) {
       console.error('AURA error:', error);
+      
+      let errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+      
+      if (error instanceof Error) {
+        if (error.message === 'timeout') {
+          errorMessage = "Le serveur met trop de temps à répondre. Veuillez réessayer avec une question plus simple.";
+        } else if (error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('network')) {
+          errorMessage = "Impossible de contacter le serveur. Vérifiez votre connexion internet.";
+        }
+      }
+      
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to get response',
+        title: 'Erreur',
+        description: errorMessage,
         variant: 'destructive',
       });
-      setMessages(prev => prev.slice(0, -1));
+      
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        { role: 'assistant', content: `❌ ${errorMessage}` },
+      ]);
     } finally {
       setIsLoading(false);
     }
