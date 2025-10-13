@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BacktestTradeSetup } from '@/data/mockBacktesterData';
 import { getInstrumentType } from '@/services/marketDataService';
+import { useToast } from '@/hooks/use-toast';
 
 export interface SimulatedTrade extends BacktestTradeSetup {
   simulated?: boolean;
@@ -32,6 +33,7 @@ interface SimulationStats {
 export function useBacktestSimulation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const runSimulation = async ({
     trades,
@@ -84,6 +86,11 @@ export function useBacktestSimulation() {
 
         if (priceError || !priceData || !priceData.data) {
           console.error(`Error fetching prices for ${instrument}:`, priceError);
+          toast({
+            title: `Failed to fetch data for ${instrument}`,
+            description: `Check instrument symbol mapping in TwelveData API.`,
+            variant: 'destructive',
+          });
           // Mark trades as insufficient data
           instrumentTrades.forEach(trade => {
             simulatedTrades.push({

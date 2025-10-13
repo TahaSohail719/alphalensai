@@ -25,6 +25,10 @@ export interface BacktestStats {
   winRate: number;
   avgRiskReward: number;
   cumulativePnL: number;
+  // Simulation stats
+  simulatedTotalPnL?: number;
+  profitFactor?: number;
+  maxDrawdown?: number;
 }
 
 // My trade setups (current user)

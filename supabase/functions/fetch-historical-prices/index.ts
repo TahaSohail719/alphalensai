@@ -8,15 +8,74 @@ const corsHeaders = {
 
 const TWELVE_API_KEY = 'e40fcead02054731aef55d2dfe01cf47';
 
-// Map instruments to TwelveData symbols
+// Map instruments to TwelveData symbols with extensive coverage
 function mapToTwelveDataSymbol(instrument: string): string {
+  // First extract symbol from parentheses if present (e.g., "GOLD (XAU/USD)" -> "XAU/USD")
+  const parenthesesMatch = instrument.match(/\(([^)]+)\)/);
+  if (parenthesesMatch) {
+    instrument = parenthesesMatch[1];
+  }
+  
   const mappings: Record<string, string> = {
-    'NG': 'NATGAS/USD',
+    // Forex pairs
+    'EUR/USD': 'EUR/USD',
+    'GBP/USD': 'GBP/USD',
+    'USD/JPY': 'USD/JPY',
+    'USD/CHF': 'USD/CHF',
+    'AUD/USD': 'AUD/USD',
+    'NZD/USD': 'NZD/USD',
+    'EUR/GBP': 'EUR/GBP',
+    'GBP/JPY': 'GBP/JPY',
+    'AUD/JPY': 'AUD/JPY',
+    'USD/CAD': 'USD/CAD',
+    
+    // Cryptocurrencies
+    'BITCOIN': 'BTC/USD',
+    'BTC': 'BTC/USD',
+    'BITCOIN (BTC)': 'BTC/USD',
+    'ETHEREUM': 'ETH/USD',
+    'ETH': 'ETH/USD',
+    
+    // Commodities - Gold
     'GOLD': 'XAU/USD',
     'XAU/USD': 'XAU/USD',
     'XAUUSD': 'XAU/USD',
+    'GOLD (XAU/USD)': 'XAU/USD',
+    
+    // Commodities - Silver
+    'SILVER': 'XAG/USD',
+    'XAG/USD': 'XAG/USD',
+    'SILVER (XAG/USD)': 'XAG/USD',
+    
+    // Oil & Energy
+    'WTI': 'WTI/USD',
+    'BRENT': 'BRENT/USD',
+    'OIL': 'WTI/USD',
+    'NATURAL GAS': 'NATGAS/USD',
+    'NG': 'NATGAS/USD',
+    'NATURAL GAS (NG)': 'NATGAS/USD',
+    'NATGAS': 'NATGAS/USD',
+    
+    // Commodities futures
+    'COFFEE': 'KC=F',
+    'KC=F': 'KC=F',
   };
-  return mappings[instrument.toUpperCase()] || instrument;
+  
+  // Clean up the input
+  const cleanedInstrument = instrument.trim();
+  
+  // Try exact match first
+  if (mappings[cleanedInstrument]) {
+    return mappings[cleanedInstrument];
+  }
+  
+  // Try uppercase match
+  if (mappings[cleanedInstrument.toUpperCase()]) {
+    return mappings[cleanedInstrument.toUpperCase()];
+  }
+  
+  // Return original if no mapping found
+  return cleanedInstrument;
 }
 
 serve(async (req) => {

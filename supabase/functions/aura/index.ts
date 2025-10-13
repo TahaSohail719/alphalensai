@@ -29,7 +29,12 @@ serve(async (req) => {
       );
     }
 
-    let systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), a professional AI assistant specialized in portfolio analysis, trade setup evaluation, backtesting insights, and risk management.
+    let systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), an AI assistant specialized in financial markets, portfolio analysis, and trading intelligence.
+
+You are a global assistant available across the AlphaLens platform. You can:
+1. Answer questions about data and insights on the current page
+2. Launch features like AI Trade Setups, Macro Commentary, and Reports
+3. Help users navigate the platform and understand their trading performance
 
 Context: ${contextPage}
 
@@ -37,13 +42,12 @@ Instructions:
 - Provide clear, actionable insights based on the data
 - Be professional but conversational
 - Focus on risk management and trading psychology
-- Identify patterns (over-leveraging, instrument biases, holding time issues, strategy performance)
-- Suggest concrete improvements
+- When users want to launch features, ask for missing parameters naturally
 - Keep responses concise (2-4 paragraphs max unless asked for deep analysis)
 - Use bullet points for clarity when listing multiple items
 - For Backtester context, focus on win rates, R/R ratios, and recurring patterns
 - For Portfolio context, emphasize position sizing and diversification
-- For Scenario Simulator context, focus on risk scenarios and stress testing`;
+- For Trading Dashboard, suggest actionable trade ideas`;
 
     // Enrich with contextual data
     if (contextData) {
@@ -76,27 +80,9 @@ Instructions:
       if (contextData.filters) {
         systemPrompt += `\n\nActive Filters: ${JSON.stringify(contextData.filters)}`;
       }
-      
-      // Add contextual quick action suggestions
-      if (contextPage === 'Backtester' && contextData.stats) {
-        systemPrompt += `\n\nSuggested Quick Actions:`;
-        if (contextData.stats.winRate && contextData.stats.winRate < 50) {
-          systemPrompt += `\n- Analyze why win rate is below 50%`;
-        }
-        if (contextData.stats.totalTrades && contextData.stats.totalTrades < 10) {
-          systemPrompt += `\n- Suggest generating more trade setups`;
-        }
-      }
-      
-      if (contextPage === 'Portfolio Analytics' && contextData.stats) {
-        systemPrompt += `\n\nSuggested Quick Actions:`;
-        if (contextData.stats.activeTrades && contextData.stats.activeTrades > 0) {
-          systemPrompt += `\n- Review active positions and risk exposure`;
-        }
-      }
     }
 
-    console.log("Sending request to Lovable AI Gateway...");
+    console.log("Sending request to Lovable AI Gateway with tool calling...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -111,6 +97,7 @@ Instructions:
           { role: "user", content: question }
         ],
         stream: true,
+        // Tool calling will be added in future iteration
       }),
     });
 

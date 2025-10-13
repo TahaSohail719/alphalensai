@@ -12,7 +12,7 @@ import { InstrumentSelector } from '@/components/backtester/InstrumentSelector';
 import { TradeChartPanel } from '@/components/backtester/TradeChartPanel';
 import { usePriceData } from '@/hooks/usePriceData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { calculateStats } from '@/data/mockBacktesterData';
+import { calculateStats, BacktestStats } from '@/data/mockBacktesterData';
 import { useBacktesterData } from '@/hooks/useBacktesterData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,8 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { useBacktestSimulation, SimulatedTrade } from '@/hooks/useBacktestSimulation';
 import { useToast } from '@/hooks/use-toast';
-import { PlayCircle } from 'lucide-react';
-import AURA from '@/components/AURA';
+import { PlayCircle, AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 function BacktesterContent() {
   const { toast } = useToast();
@@ -34,6 +34,7 @@ function BacktesterContent() {
   const [leverage, setLeverage] = useState(100);
   const [simulatedMyTrades, setSimulatedMyTrades] = useState<SimulatedTrade[]>([]);
   const [simulatedGlobalTrades, setSimulatedGlobalTrades] = useState<SimulatedTrade[]>([]);
+  const [simulationStats, setSimulationStats] = useState<{ my: any; global: any } | null>(null);
   
   // Fetch real data
   const { data: myTradeSetups, loading: myLoading } = useBacktesterData({ mode: 'my-setups' });
@@ -46,8 +47,31 @@ function BacktesterContent() {
   const displayGlobalTrades = simulatedGlobalTrades.length > 0 ? simulatedGlobalTrades : globalTradeSetups;
   
   // Calculate stats for both datasets
-  const myStats = useMemo(() => calculateStats(displayMyTrades), [displayMyTrades]);
-  const globalStats = useMemo(() => calculateStats(displayGlobalTrades), [displayGlobalTrades]);
+  const myStats: BacktestStats = useMemo(() => {
+    const baseStats = calculateStats(displayMyTrades);
+    if (simulationStats?.my) {
+      return {
+        ...baseStats,
+        simulatedTotalPnL: simulationStats.my.totalPnL,
+        profitFactor: simulationStats.my.profitFactor,
+        maxDrawdown: simulationStats.my.maxDrawdown,
+      };
+    }
+    return baseStats;
+  }, [displayMyTrades, simulationStats]);
+  
+  const globalStats: BacktestStats = useMemo(() => {
+    const baseStats = calculateStats(displayGlobalTrades);
+    if (simulationStats?.global) {
+      return {
+        ...baseStats,
+        simulatedTotalPnL: simulationStats.global.totalPnL,
+        profitFactor: simulationStats.global.profitFactor,
+        maxDrawdown: simulationStats.global.maxDrawdown,
+      };
+    }
+    return baseStats;
+  }, [displayGlobalTrades, simulationStats]);
 
   // Get unique instruments
   const uniqueInstruments = useMemo(() => {
@@ -84,11 +108,21 @@ function BacktesterContent() {
       
       setSimulatedMyTrades(myResult.simulatedTrades);
       setSimulatedGlobalTrades(globalResult.simulatedTrades);
+      setSimulationStats({
+        my: myResult.stats,
+        global: globalResult.stats,
+      });
+      
+      const insufficientCount = 
+        myResult.simulatedTrades.filter(t => t.simulated_outcome === 'insufficient_data').length +
+        globalResult.simulatedTrades.filter(t => t.simulated_outcome === 'insufficient_data').length;
       
       toast({
         title: "Simulation complete!",
-        description: `Processed ${myTradeSetups.length} personal trades and ${globalTradeSetups.length} global trades`,
-        variant: "default"
+        description: insufficientCount > 0 
+          ? `Processed trades with ${insufficientCount} instruments lacking data`
+          : `Processed ${myTradeSetups.length} personal and ${globalTradeSetups.length} global trades`,
+        variant: insufficientCount > 0 ? "destructive" : "default"
       });
     } catch (error) {
       toast({
@@ -329,13 +363,6 @@ function BacktesterContent() {
           </Tabs>
         </div>
         
-        {/* AURA Assistant */}
-        <AURA
-          context="Backtester"
-          contextData={contextData}
-          isExpanded={isAURAExpanded}
-          onToggle={() => setIsAURAExpanded(!isAURAExpanded)}
-        />
       </div>
     </Layout>
   );

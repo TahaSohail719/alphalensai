@@ -7,6 +7,8 @@ interface BacktesterSummaryProps {
 }
 
 export function BacktesterSummary({ stats }: BacktesterSummaryProps) {
+  const isSimulated = stats.simulatedTotalPnL !== undefined;
+  
   const statCards = [
     {
       icon: TrendingUp,
@@ -16,20 +18,24 @@ export function BacktesterSummary({ stats }: BacktesterSummaryProps) {
     },
     {
       icon: Target,
-      label: 'Average Win Rate',
+      label: 'Win Rate',
       value: `${stats.winRate.toFixed(1)}%`,
       delay: '100ms',
     },
     {
       icon: Scale,
-      label: 'Average R/R Ratio',
-      value: stats.avgRiskReward.toFixed(2),
+      label: isSimulated ? 'Profit Factor' : 'Average R/R Ratio',
+      value: isSimulated && stats.profitFactor 
+        ? stats.profitFactor.toFixed(2) 
+        : stats.avgRiskReward.toFixed(2),
       delay: '200ms',
     },
     {
       icon: DollarSign,
-      label: 'Cumulative PnL (%)',
-      value: `${stats.cumulativePnL >= 0 ? '+' : ''}${stats.cumulativePnL.toFixed(1)}%`,
+      label: isSimulated ? 'Total PnL (USD)' : 'Cumulative PnL (%)',
+      value: isSimulated && stats.simulatedTotalPnL !== undefined
+        ? `$${stats.simulatedTotalPnL >= 0 ? '+' : ''}${stats.simulatedTotalPnL.toFixed(2)}`
+        : `${stats.cumulativePnL >= 0 ? '+' : ''}${stats.cumulativePnL.toFixed(1)}%`,
       delay: '300ms',
       highlight: true,
     },

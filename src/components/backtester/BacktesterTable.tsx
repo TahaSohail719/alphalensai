@@ -167,6 +167,12 @@ export function BacktesterTable({ trades }: BacktesterTableProps) {
                         PnL (%) <ArrowUpDown className="ml-1 h-3 w-3" />
                       </Button>
                     </TableHead>
+                    {paginatedTrades[0]?.simulated_pnl_usd !== undefined && (
+                      <>
+                        <TableHead className="text-right">Simulated PnL (USD)</TableHead>
+                        <TableHead className="text-right">Hit Date</TableHead>
+                      </>
+                    )}
                     <TableHead className="text-right">
                       <Button variant="ghost" size="sm" onClick={() => handleSort('confidence')}>
                         Confidence <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -203,6 +209,35 @@ export function BacktesterTable({ trades }: BacktesterTableProps) {
                       }`}>
                         {trade.pnl_percent >= 0 ? '+' : ''}{trade.pnl_percent.toFixed(2)}%
                       </TableCell>
+                      {trade.simulated_pnl_usd !== undefined && (
+                        <>
+                          <TableCell className={`text-right font-bold ${
+                            trade.simulated_pnl_usd >= 0 ? 'text-success' : 'text-destructive'
+                          }`}>
+                            ${trade.simulated_pnl_usd >= 0 ? '+' : ''}{trade.simulated_pnl_usd.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {trade.hit_date ? (
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(trade.hit_date).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })}
+                                </span>
+                                <Badge 
+                                  variant={trade.simulated_outcome === 'tp_hit' ? 'default' : 'destructive'}
+                                  className={trade.simulated_outcome === 'tp_hit' ? 'bg-success text-success-foreground' : ''}
+                                >
+                                  {trade.simulated_outcome === 'tp_hit' ? '✓ TP' : '✗ SL'}
+                                </Badge>
+                              </div>
+                            ) : (
+                              <Badge variant="outline">No Hit</Badge>
+                            )}
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell className="text-right">
                         <Badge variant="outline">{trade.confidence}%</Badge>
                       </TableCell>

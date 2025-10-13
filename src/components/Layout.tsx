@@ -14,6 +14,9 @@ import { useResultNotifications } from "@/hooks/useResultNotifications";
 import { DiscreetJobStatus } from "./DiscreetJobStatus";
 import { CreditsNavbar } from "./CreditsNavbar";
 import { usePersistentNotifications } from "./PersistentNotificationProvider";
+import AURA from "./AURA";
+import { useLocation } from "react-router-dom";
+import { useMemo } from "react";
 interface LayoutProps {
   children: React.ReactNode;
   activeModule?: string;
@@ -33,6 +36,7 @@ export default function Layout({
   const [selectedAsset, setSelectedAsset] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("4h");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAURAExpanded, setIsAURAExpanded] = useState(false);
   const {
     user,
     signOut
@@ -42,6 +46,7 @@ export default function Layout({
     isSuperUser
   } = useUserRole();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Result notification system
   const { markResultsAsSeen } = useResultNotifications();
@@ -49,6 +54,17 @@ export default function Layout({
   // Get latest progress message from active jobs
   const { activeJobs } = usePersistentNotifications();
   const latestMessage = activeJobs[activeJobs.length - 1]?.progressMessage;
+  
+  // Detect context from current route
+  const auraContext = useMemo(() => {
+    const path = location.pathname;
+    if (path.includes('backtester')) return 'Backtester';
+    if (path.includes('portfolio')) return 'Portfolio Analytics';
+    if (path.includes('scenario')) return 'Scenario Simulator';
+    if (path.includes('trading-dashboard')) return 'Trading Dashboard';
+    if (path.includes('macro-analysis')) return 'Macro Analysis';
+    return 'default';
+  }, [location.pathname]);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 overflow-x-hidden">
       {/* Mobile-First Responsive Header */}
       <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-sm">
@@ -272,5 +288,14 @@ export default function Layout({
         timeframe={timeframe} 
         onTradeSetupClick={() => onModuleChange?.("trading")}
        /> */}
+
+      {/* Global AURA Assistant */}
+      {user && (
+        <AURA 
+          context={auraContext}
+          isExpanded={isAURAExpanded}
+          onToggle={() => setIsAURAExpanded(!isAURAExpanded)}
+        />
+      )}
     </div>;
 }
