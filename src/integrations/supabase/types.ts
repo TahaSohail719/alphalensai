@@ -202,6 +202,80 @@ export type Database = {
           },
         ]
       }
+      ai_trade_setups: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          direction: string
+          entry_price: number
+          expires_at: string | null
+          id: string
+          instrument: string
+          job_id: string | null
+          outcome: string | null
+          raw_response: Json | null
+          risk_reward_ratio: number | null
+          status: string | null
+          stop_loss: number | null
+          strategy: string | null
+          take_profit_1: number | null
+          take_profit_2: number | null
+          take_profit_3: number | null
+          timeframe: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          direction: string
+          entry_price: number
+          expires_at?: string | null
+          id?: string
+          instrument: string
+          job_id?: string | null
+          outcome?: string | null
+          raw_response?: Json | null
+          risk_reward_ratio?: number | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          take_profit_1?: number | null
+          take_profit_2?: number | null
+          take_profit_3?: number | null
+          timeframe?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          direction?: string
+          entry_price?: number
+          expires_at?: string | null
+          id?: string
+          instrument?: string
+          job_id?: string | null
+          outcome?: string | null
+          raw_response?: Json | null
+          risk_reward_ratio?: number | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          take_profit_1?: number | null
+          take_profit_2?: number | null
+          take_profit_3?: number | null
+          timeframe?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_trade_setups_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_profiles: {
         Row: {
           address: string | null
