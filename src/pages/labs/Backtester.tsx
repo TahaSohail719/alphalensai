@@ -8,6 +8,10 @@ import { BacktesterSummary } from '@/components/backtester/BacktesterSummary';
 import { BacktesterChartPanel } from '@/components/backtester/BacktesterChartPanel';
 import { BacktesterTable } from '@/components/backtester/BacktesterTable';
 import { BacktesterInsights } from '@/components/backtester/BacktesterInsights';
+import { InstrumentSelector } from '@/components/backtester/InstrumentSelector';
+import { TradeChartPanel } from '@/components/backtester/TradeChartPanel';
+import { usePriceData } from '@/hooks/usePriceData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculateStats } from '@/data/mockBacktesterData';
 import { useBacktesterData } from '@/hooks/useBacktesterData';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +20,7 @@ import AURA from '@/components/AURA';
 function BacktesterContent() {
   const [isAURAExpanded, setIsAURAExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('my-setups');
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
   
   // Fetch real data
   const { data: myTradeSetups, loading: myLoading } = useBacktesterData({ mode: 'my-setups' });
@@ -24,6 +29,36 @@ function BacktesterContent() {
   // Calculate stats for both datasets
   const myStats = useMemo(() => calculateStats(myTradeSetups), [myTradeSetups]);
   const globalStats = useMemo(() => calculateStats(globalTradeSetups), [globalTradeSetups]);
+
+  // Get unique instruments
+  const uniqueInstruments = useMemo(() => {
+    const data = activeTab === 'my-setups' ? myTradeSetups : globalTradeSetups;
+    return Array.from(new Set(data.map(t => t.instrument))).sort();
+  }, [activeTab, myTradeSetups, globalTradeSetups]);
+
+  // Filter trades by selected instrument
+  const filteredTrades = useMemo(() => {
+    const data = activeTab === 'my-setups' ? myTradeSetups : globalTradeSetups;
+    if (!selectedInstrument) return data;
+    return data.filter(t => t.instrument === selectedInstrument);
+  }, [activeTab, myTradeSetups, globalTradeSetups, selectedInstrument]);
+
+  // Get date range for price data
+  const dateRange = useMemo(() => {
+    if (filteredTrades.length === 0) return { start: undefined, end: undefined };
+    const dates = filteredTrades.map(t => new Date(t.date).getTime());
+    return {
+      start: new Date(Math.min(...dates) - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      end: new Date(Math.max(...dates) + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    };
+  }, [filteredTrades]);
+
+  // Fetch price data for selected instrument
+  const { data: priceData, loading: priceLoading } = usePriceData({
+    instrument: selectedInstrument,
+    startDate: dateRange.start,
+    endDate: dateRange.end,
+  });
 
   // Context data for AURA based on active tab
   const contextData = useMemo(() => {
@@ -80,7 +115,40 @@ function BacktesterContent() {
                 <>
                   <BacktesterSummary stats={myStats} />
                   <BacktesterChartPanel data={myTradeSetups} />
-                  <BacktesterTable trades={myTradeSetups} />
+                  
+                  {/* Trade Visualization Panel */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Trade Visualization</CardTitle>
+                        <InstrumentSelector
+                          instruments={uniqueInstruments}
+                          selectedInstrument={selectedInstrument}
+                          onSelect={setSelectedInstrument}
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedInstrument ? (
+                        <div className="space-y-4">
+                          <TradeChartPanel
+                            instrument={selectedInstrument}
+                            trades={filteredTrades}
+                            priceData={priceData}
+                          />
+                          <div>
+                            <h4 className="font-semibold mb-3">Trades for {selectedInstrument}</h4>
+                            <BacktesterTable trades={filteredTrades} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-[400px] flex items-center justify-center bg-muted/20 rounded-lg">
+                          <p className="text-muted-foreground">Select an instrument to view detailed chart with trade pins</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
                   <BacktesterInsights data={myTradeSetups} />
                 </>
               )}
@@ -97,7 +165,40 @@ function BacktesterContent() {
                 <>
                   <BacktesterSummary stats={globalStats} />
                   <BacktesterChartPanel data={globalTradeSetups} />
-                  <BacktesterTable trades={globalTradeSetups} />
+                  
+                  {/* Trade Visualization Panel */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Trade Visualization</CardTitle>
+                        <InstrumentSelector
+                          instruments={uniqueInstruments}
+                          selectedInstrument={selectedInstrument}
+                          onSelect={setSelectedInstrument}
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedInstrument ? (
+                        <div className="space-y-4">
+                          <TradeChartPanel
+                            instrument={selectedInstrument}
+                            trades={filteredTrades}
+                            priceData={priceData}
+                          />
+                          <div>
+                            <h4 className="font-semibold mb-3">Trades for {selectedInstrument}</h4>
+                            <BacktesterTable trades={filteredTrades} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-[400px] flex items-center justify-center bg-muted/20 rounded-lg">
+                          <p className="text-muted-foreground">Select an instrument to view detailed chart with trade pins</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
                   <BacktesterInsights data={globalTradeSetups} />
                 </>
               )}
