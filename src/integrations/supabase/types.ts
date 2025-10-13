@@ -594,6 +594,54 @@ export type Database = {
         }
         Relationships: []
       }
+      normalized_trade_setups: {
+        Row: {
+          ai_generated_at: string | null
+          confidence: number | null
+          created_at: string | null
+          direction: string | null
+          entry_price: number | null
+          id: string
+          instrument: string | null
+          performance_outcome: string | null
+          raw_json: Json | null
+          sl: number | null
+          source_feature: string | null
+          tp: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_generated_at?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          direction?: string | null
+          entry_price?: number | null
+          id?: string
+          instrument?: string | null
+          performance_outcome?: string | null
+          raw_json?: Json | null
+          sl?: number | null
+          source_feature?: string | null
+          tp?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_generated_at?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          direction?: string | null
+          entry_price?: number | null
+          id?: string
+          instrument?: string | null
+          performance_outcome?: string | null
+          raw_json?: Json | null
+          sl?: number | null
+          source_feature?: string | null
+          tp?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       plan_parameters: {
         Row: {
           created_at: string
