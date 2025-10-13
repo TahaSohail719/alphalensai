@@ -59,11 +59,10 @@ interface AdminUser {
   broker_name: string | null;
   broker_id: string | null;
   status: 'pending' | 'approved' | 'rejected';
-  role?: 'user' | 'admin' | 'super_user'; // Optional, derived from roles array
   created_at: string;
   updated_at: string;
   email?: string;
-  roles?: string[]; // New: roles from user_roles table
+  roles: string[];
 }
 
 interface UserCostStats {
@@ -368,9 +367,9 @@ export default function Admin() {
     pending: users.filter(u => u.status === 'pending').length,
     approved: users.filter(u => u.status === 'approved').length,
     rejected: users.filter(u => u.status === 'rejected').length,
-    users: users.filter(u => u.role === 'user').length,
-    admins: users.filter(u => u.role === 'admin').length,
-    superUsers: users.filter(u => u.role === 'super_user').length,
+    users: users.filter(u => u.roles.includes('user')).length,
+    admins: users.filter(u => u.roles.includes('admin')).length,
+    superUsers: users.filter(u => u.roles.includes('super_user')).length,
   };
 
   // Statistiques de coûts globales

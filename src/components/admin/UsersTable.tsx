@@ -38,12 +38,11 @@ interface AdminUser {
   user_id: string;
   broker_name: string | null;
   status: 'pending' | 'approved' | 'rejected';
-  role?: 'user' | 'admin' | 'super_user';
   created_at: string;
   updated_at: string;
   email?: string;
   user_plan?: string;
-  roles?: string[];
+  roles: string[];
   credits?: {
     queries: number;
     ideas: number;
@@ -104,7 +103,7 @@ export function UsersTable({
                          false;
     
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesRole = roleFilter === 'all' || (user.roles && user.roles.includes(roleFilter));
     
     return matchesSearch && matchesStatus && matchesRole;
   });
@@ -147,7 +146,7 @@ export function UsersTable({
   };
 
   const getRoleCount = (role: string) => {
-    return users.filter(user => user.role === role).length;
+    return users.filter(user => user.roles && user.roles.includes(role)).length;
   };
 
   return (
@@ -217,7 +216,10 @@ export function UsersTable({
                   </TableRow>
                 ) : (
                   paginatedUsers.map((user) => {
-                    const RoleIcon = roleIcons[user.role];
+                    // Get highest priority role for icon
+                    const primaryRole = user.roles?.includes('super_user') ? 'super_user' : 
+                                       user.roles?.includes('admin') ? 'admin' : 'user';
+                    const RoleIcon = roleIcons[primaryRole];
                     return (
                       <TableRow key={user.id} className="hover:bg-muted/50">
                         <TableCell>
@@ -243,9 +245,17 @@ export function UsersTable({
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <RoleIcon className="h-4 w-4" />
-                            <Badge variant={roleColors[user.role] as any}>
-                              {user.role.replace('_', ' ')}
-                            </Badge>
+                            {user.roles && user.roles.length > 0 ? (
+                              <div className="flex gap-1 flex-wrap">
+                                {user.roles.map((role, idx) => (
+                                  <Badge key={idx} variant={roleColors[role as 'user' | 'admin' | 'super_user'] as any}>
+                                    {role.replace('_', ' ')}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <Badge variant="outline">No role</Badge>
+                            )}
                           </div>
                         </TableCell>
                         {(isSuperUser || isAdmin) && (

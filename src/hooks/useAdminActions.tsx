@@ -11,7 +11,7 @@ interface AdminUser {
   created_at: string;
   updated_at: string;
   email?: string;
-  roles?: string[]; // roles from user_roles table
+  roles: string[];
 }
 
 export function useAdminActions() {
