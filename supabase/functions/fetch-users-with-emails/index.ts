@@ -7,13 +7,13 @@ interface UserProfile {
   broker_name: string | null;
   broker_id: string | null;
   status: 'pending' | 'approved' | 'rejected';
-  role: 'user' | 'admin' | 'super_user';
   created_at: string;
   updated_at: string;
 }
 
 interface UserWithEmail extends UserProfile {
   email: string;
+  roles: string[];
 }
 
 Deno.serve(async (req) => {
@@ -52,15 +52,32 @@ Deno.serve(async (req) => {
       throw new Error('User not authenticated')
     }
 
-    // Check if user has admin or super_user role and get broker_id for scoping
+    // Check if user has admin or super_user role from user_roles table
+    const { data: userRoles, error: rolesError } = await supabaseUser
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+
+    if (rolesError) {
+      throw new Error('Failed to fetch user roles')
+    }
+
+    const roles = (userRoles || []).map(r => r.role)
+    const isAdminOrSuperUser = roles.includes('admin') || roles.includes('super_user')
+
+    if (!isAdminOrSuperUser) {
+      throw new Error('Insufficient permissions')
+    }
+
+    // Get broker_id from profiles (without role)
     const { data: profileData, error: profileError } = await supabaseUser
       .from('profiles')
-      .select('role, broker_id')
+      .select('broker_id')
       .eq('user_id', user.id)
       .single()
 
-    if (profileError || !profileData || !['admin', 'super_user'].includes(profileData.role)) {
-      throw new Error('Insufficient permissions')
+    if (profileError || !profileData) {
+      throw new Error('Profile not found')
     }
 
     // Fetch profiles with broker scoping for admins
@@ -69,8 +86,8 @@ Deno.serve(async (req) => {
       .select('*')
       .order('created_at', { ascending: false })
 
-    // Apply broker scoping for admin users
-    if (profileData.role === 'admin' && profileData.broker_id) {
+    // Apply broker scoping for admin users (not super_user)
+    if (roles.includes('admin') && !roles.includes('super_user') && profileData.broker_id) {
       profilesQuery = profilesQuery.eq('broker_id', profileData.broker_id)
     }
 
@@ -87,16 +104,34 @@ Deno.serve(async (req) => {
       throw authUsersError
     }
 
-    // Create a map of user_id to email for quick lookup
+    // Fetch all user roles
+    const { data: allUserRoles, error: allRolesError } = await supabaseAdmin
+      .from('user_roles')
+      .select('user_id, role')
+
+    if (allRolesError) {
+      throw allRolesError
+    }
+
+    // Create maps for quick lookup
     const emailMap = new Map()
     authUsersData.users?.forEach(authUser => {
       emailMap.set(authUser.id, authUser.email)
     })
 
-    // Combine profiles with emails
+    const rolesMap = new Map<string, string[]>()
+    allUserRoles?.forEach(ur => {
+      if (!rolesMap.has(ur.user_id)) {
+        rolesMap.set(ur.user_id, [])
+      }
+      rolesMap.get(ur.user_id)!.push(ur.role)
+    })
+
+    // Combine profiles with emails and roles
     const usersWithEmails: UserWithEmail[] = (profiles || []).map(profile => ({
       ...profile,
-      email: emailMap.get(profile.user_id) || 'Unknown'
+      email: emailMap.get(profile.user_id) || 'Unknown',
+      roles: rolesMap.get(profile.user_id) || ['user']
     }))
 
     return new Response(
