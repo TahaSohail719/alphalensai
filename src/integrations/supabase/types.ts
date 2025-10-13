@@ -999,9 +999,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      incomplete_trade_setups: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          direction: string | null
+          entry_price: number | null
+          id: string | null
+          instrument: string | null
+          issue: string | null
+          stop_loss: number | null
+          take_profit_1: number | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          direction?: string | null
+          entry_price?: number | null
+          id?: string | null
+          instrument?: string | null
+          issue?: never
+          stop_loss?: number | null
+          take_profit_1?: number | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          direction?: string | null
+          entry_price?: number | null
+          id?: string | null
+          instrument?: string | null
+          issue?: never
+          stop_loss?: number | null
+          take_profit_1?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      backfill_ai_trade_setups: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          skipped_count: number
+          updated_count: number
+        }[]
+      }
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
