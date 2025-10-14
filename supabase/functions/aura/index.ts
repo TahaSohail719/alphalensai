@@ -26,6 +26,85 @@ serve(async (req) => {
     const contextPage = typeof context === 'string' ? context : context?.page || 'General Analytics';
     const contextData = typeof context === 'object' ? context?.data : null;
 
+    // 🌍 COLLECTIVE INTELLIGENCE LAYER
+    let collectiveContext = '';
+
+    // Check if user is asking collective questions
+    const collectiveKeywords = [
+      'community', 'traders', 'popular', 'most traded', 'general bias',
+      'what are people', 'collective', 'everyone', 'ABCG', 'research',
+      'latest insights', 'recent setups', 'trend', 'communauté', 'populaire'
+    ];
+
+    const isCollectiveQuery = collectiveKeywords.some(keyword => 
+      question.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    if (isCollectiveQuery) {
+      console.log("🌍 Collective query detected, fetching community data...");
+      
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      
+      try {
+        // Fetch collective data via internal function call
+        const [tradesRes, macroRes, abcgRes] = await Promise.all([
+          fetch(`${SUPABASE_URL}/functions/v1/collective-insights`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+            },
+            body: JSON.stringify({ type: 'trade_setups', limit: 10 })
+          }),
+          fetch(`${SUPABASE_URL}/functions/v1/collective-insights`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+            },
+            body: JSON.stringify({ type: 'macro_commentary', limit: 5 })
+          }),
+          fetch(`${SUPABASE_URL}/functions/v1/collective-insights`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+            },
+            body: JSON.stringify({ type: 'abcg_insights', limit: 5 })
+          })
+        ]);
+
+        const trades = await tradesRes.json();
+        const macros = await macroRes.json();
+        const abcg = await abcgRes.json();
+
+        collectiveContext = `
+
+--- COLLECTIVE INTELLIGENCE CONTEXT ---
+
+Recent Community Trade Setups (Last 10):
+${JSON.stringify(trades.data, null, 2)}
+
+Recent Macro Commentaries (Last 5):
+${JSON.stringify(macros.data, null, 2)}
+
+ABCG Research Insights (Latest):
+${JSON.stringify(abcg.data, null, 2)}
+
+IMPORTANT PRIVACY RULES:
+- NEVER disclose user_id or personal information
+- Only reference aggregated trends and anonymized insights
+- Use phrases like "community analysis shows..." or "recent setups indicate..."
+
+---`;
+
+        console.log("✅ Collective context fetched successfully");
+      } catch (error) {
+        console.error("❌ Error fetching collective context:", error);
+      }
+    }
+
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       return new Response(
@@ -41,7 +120,7 @@ serve(async (req) => {
     const messagesPayload = [];
     
     // System prompt with enhanced conversational guidance
-    const systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), a highly specialized financial market AI assistant.
+    const systemPrompt = `You are AURA (AlphaLens Unified Research Assistant), a highly specialized financial market AI assistant with access to collective intelligence.
 
 CONTEXT:
 - User is viewing: ${contextPage}
@@ -51,6 +130,19 @@ YOUR CAPABILITIES:
 - Provide macro commentary and market insights
 - Generate trade setups with entry/exit levels
 - Create comprehensive market reports
+- **Access collective intelligence from AlphaLens community and ABCG Research**
+
+COLLECTIVE INTELLIGENCE FEATURES:
+- Query recent trade setups across all users (anonymized)
+- Aggregate directional bias for specific instruments
+- Summarize community sentiment and trends
+- Reference institutional insights from ABCG Research
+- Identify most traded pairs and popular setups
+
+PRIVACY RULES FOR COLLECTIVE DATA:
+- NEVER expose user_id or identifiable information
+- Only reference aggregated, anonymized trends
+- Use phrases: "community analysis shows...", "recent setups indicate...", "traders are focusing on..."
 
 IMPORTANT GUIDELINES:
 1. Always be concise and actionable
@@ -100,7 +192,7 @@ TOOL USAGE:
 - Use 'launch_macro_commentary' when user confirms they want macro analysis
 - Use 'launch_report' when user confirms they want a report
 
-Remember: Be conversational, guide naturally, and always confirm before launching.`;
+Remember: Be conversational, guide naturally, and always confirm before launching.${collectiveContext}`;
     
     messagesPayload.push({ role: "system", content: systemPrompt });
 

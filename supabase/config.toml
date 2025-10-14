@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.fetch-historical-prices]
 verify_jwt = true
+
+[functions.collective-insights]
+verify_jwt = false

@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, ChevronRight, Send, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { MessageCircle, X, ChevronRight, Send, Loader2, CheckCircle, XCircle, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { AURATeaser } from '@/components/aura/AURATeaser';
+import { AURACollectivePanel } from '@/components/aura/AURACollectivePanel';
 import { getRandomTeaser, AURATeaser as TeaserType } from '@/lib/auraMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -66,6 +67,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const [teaserDismissed, setTeaserDismissed] = useState(false);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [jobBadges, setJobBadges] = useState<AuraJobBadge[]>([]);
+  const [showCollectivePanel, setShowCollectivePanel] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -618,6 +620,29 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
             <p className="text-sm text-muted-foreground">
               Your contextual market intelligence companion for {context}.
             </p>
+            
+            {/* Collective Intelligence Panel Toggle */}
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCollectivePanel(!showCollectivePanel)}
+                className="gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                {showCollectivePanel ? 'Hide' : 'Show'} Collective Intelligence
+              </Button>
+            </div>
+
+            {showCollectivePanel && (
+              <AURACollectivePanel 
+                onInsightClick={(insight) => {
+                  setInput(insight);
+                  setShowCollectivePanel(false);
+                }}
+              />
+            )}
+            
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground">Quick Actions:</p>
               {quickActions.map((action, idx) => (
