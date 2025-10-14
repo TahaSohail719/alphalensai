@@ -82,17 +82,19 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     if (scrollRef.current) {
       const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        const isNearBottom = 
-          scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100;
+        // CRITICAL FIX: Always auto-scroll when a new message arrives or loading state changes
+        // This ensures the user always sees AURA's response as it comes in
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: 'smooth'
+        });
         
-        if (isNearBottom) {
-          scrollContainer.scrollTo({
-            top: scrollContainer.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
-        
-        setShowScrollButton(!isNearBottom);
+        // Update scroll button visibility after scroll
+        setTimeout(() => {
+          const isNearBottom = 
+            scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100;
+          setShowScrollButton(!isNearBottom);
+        }, 300); // Wait for smooth scroll to complete
       }
     }
   }, [messages, jobBadges, isLoading]);

@@ -299,25 +299,79 @@ PRIVACY RULES:
     }
 
     // 🌍 DETECT USER LANGUAGE
-    function detectLanguage(text: string): string {
-      const frenchIndicators = ['bonjour', 'merci', 'stp', 'pourrais', 'peux-tu', 'quel', 'quelle', 'comment', 'pourquoi', 'où', 'quand', 'que penses', 'parle-moi', 'dis-moi'];
-      const spanishIndicators = ['hola', 'gracias', 'por favor', 'cómo', 'qué', 'cuándo', 'dónde', 'por qué', 'opinas'];
-      const germanIndicators = ['hallo', 'danke', 'bitte', 'wie', 'was', 'wann', 'wo', 'warum'];
-      
-      const lowerText = text.toLowerCase();
-      
-      if (frenchIndicators.some(word => lowerText.includes(word))) {
-        return 'French';
-      }
-      if (spanishIndicators.some(word => lowerText.includes(word))) {
-        return 'Spanish';
-      }
-      if (germanIndicators.some(word => lowerText.includes(word))) {
-        return 'German';
-      }
-      
-      return 'English'; // Default
+  function detectLanguage(text: string): string {
+    const lowerText = text.toLowerCase();
+    
+    // STRICT DETECTION: Use phrases and strong indicators only
+    // French detection - require strong signals
+    const strongFrenchIndicators = [
+      'bonjour',
+      'bonsoir', 
+      'merci beaucoup',
+      'que penses-tu',
+      'parle-moi de',
+      'dis-moi',
+      'pourrais-tu',
+      'peux-tu',
+      'qu\'est-ce que',
+      'est-ce que',
+      's\'il te plaît',
+      'stp'
+    ];
+    
+    // Spanish detection
+    const strongSpanishIndicators = [
+      'hola',
+      'buenos días',
+      'gracias',
+      'por favor',
+      '¿qué opinas',
+      '¿cómo',
+      'dime',
+      'háblame'
+    ];
+    
+    // German detection
+    const strongGermanIndicators = [
+      'guten tag',
+      'hallo',
+      'danke schön',
+      'bitte',
+      'wie geht',
+      'was denkst du'
+    ];
+    
+    // Count matches for each language
+    let frenchScore = 0;
+    let spanishScore = 0;
+    let germanScore = 0;
+    
+    strongFrenchIndicators.forEach(phrase => {
+      if (lowerText.includes(phrase)) frenchScore++;
+    });
+    
+    strongSpanishIndicators.forEach(phrase => {
+      if (lowerText.includes(phrase)) spanishScore++;
+    });
+    
+    strongGermanIndicators.forEach(phrase => {
+      if (lowerText.includes(phrase)) germanScore++;
+    });
+    
+    // Require at least 1 strong match to switch language
+    if (frenchScore > 0 && frenchScore >= spanishScore && frenchScore >= germanScore) {
+      return 'French';
     }
+    if (spanishScore > 0 && spanishScore >= frenchScore && spanishScore >= germanScore) {
+      return 'Spanish';
+    }
+    if (germanScore > 0 && germanScore >= spanishScore && germanScore >= frenchScore) {
+      return 'German';
+    }
+    
+    // Default to English (strict enforcement)
+    return 'English';
+  }
 
     const detectedLanguage = detectLanguage(question);
     console.log("🌍 Detected language:", detectedLanguage);
@@ -359,26 +413,38 @@ CONTEXT:
 - User is viewing: ${contextPage}
 
 🌍 CRITICAL LANGUAGE PROTOCOL 🌍
-YOU MUST FOLLOW THIS RULE ABSOLUTELY:
+YOU MUST FOLLOW THIS RULE ABSOLUTELY - THIS IS NON-NEGOTIABLE:
 
-1. **DEFAULT LANGUAGE: ENGLISH**
-   - ALL responses must be in English by default
-   - Use English for greetings, questions, analysis, everything
+1. **DEFAULT LANGUAGE: ENGLISH (ALWAYS)**
+   - Unless the user EXPLICITLY uses another language, you MUST respond in English
+   - English is your default for greetings, questions, analysis, everything
+   - DO NOT assume the user wants another language unless they clearly use it
 
-2. **AUTOMATIC LANGUAGE DETECTION**
-   - If the user writes in French, Spanish, German, or any other language → IMMEDIATELY switch to that language
-   - Detect the language from their MOST RECENT message
-   - Match their language exactly for the entire response
+2. **LANGUAGE SWITCHING RULES (STRICT)**
+   - ONLY switch languages if the user:
+     a) Uses clear greetings in another language (e.g., "Bonjour", "Hola")
+     b) Asks explicit questions in another language with proper grammar
+     c) Explicitly requests: "Please respond in French/Spanish/etc."
+   
+   - DO NOT switch languages if:
+     a) The user uses a single foreign word in an otherwise English sentence
+     b) The context is ambiguous
+     c) You're unsure - default to English
 
-3. **EXAMPLES**
-   - User: "Hello, what do you think about EUR/USD?" → You respond in English
-   - User: "Bonjour, que penses-tu de EUR/USD ?" → You respond in French  
-   - User: "Hola, ¿qué opinas de EUR/USD?" → You respond in Spanish
-   - User: "Tell me about Bitcoin" → You respond in English
+3. **EXAMPLES OF CORRECT BEHAVIOR**
+   - User: "Hello, what do you think about EUR/USD?" → You respond in English ✅
+   - User: "Tell me about Bitcoin" → You respond in English ✅
+   - User: "Analyze Gold" → You respond in English ✅
+   - User: "Bonjour, que penses-tu de EUR/USD ?" → You respond in French ✅
+   - User: "Hola, ¿qué opinas de EUR/USD?" → You respond in Spanish ✅
+   - User: "Comment about BTC" → You respond in English ✅ (not French)
 
 4. **CONSISTENCY**
-   - Once you detect a language, use it for the ENTIRE response (not mixed languages)
-   - If the user switches languages mid-conversation, switch immediately
+   - Once you detect a clear language switch, maintain it for the ENTIRE response
+   - If the user switches back to English mid-conversation, switch immediately back to English
+   - When in doubt → USE ENGLISH
+
+⚠️ CRITICAL: If you're uncertain about the language, ALWAYS default to English. It's better to respond in English than to guess wrong.
 
 ---
 
@@ -489,7 +555,9 @@ TOOL USAGE:
 - Use 'launch_macro_commentary' when user confirms they want macro analysis
 - Use 'launch_report' when user confirms they want a report
 
-Remember: Be conversational, guide naturally, and always confirm before launching.${languageInstruction}${collectiveContext}${proactiveGuidanceContext}`;
+Remember: Be conversational, guide naturally, and always confirm before launching.
+
+🌍 LANGUAGE REMINDER: Unless the user clearly writes in another language (French/Spanish/German with proper grammar), you MUST respond in English. This is the default behavior.${languageInstruction}${collectiveContext}${proactiveGuidanceContext}`;
     
     messagesPayload.push({ role: "system", content: systemPrompt });
 
