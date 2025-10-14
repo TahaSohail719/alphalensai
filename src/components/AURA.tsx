@@ -70,6 +70,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const [showCollectivePanel, setShowCollectivePanel] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const batchContextRef = useRef<{instrument?: string; priceSummary?: string; indicatorSummary?: string} | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -282,26 +283,53 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       if (data.toolCalls && data.toolCalls.length > 0) {
         console.log("AURA tool calls detected:", data.toolCalls);
         
-        // ✅ SPECIAL CASE: Multiple tools for technical analysis
+        // ✅ BATCH MODE: Multiple tools for technical analysis (price + indicators)
         if (data.toolCalls.length > 1) {
-          console.log("🔄 Executing multiple tools sequentially for technical analysis");
+          console.log("🔄 Batch mode: Executing multiple tools for complete technical analysis");
           
+          // Initialize batch context
+          batchContextRef.current = { instrument: '' };
+          
+          // Execute all tools in batch mode (no auto-resend)
           for (const toolCall of data.toolCalls) {
-            console.log("Executing tool:", toolCall.function.name);
-            await handleToolLaunch(toolCall);
-            // Small delay between calls
-            await new Promise(resolve => setTimeout(resolve, 500));
+            console.log("Executing tool in batch:", toolCall.function.name);
+            await handleToolLaunch(toolCall, { collectOnly: true });
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+          
+          // After all tools executed, synthesize and send ONE final message
+          if (batchContextRef.current) {
+            const { instrument, priceSummary, indicatorSummary } = batchContextRef.current;
+            
+            const synthesisPrompt = `IMPORTANT: Les outils ont déjà été exécutés. N'APPELLE PAS d'outils à nouveau. Utilise UNIQUEMENT les données ci-dessous pour produire une analyse technique structurée.
+
+**Instrument**: ${instrument}
+
+**Prix en Temps Réel**:
+${priceSummary || 'Non disponible'}
+
+**Indicateurs Techniques**:
+${indicatorSummary || 'Non disponible'}
+
+Fournis maintenant une analyse technique complète et structurée basée sur ces données.`;
+
+            console.log("📊 Sending synthesis prompt to AURA");
+            batchContextRef.current = null; // Reset batch context
+            
+            setTimeout(() => {
+              sendMessage(synthesisPrompt);
+            }, 500);
           }
           
           return;
         }
         
-        // Single tool call
+        // Single tool call (normal mode)
         const toolCall = data.toolCalls[0];
         console.log("AURA single tool call detected:", toolCall);
         
-        // Launch the feature
-        await handleToolLaunch(toolCall);
+        // Launch the feature (not in batch mode)
+        await handleToolLaunch(toolCall, { collectOnly: false });
         return;
       }
 
@@ -339,7 +367,8 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     }
   };
 
-  const handleToolLaunch = async (toolCall: any) => {
+  const handleToolLaunch = async (toolCall: any, options: { collectOnly?: boolean } = {}) => {
+    const { collectOnly = false } = options;
     const { name: functionName, arguments: args } = toolCall.function;
     
     let parsedArgs: any = {};
@@ -362,7 +391,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
     const positionSize = parsedArgs.positionSize || '2';
     const customNotes = parsedArgs.customNotes || '';
     
-    console.log('🚀 [AURA] Launching tool:', { functionName, instrument, parsedArgs });
+    console.log('🚀 [AURA] Launching tool:', { functionName, instrument, parsedArgs, collectOnly });
     
     // Handle get_realtime_price separately (doesn't require credits or job creation)
     if (functionName === 'get_realtime_price') {
@@ -372,10 +401,12 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         const { instrument: priceInstrument, dataType, interval = '5min' } = parsedArgs;
         console.log("Price data request:", { instrument: priceInstrument, dataType, interval });
 
-        setMessages((prev) => [...prev, {
-          role: 'assistant',
-          content: `📊 Récupération des données en temps réel pour ${priceInstrument}...`
-        }]);
+        if (!collectOnly) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant',
+            content: `📊 Récupération des données en temps réel pour ${priceInstrument}...`
+          }]);
+        }
 
         // Call fetch-historical-prices edge function
         const { data: priceData, error: priceError } = await supabase.functions.invoke(
@@ -392,42 +423,55 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
 
         if (priceError || !priceData?.data || priceData.data.length === 0) {
           console.error("Price data fetch error:", priceError);
-          setMessages((prev) => [...prev.slice(0, -1), {
-            role: 'assistant',
-            content: `⚠️ Impossible de récupérer les données pour ${priceInstrument}. ${priceError?.message || 'Aucune donnée disponible.'}`
-          }]);
+          const errorMsg = `⚠️ Impossible de récupérer les données pour ${priceInstrument}. ${priceError?.message || 'Aucune donnée disponible.'}`;
+          
+          if (collectOnly && batchContextRef.current) {
+            batchContextRef.current.priceSummary = errorMsg;
+          } else {
+            setMessages((prev) => [...prev.slice(0, -1), {
+              role: 'assistant',
+              content: errorMsg
+            }]);
+          }
           return;
         }
 
         const latestPrice = priceData.data[priceData.data.length - 1];
         const priceInfo = dataType === 'quote' 
-          ? `Prix actuel pour **${priceInstrument}**: ${latestPrice.close} (Haut: ${latestPrice.high}, Bas: ${latestPrice.low})`
-          : `Prix récents pour **${priceInstrument}**:\n${priceData.data.slice(-5).map((d: any) => 
+          ? `Prix actuel: ${latestPrice.close} (Haut: ${latestPrice.high}, Bas: ${latestPrice.low})`
+          : `Prix récents:\n${priceData.data.slice(-5).map((d: any) => 
               `- ${d.date}: Ouverture ${d.open}, Clôture ${d.close}`
             ).join('\n')}`;
 
         console.log("✅ Price data retrieved successfully");
 
-        // Update message with price info
+        // Batch mode: store in context, don't resend
+        if (collectOnly && batchContextRef.current) {
+          batchContextRef.current.instrument = priceInstrument;
+          batchContextRef.current.priceSummary = priceInfo;
+          console.log("📦 Stored price data in batch context");
+          return;
+        }
+
+        // Normal mode: display and suggest next action (no auto-resend)
         setMessages((prev) => [...prev.slice(0, -1), {
           role: 'assistant',
-          content: `📊 **Données en Temps Réel**\n\n${priceInfo}\n\nLaissez-moi analyser ces données pour vous...`
+          content: `📊 **Données en Temps Réel pour ${priceInstrument}**\n\n${priceInfo}\n\n✨ Souhaitez-vous que j'effectue une analyse technique complète ?`
         }]);
 
-        // Continue conversation with price context
-        setTimeout(() => {
-          sendMessage(
-            `En me basant sur ces données en temps réel pour ${priceInstrument}: ${priceInfo}. Peux-tu fournir ton analyse en intégrant ces informations de marché actuelles ?`
-          );
-        }, 1000);
-
-        return; // Exit early for price data
+        return;
       } catch (error) {
         console.error("Error fetching real-time price:", error);
-        setMessages((prev) => [...prev.slice(0, -1), {
-          role: 'assistant',
-          content: "❌ Échec de la récupération des données en temps réel. Veuillez réessayer."
-        }]);
+        const errorMsg = "❌ Échec de la récupération des données en temps réel. Veuillez réessayer.";
+        
+        if (collectOnly && batchContextRef.current) {
+          batchContextRef.current.priceSummary = errorMsg;
+        } else {
+          setMessages((prev) => [...prev.slice(0, -1), {
+            role: 'assistant',
+            content: errorMsg
+          }]);
+        }
         return;
       }
     }
@@ -440,10 +484,12 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         const { instrument: techInstrument, indicators = ['rsi'], time_period = 14, interval = '1day' } = parsedArgs;
         console.log("Technical indicators request:", { instrument: techInstrument, indicators, time_period, interval });
 
-        setMessages((prev) => [...prev, {
-          role: 'assistant',
-          content: `📈 Récupération des indicateurs techniques pour ${techInstrument} (${indicators.join(', ')})...`
-        }]);
+        if (!collectOnly) {
+          setMessages((prev) => [...prev, {
+            role: 'assistant',
+            content: `📈 Récupération des indicateurs techniques pour ${techInstrument} (${indicators.join(', ')})...`
+          }]);
+        }
 
         // Call fetch-technical-indicators edge function
         const { data: techData, error: techError } = await supabase.functions.invoke(
@@ -460,15 +506,21 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
 
         if (techError || !techData?.indicators) {
           console.error("Technical indicators fetch error:", techError);
-          setMessages((prev) => [...prev.slice(0, -1), {
-            role: 'assistant',
-            content: `⚠️ Impossible de récupérer les indicateurs pour ${techInstrument}. ${techError?.message || 'Données non disponibles.'}`
-          }]);
+          const errorMsg = `⚠️ Impossible de récupérer les indicateurs pour ${techInstrument}. ${techError?.message || 'Données non disponibles.'}`;
+          
+          if (collectOnly && batchContextRef.current) {
+            batchContextRef.current.indicatorSummary = errorMsg;
+          } else {
+            setMessages((prev) => [...prev.slice(0, -1), {
+              role: 'assistant',
+              content: errorMsg
+            }]);
+          }
           return;
         }
 
         // Format indicator results for display
-        let indicatorSummary = `📊 **Indicateurs Techniques pour ${techInstrument}**\n\n`;
+        let indicatorSummary = '';
         
         Object.entries(techData.indicators).forEach(([indicator, data]: [string, any]) => {
           if (data.values && data.values.length > 0) {
@@ -480,26 +532,33 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
 
         console.log("✅ Technical indicators retrieved successfully");
 
-        // Update message with indicator info
+        // Batch mode: store in context, don't resend
+        if (collectOnly && batchContextRef.current) {
+          batchContextRef.current.instrument = techInstrument;
+          batchContextRef.current.indicatorSummary = indicatorSummary;
+          console.log("📦 Stored indicator data in batch context");
+          return;
+        }
+
+        // Normal mode: display and suggest next action (no auto-resend)
         setMessages((prev) => [...prev.slice(0, -1), {
           role: 'assistant',
-          content: `${indicatorSummary}\nLaissez-moi analyser ces indicateurs pour vous...`
+          content: `📊 **Indicateurs Techniques pour ${techInstrument}**\n\n${indicatorSummary}\n\n✨ Souhaitez-vous une analyse complète de ces indicateurs ?`
         }]);
 
-        // Continue conversation with indicator context
-        setTimeout(() => {
-          sendMessage(
-            `En me basant sur ces indicateurs techniques pour ${techInstrument}: ${indicatorSummary}. Peux-tu fournir ton analyse technique complète en intégrant ces données ?`
-          );
-        }, 1000);
-
-        return; // Exit early for technical indicators
+        return;
       } catch (error) {
         console.error("Error fetching technical indicators:", error);
-        setMessages((prev) => [...prev.slice(0, -1), {
-          role: 'assistant',
-          content: "❌ Échec de la récupération des indicateurs techniques. Veuillez réessayer."
-        }]);
+        const errorMsg = "❌ Échec de la récupération des indicateurs techniques. Veuillez réessayer.";
+        
+        if (collectOnly && batchContextRef.current) {
+          batchContextRef.current.indicatorSummary = errorMsg;
+        } else {
+          setMessages((prev) => [...prev.slice(0, -1), {
+            role: 'assistant',
+            content: errorMsg
+          }]);
+        }
         return;
       }
     }

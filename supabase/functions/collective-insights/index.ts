@@ -31,16 +31,16 @@ serve(async (req) => {
           .or('feature.eq.AI Trade Setup,feature.eq.ai_trade_setup,feature.eq.Trade Setup')
           .order('created_at', { ascending: false });
         
-        // Apply date filter if provided
-        if (days) {
+        // Apply date filter if provided (only if days is a number)
+        if (typeof days === 'number' && days > 0) {
           const cutoffDate = new Date();
           cutoffDate.setDate(cutoffDate.getDate() - days);
           setupsQuery = setupsQuery.gte('created_at', cutoffDate.toISOString());
         }
         
-        // Apply instrument filter if provided
+        // Apply instrument filter if provided (use ->> for text extraction from JSONB)
         if (instrument) {
-          setupsQuery = setupsQuery.ilike('request_payload->instrument', `%${instrument}%`);
+          setupsQuery = setupsQuery.ilike('request_payload->>instrument', `%${instrument}%`);
         }
         
         setupsQuery = setupsQuery.limit(limit);
@@ -69,16 +69,16 @@ serve(async (req) => {
           .or('feature.eq.Macro Commentary,feature.eq.macro_commentary,feature.eq.Macro Analysis')
           .order('created_at', { ascending: false });
         
-        // Apply date filter if provided
-        if (days) {
+        // Apply date filter if provided (only if days is a number)
+        if (typeof days === 'number' && days > 0) {
           const cutoffDate = new Date();
           cutoffDate.setDate(cutoffDate.getDate() - days);
           macrosQuery = macrosQuery.gte('created_at', cutoffDate.toISOString());
         }
         
-        // Apply instrument filter if provided
+        // Apply instrument filter if provided (use ->> for text extraction from JSONB)
         if (instrument) {
-          macrosQuery = macrosQuery.ilike('request_payload->instrument', `%${instrument}%`);
+          macrosQuery = macrosQuery.ilike('request_payload->>instrument', `%${instrument}%`);
         }
         
         macrosQuery = macrosQuery.limit(limit);
@@ -101,28 +101,34 @@ serve(async (req) => {
           .or('feature.eq.Reports,feature.eq.Report,feature.eq.reports')
           .order('created_at', { ascending: false });
         
-        // Apply date filter if provided
-        if (days) {
+        // Apply date filter if provided (only if days is a number)
+        if (typeof days === 'number' && days > 0) {
           const cutoffDate = new Date();
           cutoffDate.setDate(cutoffDate.getDate() - days);
           reportsQuery = reportsQuery.gte('created_at', cutoffDate.toISOString());
         }
         
-        // Apply instrument filter if provided (check instruments array)
-        if (instrument) {
-          reportsQuery = reportsQuery.contains('request_payload->instruments', [instrument]);
+        // Fetch more data to filter client-side (avoid JSONB array contains issues)
+        const fetchLimit = instrument ? limit * 3 : limit;
+        reportsQuery = reportsQuery.limit(fetchLimit);
+        const { data: allReports } = await reportsQuery;
+        
+        // Filter by instrument client-side if needed
+        let reports = allReports;
+        if (instrument && allReports) {
+          reports = allReports.filter(job => {
+            const instruments = job.request_payload?.instruments;
+            return Array.isArray(instruments) && instruments.includes(instrument);
+          }).slice(0, limit);
         }
         
-        reportsQuery = reportsQuery.limit(limit);
-        const { data: reports } = await reportsQuery;
-        
-        data = reports?.map(job => ({
+        data = (reports || []).map(job => ({
           report_type: job.request_payload?.report_type || 'custom',
           instruments: job.request_payload?.instruments || [],
           summary: job.response_payload?.message?.content?.substring(0, 300) ||
                    job.response_payload?.content?.substring(0, 300),
           created_at: job.created_at,
-        })) || [];
+        }));
         break;
 
       case 'abcg_insights':
@@ -150,8 +156,8 @@ serve(async (req) => {
         break;
 
       case 'instrument_focus':
-        // Apply date filter (default 1 day, or custom days)
-        const daysFilter = days || 1;
+        // Apply date filter (default 1 day, or custom days if number)
+        const daysFilter = typeof days === 'number' && days > 0 ? days : 1;
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - daysFilter);
         
