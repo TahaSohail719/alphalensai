@@ -280,8 +280,25 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
 
       // Handle tool calls - launch the actual feature
       if (data.toolCalls && data.toolCalls.length > 0) {
+        console.log("AURA tool calls detected:", data.toolCalls);
+        
+        // ✅ SPECIAL CASE: Multiple tools for technical analysis
+        if (data.toolCalls.length > 1) {
+          console.log("🔄 Executing multiple tools sequentially for technical analysis");
+          
+          for (const toolCall of data.toolCalls) {
+            console.log("Executing tool:", toolCall.function.name);
+            await handleToolLaunch(toolCall);
+            // Small delay between calls
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          return;
+        }
+        
+        // Single tool call
         const toolCall = data.toolCalls[0];
-        console.log("AURA tool call detected:", toolCall);
+        console.log("AURA single tool call detected:", toolCall);
         
         // Launch the feature
         await handleToolLaunch(toolCall);
@@ -415,6 +432,78 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
       }
     }
 
+    // Handle get_technical_indicators separately (doesn't require credits or job creation)
+    if (functionName === 'get_technical_indicators') {
+      console.log("📈 Fetching technical indicators from Twelve Data");
+      
+      try {
+        const { instrument: techInstrument, indicators = ['rsi'], time_period = 14, interval = '1day' } = parsedArgs;
+        console.log("Technical indicators request:", { instrument: techInstrument, indicators, time_period, interval });
+
+        setMessages((prev) => [...prev, {
+          role: 'assistant',
+          content: `📈 Récupération des indicateurs techniques pour ${techInstrument} (${indicators.join(', ')})...`
+        }]);
+
+        // Call fetch-technical-indicators edge function
+        const { data: techData, error: techError } = await supabase.functions.invoke(
+          'fetch-technical-indicators',
+          {
+            body: {
+              instrument: techInstrument,
+              indicators,
+              time_period,
+              interval
+            }
+          }
+        );
+
+        if (techError || !techData?.indicators) {
+          console.error("Technical indicators fetch error:", techError);
+          setMessages((prev) => [...prev.slice(0, -1), {
+            role: 'assistant',
+            content: `⚠️ Impossible de récupérer les indicateurs pour ${techInstrument}. ${techError?.message || 'Données non disponibles.'}`
+          }]);
+          return;
+        }
+
+        // Format indicator results for display
+        let indicatorSummary = `📊 **Indicateurs Techniques pour ${techInstrument}**\n\n`;
+        
+        Object.entries(techData.indicators).forEach(([indicator, data]: [string, any]) => {
+          if (data.values && data.values.length > 0) {
+            const latest = data.values[0];
+            const value = latest[indicator];
+            indicatorSummary += `✅ **${indicator.toUpperCase()}**: ${value}\n`;
+          }
+        });
+
+        console.log("✅ Technical indicators retrieved successfully");
+
+        // Update message with indicator info
+        setMessages((prev) => [...prev.slice(0, -1), {
+          role: 'assistant',
+          content: `${indicatorSummary}\nLaissez-moi analyser ces indicateurs pour vous...`
+        }]);
+
+        // Continue conversation with indicator context
+        setTimeout(() => {
+          sendMessage(
+            `En me basant sur ces indicateurs techniques pour ${techInstrument}: ${indicatorSummary}. Peux-tu fournir ton analyse technique complète en intégrant ces données ?`
+          );
+        }, 1000);
+
+        return; // Exit early for technical indicators
+      } catch (error) {
+        console.error("Error fetching technical indicators:", error);
+        setMessages((prev) => [...prev.slice(0, -1), {
+          role: 'assistant',
+          content: "❌ Échec de la récupération des indicateurs techniques. Veuillez réessayer."
+        }]);
+        return;
+      }
+    }
+
     // Map tool function to feature type (for other tools)
     let featureType: 'ai_trade_setup' | 'macro_commentary' | 'reports' = 'ai_trade_setup';
     let creditType: 'ideas' | 'queries' | 'reports' = 'ideas';
@@ -434,11 +523,16 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         break;
       default:
         console.warn("Unknown tool function:", functionName);
-        toast({
-          title: 'Erreur',
-          description: 'Fonction inconnue.',
-          variant: 'destructive',
-        });
+        
+        // Instead of showing technical error, let AURA explain gracefully
+        setMessages((prev) => [
+          ...prev,
+          { 
+            role: 'assistant', 
+            content: `🤔 Je comprends votre demande, mais je ne peux pas exécuter cette action pour le moment.\n\n**Ce que je peux faire pour vous :**\n- 📊 Analyse de marché en temps réel\n- 💡 Génération de trade setups\n- 📈 Commentaires macro\n- 📋 Rapports de marché\n- 📉 Indicateurs techniques (RSI, MACD, SMA, ATR)\n\nPouvez-vous reformuler votre demande ou me dire ce que vous aimeriez savoir sur **${instrument || 'le marché'}** ?` 
+          }
+        ]);
+        
         return;
     }
 

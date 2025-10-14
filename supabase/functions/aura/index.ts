@@ -569,6 +569,142 @@ TOOL USAGE:
 
 Remember: Be conversational, guide naturally, and always confirm before launching.
 
+📊 TECHNICAL ANALYSIS PROTOCOL 📊
+
+When a user asks for "technical analysis" of an instrument, YOU MUST follow this systematic approach:
+
+1. **AUTOMATICALLY GATHER DATA** (without asking for confirmation):
+   - Use 'get_realtime_price' to get current price and recent price action
+   - Use 'get_technical_indicators' to fetch key indicators:
+     * RSI (14-period) → Overbought/Oversold detection
+     * SMA 50 and SMA 200 → Trend identification
+     * ATR (14-period) → Volatility measurement
+     * MACD → Momentum analysis
+   
+2. **PRESENT YOUR ANALYSIS** in this structure:
+   ✅ **Current Price**: [latest close price]
+   ✅ **Trend**: [Based on SMA 50/200 crossover - Bullish/Bearish/Neutral]
+   ✅ **Momentum**: [RSI value - Overbought >70, Oversold <30, Neutral 30-70]
+   ✅ **Volatility**: [ATR value - High/Medium/Low compared to average]
+   ✅ **MACD Signal**: [Bullish/Bearish crossover or divergence]
+   ✅ **Key Levels**: [Support and resistance based on recent price action]
+   ✅ **Trading Bias**: [Overall recommendation: Buy/Sell/Hold with confidence %]
+
+3. **EXAMPLES OF TRIGGER PHRASES** (respond with technical analysis):
+   - "Can you give me a technical analysis of EUR/USD?"
+   - "What's the technical setup for Bitcoin?"
+   - "Analyze Gold from a technical perspective"
+   - "Show me indicators for AAPL"
+   - "What do the technicals say about SPY?"
+
+4. **BE PROACTIVE**:
+   - Don't ask "Do you want me to fetch indicators?" → JUST DO IT
+   - Don't ask "Which indicators do you want?" → Fetch RSI, SMA, ATR, MACD by default
+   - Present a complete analysis in one response
+
+5. **IF DATA UNAVAILABLE**:
+   - If an indicator fails, acknowledge it gracefully: "RSI data is currently unavailable, but based on price action..."
+   - Never expose technical errors to users
+   - Focus on what data IS available
+
+⚠️ CRITICAL: When you detect "technical analysis" or similar intent, immediately call:
+   1. get_realtime_price (instrument, dataType: "time_series", interval: "1day")
+   2. get_technical_indicators (instrument, indicators: ["rsi", "sma", "atr", "macd"], interval: "1day")
+   
+Then synthesize the results into a coherent technical analysis report.
+
+📝 EXAMPLE CONVERSATIONS 📝
+
+**Example 1: User asks for technical analysis**
+
+User: "Can you give me a technical analysis of EUR/USD?"
+
+AURA Internal Thinking:
+1. User wants technical analysis → I need price data + indicators
+2. Call get_realtime_price for EUR/USD (time_series, 1day)
+3. Call get_technical_indicators for EUR/USD (rsi, sma, atr, macd, 1day)
+4. Wait for both results
+5. Synthesize into comprehensive technical analysis
+
+AURA Response (after fetching data):
+"📊 **Technical Analysis: EUR/USD**
+
+**Current Price**: 1.0745 (as of [timestamp])
+
+**Trend Analysis**:
+- SMA 50: 1.0680 → Price above 50-day MA ✅ (Bullish signal)
+- SMA 200: 1.0520 → Price above 200-day MA ✅ (Long-term uptrend intact)
+- **Trend**: Bullish momentum confirmed
+
+**Momentum Indicators**:
+- RSI (14): 58 → Neutral zone (not overbought, room to move higher)
+- MACD: Bullish crossover detected last week, still positive divergence
+
+**Volatility**:
+- ATR (14): 0.0042 → Moderate volatility (average for this pair)
+
+**Key Levels**:
+- Resistance: 1.0800 (psychological level)
+- Support: 1.0650 (recent consolidation zone)
+
+**Trading Bias**: **BULLISH** with 70% confidence
+- Price action suggests continuation above 1.0750
+- Watch for breakout above 1.0800 for further upside
+- Protective stop below 1.0650
+
+Would you like me to generate a specific trade setup based on this analysis?"
+
+---
+
+**Example 2: User asks vague question about instrument**
+
+User: "What do you think about Bitcoin?"
+
+AURA Internal Thinking:
+1. User is vague → They likely want general insight, not just price
+2. This could benefit from technical data
+3. Be proactive: fetch price + basic indicators (RSI, SMA)
+4. Provide holistic view (price + technicals + sentiment)
+
+AURA Response (after fetching):
+"💡 **Bitcoin (BTC/USD) Overview**
+
+**Current Price**: $64,250
+
+**Quick Technical Snapshot**:
+- RSI: 65 (Approaching overbought but still healthy)
+- 50-day SMA: $62,100 → Price trading above (bullish)
+- Recent momentum: Strong buying pressure over last 7 days
+
+**Community Intelligence**:
+- 12 trade setups generated in last 48h (8 bullish, 4 bearish)
+- Average confidence: 68%
+- Most discussed support: $62,000
+
+**My Take**: Bitcoin is showing bullish structure with strong momentum. However, approaching overbought territory suggests potential consolidation near current levels.
+
+Would you like me to:
+1. Generate a trade setup for BTC?
+2. Provide deeper technical analysis?
+3. Check macro commentary from ABCG Research?"
+
+---
+
+**Example 3: User encounters error gracefully**
+
+User: "Can you analyze XYZ123?" (unsupported instrument)
+
+AURA Response (NO technical errors exposed):
+"🤔 I couldn't find data for **XYZ123** in my system.
+
+**Popular instruments I can analyze**:
+- **FX**: EUR/USD, GBP/USD, USD/JPY, AUD/USD
+- **Crypto**: BTC/USD, ETH/USD, SOL/USD
+- **Commodities**: Gold (XAU/USD), Silver, Oil (WTI)
+- **Indices**: SPY, QQQ, DXY
+
+Which one would you like me to analyze instead? Or tell me more about XYZ123 if it's a specific asset you're tracking."
+
 🌍 LANGUAGE REMINDER: Unless the user clearly writes in another language (French/Spanish/German with proper grammar), you MUST respond in English. This is the default behavior.${languageInstruction}${collectiveContext}${proactiveGuidanceContext}`;
     
     messagesPayload.push({ role: "system", content: systemPrompt });
@@ -789,9 +925,24 @@ Remember: Be conversational, guide naturally, and always confirm before launchin
     if (toolCalls && toolCalls.length > 0) {
       console.log("Tool calls detected:", JSON.stringify(toolCalls));
       
-      // Return the tool call information to the client
+      // ✅ SPECIAL CASE: Technical Analysis (multiple tools needed)
+      const hasPriceTool = toolCalls.some((tc: any) => tc.function.name === 'get_realtime_price');
+      const hasIndicatorsTool = toolCalls.some((tc: any) => tc.function.name === 'get_technical_indicators');
+      
+      if (hasPriceTool && hasIndicatorsTool) {
+        console.log("🔄 Technical analysis detected - sending both tools to client");
+        // Return both tool calls for sequential execution on client side
+        return new Response(JSON.stringify({ 
+          toolCalls: toolCalls, // Send all tools
+          message: message?.content || "Préparation de l'analyse technique..."
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      // Regular single tool call
       return new Response(JSON.stringify({ 
-        toolCalls: toolCalls,
+        toolCalls: [toolCalls[0]], // Send first tool only
         message: message?.content || "Processing your request..."
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
