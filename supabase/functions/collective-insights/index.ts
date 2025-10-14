@@ -46,19 +46,25 @@ serve(async (req) => {
         setupsQuery = setupsQuery.limit(limit);
         const { data: setups } = await setupsQuery;
         
-        data = setups?.map(job => ({
-          instrument: job.request_payload?.instrument || 'Unknown',
-          direction: job.response_payload?.message?.content?.direction || 
-                     job.response_payload?.content?.direction || 
-                     job.response_payload?.direction,
-          confidence: job.response_payload?.message?.content?.confidence ||
-                      job.response_payload?.content?.confidence ||
-                      job.response_payload?.confidence,
-          created_at: job.created_at,
-          entry_price: job.response_payload?.message?.content?.entry_price ||
-                       job.response_payload?.content?.entry_price ||
-                       job.response_payload?.entry_price,
-        })) || [];
+        data = setups?.map(job => {
+          const content = job.response_payload?.message?.content || job.response_payload?.content || job.response_payload;
+          return {
+            instrument: job.request_payload?.instrument || 'Unknown',
+            direction: content?.direction,
+            confidence: content?.confidence,
+            entry_price: content?.entry_price || content?.entry || content?.entryPrice,
+            tp: content?.tp || content?.take_profit || content?.takeProfit,
+            tp1: content?.tp1 || content?.take_profit_1 || content?.takeProfits?.[0],
+            tp2: content?.tp2 || content?.take_profit_2 || content?.takeProfits?.[1],
+            tp3: content?.tp3 || content?.take_profit_3 || content?.takeProfits?.[2],
+            sl: content?.sl || content?.stop_loss || content?.stopLoss,
+            strategy: content?.strategy || content?.strategyMeta?.name,
+            timeframe: content?.timeframe || content?.timeFrame,
+            rationale: content?.rationale || content?.reasoning || content?.commentary,
+            risk_reward_ratio: content?.risk_reward_ratio || content?.riskRewardRatio,
+            created_at: job.created_at,
+          };
+        }) || [];
         break;
 
       case 'macro_commentary':
@@ -84,13 +90,20 @@ serve(async (req) => {
         macrosQuery = macrosQuery.limit(limit);
         const { data: macros } = await macrosQuery;
         
-        data = macros?.map(job => ({
-          instrument: job.request_payload?.instrument || 'General',
-          summary: job.response_payload?.message?.content?.content?.substring(0, 300) || 
-                   job.response_payload?.content?.substring(0, 300) ||
-                   job.response_payload?.summary?.substring(0, 300),
-          created_at: job.created_at,
-        })) || [];
+        data = macros?.map(job => {
+          const content = job.response_payload?.message?.content || job.response_payload?.content || job.response_payload;
+          const fullText = typeof content === 'string' ? content : (content?.content || content?.summary || '');
+          return {
+            instrument: job.request_payload?.instrument || 'General',
+            summary: fullText.substring(0, 500),
+            full_content: fullText,
+            market_outlook: content?.market_outlook || content?.outlook,
+            key_points: content?.key_points || content?.keyPoints,
+            sentiment: content?.sentiment || content?.market_sentiment,
+            timeframe: job.request_payload?.timeframe,
+            created_at: job.created_at,
+          };
+        }) || [];
         break;
 
       case 'reports':
@@ -122,13 +135,19 @@ serve(async (req) => {
           }).slice(0, limit);
         }
         
-        data = (reports || []).map(job => ({
-          report_type: job.request_payload?.report_type || 'custom',
-          instruments: job.request_payload?.instruments || [],
-          summary: job.response_payload?.message?.content?.substring(0, 300) ||
-                   job.response_payload?.content?.substring(0, 300),
-          created_at: job.created_at,
-        }));
+        data = (reports || []).map(job => {
+          const content = job.response_payload?.message?.content || job.response_payload?.content || job.response_payload;
+          const fullText = typeof content === 'string' ? content : JSON.stringify(content);
+          return {
+            report_type: job.request_payload?.report_type || 'custom',
+            instruments: job.request_payload?.instruments || [],
+            summary: fullText.substring(0, 500),
+            recommendations: content?.recommendations || content?.trade_recommendations,
+            risk_analysis: content?.risk_analysis || content?.risks,
+            market_overview: content?.market_overview || content?.overview,
+            created_at: job.created_at,
+          };
+        });
         break;
 
       case 'abcg_insights':
