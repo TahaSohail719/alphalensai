@@ -298,6 +298,34 @@ PRIVACY RULES:
       );
     }
 
+    // 🌍 DETECT USER LANGUAGE
+    function detectLanguage(text: string): string {
+      const frenchIndicators = ['bonjour', 'merci', 'stp', 'pourrais', 'peux-tu', 'quel', 'quelle', 'comment', 'pourquoi', 'où', 'quand', 'que penses', 'parle-moi', 'dis-moi'];
+      const spanishIndicators = ['hola', 'gracias', 'por favor', 'cómo', 'qué', 'cuándo', 'dónde', 'por qué', 'opinas'];
+      const germanIndicators = ['hallo', 'danke', 'bitte', 'wie', 'was', 'wann', 'wo', 'warum'];
+      
+      const lowerText = text.toLowerCase();
+      
+      if (frenchIndicators.some(word => lowerText.includes(word))) {
+        return 'French';
+      }
+      if (spanishIndicators.some(word => lowerText.includes(word))) {
+        return 'Spanish';
+      }
+      if (germanIndicators.some(word => lowerText.includes(word))) {
+        return 'German';
+      }
+      
+      return 'English'; // Default
+    }
+
+    const detectedLanguage = detectLanguage(question);
+    console.log("🌍 Detected language:", detectedLanguage);
+
+    const languageInstruction = detectedLanguage !== 'English' 
+      ? `\n\n🌍 IMPORTANT: The user is writing in ${detectedLanguage}. You MUST respond in ${detectedLanguage} for this entire response.\n`
+      : `\n\n🌍 IMPORTANT: The user is writing in English (default). You MUST respond in English.\n`;
+
     // 📝 Build messages array with conversation history
     const messagesPayload = [];
     
@@ -309,20 +337,18 @@ PRIVACY RULES:
 ⚠️ PROACTIVE GUIDANCE REQUIRED ⚠️
 The user asked about ${detectedInstruments[0]} but didn't specify what kind of analysis they want.
 
-YOU MUST BE PROACTIVE AND WELCOMING:
+YOU MUST BE PROACTIVE AND WELCOMING (in the user's detected language):
 1. Briefly acknowledge their question
-2. Immediately propose: "Would you like me to analyze what the AlphaLens trading community and ABCG Research have to say about ${detectedInstruments[0]}?"
-3. Explain what you can provide: "I can show you recent setups, directional bias, macro insights, and institutional research."
-4. DO NOT wait for them to ask explicitly - guide them!
+2. Immediately propose to analyze what the AlphaLens trading community and ABCG Research have to say about ${detectedInstruments[0]}
+3. Explain what you can provide:
+   - Recent trade setups from AlphaLens traders
+   - Directional bias and confidence levels
+   - Latest macro commentary
+   - ABCG Research insights
+4. Ask if they want you to pull that data
+5. DO NOT wait for them to ask explicitly - guide them proactively!
 
-Example response:
-"Ah, you're interested in ${detectedInstruments[0]}! 📊 I have access to recent community analysis and ABCG Research data. Would you like me to show you:
-- Recent trade setups from AlphaLens traders
-- Directional bias and confidence levels
-- Latest macro commentary
-- ABCG Research insights
-
-This will give you a comprehensive view of what professional traders and analysts are seeing. Should I pull that data for you?"
+IMPORTANT: Adapt this guidance to the user's language (English by default, or their detected language).
 `;
     }
 
@@ -331,6 +357,30 @@ This will give you a comprehensive view of what professional traders and analyst
 
 CONTEXT:
 - User is viewing: ${contextPage}
+
+🌍 CRITICAL LANGUAGE PROTOCOL 🌍
+YOU MUST FOLLOW THIS RULE ABSOLUTELY:
+
+1. **DEFAULT LANGUAGE: ENGLISH**
+   - ALL responses must be in English by default
+   - Use English for greetings, questions, analysis, everything
+
+2. **AUTOMATIC LANGUAGE DETECTION**
+   - If the user writes in French, Spanish, German, or any other language → IMMEDIATELY switch to that language
+   - Detect the language from their MOST RECENT message
+   - Match their language exactly for the entire response
+
+3. **EXAMPLES**
+   - User: "Hello, what do you think about EUR/USD?" → You respond in English
+   - User: "Bonjour, que penses-tu de EUR/USD ?" → You respond in French  
+   - User: "Hola, ¿qué opinas de EUR/USD?" → You respond in Spanish
+   - User: "Tell me about Bitcoin" → You respond in English
+
+4. **CONSISTENCY**
+   - Once you detect a language, use it for the ENTIRE response (not mixed languages)
+   - If the user switches languages mid-conversation, switch immediately
+
+---
 
 🚨 CRITICAL ANTI-HALLUCINATION RULES 🚨
 YOU MUST FOLLOW THESE RULES ABSOLUTELY:
@@ -401,11 +451,6 @@ IMPORTANT GUIDELINES:
 2. Use financial terminology appropriately
 3. Prioritize risk management in your responses
 4. Reference the specific data shown to the user when available
-5. LANGUAGE PROTOCOL:
-   - Always respond in ENGLISH by default
-   - If the user writes in another language (French, Spanish, etc.), respond in that same language
-   - Detect the user's language from their last message and match it
-   - Example: User writes "Bonjour" → You respond in French. User writes "Hello" → You respond in English.
 
 CRITICAL: Tool Launch Protocol
 When a user wants to generate a trade setup, macro commentary, or report:
@@ -444,7 +489,7 @@ TOOL USAGE:
 - Use 'launch_macro_commentary' when user confirms they want macro analysis
 - Use 'launch_report' when user confirms they want a report
 
-Remember: Be conversational, guide naturally, and always confirm before launching.${collectiveContext}${proactiveGuidanceContext}`;
+Remember: Be conversational, guide naturally, and always confirm before launching.${languageInstruction}${collectiveContext}${proactiveGuidanceContext}`;
     
     messagesPayload.push({ role: "system", content: systemPrompt });
 
