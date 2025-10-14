@@ -465,23 +465,24 @@ export default function Reports() {
       const sectionsText = includedSections.map(s => s.title).join(", ");
       
       // Prepare payload for n8n webhook
-      const reportPayload = {
-        mode: "run",
-        type: "reports",
-        question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
-        instrument: selectedAsset?.symbol || "Multi-Asset",
-        timeframe: "1D",
-        exportFormat: reportConfig.exportFormat,
-        email: reportConfig.email,
-        sections: includedSections.map((section, index) => ({
-          id: section.id,
-          title: section.title,
-          description: section.description,
-          order: index + 1,
-          userNotes: section.userNotes || ""
-        })),
-        customNotes: reportConfig.customNotes
-      };
+    const reportPayload = {
+      mode: "run",
+      type: "reports",
+      question: `Generate report "${reportConfig.title}" with sections: ${sectionsText}. ${reportConfig.customNotes}`,
+      instrument: selectedAsset?.symbol || "Multi-Asset",
+      timeframe: "1D",
+      user_email: user?.email || null,
+      exportFormat: reportConfig.exportFormat,
+      email: reportConfig.email,
+      sections: includedSections.map((section, index) => ({
+        id: section.id,
+        title: section.title,
+        description: section.description,
+        order: index + 1,
+        userNotes: section.userNotes || ""
+      })),
+      customNotes: reportConfig.customNotes
+    };
 
       // Create Realtime job for report generation
       const reportJobId = await createJob(

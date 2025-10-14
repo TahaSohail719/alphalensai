@@ -704,28 +704,29 @@ export default function MacroAnalysis() {
     setJobStatus("running");
     try {
       // 1. Build payload first
-      const payload = {
-        type: "RAG",
-        question: queryParams.query,
-        mode: "run",
-        filters: {
-          region: "All",
-          product: "All",
-          category: "All"
-        },
-        analysis: {
-          query: queryParams.query,
-          timestamp: new Date().toISOString()
-        },
-        user_id: "default_user",
-        instrument: selectedAsset.symbol,
-        timeframe: "1H",
-        assetType: queryParams.assetType,
-        analysisDepth: queryParams.analysisDepth,
-        period: queryParams.period,
-        adresse: queryParams.adresse,
-        isTradeQuery: false
-      };
+    const payload = {
+      type: "RAG",
+      question: queryParams.query,
+      mode: "run",
+      user_email: user?.email || null,
+      filters: {
+        region: "All",
+        product: "All",
+        category: "All"
+      },
+      analysis: {
+        query: queryParams.query,
+        timestamp: new Date().toISOString()
+      },
+      user_id: "default_user",
+      instrument: selectedAsset.symbol,
+      timeframe: "1H",
+      assetType: queryParams.assetType,
+      analysisDepth: queryParams.analysisDepth,
+      period: queryParams.period,
+      adresse: queryParams.adresse,
+      isTradeQuery: false
+    };
       
       // 2. Create job with payload using createJob hook (like Reports page)
       const responseJobId = await createJob(

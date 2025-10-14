@@ -384,6 +384,7 @@ export default function AISetup() {
         mode: "run",
         instrument: parameters.instrument,
         question: buildQuestion(parameters),
+        user_email: user?.email || null,
         
         // Trade query flag
         isTradeQuery: true,
