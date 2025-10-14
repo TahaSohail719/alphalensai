@@ -483,7 +483,9 @@ YOUR CAPABILITIES:
 - Create comprehensive market reports
 - **Access collective intelligence from AlphaLens community and ABCG Research**
 - **Get real-time price data from Twelve Data API**
+- **Fetch technical indicators: RSI, ATR, SMA, EMA, MACD, Bollinger Bands**
 - **Automatically detect when users ask about specific instruments**
+- **Filter collective data by time periods (5 days, 10 days, 30 days, etc.)**
 
 AUTOMATIC ASSET INTELLIGENCE:
 When a user asks about a specific instrument (e.g., "What do you think about EUR/USD?", "Tell me about Bitcoin", "Analyze Gold"):
@@ -499,6 +501,16 @@ Examples:
 REAL-TIME DATA ACCESS:
 - Use 'get_realtime_price' tool when users ask about current prices, latest quotes, or recent market movements
 - Examples: "What's the current price of EUR/USD?", "Show me BTC's latest candles", "What's Gold trading at?"
+
+TECHNICAL INDICATORS:
+- Use 'get_technical_indicators' when users ask about RSI, moving averages, ATR, MACD, or Bollinger Bands
+- Examples: "What's the RSI for EUR/USD?", "Show me 50-day SMA for Bitcoin", "Get ATR for Gold"
+- You can request multiple indicators at once: ['rsi', 'sma', 'atr']
+- Always explain indicator values in trading context (e.g., "RSI of 72 indicates overbought conditions")
+
+TIME-FILTERED COLLECTIVE DATA:
+- When users ask about "most traded assets in last 5/10/30 days", use the collective intelligence with time filter
+- Examples: "What are the most traded pairs this week?", "Show me popular setups from the last 10 days"
 
 COLLECTIVE INTELLIGENCE FEATURES:
 - Query recent trade setups across all users (anonymized)
@@ -691,6 +703,40 @@ Remember: Be conversational, guide naturally, and always confirm before launchin
                   }
                 },
                 required: ["instrument", "dataType"]
+              }
+            }
+          },
+          {
+            type: "function",
+            function: {
+              name: "get_technical_indicators",
+              description: "Get technical indicators (RSI, ATR, SMA, EMA, MACD, Bollinger Bands) for an instrument",
+              parameters: {
+                type: "object",
+                properties: {
+                  instrument: { 
+                    type: "string", 
+                    description: "Trading instrument (e.g., EUR/USD, BTC/USD, Gold)" 
+                  },
+                  indicators: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                      enum: ["rsi", "atr", "sma", "ema", "macd", "bbands"]
+                    },
+                    description: "List of indicators to fetch (default: ['rsi'])"
+                  },
+                  time_period: {
+                    type: "number",
+                    description: "Period for indicators (default: 14 for RSI/ATR, 50 for SMA, 20 for EMA)"
+                  },
+                  interval: {
+                    type: "string",
+                    enum: ["1min", "5min", "15min", "30min", "1h", "4h", "1day", "1week"],
+                    description: "Time interval (default: 1day)"
+                  }
+                },
+                required: ["instrument"]
               }
             }
           }

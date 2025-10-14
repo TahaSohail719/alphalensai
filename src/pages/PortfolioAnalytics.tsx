@@ -87,22 +87,22 @@ export default function PortfolioAnalytics() {
 
   return (
     <Layout>
-      <div className={`flex h-full relative transition-all duration-300 ${isAURAExpanded ? 'md:mr-[33.333%]' : ''}`}>
-        <div className="flex-1 container-wrapper space-y-6 py-6 px-4">
+      <div className={`flex flex-col lg:flex-row h-full relative transition-all duration-300 ${isAURAExpanded ? 'lg:mr-[33.333%]' : ''}`}>
+        <div className="flex-1 container-wrapper space-y-4 sm:space-y-6 py-4 sm:py-6 px-3 sm:px-4">
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+          <CardHeader className="px-3 sm:px-6 py-4 sm:py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <div className="flex-1">
+                <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   Portfolio Analytics Suite
                 </CardTitle>
-                <CardDescription className="mt-2">
+                <CardDescription className="mt-2 text-sm">
                   Comprehensive portfolio analysis and PNL calculation tools with AI-powered insights
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Portfolio:</span>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-sm font-medium whitespace-nowrap">Portfolio:</span>
                 <PortfolioSelector
                   selectedId={selectedPortfolioId}
                   onSelect={setSelectedPortfolioId}
@@ -111,22 +111,22 @@ export default function PortfolioAnalytics() {
             </div>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
             <Tabs defaultValue="calculator" className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-                <TabsTrigger value="calculator">PNL Calculator</TabsTrigger>
-                <TabsTrigger value="analysis">Portfolio Analysis</TabsTrigger>
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-4 sm:mb-6">
+                <TabsTrigger value="calculator" className="text-xs sm:text-sm">PNL Calculator</TabsTrigger>
+                <TabsTrigger value="analysis" className="text-xs sm:text-sm">Portfolio Analysis</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="calculator" className="space-y-4 mt-6">
+              <TabsContent value="calculator" className="space-y-4 mt-4 sm:mt-6">
                 <div className="w-full max-w-2xl mx-auto">
                   <PNLCalculator defaultInstrument="EUR/USD" showInstrumentPicker={true} />
                 </div>
               </TabsContent>
 
-              <TabsContent value="analysis" className="mt-6">
+              <TabsContent value="analysis" className="mt-4 sm:mt-6">
                 {loading ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-center py-8 text-muted-foreground text-sm sm:text-base">
                     Loading portfolio data...
                   </div>
                 ) : (

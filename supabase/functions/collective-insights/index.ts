@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { type, limit = 10, instrument } = await req.json();
+    const { type, limit = 10, instrument, days } = await req.json();
     
-    console.log(`Fetching collective insights: type=${type}, limit=${limit}, instrument=${instrument || 'ALL'}`);
+    console.log(`Fetching collective insights: type=${type}, limit=${limit}, instrument=${instrument || 'ALL'}, days=${days || 'ALL'}`);
     
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -28,15 +28,22 @@ serve(async (req) => {
           .from('jobs')
           .select('id, feature, created_at, response_payload, request_payload')
           .eq('status', 'completed')
-          .eq('feature', 'AI Trade Setup')
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .or('feature.eq.AI Trade Setup,feature.eq.ai_trade_setup,feature.eq.Trade Setup')
+          .order('created_at', { ascending: false });
+        
+        // Apply date filter if provided
+        if (days) {
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - days);
+          setupsQuery = setupsQuery.gte('created_at', cutoffDate.toISOString());
+        }
         
         // Apply instrument filter if provided
         if (instrument) {
           setupsQuery = setupsQuery.ilike('request_payload->instrument', `%${instrument}%`);
         }
         
+        setupsQuery = setupsQuery.limit(limit);
         const { data: setups } = await setupsQuery;
         
         data = setups?.map(job => ({
@@ -59,15 +66,22 @@ serve(async (req) => {
           .from('jobs')
           .select('id, feature, created_at, response_payload, request_payload')
           .eq('status', 'completed')
-          .eq('feature', 'Macro Commentary')
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .or('feature.eq.Macro Commentary,feature.eq.macro_commentary,feature.eq.Macro Analysis')
+          .order('created_at', { ascending: false });
+        
+        // Apply date filter if provided
+        if (days) {
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - days);
+          macrosQuery = macrosQuery.gte('created_at', cutoffDate.toISOString());
+        }
         
         // Apply instrument filter if provided
         if (instrument) {
           macrosQuery = macrosQuery.ilike('request_payload->instrument', `%${instrument}%`);
         }
         
+        macrosQuery = macrosQuery.limit(limit);
         const { data: macros } = await macrosQuery;
         
         data = macros?.map(job => ({
@@ -84,15 +98,22 @@ serve(async (req) => {
           .from('jobs')
           .select('id, feature, created_at, response_payload, request_payload')
           .eq('status', 'completed')
-          .eq('feature', 'Reports')
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .or('feature.eq.Reports,feature.eq.Report,feature.eq.reports')
+          .order('created_at', { ascending: false });
+        
+        // Apply date filter if provided
+        if (days) {
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - days);
+          reportsQuery = reportsQuery.gte('created_at', cutoffDate.toISOString());
+        }
         
         // Apply instrument filter if provided (check instruments array)
         if (instrument) {
           reportsQuery = reportsQuery.contains('request_payload->instruments', [instrument]);
         }
         
+        reportsQuery = reportsQuery.limit(limit);
         const { data: reports } = await reportsQuery;
         
         data = reports?.map(job => ({
@@ -129,12 +150,17 @@ serve(async (req) => {
         break;
 
       case 'instrument_focus':
+        // Apply date filter (default 1 day, or custom days)
+        const daysFilter = days || 1;
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysFilter);
+        
         const { data: allSetups } = await supabase
           .from('jobs')
           .select('request_payload, created_at')
           .eq('status', 'completed')
-          .eq('feature', 'AI Trade Setup')
-          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+          .or('feature.eq.AI Trade Setup,feature.eq.ai_trade_setup,feature.eq.Trade Setup')
+          .gte('created_at', cutoffDate.toISOString())
           .order('created_at', { ascending: false });
         
         const instrumentCounts: Record<string, number> = {};
@@ -146,7 +172,7 @@ serve(async (req) => {
         });
         
         data = Object.entries(instrumentCounts)
-          .map(([instrument, count]) => ({ instrument, count }))
+          .map(([instrument, count]) => ({ instrument, count, period_days: daysFilter }))
           .sort((a, b) => (b.count as number) - (a.count as number))
           .slice(0, limit);
         break;
