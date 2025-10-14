@@ -39,7 +39,7 @@ serve(async (req) => {
       
       // Commodities
       'Gold', 'XAU/USD', 'XAUUSD', 'Silver', 'XAG/USD', 'XAGUSD',
-      'Oil', 'WTI', 'Crude Oil', 'Brent', 'Or',
+      'Oil', 'WTI', 'Crude Oil', 'Brent',
       
       // Indices
       'S&P500', 'SPX', 'NASDAQ', 'NDX', 'DAX', 'FTSE', 'CAC40'
