@@ -14,7 +14,7 @@ export function AURATeaser({ teaser, onCTAClick, onDismiss, isVisible }: AURATea
   return (
     <div
       className={cn(
-        "absolute bottom-full right-0 mb-4 max-w-xs transition-all duration-300 z-50",
+        "absolute bottom-full right-0 mb-4 w-80 transition-all duration-300 z-50",
         isVisible ? "animate-fade-in-up opacity-100" : "animate-fade-out-down opacity-0 pointer-events-none"
       )}
     >
@@ -31,7 +31,7 @@ export function AURATeaser({ teaser, onCTAClick, onDismiss, isVisible }: AURATea
           <X className="h-3 w-3 text-muted-foreground" />
         </button>
         
-        <p className="text-sm mb-3 pr-6 text-foreground">{teaser.text}</p>
+        <p className="text-sm mb-3 pr-6 text-foreground line-clamp-2">{teaser.text}</p>
         
         <Button
           onClick={() => onCTAClick(teaser.query)}
