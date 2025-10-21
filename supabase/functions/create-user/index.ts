@@ -60,20 +60,38 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if user is admin or super_user using the admin client to bypass RLS
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role, broker_id')
-      .eq('user_id', user.id)
-      .single();
+    // Check user roles in user_roles table
+    const { data: userRoles, error: rolesError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
 
-    if (profileError || !profile || !['admin', 'super_user'].includes(profile.role)) {
-      console.error('User not authorized:', profileError);
+    if (rolesError) {
+      console.error('Error fetching user roles:', rolesError);
+      return new Response(JSON.stringify({ error: 'Failed to verify user permissions' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const roles = userRoles?.map(r => r.role) || [];
+    const isAdmin = roles.includes('admin');
+    const isSuperUser = roles.includes('super_user');
+
+    if (!isAdmin && !isSuperUser) {
+      console.error('User not authorized - no admin/super_user role');
       return new Response(JSON.stringify({ error: 'Unauthorized: admin or super_user role required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Get broker_id from profile (separate query)
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('broker_id')
+      .eq('user_id', user.id)
+      .single();
 
     const { email, role, brokerName, brokerId, password }: CreateUserRequest = await req.json();
 
@@ -97,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
     let actualBrokerName = brokerName;
 
     // If user is admin, they can only create users for their own broker
-    if (profile.role === 'admin') {
+    if (isAdmin && !isSuperUser) {
       if (!profile.broker_id) {
         return new Response(JSON.stringify({ error: 'Admin must have a broker assigned to create users' }), {
           status: 400,
@@ -145,12 +163,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Update the profile with the specified role and approved status using admin client
+    // Update the profile with approved status using admin client
     if (newUser.user) {
       const { error: profileUpdateError } = await supabaseAdmin
         .from('profiles')
         .update({ 
-          role: role,
           status: 'approved',
           broker_id: actualBrokerId || null,
           broker_name: actualBrokerName || null
@@ -159,12 +176,30 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (profileUpdateError) {
         console.error('Error updating profile:', profileUpdateError);
-        // User was created but profile update failed
+        return new Response(JSON.stringify({ 
+          error: 'User created but profile update failed',
+          user: newUser.user 
+        }), {
+          status: 207,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Insert role in user_roles table
+      const { error: roleInsertError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({
+          user_id: newUser.user.id,
+          role: role
+        });
+
+      if (roleInsertError) {
+        console.error('Error assigning user role:', roleInsertError);
         return new Response(JSON.stringify({ 
           error: 'User created but role assignment failed',
           user: newUser.user 
         }), {
-          status: 207, // Partial success
+          status: 207,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
