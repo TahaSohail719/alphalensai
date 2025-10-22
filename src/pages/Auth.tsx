@@ -14,6 +14,7 @@ import newLogo from '@/assets/new-logo.png';
 import PublicNavbar from '@/components/PublicNavbar';
 import { useBrokerActions } from '@/hooks/useBrokerActions';
 import { useCreditManager } from '@/hooks/useCreditManager';
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 
 const { useState, useEffect } = React;
 
@@ -23,6 +24,7 @@ export default function Auth() {
   const [brokerName, setBrokerName] = useState('');
   const [selectedBrokerId, setSelectedBrokerId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [session, setSession] = useState(null);
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [activeBrokers, setActiveBrokers] = useState([]);
@@ -36,12 +38,84 @@ export default function Auth() {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
-        if (session?.user && event === 'SIGNED_IN' && window.location.pathname === '/auth') {
-          // Don't redirect if we're in free trial flow
-          if (intent !== 'free_trial') {
-            navigate('/dashboard');
+        
+        // Handle Google OAuth callback
+        if (event === 'SIGNED_IN' && session?.user) {
+          const provider = session.user.app_metadata.provider;
+          
+          if (provider === 'google') {
+            console.log('[Google Auth] User signed in via Google');
+            
+            // Check if profile exists
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('broker_id, status')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+            
+            // If profile exists but no broker_id, update it
+            if (profile && !profile.broker_id) {
+              const pendingBrokerId = sessionStorage.getItem('pending_broker_id');
+              const pendingBrokerName = sessionStorage.getItem('pending_broker_name');
+              
+              if (pendingBrokerId) {
+                console.log('[Google Auth] Updating profile with broker info');
+                
+                await supabase
+                  .from('profiles')
+                  .update({
+                    broker_id: pendingBrokerId,
+                    broker_name: pendingBrokerName,
+                    status: 'approved'
+                  })
+                  .eq('user_id', session.user.id);
+                
+                // Also update auth metadata
+                await supabase.auth.updateUser({
+                  data: {
+                    broker_id: pendingBrokerId,
+                    broker_name: pendingBrokerName
+                  }
+                });
+                
+                // Clear temporary storage
+                sessionStorage.removeItem('pending_broker_id');
+                sessionStorage.removeItem('pending_broker_name');
+                
+                toast({
+                  title: "Welcome!",
+                  description: "Your Google account has been linked successfully.",
+                });
+              }
+            }
+            
+            // Handle free trial if needed
+            if (intent === 'free_trial') {
+              const { error: trialError } = await activateFreeTrial();
+              if (!trialError) {
+                toast({
+                  title: "🎁 Free Trial Activated!",
+                  description: "Your account is ready with Free Trial access.",
+                });
+                navigate('/payment-success?type=free_trial');
+                return;
+              }
+            }
+            
+            // Standard redirect to dashboard
+            if (window.location.pathname === '/auth') {
+              navigate('/dashboard');
+            }
+          } else {
+            // Email/password flow
+            if (session?.user && event === 'SIGNED_IN' && window.location.pathname === '/auth') {
+              // Don't redirect if we're in free trial flow
+              if (intent !== 'free_trial') {
+                navigate('/dashboard');
+              }
+            }
           }
         }
       }
@@ -56,7 +130,7 @@ export default function Auth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, intent]);
+  }, [navigate, intent, toast, activateFreeTrial]);
 
   // Separate effect for loading brokers
   useEffect(() => {
@@ -132,6 +206,76 @@ export default function Auth() {
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    
+    const redirectUrl = `${window.location.origin}/auth`;
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      }
+    });
+    
+    if (error) {
+      toast({
+        title: "Google Sign-In Error",
+        description: error.message,
+        variant: "destructive"
+      });
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    // First, check if broker is selected
+    if (!selectedBrokerId) {
+      toast({
+        title: "Broker Required",
+        description: "Please select a broker before signing up with Google.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setGoogleLoading(true);
+    
+    const selectedBroker = activeBrokers.find((b: any) => b.id === selectedBrokerId);
+    const redirectUrl = `${window.location.origin}/auth`;
+    
+    // Store broker info temporarily for OAuth callback
+    sessionStorage.setItem('pending_broker_id', selectedBrokerId);
+    sessionStorage.setItem('pending_broker_name', selectedBroker?.name || '');
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      }
+    });
+    
+    if (error) {
+      toast({
+        title: "Google Sign-Up Error",
+        description: error.message,
+        variant: "destructive"
+      });
+      setGoogleLoading(false);
+      // Clear stored broker info
+      sessionStorage.removeItem('pending_broker_id');
+      sessionStorage.removeItem('pending_broker_name');
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -204,6 +348,23 @@ export default function Auth() {
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
+                <GoogleAuthButton
+                  mode="signin"
+                  loading={googleLoading}
+                  onClick={handleGoogleSignIn}
+                />
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with email
+                    </span>
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input
@@ -244,6 +405,45 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="signup-broker">Broker *</Label>
+                  <Select value={selectedBrokerId} onValueChange={setSelectedBrokerId} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your broker" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-white">
+                      {activeBrokers.map((broker: any) => (
+                        <SelectItem key={broker.id} value={broker.id}>
+                          {broker.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {activeBrokers.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      My broker is not listed? Contact support for assistance.
+                    </p>
+                  )}
+                </div>
+                
+                <GoogleAuthButton
+                  mode="signup"
+                  loading={googleLoading}
+                  onClick={handleGoogleSignUp}
+                  disabled={!selectedBrokerId}
+                />
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or sign up with email
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
@@ -263,26 +463,6 @@ export default function Auth() {
                     required
                     minLength={6}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-broker">Broker *</Label>
-                  <Select value={selectedBrokerId} onValueChange={setSelectedBrokerId} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your broker" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-white">
-                      {activeBrokers.map((broker: any) => (
-                        <SelectItem key={broker.id} value={broker.id}>
-                          {broker.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {activeBrokers.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      My broker is not listed? Contact support for assistance.
-                    </p>
-                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
