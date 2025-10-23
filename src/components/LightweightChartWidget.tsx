@@ -41,7 +41,7 @@ export default function LightweightChartWidget({
 }: LightweightChartWidgetProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const candlestickSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const candlestickSeriesRef = useRef<ISeriesApi<"Candlestick"> | any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -73,14 +73,14 @@ export default function LightweightChartWidget({
         },
       });
 
-      const candlestickSeries = (chart as any).addCandlestickSeries({
-        upColor: 'hsl(var(--success))',
-        downColor: 'hsl(var(--danger))',
-        borderUpColor: 'hsl(var(--success))',
-        borderDownColor: 'hsl(var(--danger))',
-        wickUpColor: 'hsl(var(--success))',
-        wickDownColor: 'hsl(var(--danger))',
-      });
+      const candlestickSeries = chart.addSeries({
+        type: 'Candlestick',
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderVisible: false,
+        wickUpColor: '#22c55e',
+        wickDownColor: '#ef4444',
+      } as any);
 
       chartRef.current = chart;
       candlestickSeriesRef.current = candlestickSeries;
