@@ -254,7 +254,8 @@ export default function LightweightChartWidget({
         setLoading(false);
         
         if (onFallback) {
-          setTimeout(onFallback, 2000);
+          console.warn('⏰ Chart data loading failed, triggering fallback to TradingView in 5s...');
+          setTimeout(onFallback, 5000);
         }
       }
     };
@@ -280,7 +281,8 @@ export default function LightweightChartWidget({
         const ws = new WebSocket(`wss://ws.twelvedata.com/v1/quotes/price?apikey=${apiKey}`);
         
         ws.onopen = () => {
-          console.log(`✅ TwelveData WebSocket connected for ${selectedSymbol} → ${tdSymbol}`);
+          console.log(`✅ TwelveData WebSocket OPENED for ${selectedSymbol} → ${tdSymbol}`);
+          console.log(`📡 Subscribing to symbol: ${tdSymbol}`);
           
           // Subscribe to the TwelveData symbol
           ws.send(JSON.stringify({
@@ -289,52 +291,65 @@ export default function LightweightChartWidget({
               symbols: tdSymbol
             }
           }));
+          
+          console.log(`📤 Subscription request sent for ${tdSymbol}`);
         };
 
         ws.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
             
-            // Handle subscription confirmation
-            if (msg.event === 'subscribe-status') {
-              console.log('Subscription status:', msg);
+            // Log all messages for debug
+            console.log('📥 TwelveData WS message:', msg);
+            
+            // Ignore status/heartbeat messages
+            if (msg.event === 'subscribe-status' || msg.event === 'heartbeat') {
+              console.log('Status/Heartbeat:', msg);
               return;
             }
             
-            // Handle price updates - tolerate different message formats
-            const isPriceEvent = msg.event === 'price' || typeof msg.price !== 'undefined';
+            // Extract price flexibly from various message formats
+            let price: number | null = null;
             
-            if (isPriceEvent && candlestickSeriesRef.current && lastCandleRef.current) {
-              const price = parseFloat(msg.price ?? msg.data?.price);
+            if (typeof msg.price !== 'undefined') {
+              price = parseFloat(msg.price);
+            } else if (msg.data && typeof msg.data.price !== 'undefined') {
+              price = parseFloat(msg.data.price);
+            } else if (msg.p !== undefined) { // Compact format
+              price = parseFloat(msg.p);
+            }
+            
+            if (price && !isNaN(price) && candlestickSeriesRef.current && lastCandleRef.current) {
+              console.log(`✅ Price update for ${tdSymbol}: ${price}`);
               
-              if (!isNaN(price)) {
-                const timestamp = Math.floor(Date.now() / 1000) as UTCTimestamp;
-                
-                // Update the last candle with the new price
-                const updatedCandle: CandlestickData = {
-                  ...lastCandleRef.current,
-                  time: timestamp,
-                  close: price,
-                  high: Math.max(lastCandleRef.current.high, price),
-                  low: Math.min(lastCandleRef.current.low, price),
-                };
+              const timestamp = Math.floor(Date.now() / 1000) as UTCTimestamp;
+              
+              // Update the last candle with the new price
+              const updatedCandle: CandlestickData = {
+                ...lastCandleRef.current,
+                time: timestamp,
+                close: price,
+                high: Math.max(lastCandleRef.current.high, price),
+                low: Math.min(lastCandleRef.current.low, price),
+              };
 
-                candlestickSeriesRef.current.update(updatedCandle);
-                lastCandleRef.current = updatedCandle;
+              candlestickSeriesRef.current.update(updatedCandle);
+              lastCandleRef.current = updatedCandle;
 
-                if (onPriceUpdate) {
-                  const decimals = selectedSymbol.includes('JPY') ? 2 : 4;
-                  onPriceUpdate(price.toFixed(decimals));
-                }
+              if (onPriceUpdate) {
+                const decimals = selectedSymbol.includes('JPY') ? 2 : 4;
+                onPriceUpdate(price.toFixed(decimals));
               }
+            } else {
+              console.warn('⚠️ Could not extract price from message:', msg);
             }
           } catch (err) {
             console.error('Error processing TwelveData WebSocket message:', err);
           }
         };
 
-        ws.onclose = () => {
-          console.log('TwelveData WebSocket disconnected, reconnecting...');
+        ws.onclose = (event) => {
+          console.log(`❌ TwelveData WebSocket CLOSED for ${tdSymbol}`, event.code, event.reason);
           reconnectTimeout = setTimeout(connectWebSocket, 3000);
         };
 
