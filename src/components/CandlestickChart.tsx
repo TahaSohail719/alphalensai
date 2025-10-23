@@ -81,60 +81,6 @@ export function CandlestickChart({
     setCurrentPrice(basePrice.toString());
   }, [asset]);
 
-  // Connexion WebSocket Binance directe
-  React.useEffect(() => {
-    let ws: WebSocket | null = null;
-    let isMounted = true;
-    const connectToBinance = () => {
-      const wsUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol.toLowerCase()}@ticker`;
-      console.log(`🔌 Connecting to Binance WebSocket: ${wsUrl}`);
-      ws = new WebSocket(wsUrl);
-      ws.onopen = () => {
-        if (isMounted) {
-          console.log(`✅ Connected to ${binanceSymbol} price feed (Binance)`);
-          setIsConnected(true);
-        }
-      };
-      ws.onmessage = event => {
-        if (!isMounted) return;
-        try {
-          const data = JSON.parse(event.data);
-          if (data && data.c) {
-            const price = parseFloat(data.c);
-            const decimals = binanceSymbol.includes('JPY') ? 2 : binanceSymbol.includes('USDT') ? 2 : 4;
-            setCurrentPrice(price.toFixed(decimals));
-          }
-        } catch (error) {
-          console.error('Error parsing Binance data:', error);
-        }
-      };
-      ws.onclose = () => {
-        if (isMounted) {
-          console.log(`🔌 Disconnected from ${binanceSymbol} price feed`);
-          setIsConnected(false);
-          // Reconnect after 3 seconds
-          setTimeout(() => {
-            if (isMounted) {
-              connectToBinance();
-            }
-          }, 3000);
-        }
-      };
-      ws.onerror = error => {
-        if (isMounted) {
-          console.error('Binance WebSocket error:', error);
-          setIsConnected(false);
-        }
-      };
-    };
-    connectToBinance();
-    return () => {
-      isMounted = false;
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, [binanceSymbol]);
   const handleTimeframeChange = (newTimeframe: string) => {
     setTimeframe(newTimeframe);
   };
@@ -271,7 +217,7 @@ export function CandlestickChart({
             </div>
             
             {showHeader && <div className="mt-3 text-xs text-muted-foreground text-center">
-                {!useFallback ? 'Powered by Twelve Data + Binance' : (hasRealTimeData ? `Real-time data from TradingView` : `Historical data • ${asset} chart`)}
+                {!useFallback ? 'Powered by TwelveData' : (hasRealTimeData ? `Real-time data from TradingView` : `Historical data • ${asset} chart`)}
               </div>}
           </CardContent>
         </Card>
