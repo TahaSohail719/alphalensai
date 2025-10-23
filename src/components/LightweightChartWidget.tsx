@@ -138,7 +138,7 @@ export default function LightweightChartWidget({
         if (data && Array.isArray(data)) {
           const formattedData: CandlestickData[] = data
             .map((item: any) => ({
-              time: (new Date(item.datetime).getTime() / 1000) as UTCTimestamp,
+              time: (new Date(item.date).getTime() / 1000) as UTCTimestamp,
               open: parseFloat(item.open),
               high: parseFloat(item.high),
               low: parseFloat(item.low),
@@ -176,60 +176,83 @@ export default function LightweightChartWidget({
     fetchHistoricalData();
   }, [selectedSymbol, timeframe, onFallback]);
 
-  // Setup WebSocket for real-time updates
+  // Setup WebSocket for real-time updates with TwelveData
   useEffect(() => {
     if (loading || !candlestickSeriesRef.current) return;
 
-    const binanceSymbol = getSymbolForAsset(selectedSymbol);
+    const apiKey = import.meta.env.VITE_TWELVE_DATA_API_KEY;
+    if (!apiKey) {
+      console.error('TwelveData API key not configured');
+      return;
+    }
+
     let reconnectTimeout: NodeJS.Timeout;
 
     const connectWebSocket = () => {
       try {
-        const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${binanceSymbol.toLowerCase()}@kline_${timeframe === 'D' ? '1d' : timeframe}`);
+        const ws = new WebSocket(`wss://ws.twelvedata.com/v1/quotes/price?apikey=${apiKey}`);
         
         ws.onopen = () => {
-          console.log(`WebSocket connected for ${selectedSymbol}`);
+          console.log(`✅ TwelveData WebSocket connected for ${selectedSymbol}`);
+          
+          // Subscribe to the symbol
+          ws.send(JSON.stringify({
+            action: 'subscribe',
+            params: {
+              symbols: selectedSymbol
+            }
+          }));
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            const kline = data.k;
             
-            if (kline && candlestickSeriesRef.current) {
-              const candle: CandlestickData = {
-                time: Math.floor(kline.t / 1000) as UTCTimestamp,
-                open: parseFloat(kline.o),
-                high: parseFloat(kline.h),
-                low: parseFloat(kline.l),
-                close: parseFloat(kline.c),
+            // Handle subscription confirmation
+            if (data.event === 'subscribe-status') {
+              console.log('Subscription status:', data);
+              return;
+            }
+            
+            // Handle price updates
+            if (data.price && candlestickSeriesRef.current && lastCandleRef.current) {
+              const price = parseFloat(data.price);
+              const timestamp = Math.floor(Date.now() / 1000) as UTCTimestamp;
+              
+              // Update the last candle with the new price
+              const updatedCandle: CandlestickData = {
+                ...lastCandleRef.current,
+                time: timestamp,
+                close: price,
+                high: Math.max(lastCandleRef.current.high, price),
+                low: Math.min(lastCandleRef.current.low, price),
               };
 
-              candlestickSeriesRef.current.update(candle);
-              lastCandleRef.current = candle;
+              candlestickSeriesRef.current.update(updatedCandle);
+              lastCandleRef.current = updatedCandle;
 
               if (onPriceUpdate) {
-                onPriceUpdate(kline.c);
+                onPriceUpdate(data.price);
               }
             }
           } catch (err) {
-            console.error('Error processing WebSocket message:', err);
+            console.error('Error processing TwelveData WebSocket message:', err);
           }
         };
 
         ws.onclose = () => {
-          console.log('WebSocket disconnected, reconnecting...');
+          console.log('TwelveData WebSocket disconnected, reconnecting...');
           reconnectTimeout = setTimeout(connectWebSocket, 3000);
         };
 
         ws.onerror = (err) => {
-          console.error('WebSocket error:', err);
+          console.error('TwelveData WebSocket error:', err);
           ws.close();
         };
 
         wsRef.current = ws;
       } catch (err) {
-        console.error('Error connecting WebSocket:', err);
+        console.error('Error connecting TwelveData WebSocket:', err);
       }
     };
 
@@ -280,7 +303,7 @@ export default function LightweightChartWidget({
         <div ref={chartContainerRef} className="w-full" />
 
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>Powered by Twelve Data + Binance</span>
+          <span>Powered by TwelveData</span>
           <Button
             variant="ghost"
             size="sm"
