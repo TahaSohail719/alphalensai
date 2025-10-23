@@ -113,6 +113,7 @@ export default function LightweightChartWidget({
         },
       });
 
+      // Create candlestick series - lightweight-charts v5 syntax
       const candlestickSeries = chart.addSeries({
         type: 'Candlestick',
         upColor: '#22c55e',

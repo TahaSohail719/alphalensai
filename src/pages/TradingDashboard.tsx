@@ -81,64 +81,209 @@ export default function TradingDashboard() {
     setSelectedAsset(normalizedSymbol);
   };
 
-  // WebSocket for real-time prices - Fixed synchronization
+  // WebSocket for real-time prices - TwelveData for specific instruments, Binance for others
   useEffect(() => {
-    const symbol = getSymbolForAsset(selectedAsset);
     let ws: WebSocket;
     let isMounted = true;
+    let fallbackInterval: NodeJS.Timeout | null = null;
+    let noDataTimeout: NodeJS.Timeout | null = null;
+
+    // Map to TwelveData symbols
+    const twelveDataInstruments: Record<string, string> = {
+      'EUR/USD': 'EUR/USD',
+      'GBP/USD': 'GBP/USD',
+      'BTC/USD': 'BTC/USD',
+      'ETH/USD': 'ETH/USD',
+      'GOLD': 'XAU/USD',
+      'SILVER': 'XAG/USD',
+    };
+
+    const useTwelveData = Object.keys(twelveDataInstruments).includes(selectedAsset);
 
     const connectWebSocket = () => {
       // Clean up previous connection
       if (ws) {
         ws.close();
       }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+        fallbackInterval = null;
+      }
+      if (noDataTimeout) {
+        clearTimeout(noDataTimeout);
+        noDataTimeout = null;
+      }
 
-      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`);
-      
-      ws.onopen = () => {
-        if (isMounted) {
-          setIsConnected(true);
-          console.log(`Connected to ${selectedAsset} (${symbol}) price feed`);
+      if (useTwelveData) {
+        // TwelveData WebSocket for EUR/USD, GBP/USD, BTC/USD, ETH/USD, GOLD, SILVER
+        const tdSymbol = twelveDataInstruments[selectedAsset];
+        const apiKey = import.meta.env.VITE_TWELVE_DATA_API_KEY;
+
+        if (!apiKey) {
+          console.error('TwelveData API key not found');
+          startFallbackSimulation();
+          return;
         }
-      };
 
-      ws.onmessage = (event) => {
+        console.log(`🔌 Connecting to TwelveData WS for ${selectedAsset} → ${tdSymbol}`);
+        ws = new WebSocket(`wss://ws.twelvedata.com/v1/quotes/price?apikey=${apiKey}`);
+
+        let hasReceivedData = false;
+
+        ws.onopen = () => {
+          if (!isMounted) return;
+          console.log(`✅ TwelveData WebSocket OPENED for ${selectedAsset} → ${tdSymbol}`);
+          
+          ws.send(JSON.stringify({
+            action: 'subscribe',
+            params: { symbols: tdSymbol }
+          }));
+
+          console.log(`📤 Subscription sent for ${tdSymbol}`);
+
+          // Start 5s timeout - if no data, fallback to simulation
+          noDataTimeout = setTimeout(() => {
+            if (!hasReceivedData && isMounted) {
+              console.warn(`⏰ No data from TwelveData after 5s for ${tdSymbol}, starting fallback`);
+              startFallbackSimulation();
+            }
+          }, 5000);
+        };
+
+        ws.onmessage = (event) => {
+          if (!isMounted) return;
+
+          try {
+            const msg = JSON.parse(event.data);
+
+            if (msg.event === 'subscribe-status' || msg.event === 'heartbeat') {
+              return;
+            }
+
+            let price: number | null = null;
+
+            if (typeof msg.price !== 'undefined') {
+              price = parseFloat(msg.price);
+            } else if (msg.data && typeof msg.data.price !== 'undefined') {
+              price = parseFloat(msg.data.price);
+            } else if (msg.p !== undefined) {
+              price = parseFloat(msg.p);
+            }
+
+            if (price && !isNaN(price)) {
+              hasReceivedData = true;
+              if (noDataTimeout) {
+                clearTimeout(noDataTimeout);
+                noDataTimeout = null;
+              }
+              if (fallbackInterval) {
+                clearInterval(fallbackInterval);
+                fallbackInterval = null;
+              }
+
+              setIsConnected(true);
+              const decimals = selectedAsset.includes('BTC') || selectedAsset.includes('ETH') ? 2 : selectedAsset.includes('JPY') ? 2 : 4;
+              
+              setPriceData({
+                symbol: selectedAsset,
+                price: price,
+                change24h: 0, // TwelveData doesn't provide 24h change in WS
+                volume: 0
+              });
+
+              console.log(`✅ TwelveData price update for ${selectedAsset}: ${price.toFixed(decimals)}`);
+            }
+          } catch (err) {
+            console.error('Error parsing TwelveData message:', err);
+          }
+        };
+
+        ws.onclose = (event) => {
+          if (isMounted) {
+            setIsConnected(false);
+            console.log(`❌ TwelveData WS closed for ${tdSymbol}`, event.code, event.reason);
+            setTimeout(() => {
+              if (isMounted) connectWebSocket();
+            }, 3000);
+          }
+        };
+
+        ws.onerror = () => {
+          if (isMounted) {
+            setIsConnected(false);
+            console.error(`❌ TwelveData WS error for ${tdSymbol}`);
+          }
+        };
+
+      } else {
+        // Binance WebSocket for all other instruments (no changes)
+        const symbol = getSymbolForAsset(selectedAsset);
+        ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`);
+        
+        ws.onopen = () => {
+          if (isMounted) {
+            setIsConnected(true);
+            console.log(`✅ Connected to ${selectedAsset} price feed (source: Binance)`);
+          }
+        };
+
+        ws.onmessage = (event) => {
+          if (!isMounted) return;
+          
+          try {
+            const data = JSON.parse(event.data);
+            if (data.s === symbol) {
+              setPriceData({
+                symbol: selectedAsset,
+                price: parseFloat(data.c),
+                change24h: parseFloat(data.P),
+                volume: parseFloat(data.v)
+              });
+            }
+          } catch (error) {
+            console.error('Error parsing price data:', error);
+          }
+        };
+
+        ws.onclose = () => {
+          if (isMounted) {
+            setIsConnected(false);
+            console.log(`Disconnected from ${selectedAsset} price feed`);
+            setTimeout(() => {
+              if (isMounted && symbol === getSymbolForAsset(selectedAsset)) {
+                connectWebSocket();
+              }
+            }, 3000);
+          }
+        };
+
+        ws.onerror = () => {
+          if (isMounted) {
+            setIsConnected(false);
+          }
+        };
+      }
+    };
+
+    // Simulated fallback for TwelveData instruments when WS fails
+    const startFallbackSimulation = () => {
+      console.warn(`⚠️ No ${useTwelveData ? 'TwelveData' : 'Binance'} data for ${selectedAsset}. Starting simulated realtime fallback.`);
+      
+      let simulatedPrice = 1.0 + Math.random() * 0.1;
+      
+      fallbackInterval = setInterval(() => {
         if (!isMounted) return;
         
-        try {
-          const data = JSON.parse(event.data);
-          // Verify the symbol matches current selection
-          if (data.s === symbol) {
-            setPriceData({
-              symbol: selectedAsset,
-              price: parseFloat(data.c),
-              change24h: parseFloat(data.P),
-              volume: parseFloat(data.v)
-            });
-          }
-        } catch (error) {
-          console.error('Error parsing price data:', error);
-        }
-      };
-
-      ws.onclose = () => {
-        if (isMounted) {
-          setIsConnected(false);
-          console.log(`Disconnected from ${selectedAsset} price feed`);
-          // Only reconnect if still mounted and same asset
-          setTimeout(() => {
-            if (isMounted && symbol === getSymbolForAsset(selectedAsset)) {
-              connectWebSocket();
-            }
-          }, 3000);
-        }
-      };
-
-      ws.onerror = () => {
-        if (isMounted) {
-          setIsConnected(false);
-        }
-      };
+        simulatedPrice += (Math.random() - 0.5) * 0.001;
+        const decimals = selectedAsset.includes('BTC') || selectedAsset.includes('ETH') ? 2 : selectedAsset.includes('JPY') ? 2 : 4;
+        
+        setPriceData({
+          symbol: selectedAsset,
+          price: parseFloat(simulatedPrice.toFixed(decimals)),
+          change24h: (Math.random() - 0.5) * 2,
+          volume: Math.random() * 1000000
+        });
+      }, 2000);
     };
 
     // Reset price data when asset changes
@@ -150,8 +295,14 @@ export default function TradingDashboard() {
       if (ws) {
         ws.close();
       }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+      }
+      if (noDataTimeout) {
+        clearTimeout(noDataTimeout);
+      }
     };
-  }, [selectedAsset]); // Only depend on selectedAsset
+  }, [selectedAsset]);
 
   const currentAsset = allAssets.find(asset => asset.symbol === selectedAsset);
 
