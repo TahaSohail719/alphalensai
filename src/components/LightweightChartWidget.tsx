@@ -86,6 +86,12 @@ export default function LightweightChartWidget({
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const lastCandleRef = useRef<CandlestickData | null>(null);
+  
+  // Tooltip state
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipContent, setTooltipContent] = useState<string>('');
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Initialize chart
   useEffect(() => {
@@ -245,6 +251,37 @@ export default function LightweightChartWidget({
           candlestickSeriesRef.current.setData(formattedData);
           lastCandleRef.current = formattedData[formattedData.length - 1];
           chartRef.current?.timeScale().fitContent();
+          
+          // Add test markers with tooltips
+          if (formattedData.length > 5) {
+            const testMarkers = [
+              {
+                time: formattedData[Math.floor(formattedData.length * 0.3)].time,
+                position: 'belowBar' as const,
+                color: '#2196F3',
+                shape: 'circle' as const,
+                text: 'Test Point 1',
+              },
+              {
+                time: formattedData[Math.floor(formattedData.length * 0.5)].time,
+                position: 'aboveBar' as const,
+                color: '#f59e0b',
+                shape: 'arrowDown' as const,
+                text: 'Test Point 2',
+              },
+              {
+                time: formattedData[Math.floor(formattedData.length * 0.8)].time,
+                position: 'belowBar' as const,
+                color: '#22c55e',
+                shape: 'arrowUp' as const,
+                text: 'Test Point 3',
+              },
+            ];
+
+            candlestickSeriesRef.current.setMarkers(testMarkers);
+            console.log('✅ Added test markers to chart');
+          }
+          
           setLoading(false);
         } else {
           throw new Error('No valid data after parsing');
@@ -377,6 +414,48 @@ export default function LightweightChartWidget({
     };
   }, [selectedSymbol, timeframe, loading, onPriceUpdate]);
 
+  // Setup tooltip on mouse move
+  useEffect(() => {
+    if (!chartRef.current || !chartContainerRef.current) return;
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = chartContainerRef.current!.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // Simple test: show tooltip with lorem ipsum when hovering near markers
+      // In a real scenario, you'd calculate which marker is closest
+      const testTooltips = [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        'Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+      ];
+
+      // For testing: randomly show tooltip based on Y position
+      if (y > 100 && y < 400) {
+        const index = Math.floor((y / 400) * testTooltips.length);
+        setTooltipContent(testTooltips[index] || testTooltips[0]);
+        setTooltipVisible(true);
+        setTooltipPosition({ x, y });
+      } else {
+        setTooltipVisible(false);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setTooltipVisible(false);
+    };
+
+    const container = chartContainerRef.current;
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
   const handleRefresh = () => {
     setLoading(true);
     setError(null);
@@ -409,7 +488,21 @@ export default function LightweightChartWidget({
           </div>
         )}
         
-        <div ref={chartContainerRef} className="w-full" />
+        <div ref={chartContainerRef} className="w-full relative">
+          {/* Custom Tooltip */}
+          {tooltipVisible && (
+            <div
+              ref={tooltipRef}
+              className="absolute pointer-events-none z-50 bg-popover/95 backdrop-blur-sm text-popover-foreground px-3 py-2 rounded-md shadow-lg border text-xs max-w-xs"
+              style={{
+                left: `${tooltipPosition.x + 15}px`,
+                top: `${tooltipPosition.y - 30}px`,
+              }}
+            >
+              {tooltipContent}
+            </div>
+          )}
+        </div>
 
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>Powered by TwelveData</span>
