@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Shield, User, Crown, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Shield, User, Crown, Trash2, Key, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +33,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserActionsDialogProps {
   isOpen: boolean;
@@ -76,8 +81,34 @@ export function UserActionsDialog({
 }: UserActionsDialogProps) {
   const [selectedStatus, setSelectedStatus] = useState<'pending' | 'approved' | 'rejected'>();
   const [selectedRole, setSelectedRole] = useState<'user' | 'admin' | 'super_user'>();
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const { isSuperUser } = useUserRole();
   const { profile } = useProfile();
+  const { toast } = useToast();
+
+  // Validate password confirmation
+  useEffect(() => {
+    if (confirmPassword && newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+    } else if (newPassword && newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+    } else {
+      setPasswordError('');
+    }
+  }, [newPassword, confirmPassword]);
+
+  // Reset password form when dialog closes
+  useEffect(() => {
+    if (!isPasswordDialogOpen) {
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError('');
+    }
+  }, [isPasswordDialogOpen]);
 
   if (!user) return null;
 
@@ -110,6 +141,53 @@ export function UserActionsDialog({
     const result = await onDeleteUser(user.user_id);
     if (result.success) {
       onClose();
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Validation Error",
+        description: "Passwords do not match",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data, error } = await supabase.functions.invoke('update-user-password', {
+        body: {
+          userId: user.user_id,
+          newPassword: newPassword
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ Password Updated",
+        description: `Password successfully updated for ${user.email}`,
+      });
+
+      setIsPasswordDialogOpen(false);
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      console.error('Password update failed:', err);
+      toast({
+        title: "❌ Password Update Failed",
+        description: err.message || "Check permissions or inputs.",
+        variant: "destructive"
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -221,6 +299,21 @@ export function UserActionsDialog({
           </div>
         </div>
 
+        {/* Change Password Section - Super User Only */}
+        {isSuperUser && (
+          <div className="space-y-2 pt-4 border-t">
+            <Button
+              onClick={() => setIsPasswordDialogOpen(true)}
+              variant="outline"
+              className="w-full"
+              size="sm"
+            >
+              <Key className="h-4 w-4 mr-2" />
+              Change Password
+            </Button>
+          </div>
+        )}
+
         <DialogFooter className="flex-col sm:flex-row gap-2">
           {/* Delete User - Only for Super Users */}
           {isSuperUser && (
@@ -263,6 +356,60 @@ export function UserActionsDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Password Change Dialog */}
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change User Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for {user.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+            {passwordError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{passwordError}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdatePassword}
+              disabled={!newPassword || !confirmPassword || !!passwordError || passwordLoading}
+            >
+              {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

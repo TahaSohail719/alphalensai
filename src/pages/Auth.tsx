@@ -21,6 +21,8 @@ const { useState, useEffect } = React;
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMatchError, setPasswordMatchError] = useState('');
   const [brokerName, setBrokerName] = useState('');
   const [selectedBrokerId, setSelectedBrokerId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,6 +36,15 @@ export default function Auth() {
   const { activateFreeTrial } = useCreditManager();
   const intent = searchParams.get('intent');
   const { fetchActiveBrokers } = useBrokerActions();
+
+  // Validate password confirmation in real-time
+  useEffect(() => {
+    if (confirmPassword && password !== confirmPassword) {
+      setPasswordMatchError('Passwords do not match');
+    } else {
+      setPasswordMatchError('');
+    }
+  }, [password, confirmPassword]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -154,6 +165,25 @@ export default function Auth() {
       toast({
         title: "Validation Error",
         description: "Please select a broker.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Please ensure both password fields are identical.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive"
       });
       return;
@@ -464,7 +494,25 @@ export default function Auth() {
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <Input
+                    id="signup-confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className={passwordMatchError ? 'border-destructive' : ''}
+                  />
+                  {passwordMatchError && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <Loader2 className="h-3 w-3" />
+                      {passwordMatchError}
+                    </p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full" disabled={loading || !!passwordMatchError}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>
