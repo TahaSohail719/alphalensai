@@ -118,15 +118,19 @@ export default function Auth() {
                 return;
               }
               
-              // If no broker info in sessionStorage, user needs to complete signup
-              if (!profile?.broker_id) {
+              // ✅ User clicked "Sign in with Google" (no broker in sessionStorage)
+              // This is OK - they'll be created with status='pending' by the trigger
+              // AuthGuard will handle showing the pending approval screen
+              if (!profile?.broker_id && !pendingBrokerId) {
+                console.log('[Google Auth] New user via Sign In - no broker selected yet');
+                
                 toast({
-                  title: "Setup Required",
-                  description: "Please select your broker to complete registration.",
-                  variant: "destructive",
+                  title: "Account Created",
+                  description: "Your account has been created and is pending approval. An administrator will review your request.",
                 });
                 
-                await supabase.auth.signOut();
+                // Navigate to dashboard - AuthGuard will show "Pending Approval" screen
+                navigate('/dashboard');
                 return;
               }
             } else {
