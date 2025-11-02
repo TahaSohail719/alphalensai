@@ -52,6 +52,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { startOfDay } from 'date-fns';
 import { RealtimeDiagnostic } from "@/components/RealtimeDiagnostic";
+import { useTranslation } from 'react-i18next';
 
 interface AdminUser {
   id: string;
@@ -98,6 +99,7 @@ export default function Admin() {
   const { toast } = useToast();
   const { isSuperUser, isAdmin } = useUserRole();
   const { profile } = useProfile();
+  const { t } = useTranslation('admin');
   const { 
     fetchUsers,
     updateUserStatus, 
@@ -146,15 +148,15 @@ export default function Admin() {
       await loadStripeMode();
       
       toast({
-        title: "Stripe Mode Updated",
-        description: `Stripe payment processing is now in ${pendingStripeMode.toUpperCase()} mode.`,
+        title: t('stripe.modeUpdated'),
+        description: t('stripe.modeUpdatedDescription', { mode: pendingStripeMode.toUpperCase() }),
         variant: pendingStripeMode === 'live' ? 'default' : 'default',
       });
     } catch (err: any) {
       console.error('Failed to update Stripe mode:', err);
       toast({
-        title: "Update Failed",
-        description: err.message || "Failed to update Stripe mode. Please try again or update manually.",
+        title: t('stripe.updateFailed'),
+        description: err.message || t('stripe.updateFailedDescription'),
         variant: "destructive",
       });
     } finally {
@@ -391,7 +393,7 @@ export default function Admin() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
                 <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                Admin Dashboard
+                {t('title')}
               </h1>
               {isAdmin && userBroker && (
                 <Badge variant="outline" className="text-xs">
@@ -400,12 +402,12 @@ export default function Admin() {
               )}
             </div>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              {isAdmin ? `Manage users and approvals for ${userBroker?.name || 'your broker'}` : 'Manage users, approvals, and system permissions'}
+              {isAdmin ? t('brokerSubtitle', { brokerName: userBroker?.name || 'your broker' }) : t('subtitle')}
             </p>
             {isAdmin && !profile?.broker_id && (
               <div className="mt-2 p-2 border border-warning rounded-md bg-warning/10">
                 <p className="text-sm text-warning-foreground">
-                  Broker not assigned. Please contact a super user to assign a broker.
+                  {t('brokerNotAssigned')}
                 </p>
               </div>
             )}
@@ -423,7 +425,7 @@ export default function Admin() {
               className="h-10 sm:h-11"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('actions.refresh')}
             </Button>
           </div>
         </div>
@@ -434,7 +436,7 @@ export default function Admin() {
             <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
-                Total Users
+                {t('stats.totalUsers')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
@@ -446,7 +448,7 @@ export default function Admin() {
             <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4 text-warning" />
-                Pending
+                {t('stats.pending')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
@@ -458,7 +460,7 @@ export default function Admin() {
             <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-success" />
-                Approved
+                {t('stats.approved')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
@@ -470,7 +472,7 @@ export default function Admin() {
             <CardHeader className="p-4 sm:p-6 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <UserX className="h-4 w-4 text-danger" />
-                Rejected
+                {t('stats.rejected')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">
@@ -485,10 +487,10 @@ export default function Admin() {
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                Stripe Environment
+                {t('stripe.title')}
               </CardTitle>
               <CardDescription className="text-sm sm:text-base">
-                Current payment processing mode
+                {t('stripe.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0">

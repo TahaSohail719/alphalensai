@@ -17,7 +17,21 @@
     "indicatorsError": "Error al recuperar indicadores técnicos. Por favor intente de nuevo.",
     "collectiveInsightsError": "No se pueden cargar las perspectivas colectivas. Por favor intente más tarde.",
     "jobLaunched": "¡Lanzado con éxito!",
-    "jobLaunchError": "No se puede lanzar la solicitud. Por favor intente de nuevo."
+    "jobLaunchError": "No se puede lanzar la solicitud. Por favor intente de nuevo.",
+    "dataRetrievalFailed": "Error al recuperar datos en tiempo real. Por favor inténtelo de nuevo."
+  },
+  "macro": {
+    "analysisCompleted": "Análisis Completado",
+    "analysisCompletedDescription": "Su análisis macro está listo",
+    "analysisError": "Error de Análisis",
+    "analysisErrorDescription": "No se pudo completar el análisis. Por favor, inténtelo de nuevo."
+  },
+  "reports": {
+    "reportGenerated": "Informe Generado",
+    "reportGeneratedDescription": "Su informe se ha generado exitosamente",
+    "reportLoaded": "Informe Cargado",
+    "reportLoadedDescription": "El informe generado anteriormente ha sido restaurado",
+    "reportGeneratedStructured": "Su informe se ha generado exitosamente (formato estructurado)"
   },
   "pricing": {
     "invalidPlan": "Plan Inválido",

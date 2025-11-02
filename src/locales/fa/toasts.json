@@ -17,7 +17,21 @@
     "indicatorsError": "بازیابی شاخص‌های فنی ناموفق بود. لطفاً دوباره امتحان کنید.",
     "collectiveInsightsError": "قادر به بارگذاری بینش‌های جمعی نیست. لطفاً بعداً دوباره امتحان کنید.",
     "jobLaunched": "با موفقیت راه‌اندازی شد!",
-    "jobLaunchError": "قادر به راه‌اندازی درخواست نیست. لطفاً دوباره امتحان کنید."
+    "jobLaunchError": "قادر به راه‌اندازی درخواست نیست. لطفاً دوباره امتحان کنید.",
+    "dataRetrievalFailed": "خطا در بازیابی داده‌های زمان واقعی. لطفاً دوباره امتحان کنید."
+  },
+  "macro": {
+    "analysisCompleted": "تحلیل کامل شد",
+    "analysisCompletedDescription": "تحلیل ماکرو شما آماده است",
+    "analysisError": "خطای تحلیل",
+    "analysisErrorDescription": "تکمیل تحلیل امکان‌پذیر نیست. لطفاً دوباره امتحان کنید."
+  },
+  "reports": {
+    "reportGenerated": "گزارش تولید شد",
+    "reportGeneratedDescription": "گزارش شما با موفقیت تولید شد",
+    "reportLoaded": "گزارش بارگذاری شد",
+    "reportLoadedDescription": "گزارش تولید شده قبلی بازیابی شد",
+    "reportGeneratedStructured": "گزارش شما با موفقیت تولید شد (فرمت ساختاریافته)"
   },
   "pricing": {
     "invalidPlan": "برنامه نامعتبر",

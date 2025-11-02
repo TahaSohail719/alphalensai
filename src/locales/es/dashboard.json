@@ -39,7 +39,20 @@
     "selectAsset": "Seleccionar un activo",
     "generateAnalysis": "Generar Análisis",
     "enterQuery": "Ingrese su pregunta de mercado",
-    "queryPlaceholder": "¿Qué está impulsando el rally EUR/USD?"
+    "queryPlaceholder": "¿Qué está impulsando el rally EUR/USD?",
+    "analysisResults": "Resultados del Análisis",
+    "analysisRealtime": "Análisis (Tiempo Real)",
+    "analysisGenerator": "Generador de Análisis",
+    "askQuestion": "Haga su pregunta macro o describa el contexto a analizar...",
+    "quickSuggestions": "Sugerencias rápidas de análisis...",
+    "analysisQueued": "Análisis en cola...",
+    "analysisInProgress": "Análisis en progreso...",
+    "generatingAnalysis": "Generando Análisis...",
+    "macroAnalysisFor": "Análisis Macro",
+    "analysisFor": "Análisis para",
+    "copied": "Copiado",
+    "analysisCopied": "Análisis copiado al portapapeles",
+    "completed": "Completado"
   },
   "reports": {
     "title": "Informes",
@@ -52,7 +65,29 @@
     "customNotes": "Notas Personalizadas",
     "selectSections": "Seleccionar Secciones",
     "exportFormat": "Formato de Exportación",
-    "generateReport": "Generar Informe"
+    "generateReport": "Generar Informe",
+    "generating": "Generando...",
+    "compose": "Componer",
+    "preview": "Vista Previa",
+    "generated": "Generado",
+    "sections": {
+      "market": "Condiciones de Mercado",
+      "marketDescription": "Contexto macro y condiciones de trading",
+      "technical": "Análisis Técnico",
+      "technicalDescription": "Análisis de patrones y señales identificadas",
+      "risks": "Riesgos Clave",
+      "risksDescription": "Evaluación de riesgos y amenazas clave a vigilar",
+      "events": "Vigilancia de Eventos",
+      "eventsDescription": "Eventos próximos y catalizadores a monitorear",
+      "sentiment": "Sentimiento y Posicionamiento",
+      "sentimentDescription": "Análisis de sentimiento y posicionamiento de mercado",
+      "recommendations": "Recomendaciones",
+      "recommendationsDescription": "Recomendaciones de inversión y perspectiva estratégica"
+    },
+    "sectionNotes": "Notas de Sección",
+    "notesPlaceholder": "Agregar instrucciones específicas para esta sección...",
+    "moveUp": "Subir",
+    "moveDown": "Bajar"
   },
   "portfolio": {
     "title": "Cartera",

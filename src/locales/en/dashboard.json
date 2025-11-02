@@ -39,7 +39,20 @@
     "selectAsset": "Select an asset",
     "generateAnalysis": "Generate Analysis",
     "enterQuery": "Enter your market question",
-    "queryPlaceholder": "What's driving the EUR/USD rally?"
+    "queryPlaceholder": "What's driving the EUR/USD rally?",
+    "analysisResults": "Analysis Results",
+    "analysisRealtime": "Analysis (Realtime)",
+    "analysisGenerator": "Analysis Generator",
+    "askQuestion": "Ask your macro question or describe the context to analyze...",
+    "quickSuggestions": "Quick analysis suggestions...",
+    "analysisQueued": "Analysis queued...",
+    "analysisInProgress": "Analysis in progress...",
+    "generatingAnalysis": "Generating Analysis...",
+    "macroAnalysisFor": "Macro Analysis",
+    "analysisFor": "Analysis for",
+    "copied": "Copied",
+    "analysisCopied": "Analysis copied to clipboard",
+    "completed": "Completed"
   },
   "reports": {
     "title": "Reports",
@@ -52,7 +65,29 @@
     "customNotes": "Custom Notes",
     "selectSections": "Select Sections",
     "exportFormat": "Export Format",
-    "generateReport": "Generate Report"
+    "generateReport": "Generate Report",
+    "generating": "Generating...",
+    "compose": "Compose",
+    "preview": "Preview",
+    "generated": "Generated",
+    "sections": {
+      "market": "Market Conditions",
+      "marketDescription": "Macro context and trading conditions",
+      "technical": "Technical Analysis",
+      "technicalDescription": "Analysis of identified patterns and signals",
+      "risks": "Key Risks",
+      "risksDescription": "Risk assessment and key threats to watch",
+      "events": "Event Watch",
+      "eventsDescription": "Upcoming events and catalysts to monitor",
+      "sentiment": "Sentiment & Positioning",
+      "sentimentDescription": "Market sentiment and positioning analysis",
+      "recommendations": "Recommendations",
+      "recommendationsDescription": "Investment recommendations and strategic outlook"
+    },
+    "sectionNotes": "Section Notes",
+    "notesPlaceholder": "Add specific instructions for this section...",
+    "moveUp": "Move Up",
+    "moveDown": "Move Down"
   },
   "portfolio": {
     "title": "Portfolio",

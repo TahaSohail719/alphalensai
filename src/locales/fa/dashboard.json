@@ -39,7 +39,20 @@
     "selectAsset": "یک دارایی انتخاب کنید",
     "generateAnalysis": "تولید تحلیل",
     "enterQuery": "سوال بازار خود را وارد کنید",
-    "queryPlaceholder": "چه چیزی باعث رشد EUR/USD می‌شود؟"
+    "queryPlaceholder": "چه چیزی باعث رشد EUR/USD می‌شود؟",
+    "analysisResults": "نتایج تحلیل",
+    "analysisRealtime": "تحلیل (زمان واقعی)",
+    "analysisGenerator": "تولید کننده تحلیل",
+    "askQuestion": "سوال ماکرو خود را بپرسید یا زمینه را برای تجزیه و تحلیل توصیف کنید...",
+    "quickSuggestions": "پیشنهادهای سریع تحلیل...",
+    "analysisQueued": "تحلیل در صف...",
+    "analysisInProgress": "تحلیل در حال انجام...",
+    "generatingAnalysis": "تولید تحلیل...",
+    "macroAnalysisFor": "تحلیل ماکرو",
+    "analysisFor": "تحلیل برای",
+    "copied": "کپی شد",
+    "analysisCopied": "تحلیل در کلیپ‌بورد کپی شد",
+    "completed": "تکمیل شده"
   },
   "reports": {
     "title": "گزارش‌ها",
@@ -52,7 +65,29 @@
     "customNotes": "یادداشت‌های سفارشی",
     "selectSections": "انتخاب بخش‌ها",
     "exportFormat": "فرمت خروجی",
-    "generateReport": "تولید گزارش"
+    "generateReport": "تولید گزارش",
+    "generating": "در حال تولید...",
+    "compose": "نوشتن",
+    "preview": "پیش‌نمایش",
+    "generated": "تولید شده",
+    "sections": {
+      "market": "شرایط بازار",
+      "marketDescription": "زمینه ماکرو و شرایط معاملاتی",
+      "technical": "تحلیل تکنیکال",
+      "technicalDescription": "تحلیل الگوها و سیگنال‌های شناسایی شده",
+      "risks": "ریسک‌های کلیدی",
+      "risksDescription": "ارزیابی ریسک و تهدیدات کلیدی برای نظارت",
+      "events": "نظارت بر رویدادها",
+      "eventsDescription": "رویدادهای آتی و کاتالیزورها برای نظارت",
+      "sentiment": "احساسات و موقعیت‌یابی",
+      "sentimentDescription": "تحلیل احساسات و موقعیت‌یابی بازار",
+      "recommendations": "توصیه‌ها",
+      "recommendationsDescription": "توصیه‌های سرمایه‌گذاری و چشم‌انداز استراتژیک"
+    },
+    "sectionNotes": "یادداشت‌های بخش",
+    "notesPlaceholder": "افزودن دستورالعمل‌های خاص برای این بخش...",
+    "moveUp": "حرکت به بالا",
+    "moveDown": "حرکت به پایین"
   },
   "portfolio": {
     "title": "پرتفوی",

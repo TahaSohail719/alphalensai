@@ -17,7 +17,21 @@
     "indicatorsError": "Failed to retrieve technical indicators. Please try again.",
     "collectiveInsightsError": "Unable to load collective insights. Please try again later.",
     "jobLaunched": "Launched successfully!",
-    "jobLaunchError": "Unable to launch the request. Please try again."
+    "jobLaunchError": "Unable to launch the request. Please try again.",
+    "dataRetrievalFailed": "Failed to retrieve real-time data. Please try again."
+  },
+  "macro": {
+    "analysisCompleted": "Analysis Completed",
+    "analysisCompletedDescription": "Your macro analysis is ready",
+    "analysisError": "Analysis Error",
+    "analysisErrorDescription": "Unable to complete analysis. Please retry."
+  },
+  "reports": {
+    "reportGenerated": "Report Generated",
+    "reportGeneratedDescription": "Your report has been successfully generated",
+    "reportLoaded": "Report Loaded",
+    "reportLoadedDescription": "Previously generated report has been restored",
+    "reportGeneratedStructured": "Your report has been successfully generated (structured format)"
   },
   "pricing": {
     "invalidPlan": "Invalid Plan",

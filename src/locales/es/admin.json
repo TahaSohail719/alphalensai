@@ -24,7 +24,11 @@
     "confirmMessage": "¿Está seguro de que desea cambiar Stripe al modo {{mode}}?",
     "warning": "Esto afectará todo el procesamiento de pagos en la plataforma.",
     "testWarning": "El modo de prueba usa tarjetas de prueba y no procesa pagos reales.",
-    "liveWarning": "El modo EN VIVO procesa pagos REALES con dinero REAL. Solo active en producción."
+    "liveWarning": "El modo EN VIVO procesa pagos REALES con dinero REAL. Solo active en producción.",
+    "modeUpdated": "Modo de Stripe Actualizado",
+    "modeUpdatedDescription": "El procesamiento de pagos de Stripe ahora está en modo {{mode}}.",
+    "updateFailed": "Actualización Fallida",
+    "updateFailedDescription": "Error al actualizar el modo de Stripe. Por favor intente de nuevo o actualice manualmente."
   },
   "actions": {
     "createUser": "Crear Usuario",

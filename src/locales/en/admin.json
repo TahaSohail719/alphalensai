@@ -24,7 +24,11 @@
     "confirmMessage": "Are you sure you want to switch Stripe to {{mode}} mode?",
     "warning": "This will affect all payment processing across the platform.",
     "testWarning": "Test mode uses test cards and doesn't process real payments.",
-    "liveWarning": "LIVE mode processes REAL payments with REAL money. Only activate in production."
+    "liveWarning": "LIVE mode processes REAL payments with REAL money. Only activate in production.",
+    "modeUpdated": "Stripe Mode Updated",
+    "modeUpdatedDescription": "Stripe payment processing is now in {{mode}} mode.",
+    "updateFailed": "Update Failed",
+    "updateFailedDescription": "Failed to update Stripe mode. Please try again or update manually."
   },
   "actions": {
     "createUser": "Create User",

@@ -23,6 +23,7 @@ import { dualResponseHandler } from "@/lib/dual-response-handler";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreditEngagement } from "@/hooks/useCreditEngagement";
+import { useTranslation } from 'react-i18next';
 const {
   useState,
   useEffect
@@ -71,6 +72,7 @@ export default function MacroAnalysis() {
   } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
   const { canLaunchJob, engageCredit } = useCreditEngagement();
+  const { t } = useTranslation(['dashboard', 'toasts', 'common']);
   const [isGenerating, setIsGenerating] = useState(false);
   const [analyses, setAnalyses] = useState<MacroAnalysis[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -163,13 +165,13 @@ export default function MacroAnalysis() {
       query: queryParams.query,
       timestamp: new Date(),
       sections: [{
-        title: "Analysis Results",
+        title: t('dashboard:macro.analysisResults'),
         content: analysisContent,
         type: "overview",
         expanded: true
       }],
       sources: [{
-        title: "Analysis (Realtime)",
+        title: t('dashboard:macro.analysisRealtime'),
         url: "#",
         type: "research"
       }]
@@ -179,8 +181,8 @@ export default function MacroAnalysis() {
     console.log('🔄 [Loader] Stopping loader - Realtime response received');
     setIsGenerating(false);
     toast({
-      title: "Analysis Completed",
-      description: "Your macro analysis is ready"
+      title: t('toasts:macro.analysisCompleted'),
+      description: t('toasts:macro.analysisCompletedDescription')
     });
 
     // Log interaction to Supabase history
@@ -201,8 +203,8 @@ export default function MacroAnalysis() {
     setIsGenerating(false);
     setJobStatus("error");
     toast({
-      title: "Analysis Error",
-      description: errorMessage || "Unable to complete analysis. Please retry.",
+      title: t('toasts:macro.analysisError'),
+      description: errorMessage || t('toasts:macro.analysisErrorDescription'),
       variant: "destructive"
     });
   };
@@ -865,8 +867,8 @@ export default function MacroAnalysis() {
     const content = `Macro Analysis - ${analysis.query}\n\n${analysis.sections.map(s => `${s.title}:\n${s.content}`).join('\n\n')}`;
     navigator.clipboard.writeText(content);
     toast({
-      title: "Copied",
-      description: "Analysis copied to clipboard"
+      title: t('dashboard:macro.copied'),
+      description: t('dashboard:macro.analysisCopied')
     });
   };
 
@@ -881,8 +883,8 @@ export default function MacroAnalysis() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">Macro Analysis</h1>
-            <p className="text-sm sm:text-base text-muted-foreground break-words">AI-powered economic analysis and market insights</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">{t('dashboard:macro.title')}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground break-words">{t('dashboard:macro.subtitle')}</p>
           </div>
         </div>
 
@@ -891,7 +893,7 @@ export default function MacroAnalysis() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              <h2 className="text-lg sm:text-xl font-semibold text-foreground">Analysis Generator</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground">{t('dashboard:macro.analysisGenerator')}</h2>
             </div>
             
             <div className="space-y-4">
@@ -905,7 +907,7 @@ export default function MacroAnalysis() {
                     query: value
                   }));
                 }
-              }} placeholder="Ask your macro question or describe the context to analyze..." rows={3} className="text-base resize-none pr-12 pb-8" maxLength={500} />
+              }} placeholder={t('dashboard:macro.askQuestion')} rows={3} className="text-base resize-none pr-12 pb-8" maxLength={500} />
                 <div className="absolute bottom-2 left-2 text-xs text-muted-foreground">
                   {queryParams.query.length}/500
                 </div>
@@ -923,7 +925,7 @@ export default function MacroAnalysis() {
                   <SelectTrigger className="w-full">
                     <div className="flex items-center gap-2">
                       <ChevronDown className="h-4 w-4" />
-                      <span className="text-muted-foreground">Quick analysis suggestions...</span>
+                      <span className="text-muted-foreground">{t('dashboard:macro.quickSuggestions')}</span>
                     </div>
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
@@ -940,9 +942,9 @@ export default function MacroAnalysis() {
               {/* Status indicator */}
               {isGenerating && <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {jobStatus === "queued" && "Analysis queued..."}
-                  {jobStatus === "running" && "Analysis in progress..."}
-                  {!jobStatus && "Generating Analysis..."}
+                  {jobStatus === "queued" && t('dashboard:macro.analysisQueued')}
+                  {jobStatus === "running" && t('dashboard:macro.analysisInProgress')}
+                  {!jobStatus && t('dashboard:macro.generatingAnalysis')}
                 </div>}
             </div>
           </CardContent>
@@ -952,7 +954,7 @@ export default function MacroAnalysis() {
         {analyses.length > 0 && <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-foreground mb-6 flex items-center gap-2">
               <Brain className="h-6 w-6 text-primary" />
-              Analysis Results
+              {t('dashboard:macro.analysisResults')}
             </h2>
             {analyses.map((analysis, index) => <Card key={index} className="overflow-hidden animate-fade-in shadow-soft hover:shadow-medium transition-all">
                 <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-accent/5">
@@ -962,9 +964,9 @@ export default function MacroAnalysis() {
                         <Activity className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg font-semibold text-foreground mb-1">Macro Analysis</CardTitle>
+                        <CardTitle className="text-lg font-semibold text-foreground mb-1">{t('dashboard:macro.macroAnalysisFor')}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          Analysis for {analysis.query} • {analysis.timestamp.toLocaleString()}
+                          {t('dashboard:macro.analysisFor')} {analysis.query} • {analysis.timestamp.toLocaleString()}
                         </p>
                       </div>
                     </div>

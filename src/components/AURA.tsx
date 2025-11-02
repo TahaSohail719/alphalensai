@@ -418,7 +418,7 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
         if (!collectOnly) {
           setMessages((prev) => [...prev, {
             role: 'assistant',
-            content: `📊 Récupération des données en temps réel pour ${priceInstrument}...`
+            content: `📊 ${t('aura.fetchingData')} ${priceInstrument}...`
           }]);
         }
 
@@ -446,7 +446,7 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
 
         if (priceError || !priceData?.data || priceData.data.length === 0) {
           console.error("Price data fetch error:", priceError);
-          const errorMsg = `⚠️ Impossible de récupérer les données pour ${priceInstrument}. ${priceError?.message || 'Aucune donnée disponible.'}`;
+          const errorMsg = `⚠️ ${t('aura.dataFetchError')} ${priceInstrument}. ${priceError?.message || t('aura.noDataAvailable')}`;
           
           if (collectOnly && batchContextRef.current) {
             batchContextRef.current.priceSummary = errorMsg;
@@ -479,13 +479,13 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
         // Normal mode: display and suggest next action (no auto-resend)
         setMessages((prev) => [...prev.slice(0, -1), {
           role: 'assistant',
-          content: `📊 **Données en Temps Réel pour ${priceInstrument}**\n\n${priceInfo}\n\n✨ Souhaitez-vous que j'effectue une analyse technique complète ?`
+          content: `📊 **${t('aura.priceDataSuccess')} ${priceInstrument}**\n\n${priceInfo}\n\n${t('aura.analysisPrompt')}`
         }]);
 
         return;
       } catch (error) {
         console.error("Error fetching real-time price:", error);
-        const errorMsg = "❌ Échec de la récupération des données en temps réel. Veuillez réessayer.";
+        const errorMsg = `❌ ${t('aura.dataRetrievalFailed')}`;
         
         if (collectOnly && batchContextRef.current) {
           batchContextRef.current.priceSummary = errorMsg;
@@ -526,7 +526,7 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
         if (!collectOnly) {
           setMessages((prev) => [...prev, {
             role: 'assistant',
-            content: `📈 Récupération des indicateurs techniques pour ${techInstrument} (${indicators.join(', ')})...`
+            content: `📈 ${t('aura.fetchingData')} ${techInstrument} (${indicators.join(', ')})...`
           }]);
         }
 
@@ -548,7 +548,7 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
 
         if (techError || !techData?.indicators) {
           console.error("Technical indicators fetch error:", techError);
-          const errorMsg = `⚠️ Impossible de récupérer les indicateurs pour ${techInstrument}. ${techError?.message || 'Données non disponibles.'}`;
+          const errorMsg = `⚠️ ${t('aura.indicatorsError')} ${techInstrument}. ${techError?.message || t('aura.noDataAvailable')}`;
           
           if (collectOnly && batchContextRef.current) {
             batchContextRef.current.indicatorSummary = errorMsg;
