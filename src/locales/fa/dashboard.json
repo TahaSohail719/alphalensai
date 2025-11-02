@@ -1,0 +1,21 @@
+{
+  "welcome": "خوش آمدید",
+  "aiTradeSetups": "تنظیمات معاملاتی هوش مصنوعی",
+  "macroAnalysis": "تحلیل ماکرو",
+  "reports": "گزارش‌ها",
+  "portfolio": "پرتفوی",
+  "history": "تاریخچه",
+  "credits": "اعتبارات",
+  "settings": "تنظیمات",
+  "logout": "خروج",
+  "viewAll": "مشاهده همه",
+  "getStarted": "شروع کنید",
+  "learnMore": "بیشتر بدانید",
+  "noDataAvailable": "داده‌ای در دسترس نیست",
+  "loading": "در حال بارگذاری...",
+  "refresh": "بارگذاری مجدد",
+  "filter": "فیلتر",
+  "search": "جستجو",
+  "export": "خروجی",
+  "import": "وارد کردن"
+}

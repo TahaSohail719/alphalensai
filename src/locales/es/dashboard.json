@@ -1,0 +1,21 @@
+{
+  "welcome": "Bienvenido de nuevo",
+  "aiTradeSetups": "Configuraciones de Trading IA",
+  "macroAnalysis": "Análisis Macro",
+  "reports": "Informes",
+  "portfolio": "Cartera",
+  "history": "Historial",
+  "credits": "Créditos",
+  "settings": "Configuración",
+  "logout": "Cerrar Sesión",
+  "viewAll": "Ver Todo",
+  "getStarted": "Comenzar",
+  "learnMore": "Aprender Más",
+  "noDataAvailable": "No hay datos disponibles",
+  "loading": "Cargando...",
+  "refresh": "Actualizar",
+  "filter": "Filtrar",
+  "search": "Buscar",
+  "export": "Exportar",
+  "import": "Importar"
+}

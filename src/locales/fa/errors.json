@@ -1,0 +1,18 @@
+{
+  "rateLimitReached": "محدودیت نرخ",
+  "rateLimitDescription": "لطفاً قبل از ارسال پیام دیگر صبر کنید.",
+  "creditsRequired": "اعتبار مورد نیاز",
+  "creditsDescription": "لطفاً برای ادامه استفاده از این ویژگی اعتبار اضافه کنید.",
+  "authenticationRequired": "احراز هویت مورد نیاز",
+  "authenticationDescription": "لطفاً برای دسترسی به این ویژگی وارد شوید.",
+  "networkError": "خطای شبکه",
+  "networkErrorDescription": "اتصال برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کنید.",
+  "serverError": "خطای سرور",
+  "serverErrorDescription": "مشکلی پیش آمد. لطفاً بعداً دوباره امتحان کنید.",
+  "invalidInput": "ورودی نامعتبر",
+  "invalidInputDescription": "لطفاً ورودی خود را بررسی کرده و دوباره امتحان کنید.",
+  "notFound": "یافت نشد",
+  "notFoundDescription": "منبع درخواستی یافت نشد.",
+  "permissionDenied": "اجازه رد شد",
+  "permissionDeniedDescription": "شما اجازه دسترسی به این منبع را ندارید."
+}

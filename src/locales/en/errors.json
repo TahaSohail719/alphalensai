@@ -1,0 +1,18 @@
+{
+  "rateLimitReached": "Rate Limit Reached",
+  "rateLimitDescription": "Please wait before sending another message.",
+  "creditsRequired": "Credits Required",
+  "creditsDescription": "Please add credits to continue using this feature.",
+  "authenticationRequired": "Authentication Required",
+  "authenticationDescription": "Please log in to access this feature.",
+  "networkError": "Network Error",
+  "networkErrorDescription": "Unable to connect. Please check your internet connection.",
+  "serverError": "Server Error",
+  "serverErrorDescription": "Something went wrong. Please try again later.",
+  "invalidInput": "Invalid Input",
+  "invalidInputDescription": "Please check your input and try again.",
+  "notFound": "Not Found",
+  "notFoundDescription": "The requested resource was not found.",
+  "permissionDenied": "Permission Denied",
+  "permissionDeniedDescription": "You don't have permission to access this resource."
+}

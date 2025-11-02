@@ -1,0 +1,21 @@
+{
+  "welcome": "Welcome back",
+  "aiTradeSetups": "AI Trade Setups",
+  "macroAnalysis": "Macro Analysis",
+  "reports": "Reports",
+  "portfolio": "Portfolio",
+  "history": "History",
+  "credits": "Credits",
+  "settings": "Settings",
+  "logout": "Logout",
+  "viewAll": "View All",
+  "getStarted": "Get Started",
+  "learn more": "Learn More",
+  "noDataAvailable": "No data available",
+  "loading": "Loading...",
+  "refresh": "Refresh",
+  "filter": "Filter",
+  "search": "Search",
+  "export": "Export",
+  "import": "Import"
+}

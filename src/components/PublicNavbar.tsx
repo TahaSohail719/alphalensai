@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +16,13 @@ export default function PublicNavbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation('common');
 
   const navigationItems = [
-    { name: "About", path: "/about" },
-    { name: "Features", path: "/features" },
-    { name: "Pricing", path: "/pricing" },
-    { name: "Contact", path: "/contact" },
+    { name: t('nav.about'), path: "/about" },
+    { name: t('nav.features'), path: "/features" },
+    { name: t('nav.pricing'), path: "/pricing" },
+    { name: t('nav.contact'), path: "/contact" },
   ];
 
   const handleNavigation = (path: string) => {
@@ -89,19 +92,22 @@ export default function PublicNavbar() {
             ))}
           </div>
 
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+
           {/* Auth buttons */}
           {!user ? (
             <>
               <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm px-2 sm:px-4 min-h-[44px]">
-                Login
+                {t('nav.login')}
               </Button>
               <Button onClick={() => navigate("/auth")} className="text-sm px-2 sm:px-4 min-h-[44px]">
-                Sign Up
+                {t('nav.signup')}
               </Button>
             </>
           ) : (
             <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-sm px-2 sm:px-4 min-h-[44px]">
-              Dashboard
+              {t('nav.dashboard')}
             </Button>
           )}
         </div>

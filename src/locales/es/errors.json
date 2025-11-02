@@ -1,0 +1,18 @@
+{
+  "rateLimitReached": "Límite de Tasa Alcanzado",
+  "rateLimitDescription": "Por favor espere antes de enviar otro mensaje.",
+  "creditsRequired": "Créditos Requeridos",
+  "creditsDescription": "Por favor agregue créditos para continuar usando esta función.",
+  "authenticationRequired": "Autenticación Requerida",
+  "authenticationDescription": "Por favor inicie sesión para acceder a esta función.",
+  "networkError": "Error de Red",
+  "networkErrorDescription": "No se puede conectar. Por favor verifique su conexión a internet.",
+  "serverError": "Error del Servidor",
+  "serverErrorDescription": "Algo salió mal. Por favor intente de nuevo más tarde.",
+  "invalidInput": "Entrada Inválida",
+  "invalidInputDescription": "Por favor verifique su entrada e intente de nuevo.",
+  "notFound": "No Encontrado",
+  "notFoundDescription": "El recurso solicitado no fue encontrado.",
+  "permissionDenied": "Permiso Denegado",
+  "permissionDeniedDescription": "No tiene permiso para acceder a este recurso."
+}

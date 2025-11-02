@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "about": "Acerca de",
+    "features": "Características",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "dashboard": "Panel",
+    "documentation": "Documentación",
+    "helpCenter": "Centro de Ayuda"
+  },
+  "hero": {
+    "title": "Investigación Financiera Inteligente",
+    "subtitle": "Impulsado por IA",
+    "description": "Análisis avanzado de FX, cripto y macroeconomía con información de nivel institucional, configuraciones de trading impulsadas por IA y reportes de investigación integrales para profesionales financieros.",
+    "tryDemo": "Probar Demo",
+    "getStarted": "Comenzar"
+  },
+  "features": {
+    "aiTradeSetups": {
+      "title": "Configuraciones de Trading IA",
+      "description": "Algoritmos avanzados analizan las condiciones del mercado para identificar puntos óptimos de entrada y salida en mercados FX y cripto."
+    },
+    "macroCommentary": {
+      "title": "Comentario Macroeconómico",
+      "description": "Análisis en tiempo real de eventos económicos globales y su impacto en los mercados financieros con información accionable."
+    },
+    "researchReports": {
+      "title": "Informes de Investigación",
+      "description": "Análisis de mercado integral e informes de investigación respaldados por datos de nivel institucional e información experta."
+    },
+    "portfolioManagement": {
+      "title": "Gestión de Cartera",
+      "description": "Rastree y optimice su cartera con recomendaciones impulsadas por IA y análisis de riesgo."
+    }
+  },
+  "cta": {
+    "title": "¿Listo para Transformar tu Estrategia de Trading?",
+    "subtitle": "Únete a profesionales financieros que confían en alphaLens.ai para información superior del mercado y decisiones de trading.",
+    "requestDemo": "Solicitar Demo",
+    "startFreeTrial": "Comenzar Prueba Gratuita"
+  },
+  "footer": {
+    "description": "Investigación financiera profesional e inteligencia de trading impulsada por inteligencia artificial.",
+    "product": "Producto",
+    "company": "Compañía",
+    "support": "Soporte",
+    "legal": "Legal",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "copyright": "© 2025 alphaLens AI. Todos los derechos reservados."
+  },
+  "seo": {
+    "defaultTitle": "alphaLens AI - Plataforma de Investigación Financiera Inteligente",
+    "defaultDescription": "Análisis avanzado de FX, cripto y macroeconomía con información de nivel institucional, configuraciones de trading impulsadas por IA y reportes de investigación integrales.",
+    "homeTitle": "alphaLens AI - Investigación Financiera Impulsada por IA",
+    "homeDescription": "Transforme su estrategia de trading con información impulsada por IA, comentarios macro e informes de investigación para mercados FX y cripto."
+  }
+}

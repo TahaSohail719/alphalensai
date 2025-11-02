@@ -445,4 +445,32 @@
   .report-content li {
     margin-bottom: 0.5em;
   }
+
+  /* RTL Support for Persian (fa) */
+  [dir='rtl'] {
+    text-align: right;
+  }
+
+  [dir='rtl'] .flex {
+    flex-direction: row-reverse;
+  }
+
+  /* Preserve LTR for specific elements (numbers, charts, code) */
+  [dir='rtl'] .ltr-override,
+  [dir='rtl'] code,
+  [dir='rtl'] pre,
+  [dir='rtl'] .chart-container {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* Mirror spacing utilities */
+  [dir='rtl'] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+  [dir='rtl'] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+  [dir='rtl'] .ml-4 { margin-left: 0; margin-right: 1rem; }
+  [dir='rtl'] .mr-4 { margin-right: 0; margin-left: 1rem; }
+  [dir='rtl'] .pl-4 { padding-left: 0; padding-right: 1rem; }
+  [dir='rtl'] .pr-4 { padding-right: 0; padding-left: 1rem; }
+  [dir='rtl'] .pl-6 { padding-left: 0; padding-right: 1.5rem; }
+  [dir='rtl'] .pr-6 { padding-right: 0; padding-left: 1.5rem; }
 }

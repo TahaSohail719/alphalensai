@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "about": "About",
+    "features": "Features",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Login",
+    "signup": "Sign Up",
+    "dashboard": "Dashboard",
+    "documentation": "Documentation",
+    "helpCenter": "Help Center"
+  },
+  "hero": {
+    "title": "Intelligent Financial Research",
+    "subtitle": "Powered by AI",
+    "description": "Advanced FX, crypto, and macro analysis with institutional-grade insights, AI-powered trade setups, and comprehensive research reports for financial professionals.",
+    "tryDemo": "Try Demo",
+    "getStarted": "Get Started"
+  },
+  "features": {
+    "aiTradeSetups": {
+      "title": "AI Trade Setups",
+      "description": "Advanced algorithms analyze market conditions to identify optimal entry and exit points across FX and crypto markets."
+    },
+    "macroCommentary": {
+      "title": "Macro Commentary",
+      "description": "Real-time analysis of global economic events and their impact on financial markets with actionable insights."
+    },
+    "researchReports": {
+      "title": "Research Reports",
+      "description": "Comprehensive market analysis and research reports backed by institutional-grade data and expert insights."
+    },
+    "portfolioManagement": {
+      "title": "Portfolio Management",
+      "description": "Track and optimize your portfolio with AI-powered recommendations and risk analysis."
+    }
+  },
+  "cta": {
+    "title": "Ready to Transform Your Trading Strategy?",
+    "subtitle": "Join financial professionals who rely on alphaLens.ai for superior market insights and trading decisions.",
+    "requestDemo": "Request Demo",
+    "startFreeTrial": "Start Free Trial"
+  },
+  "footer": {
+    "description": "Professional financial research and trading intelligence powered by artificial intelligence.",
+    "product": "Product",
+    "company": "Company",
+    "support": "Support",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2025 alphaLens AI. All rights reserved."
+  },
+  "seo": {
+    "defaultTitle": "alphaLens AI - Intelligent Financial Research Platform",
+    "defaultDescription": "Advanced FX, crypto, and macro analysis with institutional-grade insights, AI-powered trade setups, and comprehensive research reports.",
+    "homeTitle": "alphaLens AI - AI-Powered Financial Research",
+    "homeDescription": "Transform your trading strategy with AI-powered insights, macro commentary, and research reports for FX and crypto markets."
+  }
+}

@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BarChart3, Brain, FileText, TrendingUp, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PublicNavbar from "@/components/PublicNavbar";
+import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreditManager } from "@/hooks/useCreditManager";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +14,7 @@ export default function Homepage() {
   const { user } = useAuth();
   const { activateFreeTrial } = useCreditManager();
   const { toast } = useToast();
+  const { t } = useTranslation('common');
 
   const handleFreeTrialClick = async () => {
     if (!user) {
@@ -30,6 +33,7 @@ export default function Homepage() {
     }
   };
   return <div className="min-h-screen bg-background">
+      <SEOHead titleKey="seo.homeTitle" descriptionKey="seo.homeDescription" />
       <PublicNavbar />
 
       {/* Hero Section */}
@@ -39,19 +43,18 @@ export default function Homepage() {
             <img src="/lovable-uploads/Full_logi_white_BG_FINAL.png" alt="alphaLens.ai logo" loading="lazy" className="w-full h-auto mx-auto mb-4 max-w-[238px] sm:max-w-[307px] md:max-w-[408px] lg:max-w-[544px] object-contain" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight">
-            Intelligent Financial Research
-            <span className="text-primary"> Powered by AI</span>
+            {t('hero.title')}
+            <span className="text-primary"> {t('hero.subtitle')}</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
-            Advanced FX, crypto, and macro analysis with institutional-grade insights, 
-            AI-powered trade setups, and comprehensive research reports for financial professionals.
+            {t('hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" className="text-lg px-8 py-3 bg-primary hover:bg-primary/90" onClick={handleFreeTrialClick}>
-              Try Demo <ArrowRight className="ml-2 h-5 w-5" />
+              {t('hero.tryDemo')} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={() => navigate("/auth")}>
-              Get Started
+              {t('hero.getStarted')}
             </Button>
           </div>
         </div>
@@ -75,10 +78,9 @@ export default function Homepage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Brain className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-foreground">AI Trade Setups</h3>
+                <h3 className="text-xl font-semibold mb-4 text-foreground">{t('features.aiTradeSetups.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Advanced algorithms analyze market conditions to identify optimal entry and exit points 
-                  across FX and crypto markets.
+                  {t('features.aiTradeSetups.description')}
                 </p>
               </CardContent>
             </Card>
@@ -88,10 +90,9 @@ export default function Homepage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <BarChart3 className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-foreground">Macro Commentary</h3>
+                <h3 className="text-xl font-semibold mb-4 text-foreground">{t('features.macroCommentary.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Real-time analysis of global economic events and their impact on financial markets 
-                  with actionable insights.
+                  {t('features.macroCommentary.description')}
                 </p>
               </CardContent>
             </Card>
@@ -101,10 +102,9 @@ export default function Homepage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <FileText className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-foreground">Research Reports</h3>
+                <h3 className="text-xl font-semibold mb-4 text-foreground">{t('features.researchReports.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Comprehensive market analysis and research reports backed by institutional-grade 
-                  data and expert insights.
+                  {t('features.researchReports.description')}
                 </p>
               </CardContent>
             </Card>
@@ -118,17 +118,17 @@ export default function Homepage() {
       <section className="py-20 px-4 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Trading Strategy?
+            {t('cta.title')}
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join financial professionals who rely on alphaLens.ai for superior market insights and trading decisions.
+            {t('cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-3" onClick={() => navigate("/contact")}>
-              Request Demo
+              {t('cta.requestDemo')}
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 py-3 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" onClick={handleFreeTrialClick}>
-              Start Free Trial
+              {t('cta.startFreeTrial')}
             </Button>
           </div>
         </div>
@@ -143,11 +143,11 @@ export default function Homepage() {
                 <img src="/lovable-uploads/Only_text_white_BG_FINAL.png" alt="alphaLens.ai" className="h-[1.95rem]" />
               </div>
               <p className="text-muted-foreground text-sm">
-                Professional financial research and trading intelligence powered by artificial intelligence.
+                {t('footer.description')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Product</h4>
+              <h4 className="font-semibold mb-4 text-foreground">{t('footer.product')}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><button onClick={() => navigate("/features")} className="hover:text-foreground transition-colors">Features</button></li>
                 <li><button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">Pricing</button></li>
@@ -155,7 +155,7 @@ export default function Homepage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Company</h4>
+              <h4 className="font-semibold mb-4 text-foreground">{t('footer.company')}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><button onClick={() => navigate("/about")} className="hover:text-foreground transition-colors">About</button></li>
                 <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Contact</button></li>
@@ -163,7 +163,7 @@ export default function Homepage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Support</h4>
+              <h4 className="font-semibold mb-4 text-foreground">{t('footer.support')}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Documentation</button></li>
                 <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Help Center</button></li>
@@ -172,7 +172,7 @@ export default function Homepage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens AI. All rights reserved.</p>
+            <p>{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>

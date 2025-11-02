@@ -3,11 +3,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { GlobalLoadingProvider } from "@/components/GlobalLoadingProvider";
 import { PersistentNotificationProvider } from "@/components/PersistentNotificationProvider";
 import { AURAContextProvider } from "@/contexts/AURAContextProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PersistentToast } from "@/components/PersistentToast";
 import { JobStatusCards } from "@/components/JobStatusCards";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -51,15 +53,17 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SessionManagerProvider>
-          <AURAContextProvider>
-            <TooltipProvider>
-              <BrowserRouter>
-              <ScrollToTop />
-              <GlobalLoadingProvider>
-                <PersistentNotificationProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SessionManagerProvider>
+            <LanguageProvider>
+              <AURAContextProvider>
+                <TooltipProvider>
+                  <BrowserRouter>
+                  <ScrollToTop />
+                  <GlobalLoadingProvider>
+                    <PersistentNotificationProvider>
                   <JobStatusCards />
                   <PersistentToast />
                   <Toaster />
@@ -98,14 +102,16 @@ const App = () => {
                     <Route path="/test-webhook" element={<AuthGuard><TestWebhook /></AuthGuard>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </PersistentNotificationProvider>
-              </GlobalLoadingProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-          </AURAContextProvider>
-        </SessionManagerProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+                    </PersistentNotificationProvider>
+                  </GlobalLoadingProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+              </AURAContextProvider>
+            </LanguageProvider>
+          </SessionManagerProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
