@@ -29,9 +29,9 @@ export function useCreditManager() {
         .from('user_credits')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching credits:', error);
         return;
       }

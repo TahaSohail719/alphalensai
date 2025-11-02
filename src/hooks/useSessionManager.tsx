@@ -89,25 +89,53 @@ export function useSessionManager() {
 
           if (!updatedRows || updatedRows.length === 0) {
             console.log('➕ [SessionManager] Creating new session record');
-            const { error: insertError } = await supabase
-              .from('user_sessions')
-              .insert({
-                user_id: user.id,
-                session_id: sessionId,
-                device_info: updatePayload.device_info,
-                is_active: true,
-                last_seen: updatePayload.last_seen,
-              });
-            if (insertError) {
-              // Ignore RLS violations during token refresh - session will be recreated on next cycle
-              if (insertError.code !== 'PGRST301' && insertError.code !== '42501') {
-                console.error('❌ [SessionManager] Session insert error:', insertError);
-              } else {
-                console.log('⚠️ [SessionManager] RLS prevented insert, will retry');
+            
+            // Retry logic for session insert
+            const tryInsertSession = async (attempt = 1): Promise<void> => {
+              const maxAttempts = 4;
+              const backoffMs = 300 * Math.pow(2, attempt - 1); // 300, 600, 1200, 2400
+              
+              // Ensure we have a valid session token before inserting
+              const { data: { session: current } } = await supabase.auth.getSession();
+              if (!current) {
+                if (attempt <= maxAttempts) {
+                  console.log(`⚠️ [SessionManager] No session token, retrying in ${backoffMs}ms (attempt ${attempt}/${maxAttempts})`);
+                  setTimeout(() => tryInsertSession(attempt + 1), backoffMs);
+                } else {
+                  console.warn('⚠️ [SessionManager] Insert skipped: no session after retries');
+                }
+                return;
               }
-            } else {
-              console.log('✅ [SessionManager] Session created');
-            }
+              
+              const { error: insertError } = await supabase
+                .from('user_sessions')
+                .insert({
+                  user_id: user.id,
+                  session_id: sessionId,
+                  device_info: updatePayload.device_info,
+                  is_active: true,
+                  last_seen: updatePayload.last_seen,
+                });
+                
+              if (insertError) {
+                const code = insertError.code;
+                const status = (insertError as any)?.status;
+                
+                // Retry on 401/42501/PGRST301 errors
+                if ((code === 'PGRST301' || code === '42501' || status === 401) && attempt < maxAttempts) {
+                  console.log(`⚠️ [SessionManager] Insert failed (${code || status}), retrying in ${backoffMs}ms (attempt ${attempt}/${maxAttempts})`);
+                  setTimeout(() => tryInsertSession(attempt + 1), backoffMs);
+                } else if (code === 'PGRST301' || code === '42501') {
+                  console.log('⚠️ [SessionManager] RLS prevented insert after retries');
+                } else {
+                  console.error('❌ [SessionManager] Session insert error:', insertError);
+                }
+              } else {
+                console.log('✅ [SessionManager] Session created');
+              }
+            };
+            
+            tryInsertSession();
           }
 
           // Set up periodic session validation

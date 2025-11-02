@@ -31,14 +31,14 @@ export function useCreditEngagement() {
         .from('user_credits')
         .select(FEATURE_TO_CREDIT_COLUMN[feature])
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (creditsError) {
         console.error('[CreditEngagement] Error fetching credits:', creditsError);
         return { canLaunch: false, message: 'Failed to check credits' };
       }
 
-      const totalCredits = credits?.[FEATURE_TO_CREDIT_COLUMN[feature]] || 0;
+      const totalCredits = (credits?.[FEATURE_TO_CREDIT_COLUMN[feature]] as number) || 0;
 
       // 2. Get engaged credits for this feature
       const { data: engaged, error: engagedError } = await supabase

@@ -80,9 +80,9 @@ export function UserPlanDialog({
         .from('user_credits')
         .select('*')
         .eq('user_id', user.user_id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error;
       }
 
