@@ -27,7 +27,8 @@
     "generateSetup": "تولید راه‌اندازی",
     "intelligentTradeSetups": "تولید راه‌اندازی‌های معاملاتی هوشمند با تحلیل هوش مصنوعی",
     "inDepthAnalysis": "تحلیل عمیق اقتصاد کلان و بینش بازار",
-    "comprehensiveReports": "گزارش‌های جامع بازار و چشم‌انداز استراتژیک"
+    "comprehensiveReports": "گزارش‌های جامع بازار و چشم‌انداز استراتژیک",
+    "reports": "گزارش‌ها"
   },
   "macro": {
     "title": "تحلیل ماکرو",

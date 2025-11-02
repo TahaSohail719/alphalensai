@@ -27,7 +27,8 @@
     "generateSetup": "Generate Setup",
     "intelligentTradeSetups": "Generate intelligent trade setups with AI-powered analysis",
     "inDepthAnalysis": "In-depth macroeconomic analysis and market insights",
-    "comprehensiveReports": "Comprehensive market reports and strategic outlook"
+    "comprehensiveReports": "Comprehensive market reports and strategic outlook",
+    "reports": "Reports"
   },
   "macro": {
     "title": "Macro Analysis",

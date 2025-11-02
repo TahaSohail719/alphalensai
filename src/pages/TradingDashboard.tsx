@@ -414,7 +414,7 @@ export default function TradingDashboard() {
                 <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
                   <Activity className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:reports')}</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.reports')}</h3>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                   {t('dashboard:trading.comprehensiveReports')}
                 </p>

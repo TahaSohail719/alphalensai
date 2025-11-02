@@ -27,7 +27,8 @@
     "generateSetup": "Generar Configuración",
     "intelligentTradeSetups": "Genere configuraciones de trading inteligentes con análisis impulsado por IA",
     "inDepthAnalysis": "Análisis macroeconómico profundo e información del mercado",
-    "comprehensiveReports": "Informes de mercado completos y perspectiva estratégica"
+    "comprehensiveReports": "Informes de mercado completos y perspectiva estratégica",
+    "reports": "Informes"
   },
   "macro": {
     "title": "Análisis Macro",
