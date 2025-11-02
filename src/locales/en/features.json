@@ -1,0 +1,58 @@
+{
+  "hero": {
+    "title": "Powerful Features for",
+    "titleHighlight": "Professional Trading",
+    "description": "Discover the comprehensive suite of tools that make Alphalens the preferred choice for financial professionals worldwide."
+  },
+  "main": {
+    "aiTradeSetups": {
+      "title": "AI Trade Setups",
+      "description": "Advanced algorithms analyze market conditions to identify optimal entry and exit points with clear stop-loss, take-profit, and risk-reward rationales.",
+      "detail1": "Directional signals with confidence scores",
+      "detail2": "Clear SL/TP levels with risk-reward ratios",
+      "detail3": "AI-powered trade rationales and market context",
+      "detail4": "Real-time signal updates and notifications",
+      "ctaText": "View Dashboard"
+    },
+    "macroCommentary": {
+      "title": "Macro Commentary",
+      "description": "Institutional-grade macroeconomic analysis with integrated economic calendars and real-time market impact assessments.",
+      "detail1": "Daily and weekly institutional research notes",
+      "detail2": "Integrated macroeconomic calendar with impact analysis",
+      "detail3": "Central bank policy tracking and implications",
+      "detail4": "Global market interconnection analysis",
+      "ctaText": "View Macro Analysis"
+    },
+    "researchReports": {
+      "title": "Research Reports",
+      "description": "Comprehensive market analysis and research reports with PDF/HTML export capabilities and professional formatting.",
+      "detail1": "Weekly and daily research briefs",
+      "detail2": "PDF and HTML export functionality",
+      "detail3": "Professional report formatting",
+      "detail4": "Historical report archive and search",
+      "ctaText": "View Reports"
+    }
+  },
+  "additional": {
+    "title": "Everything You Need",
+    "subtitle": "Additional capabilities that make Alphalens a complete solution for professional trading",
+    "multiAsset": {
+      "title": "Multi-Asset Coverage",
+      "description": "FX, cryptocurrencies, and major indices with comprehensive market coverage."
+    },
+    "realtime": {
+      "title": "Real-Time Updates",
+      "description": "Live market data integration with instant notifications and alerts."
+    },
+    "institutional": {
+      "title": "Institutional Grade",
+      "description": "Professional-level analysis tools trusted by financial institutions worldwide."
+    }
+  },
+  "cta": {
+    "title": "Ready to Experience These Features?",
+    "subtitle": "Join thousands of professionals who trust Alphalens for their trading decisions.",
+    "startTrial": "Start Free Trial",
+    "requestDemo": "Request Demo"
+  }
+}

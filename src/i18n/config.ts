@@ -6,16 +6,25 @@ import enCommon from '@/locales/en/common.json';
 import enAuth from '@/locales/en/auth.json';
 import enDashboard from '@/locales/en/dashboard.json';
 import enErrors from '@/locales/en/errors.json';
+import enAbout from '@/locales/en/about.json';
+import enFeatures from '@/locales/en/features.json';
+import enPricing from '@/locales/en/pricing.json';
 
 import esCommon from '@/locales/es/common.json';
 import esAuth from '@/locales/es/auth.json';
 import esDashboard from '@/locales/es/dashboard.json';
 import esErrors from '@/locales/es/errors.json';
+import esAbout from '@/locales/es/about.json';
+import esFeatures from '@/locales/es/features.json';
+import esPricing from '@/locales/es/pricing.json';
 
 import faCommon from '@/locales/fa/common.json';
 import faAuth from '@/locales/fa/auth.json';
 import faDashboard from '@/locales/fa/dashboard.json';
 import faErrors from '@/locales/fa/errors.json';
+import faAbout from '@/locales/fa/about.json';
+import faFeatures from '@/locales/fa/features.json';
+import faPricing from '@/locales/fa/pricing.json';
 
 export const supportedLanguages = ['en', 'es', 'fa'] as const;
 export type SupportedLanguage = typeof supportedLanguages[number];
@@ -30,23 +39,32 @@ i18n
         auth: enAuth,
         dashboard: enDashboard,
         errors: enErrors,
+        about: enAbout,
+        features: enFeatures,
+        pricing: enPricing,
       },
       es: {
         common: esCommon,
         auth: esAuth,
         dashboard: esDashboard,
         errors: esErrors,
+        about: esAbout,
+        features: esFeatures,
+        pricing: esPricing,
       },
       fa: {
         common: faCommon,
         auth: faAuth,
         dashboard: faDashboard,
         errors: faErrors,
+        about: faAbout,
+        features: faFeatures,
+        pricing: faPricing,
       },
     },
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'errors'],
+    ns: ['common', 'auth', 'dashboard', 'errors', 'about', 'features', 'pricing'],
     interpolation: {
       escapeValue: false,
     },

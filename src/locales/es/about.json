@@ -1,0 +1,23 @@
+{
+  "title": "Acerca de",
+  "subtitle": "Una colaboración conjunta entre OptiQuant IA y ABCG Research, brindando inteligencia financiera de nivel institucional.",
+  "optiquant": {
+    "title": "OptiQuant IA",
+    "description1": "OptiQuant IA es una empresa líder especializada en finanzas cuantitativas, inteligencia artificial y herramientas de toma de decisiones inteligentes para empresas. Desarrollamos soluciones de IA de vanguardia que transforman cómo las instituciones financieras analizan los mercados y toman decisiones estratégicas.",
+    "description2": "Nuestra experiencia radica en crear algoritmos sofisticados y modelos de aprendizaje automático que proporcionan información procesable para el trading, gestión de riesgos y optimización de carteras.",
+    "visitButton": "Visitar OptiQuant IA"
+  },
+  "abcg": {
+    "title": "ABCG Research",
+    "description1": "ABCG Research es una firma líder en investigación macroeconómica e información financiera, proporcionando análisis de nivel institucional a inversores profesionales, corporaciones e instituciones financieras en todo el mundo.",
+    "description2": "Con profunda experiencia en tendencias macroeconómicas globales, dinámicas del mercado y análisis fundamental, ABCG Research ofrece investigación integral que impulsa decisiones de inversión informadas.",
+    "visitButton": "Visitar ABCG Research"
+  },
+  "collaboration": {
+    "title": "Nuestra Colaboración",
+    "description1": "Este producto representa un poderoso esfuerzo conjunto que combina la experiencia de vanguardia de OptiQuant IA en finanzas cuantitativas y desarrollo de IA con la investigación macroeconómica de nivel institucional y las perspectivas del mercado de ABCG Research.",
+    "description2": "Juntos, entregamos una plataforma integral que proporciona análisis macro de nivel institucional, enriquecido con información impulsada por IA y datos en tiempo real. Nuestra misión es democratizar el acceso a herramientas de análisis financiero sofisticadas que anteriormente solo estaban disponibles para grandes instituciones.",
+    "missionTitle": "Nuestra Misión",
+    "missionDescription": "Entregar análisis macro de nivel institucional, enriquecido con información impulsada por IA y datos en tiempo real, empoderando a traders e inversores con las herramientas que necesitan para tomar decisiones informadas en los complejos mercados financieros de hoy."
+  }
+}

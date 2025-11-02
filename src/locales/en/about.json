@@ -1,0 +1,23 @@
+{
+  "title": "About",
+  "subtitle": "A joint collaboration between OptiQuant IA and ABCG Research, delivering institutional-grade financial intelligence.",
+  "optiquant": {
+    "title": "OptiQuant IA",
+    "description1": "OptiQuant IA is a leading company specializing in quantitative finance, artificial intelligence, and intelligent decision-making tools for businesses. We develop cutting-edge AI solutions that transform how financial institutions analyze markets and make strategic decisions.",
+    "description2": "Our expertise lies in creating sophisticated algorithms and machine learning models that provide actionable insights for trading, risk management, and portfolio optimization.",
+    "visitButton": "Visit OptiQuant IA"
+  },
+  "abcg": {
+    "title": "ABCG Research",
+    "description1": "ABCG Research is a leading macroeconomic research and financial insights firm, providing institutional-grade analysis to professional investors, corporations, and financial institutions worldwide.",
+    "description2": "With deep expertise in global macroeconomic trends, market dynamics, and fundamental analysis, ABCG Research delivers comprehensive research that drives informed investment decisions.",
+    "visitButton": "Visit ABCG Research"
+  },
+  "collaboration": {
+    "title": "Our Collaboration",
+    "description1": "This product represents a powerful joint effort combining OptiQuant IA's cutting-edge expertise in quantitative finance and AI development with ABCG Research's institutional-grade macroeconomic research and market insights.",
+    "description2": "Together, we deliver a comprehensive platform that provides institutional-grade macro analysis, enriched with AI-driven insights and real-time data. Our mission is to democratize access to sophisticated financial analysis tools that were previously available only to large institutions.",
+    "missionTitle": "Our Mission",
+    "missionDescription": "Delivering institutional-grade macro analysis, enriched with AI-driven insights and real-time data, empowering traders and investors with the tools they need to make informed decisions in today's complex financial markets."
+  }
+}

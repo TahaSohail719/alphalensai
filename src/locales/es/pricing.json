@@ -1,0 +1,67 @@
+{
+  "hero": {
+    "title": "Precios de Alphalens AI",
+    "subtitle": "Elija el plan perfecto para sus necesidades de trading e inversión. Análisis de mercado profesional impulsado por IA para cada nivel."
+  },
+  "b2b": {
+    "title": "Modelo de Asociación B2B",
+    "subtitle": "Diseñado para brokers e instituciones financieras",
+    "cardTitle": "Asociación Empresarial",
+    "cardDescription": "Integración completa de Alphalens para su base de clientes",
+    "benefits": {
+      "title": "Beneficios de la Asociación",
+      "whiteLabel": "Integración de marca blanca",
+      "revenueShare": "Modelo de reparto de ingresos",
+      "support": "Soporte dedicado",
+      "branding": "Marca personalizada"
+    },
+    "revenueModel": {
+      "title": "Modelo de Ingresos",
+      "description": "Obtenga ingresos directos de sus clientes que se suscriban a los planes de pago de Alphalens a través de nuestra asociación de participación en ganancias.",
+      "valueCreation": "Creación de valor inmediato para sus clientes"
+    },
+    "footer": "Acceso de nivel básico para mostrar el valor de Alphalens a todos los clientes del broker. Ingresos directos de traders que se suscriban a planes de pago.",
+    "contactSales": "Contactar Ventas"
+  },
+  "b2c": {
+    "title": "Planes Individuales",
+    "subtitle": "Análisis IA profesional para traders e inversores individuales",
+    "loading": "Cargando planes...",
+    "mostComplete": "Más Completo",
+    "unavailable": "No Disponible",
+    "perMonth": "/mes",
+    "features": "Características",
+    "usageLimits": "Límites de Uso",
+    "getStarted": "Comenzar",
+    "signInToPurchase": "Iniciar sesión para comprar",
+    "processing": "Procesando...",
+    "marketCommentary": "Comentario de Mercado",
+    "aiTradeSetup": "Configuración de Trading IA",
+    "researchReports": "Informes de Investigación",
+    "queriesPerMonth": "consultas por mes",
+    "ideasPerMonth": "ideas de inversión por mes",
+    "reportsPerMonth": "informes por mes",
+    "plans": {
+      "basic": {
+        "name": "Básico",
+        "description": "Perfecto para traders individuales que están comenzando"
+      },
+      "standard": {
+        "name": "Estándar",
+        "description": "Ideal para traders e inversores activos"
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Solución completa para traders profesionales"
+      }
+    }
+  },
+  "footer": "Todos los planes incluyen acceso a nuestra plataforma integral de análisis de mercado. Actualice o baje de categoría su plan en cualquier momento para adaptarse a su actividad de trading.",
+  "errors": {
+    "invalidPlan": "Plan Inválido",
+    "invalidPlanDescription": "Por favor seleccione un plan válido.",
+    "paymentError": "Error de Pago",
+    "checkoutFailed": "Falló la creación de sesión de pago. Por favor intente de nuevo.",
+    "checkoutError": "No se puede procesar el pago. Por favor intente de nuevo o contacte a soporte."
+  }
+}

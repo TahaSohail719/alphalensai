@@ -1,0 +1,67 @@
+{
+  "hero": {
+    "title": "Alphalens AI Pricing",
+    "subtitle": "Choose the perfect plan for your trading and investment needs. Professional AI-powered market analysis for every level."
+  },
+  "b2b": {
+    "title": "B2B Partnership Model",
+    "subtitle": "Designed for brokers and financial institutions",
+    "cardTitle": "Enterprise Partnership",
+    "cardDescription": "Complete Alphalens integration for your client base",
+    "benefits": {
+      "title": "Partnership Benefits",
+      "whiteLabel": "White-label integration",
+      "revenueShare": "Revenue share model",
+      "support": "Dedicated support",
+      "branding": "Custom branding"
+    },
+    "revenueModel": {
+      "title": "Revenue Model",
+      "description": "Earn direct revenue from your clients who subscribe to Alphalens paid plans through our profit-sharing partnership.",
+      "valueCreation": "Immediate value creation for your clients"
+    },
+    "footer": "Entry-level access to showcase Alphalens' value to all broker clients. Direct revenue from traders who subscribe to paid plans.",
+    "contactSales": "Contact Sales"
+  },
+  "b2c": {
+    "title": "Individual Plans",
+    "subtitle": "Professional AI analysis for individual traders and investors",
+    "loading": "Loading plans...",
+    "mostComplete": "Most Complete",
+    "unavailable": "Unavailable",
+    "perMonth": "/month",
+    "features": "Features",
+    "usageLimits": "Usage Limits",
+    "getStarted": "Get Started",
+    "signInToPurchase": "Sign in to purchase",
+    "processing": "Processing...",
+    "marketCommentary": "Market Commentary",
+    "aiTradeSetup": "AI Trade Setup",
+    "researchReports": "Research Reports",
+    "queriesPerMonth": "queries per month",
+    "ideasPerMonth": "investment ideas per month",
+    "reportsPerMonth": "reports per month",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "description": "Perfect for individual traders getting started"
+      },
+      "standard": {
+        "name": "Standard",
+        "description": "Ideal for active traders and investors"
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Complete solution for professional traders"
+      }
+    }
+  },
+  "footer": "All plans include access to our comprehensive market analysis platform. Upgrade or downgrade your plan at any time to match your trading activity.",
+  "errors": {
+    "invalidPlan": "Invalid Plan",
+    "invalidPlanDescription": "Please select a valid plan.",
+    "paymentError": "Payment Error",
+    "checkoutFailed": "Failed to create checkout session. Please try again.",
+    "checkoutError": "Unable to process payment. Please try again or contact support."
+  }
+}

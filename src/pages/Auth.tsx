@@ -15,10 +15,12 @@ import PublicNavbar from '@/components/PublicNavbar';
 import { useBrokerActions } from '@/hooks/useBrokerActions';
 import { useCreditManager } from '@/hooks/useCreditManager';
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
+import { useTranslation } from 'react-i18next';
 
 const { useState, useEffect } = React;
 
 export default function Auth() {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,11 +43,11 @@ export default function Auth() {
   // Validate password confirmation in real-time
   useEffect(() => {
     if (confirmPassword && password !== confirmPassword) {
-      setPasswordMatchError('Passwords do not match');
+      setPasswordMatchError(t('passwordsDoNotMatch'));
     } else {
       setPasswordMatchError('');
     }
-  }, [password, confirmPassword]);
+  }, [password, confirmPassword, t]);
 
   useEffect(() => {
     // CRITICAL: onAuthStateChange callback must NOT be async and must NOT call Supabase
@@ -100,8 +102,8 @@ export default function Auth() {
           console.log('[Google Auth] User is soft-deleted, blocking login');
           await supabase.auth.signOut();
           toast({
-            title: "Account Deactivated",
-            description: "Your account has been deactivated. Please contact support if you think this is an error.",
+            title: t('errors.accountDeactivated'),
+            description: t('errors.accountDeactivatedDescription'),
             variant: "destructive",
           });
           setProcessingOAuth(false);
@@ -120,8 +122,8 @@ export default function Auth() {
             console.log('[Google Auth] New user tried to sign in without broker - redirecting to Sign Up');
             await supabase.auth.signOut();
             toast({
-              title: "Compte inexistant",
-              description: "Veuillez vous inscrire en sélectionnant votre broker dans l'onglet Sign Up.",
+              title: t('errors.accountNotFound'),
+              description: t('errors.accountNotFoundDescription'),
               variant: "destructive",
             });
             setProcessingOAuth(false);
@@ -149,8 +151,8 @@ export default function Auth() {
             console.error('[Google Auth] Profile not created after 5 retries');
             await supabase.auth.signOut();
             toast({
-              title: "Error",
-              description: "Profile creation failed. Please contact support.",
+              title: t('errors.profileCreationFailed'),
+              description: t('errors.profileCreationFailedDescription'),
               variant: "destructive"
             });
             setProcessingOAuth(false);
@@ -173,8 +175,8 @@ export default function Auth() {
             console.error('[Google Auth] Failed to update broker:', updateError);
             await supabase.auth.signOut();
             toast({
-              title: "Error",
-              description: "Failed to assign broker. Please contact support.",
+              title: t('errors.brokerAssignmentFailed'),
+              description: t('errors.brokerAssignmentFailedDescription'),
               variant: "destructive"
             });
             setProcessingOAuth(false);
@@ -188,8 +190,8 @@ export default function Auth() {
           sessionStorage.removeItem('pending_broker_name');
 
           toast({
-            title: "Account Created",
-            description: "Your account has been created and is pending approval. You'll receive an email once it's activated.",
+            title: t('success.accountCreated'),
+            description: t('success.accountCreatedDescription'),
           });
 
           navigate('/dashboard');
@@ -200,8 +202,8 @@ export default function Auth() {
 
           // Returning user - simple sign in
           toast({
-            title: "Welcome back!",
-            description: "Successfully signed in with Google.",
+            title: t('success.welcomeBack'),
+            description: t('success.welcomeBackDescription'),
           });
 
           // Handle free trial if needed
@@ -209,8 +211,8 @@ export default function Auth() {
             const { error: trialError } = await activateFreeTrial();
             if (!trialError) {
               toast({
-                title: "🎁 Free Trial Activated!",
-                description: "Your account is ready with Free Trial access.",
+                title: t('success.freeTrialActivated'),
+                description: t('success.freeTrialActivatedDescription'),
               });
               navigate('/payment-success?type=free_trial');
               setProcessingOAuth(false);
@@ -229,8 +231,8 @@ export default function Auth() {
         console.error('[Google Auth] Unexpected error:', error);
         await supabase.auth.signOut();
         toast({
-          title: "Authentication Error",
-          description: "An unexpected error occurred. Please try again.",
+          title: t('errors.authenticationError'),
+          description: t('errors.authenticationErrorDescription'),
           variant: "destructive"
         });
         setProcessingOAuth(false);
@@ -238,7 +240,7 @@ export default function Auth() {
     };
 
     return () => subscription.unsubscribe();
-  }, [navigate, intent, toast, activateFreeTrial]);
+  }, [navigate, intent, toast, activateFreeTrial, t]);
 
   // Separate effect for loading brokers
   useEffect(() => {
@@ -260,8 +262,8 @@ export default function Auth() {
     // Validate broker selection
     if (!selectedBrokerId) {
       toast({
-        title: "Validation Error",
-        description: "Please select a broker.",
+        title: t('errors.validationError'),
+        description: t('errors.selectBrokerError'),
         variant: "destructive"
       });
       return;
@@ -270,8 +272,8 @@ export default function Auth() {
     // Validate password confirmation
     if (password !== confirmPassword) {
       toast({
-        title: "Passwords do not match",
-        description: "Please ensure both password fields are identical.",
+        title: t('errors.passwordMismatch'),
+        description: t('errors.passwordMismatchDescription'),
         variant: "destructive"
       });
       return;
@@ -279,8 +281,8 @@ export default function Auth() {
 
     if (password.length < 6) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
+        title: t('errors.passwordTooShort'),
+        description: t('errors.passwordTooShortDescription'),
         variant: "destructive"
       });
       return;
@@ -305,14 +307,14 @@ export default function Auth() {
 
     if (error) {
       toast({
-        title: "Registration Error",
+        title: t('errors.registrationError'),
         description: error.message,
         variant: "destructive"
       });
     } else {
       toast({
-        title: "Registration Successful",
-        description: "Check your email to confirm your account. Your account will be reviewed for approval."
+        title: t('success.registrationSuccessful'),
+        description: t('success.registrationSuccessfulDescription')
       });
       
       // If intent is free_trial, activate it after successful signup
@@ -321,8 +323,8 @@ export default function Auth() {
           const { error: trialError } = await activateFreeTrial();
           if (!trialError) {
             toast({
-              title: "🎁 Free Trial Activated!",
-              description: "Your account is ready with Free Trial access.",
+              title: t('success.freeTrialActivated'),
+              description: t('success.freeTrialActivatedDescription'),
             });
             navigate('/payment-success?type=free_trial');
           }
@@ -351,7 +353,7 @@ export default function Auth() {
     
     if (error) {
       toast({
-        title: "Google Sign-In Error",
+        title: t('errors.googleSignInError'),
         description: error.message,
         variant: "destructive"
       });
@@ -363,8 +365,8 @@ export default function Auth() {
     // First, check if broker is selected
     if (!selectedBrokerId) {
       toast({
-        title: "Broker Required",
-        description: "Please select a broker before signing up with Google.",
+        title: t('errors.brokerRequiredForGoogle'),
+        description: t('errors.brokerRequiredForGoogleDescription'),
         variant: "destructive"
       });
       return;
@@ -392,7 +394,7 @@ export default function Auth() {
     
     if (error) {
       toast({
-        title: "Google Sign-Up Error",
+        title: t('errors.googleSignUpError'),
         description: error.message,
         variant: "destructive"
       });
@@ -425,8 +427,8 @@ export default function Auth() {
         await supabase.auth.signOut();
         
         toast({
-          title: "Account Deactivated",
-          description: "Your account has been deactivated. Please contact support if you think this is an error.",
+          title: t('errors.accountDeactivated'),
+          description: t('errors.accountDeactivatedDescription'),
           variant: "destructive",
         });
         
@@ -442,7 +444,7 @@ export default function Auth() {
 
     if (error) {
       toast({
-        title: "Login Error",
+        title: t('errors.loginError'),
         description: error.message,
         variant: "destructive"
       });
@@ -455,8 +457,8 @@ export default function Auth() {
         const { error: trialError } = await activateFreeTrial();
         if (!trialError) {
           toast({
-            title: "🎁 Free Trial Activated!",
-            description: "Start exploring all features now!",
+            title: t('success.freeTrialActivated'),
+            description: t('success.freeTrialActivatedDescription'),
           });
           navigate('/payment-success?type=free_trial');
           setLoading(false);
@@ -481,7 +483,7 @@ export default function Auth() {
             <CardContent className="pt-6">
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Processing Google sign-in...</p>
+                <p className="text-sm text-muted-foreground">{t('processingGoogleSignIn')}</p>
               </div>
             </CardContent>
           </Card>
@@ -496,16 +498,16 @@ export default function Auth() {
               className="h-12 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Alphalens</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('welcomeToAlphalens')}</CardTitle>
           <CardDescription>
-            Connect to access your trading dashboard
+            {t('connectToDashboard')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -522,13 +524,13 @@ export default function Auth() {
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-muted-foreground">
-                      Or continue with email
+                      {t('orContinueWithEmail')}
                     </span>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">{t('email')}</Label>
                   <Input
                     id="signin-email"
                     type="email"
@@ -538,7 +540,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password">{t('password')}</Label>
                   <Input
                     id="signin-password"
                     type="password"
@@ -554,12 +556,12 @@ export default function Auth() {
                     onCheckedChange={(checked) => setStayLoggedIn(checked === true)}
                   />
                   <Label htmlFor="stay-logged-in" className="text-sm text-muted-foreground cursor-pointer">
-                    Stay logged in
+                    {t('stayLoggedIn')}
                   </Label>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
+                  {t('signIn')}
                 </Button>
               </form>
             </TabsContent>
@@ -567,10 +569,10 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-broker">Broker *</Label>
+                  <Label htmlFor="signup-broker">{t('selectBroker')} *</Label>
                   <Select value={selectedBrokerId} onValueChange={setSelectedBrokerId} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select your broker" />
+                      <SelectValue placeholder={t('brokerPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-white">
                       {activeBrokers.map((broker: any) => (
@@ -582,7 +584,7 @@ export default function Auth() {
                   </Select>
                   {activeBrokers.length === 0 && (
                     <p className="text-xs text-muted-foreground">
-                      My broker is not listed? Contact support for assistance.
+                      {t('brokerNotListed')}
                     </p>
                   )}
                 </div>
@@ -600,13 +602,13 @@ export default function Auth() {
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-muted-foreground">
-                      Or sign up with email
+                      {t('orSignupWithEmail')}
                     </span>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t('email')}</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -616,7 +618,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t('password')}</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -627,7 +629,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <Label htmlFor="signup-confirm-password">{t('confirmPassword')}</Label>
                   <Input
                     id="signup-confirm-password"
                     type="password"
@@ -646,7 +648,7 @@ export default function Auth() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading || !!passwordMatchError}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign Up
+                  {t('signUp')}
                 </Button>
               </form>
             </TabsContent>

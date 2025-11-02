@@ -1,0 +1,58 @@
+{
+  "hero": {
+    "title": "Características Poderosas para",
+    "titleHighlight": "Trading Profesional",
+    "description": "Descubra el completo conjunto de herramientas que hacen de Alphalens la opción preferida para profesionales financieros en todo el mundo."
+  },
+  "main": {
+    "aiTradeSetups": {
+      "title": "Configuraciones de Trading IA",
+      "description": "Algoritmos avanzados analizan las condiciones del mercado para identificar puntos óptimos de entrada y salida con claras racionales de stop-loss, take-profit y riesgo-recompensa.",
+      "detail1": "Señales direccionales con puntajes de confianza",
+      "detail2": "Niveles claros de SL/TP con ratios riesgo-recompensa",
+      "detail3": "Racionales de trading impulsados por IA y contexto de mercado",
+      "detail4": "Actualizaciones de señales en tiempo real y notificaciones",
+      "ctaText": "Ver Panel"
+    },
+    "macroCommentary": {
+      "title": "Comentario Macro",
+      "description": "Análisis macroeconómico de nivel institucional con calendarios económicos integrados y evaluaciones de impacto de mercado en tiempo real.",
+      "detail1": "Notas de investigación institucional diarias y semanales",
+      "detail2": "Calendario macroeconómico integrado con análisis de impacto",
+      "detail3": "Seguimiento de políticas de bancos centrales e implicaciones",
+      "detail4": "Análisis de interconexión de mercados globales",
+      "ctaText": "Ver Análisis Macro"
+    },
+    "researchReports": {
+      "title": "Informes de Investigación",
+      "description": "Análisis de mercado integral e informes de investigación con capacidades de exportación PDF/HTML y formato profesional.",
+      "detail1": "Resúmenes de investigación semanales y diarios",
+      "detail2": "Funcionalidad de exportación PDF y HTML",
+      "detail3": "Formato de informe profesional",
+      "detail4": "Archivo histórico de informes y búsqueda",
+      "ctaText": "Ver Informes"
+    }
+  },
+  "additional": {
+    "title": "Todo lo que Necesitas",
+    "subtitle": "Capacidades adicionales que hacen de Alphalens una solución completa para trading profesional",
+    "multiAsset": {
+      "title": "Cobertura Multi-Activo",
+      "description": "FX, criptomonedas e índices principales con cobertura de mercado integral."
+    },
+    "realtime": {
+      "title": "Actualizaciones en Tiempo Real",
+      "description": "Integración de datos de mercado en vivo con notificaciones y alertas instantáneas."
+    },
+    "institutional": {
+      "title": "Nivel Institucional",
+      "description": "Herramientas de análisis de nivel profesional confiadas por instituciones financieras en todo el mundo."
+    }
+  },
+  "cta": {
+    "title": "¿Listo para Experimentar Estas Características?",
+    "subtitle": "Únase a miles de profesionales que confían en Alphalens para sus decisiones de trading.",
+    "startTrial": "Comenzar Prueba Gratuita",
+    "requestDemo": "Solicitar Demo"
+  }
+}
