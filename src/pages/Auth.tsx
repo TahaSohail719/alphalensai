@@ -118,19 +118,21 @@ export default function Auth() {
                 return;
               }
               
-              // ✅ User clicked "Sign in with Google" (no broker in sessionStorage)
-              // This is OK - they'll be created with status='pending' by the trigger
-              // AuthGuard will handle showing the pending approval screen
+              // ❌ User tried "Sign in with Google" but account doesn't exist
+              // Redirect to Sign Up to select a broker
               if (!profile?.broker_id && !pendingBrokerId) {
-                console.log('[Google Auth] New user via Sign In - no broker selected yet');
+                console.log('[Google Auth] New user tried to sign in - redirecting to Sign Up');
+                
+                // Sign out immediately to clean up the session
+                await supabase.auth.signOut();
                 
                 toast({
-                  title: "Account Created",
-                  description: "Your account has been created and is pending approval. An administrator will review your request.",
+                  title: "Compte inexistant",
+                  description: "Veuillez vous inscrire en sélectionnant votre broker dans l'onglet Sign Up.",
+                  variant: "destructive",
                 });
                 
-                // Navigate to dashboard - AuthGuard will show "Pending Approval" screen
-                navigate('/dashboard');
+                // Stay on auth page, user will see Sign Up tab
                 return;
               }
             } else {
@@ -307,7 +309,7 @@ export default function Auth() {
         redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
-          prompt: 'consent',
+          prompt: 'select_account',
         }
       }
     });
@@ -322,49 +324,6 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    // First, check if broker is selected
-    if (!selectedBrokerId) {
-      toast({
-        title: "Broker Required",
-        description: "Please select a broker before signing up with Google.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setGoogleLoading(true);
-    
-    const selectedBroker = activeBrokers.find((b: any) => b.id === selectedBrokerId);
-    const redirectUrl = `${window.location.origin}/auth`;
-    
-    // Store broker info temporarily for OAuth callback
-    sessionStorage.setItem('pending_broker_id', selectedBrokerId);
-    sessionStorage.setItem('pending_broker_name', selectedBroker?.name || '');
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
-      }
-    });
-    
-    if (error) {
-      toast({
-        title: "Google Sign-Up Error",
-        description: error.message,
-        variant: "destructive"
-      });
-      setGoogleLoading(false);
-      // Clear stored broker info
-      sessionStorage.removeItem('pending_broker_id');
-      sessionStorage.removeItem('pending_broker_name');
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -538,12 +497,6 @@ export default function Auth() {
                   )}
                 </div>
                 
-                <GoogleAuthButton
-                  mode="signup"
-                  loading={googleLoading}
-                  onClick={handleGoogleSignUp}
-                  disabled={!selectedBrokerId}
-                />
                 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
