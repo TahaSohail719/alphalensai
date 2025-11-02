@@ -1,0 +1,57 @@
+{
+  "hero": {
+    "title": "Centro de Ayuda",
+    "subtitle": "Encuentre respuestas a sus preguntas y aproveche al máximo Alphalens",
+    "searchPlaceholder": "Buscar artículos de ayuda..."
+  },
+  "categories": {
+    "gettingStarted": {
+      "title": "Comenzando",
+      "articles": {
+        "createAccount": "Crear Su Primera Cuenta",
+        "understandCredits": "Comprender Créditos y Planes",
+        "selectBroker": "Seleccionar Su Broker",
+        "navigateDashboard": "Navegar por el Panel"
+      }
+    },
+    "aiFeatures": {
+      "title": "Características de IA",
+      "articles": {
+        "generateTrades": "Cómo Generar Configuraciones de Trading",
+        "macroCommentary": "Usar Comentarios Macro",
+        "createReports": "Crear Informes Personalizados",
+        "bestPractices": "Mejores Prácticas para Consultas de IA"
+      }
+    },
+    "portfolio": {
+      "title": "Gestión de Cartera",
+      "articles": {
+        "addPositions": "Agregar Posiciones a Su Cartera",
+        "pnlCalculations": "Comprender Cálculos de P&L",
+        "aiRecommendations": "Recomendaciones de IA Explicadas",
+        "exportData": "Exportar Datos de Cartera"
+      }
+    },
+    "billing": {
+      "title": "Facturación y Cuenta",
+      "articles": {
+        "upgradePlan": "Actualizar Su Plan",
+        "paymentMethods": "Administrar Métodos de Pago",
+        "cancelSubscription": "Cancelar Su Suscripción",
+        "refundPolicy": "Política de Reembolso"
+      }
+    }
+  },
+  "support": {
+    "title": "¿Todavía Necesita Ayuda?",
+    "description": "¿No encuentra lo que busca? Nuestro equipo de soporte está aquí para ayudar.",
+    "contactButton": "Contactar Soporte",
+    "docsButton": "Ver Documentación Completa",
+    "emailLabel": "Envíenos un correo a",
+    "emailValue": "research@albaricg.com",
+    "responseTime": "Normalmente respondemos en 24 horas"
+  },
+  "footer": {
+    "copyright": "© 2025 alphaLens.ai. Todos los derechos reservados."
+  }
+}

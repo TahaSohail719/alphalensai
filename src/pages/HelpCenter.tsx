@@ -5,10 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MessageCircle, Mail, Book } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
+import { Footer } from '@/components/Footer';
 
 export default function HelpCenter() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation('help');
 
   const helpTopics = [
     {
@@ -61,10 +64,10 @@ export default function HelpCenter() {
       <section className="py-20 px-4 text-center bg-gradient-to-br from-background via-background to-secondary/10">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Help Center
+            {t('hero.title')}
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Find answers to your questions and get the most out of Alphalens
+            {t('hero.subtitle')}
           </p>
 
           {/* Search Bar */}
@@ -73,7 +76,7 @@ export default function HelpCenter() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Search for help articles..."
+                placeholder={t('hero.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 py-6 text-lg"
@@ -159,12 +162,7 @@ export default function HelpCenter() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-8 px-4">
-        <div className="container mx-auto max-w-4xl text-center text-muted-foreground text-sm">
-          <p>© 2025 alphaLens.ai. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

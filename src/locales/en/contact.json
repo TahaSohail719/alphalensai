@@ -1,0 +1,49 @@
+{
+  "hero": {
+    "title": "Get in Touch",
+    "titleHighlight": "with Our Team",
+    "subtitle": "Have questions about Alphalens? Want to request a demo or discuss your specific needs? We're here to help you succeed."
+  },
+  "form": {
+    "title": "Send us a Message",
+    "description": "Fill out the form below and we'll get back to you within 24 hours.",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company / Broker",
+    "message": "Message",
+    "namePlaceholder": "Your full name",
+    "emailPlaceholder": "your.email@company.com",
+    "companyPlaceholder": "Your company or broker name",
+    "messagePlaceholder": "Tell us about your trading needs, questions about features, or demo requirements...",
+    "sendButton": "Send Message",
+    "sendingButton": "Sending...",
+    "requiredFields": "*"
+  },
+  "info": {
+    "title": "Contact Information",
+    "email": "Email",
+    "emailValue": "research@albaricg.com",
+    "emailNote": "We typically respond within 24 hours",
+    "phone": "Phone",
+    "phoneValue": "+92-315-452-1099",
+    "phoneNote": "Schedule a call through our contact form",
+    "office": "Office",
+    "officeAddress": "86, 90 Paul St, London EC2A 4NE, United Kingdom",
+    "officeNote": "Global team serving worldwide"
+  },
+  "expect": {
+    "title": "What to Expect",
+    "demo": "Demo Requests",
+    "demoDescription": "We'll schedule a personalized 30-minute demonstration of Alphalens features tailored to your specific trading needs.",
+    "inquiries": "General Inquiries",
+    "inquiriesDescription": "Our team will provide detailed answers about features, pricing, integration options, and technical requirements.",
+    "partnership": "Partnership Opportunities",
+    "partnershipDescription": "Interested in white-label solutions or API integration? We'll connect you with our partnership team."
+  },
+  "toasts": {
+    "fillRequired": "Please fill in all required fields.",
+    "invalidEmail": "Please enter a valid email address.",
+    "success": "Message sent successfully! We'll get back to you soon.",
+    "error": "Failed to send message. Please try again."
+  }
+}

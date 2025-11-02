@@ -8,9 +8,12 @@ import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PublicNavbar from "@/components/PublicNavbar";
+import { useTranslation } from 'react-i18next';
+import { Footer } from '@/components/Footer';
 export default function Contact() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation('contact');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,14 +25,14 @@ export default function Contact() {
 
     // Basic validation
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error("Please fill in all required fields.");
+      toast.error(t('toasts.fillRequired'));
       return;
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      toast.error("Please enter a valid email address.");
+      toast.error(t('toasts.invalidEmail'));
       return;
     }
     setLoading(true);
@@ -45,7 +48,7 @@ export default function Contact() {
       if (!response.ok) {
         throw new Error('Failed to send email');
       }
-      toast.success("Message sent successfully! We'll get back to you soon.");
+      toast.success(t('toasts.success'));
 
       // Reset form
       setFormData({
@@ -56,7 +59,7 @@ export default function Contact() {
       });
     } catch (error) {
       console.error("Error sending contact form:", error);
-      toast.error("Failed to send message. Please try again.");
+      toast.error(t('toasts.error'));
     } finally {
       setLoading(false);
     }
@@ -74,12 +77,11 @@ export default function Contact() {
       <section className="py-20 px-4 text-center bg-gradient-to-br from-background via-background to-secondary/10">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Get in Touch
-            <span className="text-primary"> with Our Team</span>
+            {t('hero.title')}
+            <span className="text-primary"> {t('hero.titleHighlight')}</span>
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Have questions about Alphalens? Want to request a demo or discuss your specific needs? 
-            We're here to help you succeed.
+            {t('hero.subtitle')}
           </p>
         </div>
       </section>
@@ -91,41 +93,41 @@ export default function Contact() {
             {/* Contact Form */}
             <Card className="p-6 border-border">
               <CardHeader>
-                <CardTitle className="text-2xl text-foreground mb-2">Send us a Message</CardTitle>
+                <CardTitle className="text-2xl text-foreground mb-2">{t('form.title')}</CardTitle>
                 <p className="text-muted-foreground">
-                  Fill out the form below and we'll get back to you within 24 hours.
+                  {t('form.description')}
                 </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name *</Label>
-                      <Input id="name" type="text" value={formData.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Your full name" required />
+                      <Label htmlFor="name">{t('form.name')} {t('form.requiredFields')}</Label>
+                      <Input id="name" type="text" value={formData.name} onChange={e => handleInputChange("name", e.target.value)} placeholder={t('form.namePlaceholder')} required />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange("email", e.target.value)} placeholder="your.email@company.com" required />
+                      <Label htmlFor="email">{t('form.email')} {t('form.requiredFields')}</Label>
+                      <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange("email", e.target.value)} placeholder={t('form.emailPlaceholder')} required />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="company">Company / Broker</Label>
-                    <Input id="company" type="text" value={formData.company} onChange={e => handleInputChange("company", e.target.value)} placeholder="Your company or broker name" />
+                    <Label htmlFor="company">{t('form.company')}</Label>
+                    <Input id="company" type="text" value={formData.company} onChange={e => handleInputChange("company", e.target.value)} placeholder={t('form.companyPlaceholder')} />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
-                    <Textarea id="message" value={formData.message} onChange={e => handleInputChange("message", e.target.value)} placeholder="Tell us about your trading needs, questions about features, or demo requirements..." rows={5} required />
+                    <Label htmlFor="message">{t('form.message')} {t('form.requiredFields')}</Label>
+                    <Textarea id="message" value={formData.message} onChange={e => handleInputChange("message", e.target.value)} placeholder={t('form.messagePlaceholder')} rows={5} required />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? <>
                         <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                        Sending...
+                        {t('form.sendingButton')}
                       </> : <>
                         <Send className="w-4 h-4 mr-2" />
-                        Send Message
+                        {t('form.sendButton')}
                       </>}
                   </Button>
                 </form>
@@ -136,7 +138,7 @@ export default function Contact() {
             <div className="space-y-8">
               <Card className="p-6 border-border">
                 <CardHeader>
-                  <CardTitle className="text-xl text-foreground">Contact Information</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{t('info.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-start space-x-4">
@@ -144,10 +146,10 @@ export default function Contact() {
                       <Mail className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Email</h3>
-                      <p className="text-muted-foreground">research@albaricg.com</p>
+                      <h3 className="font-semibold text-foreground">{t('info.email')}</h3>
+                      <p className="text-muted-foreground">{t('info.emailValue')}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        We typically respond within 24 hours
+                        {t('info.emailNote')}
                       </p>
                     </div>
                   </div>
@@ -157,10 +159,10 @@ export default function Contact() {
                       <Phone className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Phone</h3>
-                      <p className="text-muted-foreground">+92-315-452-1099</p>
+                      <h3 className="font-semibold text-foreground">{t('info.phone')}</h3>
+                      <p className="text-muted-foreground">{t('info.phoneValue')}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Schedule a call through our contact form
+                        {t('info.phoneNote')}
                       </p>
                     </div>
                   </div>
@@ -170,10 +172,10 @@ export default function Contact() {
                       <MapPin className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Office</h3>
-                      <p className="text-muted-foreground">86, 90 Paul St, London EC2A 4NE, United Kingdom</p>
+                      <h3 className="font-semibold text-foreground">{t('info.office')}</h3>
+                      <p className="text-muted-foreground">{t('info.officeAddress')}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Global team serving worldwide
+                        {t('info.officeNote')}
                       </p>
                     </div>
                   </div>
@@ -182,30 +184,27 @@ export default function Contact() {
 
               <Card className="p-6 border-border">
                 <CardHeader>
-                  <CardTitle className="text-xl text-foreground">What to Expect</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{t('expect.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-foreground">Demo Requests</h3>
+                    <h3 className="font-semibold text-foreground">{t('expect.demo')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      We'll schedule a personalized 30-minute demonstration of Alphalens features 
-                      tailored to your specific trading needs.
+                      {t('expect.demoDescription')}
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-foreground">General Inquiries</h3>
+                    <h3 className="font-semibold text-foreground">{t('expect.inquiries')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Our team will provide detailed answers about features, pricing, 
-                      integration options, and technical requirements.
+                      {t('expect.inquiriesDescription')}
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-foreground">Partnership Opportunities</h3>
+                    <h3 className="font-semibold text-foreground">{t('expect.partnership')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Interested in white-label solutions or API integration? 
-                      We'll connect you with our partnership team.
+                      {t('expect.partnershipDescription')}
                     </p>
                   </div>
                 </CardContent>
@@ -215,47 +214,6 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <img src="/lovable-uploads/Only_text_white_BG_FINAL.png" alt="alphaLens.ai" className="h-[1.95rem]" />
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Professional financial research and trading intelligence powered by artificial intelligence.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/features")} className="hover:text-foreground transition-colors">Features</button></li>
-                <li><button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">Pricing</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">API</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/about")} className="hover:text-foreground transition-colors">About</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Contact</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Privacy</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Documentation</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Help Center</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Terms of Service</button></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>;
 }

@@ -1,0 +1,35 @@
+{
+  "aura": {
+    "rateLimitReached": "Rate Limit Reached",
+    "rateLimitDescription": "Please wait before sending another message.",
+    "creditsRequired": "Credits Required",
+    "creditsDescription": "Please add credits to your Lovable AI workspace.",
+    "error": "Error",
+    "errorDescription": "An error occurred. Please try again.",
+    "timeout": "The server is taking too long to respond. Please try again with a simpler question.",
+    "networkError": "Unable to contact the server. Check your internet connection.",
+    "launchError": "Unable to launch the request.",
+    "fetchingData": "Fetching real-time data for",
+    "dataFetchError": "Unable to retrieve data for",
+    "noDataAvailable": "No data available.",
+    "priceDataSuccess": "Real-Time Data for",
+    "analysisPrompt": "✨ Would you like me to perform a complete technical analysis?",
+    "indicatorsError": "Failed to retrieve technical indicators. Please try again.",
+    "collectiveInsightsError": "Unable to load collective insights. Please try again later.",
+    "jobLaunched": "Launched successfully!",
+    "jobLaunchError": "Unable to launch the request. Please try again."
+  },
+  "pricing": {
+    "invalidPlan": "Invalid Plan",
+    "invalidPlanDescription": "Please select a valid plan.",
+    "paymentError": "Payment Error",
+    "checkoutFailed": "Failed to create checkout session. Please try again.",
+    "checkoutError": "Unable to process payment. Please try again or contact support."
+  },
+  "contact": {
+    "fillRequired": "Please fill in all required fields.",
+    "invalidEmail": "Please enter a valid email address.",
+    "success": "Message sent successfully! We'll get back to you soon.",
+    "error": "Failed to send message. Please try again."
+  }
+}

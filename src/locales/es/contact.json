@@ -1,0 +1,49 @@
+{
+  "hero": {
+    "title": "Póngase en Contacto",
+    "titleHighlight": "con Nuestro Equipo",
+    "subtitle": "¿Tiene preguntas sobre Alphalens? ¿Quiere solicitar una demostración o discutir sus necesidades específicas? Estamos aquí para ayudarlo a tener éxito."
+  },
+  "form": {
+    "title": "Envíenos un Mensaje",
+    "description": "Complete el formulario a continuación y nos pondremos en contacto con usted en 24 horas.",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "company": "Empresa / Broker",
+    "message": "Mensaje",
+    "namePlaceholder": "Su nombre completo",
+    "emailPlaceholder": "su.correo@empresa.com",
+    "companyPlaceholder": "Nombre de su empresa o broker",
+    "messagePlaceholder": "Cuéntenos sobre sus necesidades de trading, preguntas sobre características o requisitos de demostración...",
+    "sendButton": "Enviar Mensaje",
+    "sendingButton": "Enviando...",
+    "requiredFields": "*"
+  },
+  "info": {
+    "title": "Información de Contacto",
+    "email": "Correo Electrónico",
+    "emailValue": "research@albaricg.com",
+    "emailNote": "Normalmente respondemos en 24 horas",
+    "phone": "Teléfono",
+    "phoneValue": "+92-315-452-1099",
+    "phoneNote": "Programe una llamada a través de nuestro formulario de contacto",
+    "office": "Oficina",
+    "officeAddress": "86, 90 Paul St, London EC2A 4NE, United Kingdom",
+    "officeNote": "Equipo global al servicio mundial"
+  },
+  "expect": {
+    "title": "Qué Esperar",
+    "demo": "Solicitudes de Demostración",
+    "demoDescription": "Programaremos una demostración personalizada de 30 minutos de las características de Alphalens adaptadas a sus necesidades específicas de trading.",
+    "inquiries": "Consultas Generales",
+    "inquiriesDescription": "Nuestro equipo proporcionará respuestas detalladas sobre características, precios, opciones de integración y requisitos técnicos.",
+    "partnership": "Oportunidades de Asociación",
+    "partnershipDescription": "¿Interesado en soluciones de marca blanca o integración API? Lo conectaremos con nuestro equipo de asociaciones."
+  },
+  "toasts": {
+    "fillRequired": "Por favor complete todos los campos requeridos.",
+    "invalidEmail": "Por favor ingrese una dirección de correo electrónico válida.",
+    "success": "¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.",
+    "error": "Error al enviar el mensaje. Por favor intente de nuevo."
+  }
+}

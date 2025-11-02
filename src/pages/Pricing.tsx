@@ -8,6 +8,8 @@ import PublicNavbar from '@/components/PublicNavbar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
+import { Footer } from '@/components/Footer';
 interface PlanData {
   name: string;
   price: string;
@@ -18,12 +20,9 @@ interface PlanData {
 }
 const Pricing = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { t } = useTranslation('pricing');
   const [b2cPlans, setB2cPlans] = useState<PlanData[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
@@ -86,18 +85,13 @@ const Pricing = () => {
     highlight: true
   }];
   const getPlanDescription = (planType: string): string => {
-    const descriptions = {
-      basic: 'Perfect for individual traders getting started',
-      standard: 'Ideal for active traders and investors',
-      premium: 'Complete solution for professional traders'
-    };
-    return descriptions[planType as keyof typeof descriptions] || 'Professional trading solution';
+    return t(`b2c.plans.${planType}.description`, 'Professional trading solution');
   };
   const getPlanUsage = (plan: any): string[] => {
     return [
-      `${plan.max_queries} queries per month`,
-      `${plan.max_ideas} investment ideas per month`,
-      `${plan.max_reports} reports per month`
+      `${plan.max_queries} ${t('b2c.queriesPerMonth')}`,
+      `${plan.max_ideas} ${t('b2c.ideasPerMonth')}`,
+      `${plan.max_reports} ${t('b2c.reportsPerMonth')}`
     ];
   };
   const handleCTAClick = async (plan: string) => {
@@ -111,8 +105,8 @@ const Pricing = () => {
     const planType = plan.toLowerCase();
     if (!['basic', 'standard', 'premium'].includes(planType)) {
       toast({
-        title: "Invalid Plan",
-        description: "Please select a valid plan.",
+        title: t('errors.invalidPlan'),
+        description: t('errors.invalidPlanDescription'),
         variant: "destructive"
       });
       return;
@@ -143,8 +137,8 @@ const Pricing = () => {
       if (error) {
         console.error('Checkout error:', error);
         toast({
-          title: "Payment Error",
-          description: error.message || "Failed to create checkout session. Please try again.",
+          title: t('errors.paymentError'),
+          description: error.message || t('errors.checkoutFailed'),
           variant: "destructive"
         });
         return;
@@ -158,8 +152,8 @@ const Pricing = () => {
     } catch (err) {
       console.error('Failed to create checkout session:', err);
       toast({
-        title: "Payment Error",
-        description: "Unable to process payment. Please try again or contact support.",
+        title: t('errors.paymentError'),
+        description: t('errors.checkoutError'),
         variant: "destructive"
       });
     } finally {
@@ -176,11 +170,10 @@ const Pricing = () => {
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Alphalens AI Pricing
+              {t('hero.title')}
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Choose the perfect plan for your trading and investment needs. 
-              Professional AI-powered market analysis for every level.
+              {t('hero.subtitle')}
             </p>
           </div>
 
@@ -188,18 +181,18 @@ const Pricing = () => {
           <div className="mb-20">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-semibold text-foreground mb-4">
-                B2B Partnership Model
+                {t('b2b.title')}
               </h2>
               <p className="text-lg text-muted-foreground">
-                Designed for brokers and financial institutions
+                {t('b2b.subtitle')}
               </p>
             </div>
             
             <Card className="max-w-4xl mx-auto border-primary/20">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl">Enterprise Partnership</CardTitle>
+                <CardTitle className="text-2xl">{t('b2b.cardTitle')}</CardTitle>
                 <CardDescription className="text-lg mt-2">
-                  Complete Alphalens integration for your client base
+                  {t('b2b.cardDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8 bg-gradient-to-br from-background via-muted/5 to-background">
@@ -207,38 +200,38 @@ const Pricing = () => {
                   <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-xl p-6 border border-primary/20 backdrop-blur-sm">
                     <h4 className="font-semibold text-xl mb-4 text-foreground flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      Partnership Benefits
+                      {t('b2b.benefits.title')}
                     </h4>
                     <ul className="space-y-3">
                       <li className="flex items-center gap-3 text-muted-foreground">
                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span>White-label integration</span>
+                        <span>{t('b2b.benefits.whiteLabel')}</span>
                       </li>
                       <li className="flex items-center gap-3 text-muted-foreground">
                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span>Revenue share model</span>
+                        <span>{t('b2b.benefits.revenueShare')}</span>
                       </li>
                       <li className="flex items-center gap-3 text-muted-foreground">
                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span>Dedicated support</span>
+                        <span>{t('b2b.benefits.support')}</span>
                       </li>
                       <li className="flex items-center gap-3 text-muted-foreground">
                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span>Custom branding</span>
+                        <span>{t('b2b.benefits.branding')}</span>
                       </li>
                     </ul>
                   </div>
                   <div className="bg-gradient-to-br from-accent/10 via-accent/5 to-transparent rounded-xl p-6 border border-accent/20 backdrop-blur-sm">
                     <h4 className="font-semibold text-xl mb-4 text-foreground flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-accent"></div>
-                      Revenue Model
+                      {t('b2b.revenueModel.title')}
                     </h4>
                     <p className="text-muted-foreground leading-relaxed">
-                      Earn direct revenue from your clients who subscribe to Alphalens paid plans through our profit-sharing partnership.
+                      {t('b2b.revenueModel.description')}
                     </p>
                     <div className="mt-4 pt-4 border-t border-accent/20">
                       <p className="text-sm font-medium text-foreground">
-                        Immediate value creation for your clients
+                        {t('b2b.revenueModel.valueCreation')}
                       </p>
                     </div>
                   </div>
@@ -246,11 +239,10 @@ const Pricing = () => {
                 
                 <div className="pt-4 border-t border-border">
                   <p className="text-sm text-muted-foreground mb-6">
-                    Entry-level access to showcase Alphalens' value to all broker clients. 
-                    Direct revenue from traders who subscribe to paid plans.
+                    {t('b2b.footer')}
                   </p>
                   <Button size="lg" className="w-full md:w-auto" onClick={() => handleCTAClick('B2B Contact Sales')}>
-                    Contact Sales
+                    {t('b2b.contactSales')}
                   </Button>
                 </div>
               </CardContent>
@@ -261,26 +253,26 @@ const Pricing = () => {
           <div>
             <div className="text-center mb-12">
               <h2 className="text-3xl font-semibold text-foreground mb-4">
-                Individual Plans
+                {t('b2c.title')}
               </h2>
               <p className="text-lg text-muted-foreground">
-                Professional AI analysis for individual traders and investors
+                {t('b2c.subtitle')}
               </p>
             </div>
 
             {loading ? <div className="flex justify-center py-8">
-                <div className="text-muted-foreground">Loading plans...</div>
+                <div className="text-muted-foreground">{t('b2c.loading')}</div>
               </div> : <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 {b2cPlans.map(plan => <div key={plan.name} className="relative flex">
-                    {plan.highlight && <Badge variant="default" className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs whitespace-nowrap z-20 shadow-lg" aria-label="Most Complete">
-                        Most Complete
+                    {plan.highlight && <Badge variant="default" className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs whitespace-nowrap z-20 shadow-lg" aria-label={t('b2c.mostComplete')}>
+                        {t('b2c.mostComplete')}
                       </Badge>}
                     <Card className={`${plan.highlight ? 'border-primary shadow-lg scale-105' : 'border-border'} flex flex-col h-full w-full`}>
                   <CardHeader className={`text-center ${plan.highlight ? 'pb-6 pt-2' : 'pb-6'}`}>
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                      <span className="text-muted-foreground">/month</span>
+                      <span className="text-4xl font-bold text-foreground">{plan.price === 'Unavailable' ? t('b2c.unavailable') : plan.price}</span>
+                      {plan.price !== 'Unavailable' && <span className="text-muted-foreground">{t('b2c.perMonth')}</span>}
                     </div>
                     <CardDescription className="mt-2">
                       {plan.description}
@@ -289,7 +281,7 @@ const Pricing = () => {
                   
                   <CardContent className="space-y-6 flex-1 flex flex-col">
                     <div>
-                      <h4 className="font-semibold mb-3">Features</h4>
+                      <h4 className="font-semibold mb-3">{t('b2c.features')}</h4>
                       <ul className="space-y-2">
                         {plan.features.map((feature, index) => <li key={index} className="flex items-center gap-3">
                             <Check className="h-4 w-4 text-primary flex-shrink-0" />
@@ -299,7 +291,7 @@ const Pricing = () => {
                     </div>
                     
                     <div className="flex-1">
-                      <h4 className="font-semibold mb-3">Usage Limits</h4>
+                      <h4 className="font-semibold mb-3">{t('b2c.usageLimits')}</h4>
                       <ul className="space-y-2">
                         {plan.usage.map((usage, index) => <li key={index} className="flex items-center gap-3">
                             <Check className="h-4 w-4 text-primary flex-shrink-0" />
@@ -315,7 +307,7 @@ const Pricing = () => {
                          onClick={() => handleCTAClick(plan.name)} 
                          disabled={isCheckoutLoading(plan.name) || plan.price === 'Unavailable'}
                        >
-                         {isCheckoutLoading(plan.name) ? "Processing..." : user ? "Get Started" : <><LogIn className="mr-2 h-4 w-4" />Sign in to purchase</>}
+                         {isCheckoutLoading(plan.name) ? t('b2c.processing') : user ? t('b2c.getStarted') : <><LogIn className="mr-2 h-4 w-4" />{t('b2c.signInToPurchase')}</>}
                        </Button>
                      </div>
                    </CardContent>
@@ -328,56 +320,13 @@ const Pricing = () => {
           {/* Footer Note */}
           <div className="text-center mt-16 max-w-2xl mx-auto">
             <p className="text-sm text-muted-foreground">
-              All plans include access to our comprehensive market analysis platform. 
-              Upgrade or downgrade your plan at any time to match your trading activity.
+              {t('footer')}
             </p>
           </div>
         </div>
       </div>
 
-
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <img src="/lovable-uploads/Only_text_white_BG_FINAL.png" alt="alphaLens.ai" className="h-[1.95rem]" />
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Professional financial research and trading intelligence powered by artificial intelligence.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/features")} className="hover:text-foreground transition-colors">Features</button></li>
-                <li><button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">Pricing</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">API</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/about")} className="hover:text-foreground transition-colors">About</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Contact</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Privacy</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Documentation</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Help Center</button></li>
-                <li><button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">Terms of Service</button></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© 2025 alphaLens AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>;
 };
 export default Pricing;

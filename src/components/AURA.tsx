@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, X, ChevronRight, Send, Loader2, CheckCircle, XCircle, Globe, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { AURATeaser } from '@/components/aura/AURATeaser';
 import { AURACollectivePanel } from '@/components/aura/AURACollectivePanel';
 import { getRandomTeaser, AURATeaser as TeaserType } from '@/lib/auraMessages';
@@ -72,6 +73,7 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
   const scrollRef = useRef<HTMLDivElement>(null);
   const batchContextRef = useRef<{instrument?: string; priceSummary?: string; indicatorSummary?: string} | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation('toasts');
   const { user } = useAuth();
   const navigate = useNavigate();
   const globalLoading = useGlobalLoading();
@@ -253,8 +255,8 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         
         if (result.error.message?.includes('429')) {
           toast({
-            title: 'Limite Atteinte',
-            description: 'Veuillez patienter avant d\'envoyer un autre message.',
+            title: t('aura.rateLimitReached'),
+            description: t('aura.rateLimitDescription'),
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
@@ -264,8 +266,8 @@ export default function AURA({ context, isExpanded, onToggle, contextData }: AUR
         
         if (result.error.message?.includes('402')) {
           toast({
-            title: 'Crédits Requis',
-            description: 'Veuillez ajouter des crédits à votre workspace Lovable AI.',
+            title: t('aura.creditsRequired'),
+            description: t('aura.creditsDescription'),
             variant: 'destructive',
           });
           setMessages(prev => prev.slice(0, -1));
@@ -342,18 +344,18 @@ Fournis maintenant une analyse technique complète et structurée basée sur ces
     } catch (error) {
       console.error('AURA error:', error);
       
-      let errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+      let errorMessage = t('aura.errorDescription');
       
       if (error instanceof Error) {
         if (error.message === 'timeout') {
-          errorMessage = "Le serveur met trop de temps à répondre. Veuillez réessayer avec une question plus simple.";
+          errorMessage = t('aura.timeout');
         } else if (error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('network')) {
-          errorMessage = "Impossible de contacter le serveur. Vérifiez votre connexion internet.";
+          errorMessage = t('aura.networkError');
         }
       }
       
       toast({
-        title: 'Erreur',
+        title: t('aura.error'),
         description: errorMessage,
         variant: 'destructive',
       });

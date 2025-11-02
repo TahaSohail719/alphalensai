@@ -1,0 +1,57 @@
+{
+  "hero": {
+    "title": "Help Center",
+    "subtitle": "Find answers to your questions and get the most out of Alphalens",
+    "searchPlaceholder": "Search for help articles..."
+  },
+  "categories": {
+    "gettingStarted": {
+      "title": "Getting Started",
+      "articles": {
+        "createAccount": "Creating Your First Account",
+        "understandCredits": "Understanding Credits and Plans",
+        "selectBroker": "Selecting Your Broker",
+        "navigateDashboard": "Navigating the Dashboard"
+      }
+    },
+    "aiFeatures": {
+      "title": "AI Features",
+      "articles": {
+        "generateTrades": "How to Generate Trade Setups",
+        "macroCommentary": "Using Macro Commentary",
+        "createReports": "Creating Custom Reports",
+        "bestPractices": "Best Practices for AI Queries"
+      }
+    },
+    "portfolio": {
+      "title": "Portfolio Management",
+      "articles": {
+        "addPositions": "Adding Positions to Your Portfolio",
+        "pnlCalculations": "Understanding P&L Calculations",
+        "aiRecommendations": "AI Recommendations Explained",
+        "exportData": "Exporting Portfolio Data"
+      }
+    },
+    "billing": {
+      "title": "Billing & Account",
+      "articles": {
+        "upgradePlan": "Upgrading Your Plan",
+        "paymentMethods": "Managing Payment Methods",
+        "cancelSubscription": "Canceling Your Subscription",
+        "refundPolicy": "Refund Policy"
+      }
+    }
+  },
+  "support": {
+    "title": "Still Need Help?",
+    "description": "Can't find what you're looking for? Our support team is here to help.",
+    "contactButton": "Contact Support",
+    "docsButton": "View Full Documentation",
+    "emailLabel": "Email us at",
+    "emailValue": "research@albaricg.com",
+    "responseTime": "We typically respond within 24 hours"
+  },
+  "footer": {
+    "copyright": "© 2025 alphaLens.ai. All rights reserved."
+  }
+}

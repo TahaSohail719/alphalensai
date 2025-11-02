@@ -1,0 +1,35 @@
+{
+  "aura": {
+    "rateLimitReached": "Límite de Tasa Alcanzado",
+    "rateLimitDescription": "Por favor espere antes de enviar otro mensaje.",
+    "creditsRequired": "Créditos Requeridos",
+    "creditsDescription": "Por favor agregue créditos a su espacio de trabajo de Lovable AI.",
+    "error": "Error",
+    "errorDescription": "Ocurrió un error. Por favor intente de nuevo.",
+    "timeout": "El servidor está tardando demasiado en responder. Por favor intente de nuevo con una pregunta más simple.",
+    "networkError": "No se puede contactar al servidor. Verifique su conexión a internet.",
+    "launchError": "No se puede lanzar la solicitud.",
+    "fetchingData": "Obteniendo datos en tiempo real para",
+    "dataFetchError": "No se pueden recuperar los datos para",
+    "noDataAvailable": "No hay datos disponibles.",
+    "priceDataSuccess": "Datos en Tiempo Real para",
+    "analysisPrompt": "✨ ¿Le gustaría que realice un análisis técnico completo?",
+    "indicatorsError": "Error al recuperar indicadores técnicos. Por favor intente de nuevo.",
+    "collectiveInsightsError": "No se pueden cargar las perspectivas colectivas. Por favor intente más tarde.",
+    "jobLaunched": "¡Lanzado con éxito!",
+    "jobLaunchError": "No se puede lanzar la solicitud. Por favor intente de nuevo."
+  },
+  "pricing": {
+    "invalidPlan": "Plan Inválido",
+    "invalidPlanDescription": "Por favor seleccione un plan válido.",
+    "paymentError": "Error de Pago",
+    "checkoutFailed": "Falló la creación de sesión de pago. Por favor intente de nuevo.",
+    "checkoutError": "No se puede procesar el pago. Por favor intente de nuevo o contacte a soporte."
+  },
+  "contact": {
+    "fillRequired": "Por favor complete todos los campos requeridos.",
+    "invalidEmail": "Por favor ingrese una dirección de correo electrónico válida.",
+    "success": "¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.",
+    "error": "Error al enviar el mensaje. Por favor intente de nuevo."
+  }
+}

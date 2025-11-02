@@ -1,0 +1,57 @@
+{
+  "hero": {
+    "title": "مرکز راهنما",
+    "subtitle": "پاسخ سوالات خود را پیدا کنید و بیشترین استفاده را از Alphalens ببرید",
+    "searchPlaceholder": "جستجو برای مقالات راهنما..."
+  },
+  "categories": {
+    "gettingStarted": {
+      "title": "شروع کار",
+      "articles": {
+        "createAccount": "ایجاد اولین حساب کاربری",
+        "understandCredits": "درک اعتبارات و برنامه‌ها",
+        "selectBroker": "انتخاب بروکر خود",
+        "navigateDashboard": "پیمایش در داشبورد"
+      }
+    },
+    "aiFeatures": {
+      "title": "ویژگی‌های هوش مصنوعی",
+      "articles": {
+        "generateTrades": "نحوه ایجاد تنظیمات معاملاتی",
+        "macroCommentary": "استفاده از تفسیر ماکرو",
+        "createReports": "ایجاد گزارش‌های سفارشی",
+        "bestPractices": "بهترین شیوه‌ها برای پرس و جوهای هوش مصنوعی"
+      }
+    },
+    "portfolio": {
+      "title": "مدیریت پرتفوی",
+      "articles": {
+        "addPositions": "اضافه کردن موقعیت‌ها به پرتفوی خود",
+        "pnlCalculations": "درک محاسبات سود و زیان",
+        "aiRecommendations": "توضیح توصیه‌های هوش مصنوعی",
+        "exportData": "خروجی گرفتن از داده‌های پرتفوی"
+      }
+    },
+    "billing": {
+      "title": "صورتحساب و حساب کاربری",
+      "articles": {
+        "upgradePlan": "ارتقای برنامه خود",
+        "paymentMethods": "مدیریت روش‌های پرداخت",
+        "cancelSubscription": "لغو اشتراک خود",
+        "refundPolicy": "سیاست بازپرداخت"
+      }
+    }
+  },
+  "support": {
+    "title": "هنوز به کمک نیاز دارید؟",
+    "description": "آنچه را که به دنبال آن هستید پیدا نمی‌کنید؟ تیم پشتیبانی ما اینجاست تا کمک کند.",
+    "contactButton": "تماس با پشتیبانی",
+    "docsButton": "مشاهده مستندات کامل",
+    "emailLabel": "ایمیل ما",
+    "emailValue": "research@albaricg.com",
+    "responseTime": "معمولاً ظرف 24 ساعت پاسخ می‌دهیم"
+  },
+  "footer": {
+    "copyright": "© 2025 alphaLens.ai. تمامی حقوق محفوظ است."
+  }
+}
