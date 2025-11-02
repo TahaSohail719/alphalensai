@@ -1,0 +1,89 @@
+{
+  "title": "AI Trade Setup Generator",
+  "subtitle": "Institutional-grade AI trade setups with entry, stop loss, and take profit levels",
+  "backToDashboard": "Back to Dashboard",
+  "parameters": {
+    "title": "Trade Parameters",
+    "instrument": "Instrument",
+    "instrumentPlaceholder": "Search for instrument (e.g., EUR/USD, Bitcoin)",
+    "timeframe": "Timeframe",
+    "riskLevel": "Risk Level",
+    "positionSize": "Position Size (%)",
+    "strategy": "Strategy",
+    "customNotes": "Custom Notes (Optional)",
+    "customNotesPlaceholder": "Add any specific requirements or market views...",
+    "generate": "Generate AI Setup",
+    "generating": "Generating...",
+    "reset": "Reset"
+  },
+  "timeframes": {
+    "1m": "1 Minute",
+    "5m": "5 Minutes",
+    "15m": "15 Minutes",
+    "1h": "1 Hour",
+    "4h": "4 Hours",
+    "1d": "Daily",
+    "1w": "Weekly"
+  },
+  "riskLevels": {
+    "low": "Conservative",
+    "medium": "Moderate",
+    "high": "Aggressive"
+  },
+  "strategies": {
+    "breakout": "Breakout",
+    "momentum": "Momentum",
+    "reversal": "Reversal",
+    "range": "Range Trading",
+    "trend": "Trend Following"
+  },
+  "results": {
+    "title": "AI Trade Setup",
+    "marketCommentary": "Market Commentary",
+    "keyDrivers": "Key Market Drivers",
+    "tradeSetup": "Trade Setup",
+    "setup": "Setup",
+    "direction": "Direction",
+    "horizon": "Time Horizon",
+    "confidence": "Confidence",
+    "entryPrice": "Entry Price",
+    "stopLoss": "Stop Loss",
+    "takeProfit": "Take Profit",
+    "takeProfits": "Take Profit Levels",
+    "riskReward": "Risk/Reward",
+    "supports": "Support Levels",
+    "resistances": "Resistance Levels",
+    "context": "Trade Context",
+    "riskNotes": "Risk Management",
+    "indicators": "Technical Indicators",
+    "atrMultiple": "ATR Multiple (SL)",
+    "disclaimer": "Disclaimer",
+    "applyToPortfolio": "Apply to Portfolio",
+    "copySetup": "Copy Setup",
+    "saveSetup": "Save Setup",
+    "long": "LONG",
+    "short": "SHORT",
+    "noData": "No data available"
+  },
+  "tools": {
+    "title": "Analysis Tools",
+    "pnlCalculator": "P&L Calculator",
+    "tradingChart": "Trading Chart"
+  },
+  "toasts": {
+    "insufficientCredits": "Insufficient Credits",
+    "insufficientCreditsDesc": "You cannot launch this request.",
+    "tradeSetupGenerated": "Trade Setup Generated",
+    "tradeSetupGeneratedDesc": "AI trade setup generated successfully.",
+    "noSetupsReturned": "No Setups Returned",
+    "noSetupsReturnedDesc": "The response contains no setups.",
+    "errorTitle": "Error",
+    "errorReservingCredit": "Failed to reserve credit. Please try again.",
+    "setupCopied": "Setup Copied",
+    "setupCopiedDesc": "Trade setup copied to clipboard.",
+    "setupSaved": "Setup Saved",
+    "setupSavedDesc": "Trade setup saved successfully.",
+    "processingTimeout": "Request timed out. Please try again.",
+    "processingError": "Failed to process request. Please try again."
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "title": "Documentation",
+  "subtitle": "Everything you need to master Alphalens and maximize your trading insights",
+  "tabs": {
+    "gettingStarted": "Getting Started",
+    "features": "Features",
+    "aiSetup": "AI Setup",
+    "portfolio": "Portfolio",
+    "api": "API",
+    "faq": "FAQ"
+  },
+  "gettingStarted": {
+    "quickStart": "Quick Start Guide",
+    "step1Title": "1. Create Your Account",
+    "step1Desc": "Sign up with your email and start with a free trial to explore all features.",
+    "step2Title": "2. Select Your Broker",
+    "step2Desc": "Choose your trading broker from our supported list to get tailored insights.",
+    "step3Title": "3. Explore AI Features",
+    "step3Desc": "Use AI Trade Setup, Macro Commentary, and Reports to generate trading insights.",
+    "step4Title": "4. Build Your Portfolio",
+    "step4Desc": "Add positions and receive AI-powered recommendations for optimization.",
+    "creditsTitle": "Understanding Credits",
+    "creditsIntro": "Alphalens uses a credit-based system for AI-generated insights:",
+    "creditsTradeSetup": "Trade Setup: 1 credit per AI-generated trade idea",
+    "creditsMacro": "Macro Commentary: 1 credit per market analysis",
+    "creditsReports": "Reports: 1 credit per comprehensive report",
+    "creditsNote": "Credits reset monthly based on your subscription plan. Unused credits do not roll over."
+  },
+  "features": {
+    "aiTradeSetup": {
+      "title": "AI Trade Setup",
+      "description": "Generate intelligent trade ideas with entry points, stop losses, and take profit levels.",
+      "feature1": "Multi-timeframe technical analysis",
+      "feature2": "Risk-reward ratio calculations",
+      "feature3": "Real-time market data integration",
+      "feature4": "Customizable analysis parameters"
+    },
+    "macroCommentary": {
+      "title": "Macro Commentary",
+      "description": "AI-powered analysis of macroeconomic trends and market sentiment.",
+      "feature1": "Economic indicator analysis",
+      "feature2": "Sector rotation insights",
+      "feature3": "Geopolitical impact assessment",
+      "feature4": "Cross-asset correlations"
+    },
+    "reports": {
+      "title": "Comprehensive Reports",
+      "description": "Generate detailed research reports on any asset or market.",
+      "feature1": "Fundamental and technical analysis",
+      "feature2": "Earnings and financial data",
+      "feature3": "Historical performance metrics",
+      "feature4": "Export to PDF or email"
+    }
+  },
+  "aiSetup": {
+    "title": "Configuring AI Trade Setup",
+    "step1Title": "1. Select Your Asset",
+    "step1Desc": "Search for stocks, forex pairs, cryptocurrencies, or commodities using the search bar.",
+    "step2Title": "2. Choose Timeframe",
+    "step2Desc": "Select from 1m, 5m, 15m, 1h, 4h, 1D, or 1W timeframes based on your trading style.",
+    "step3Title": "3. Set Parameters",
+    "step3Desc": "Adjust risk tolerance, position size, and analysis depth to match your strategy.",
+    "step4Title": "4. Generate Setup",
+    "step4Desc": "Click \"Generate AI Setup\" and receive your personalized trade idea within seconds."
+  },
+  "portfolio": {
+    "title": "Portfolio Management",
+    "description": "Build and manage your investment portfolio with AI-powered insights.",
+    "feature1": "Add positions with entry price and quantity",
+    "feature2": "Real-time P&L tracking and valuation",
+    "feature3": "AI recommendations for portfolio optimization",
+    "feature4": "Risk assessment and diversification analysis",
+    "feature5": "Historical performance tracking"
+  },
+  "api": {
+    "title": "API Access",
+    "description": "Enterprise and Professional plans include API access for integration with your own systems.",
+    "contact": "For API documentation and access credentials, please contact our team at",
+    "email": "research@albaricg.com"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1Title": "How accurate are the AI predictions?",
+    "q1Answer": "Our AI analyzes multiple data sources and technical indicators, but trading involves risk. Always use our insights as one input in your decision-making process.",
+    "q2Title": "Can I cancel my subscription anytime?",
+    "q2Answer": "Yes, you can cancel your subscription at any time from your account settings. You'll retain access until the end of your billing period.",
+    "q3Title": "What markets do you support?",
+    "q3Answer": "We support forex, cryptocurrencies, and commodities. Coverage is continuously expanding.",
+    "q4Title": "Is my data secure?",
+    "q4Answer": "Yes, we use industry-standard encryption and security practices. We never sell your data to third parties."
+  },
+  "footer": {
+    "copyright": "© 2025 alphaLens.ai. All rights reserved."
+  }
+}

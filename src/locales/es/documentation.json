@@ -1,0 +1,95 @@
+{
+  "title": "Documentación",
+  "subtitle": "Todo lo que necesitas para dominar Alphalens y maximizar tus conocimientos de trading",
+  "tabs": {
+    "gettingStarted": "Comenzando",
+    "features": "Características",
+    "aiSetup": "Configuración IA",
+    "portfolio": "Cartera",
+    "api": "API",
+    "faq": "Preguntas Frecuentes"
+  },
+  "gettingStarted": {
+    "quickStart": "Guía de Inicio Rápido",
+    "step1Title": "1. Crea Tu Cuenta",
+    "step1Desc": "Regístrate con tu correo electrónico y comienza con una prueba gratuita para explorar todas las funciones.",
+    "step2Title": "2. Selecciona Tu Broker",
+    "step2Desc": "Elige tu broker de trading de nuestra lista compatible para obtener información personalizada.",
+    "step3Title": "3. Explora Funciones de IA",
+    "step3Desc": "Usa Configuración de Trading IA, Comentarios Macro e Informes para generar conocimientos de trading.",
+    "step4Title": "4. Construye Tu Cartera",
+    "step4Desc": "Agrega posiciones y recibe recomendaciones impulsadas por IA para optimización.",
+    "creditsTitle": "Comprender los Créditos",
+    "creditsIntro": "Alphalens usa un sistema basado en créditos para conocimientos generados por IA:",
+    "creditsTradeSetup": "Configuración de Trading: 1 crédito por idea de trading generada por IA",
+    "creditsMacro": "Comentario Macro: 1 crédito por análisis de mercado",
+    "creditsReports": "Informes: 1 crédito por informe integral",
+    "creditsNote": "Los créditos se restablecen mensualmente según tu plan de suscripción. Los créditos no utilizados no se transfieren."
+  },
+  "features": {
+    "aiTradeSetup": {
+      "title": "Configuración de Trading IA",
+      "description": "Genera ideas de trading inteligentes con puntos de entrada, stop loss y niveles de take profit.",
+      "feature1": "Análisis técnico multi-temporal",
+      "feature2": "Cálculos de relación riesgo-recompensa",
+      "feature3": "Integración de datos de mercado en tiempo real",
+      "feature4": "Parámetros de análisis personalizables"
+    },
+    "macroCommentary": {
+      "title": "Comentario Macro",
+      "description": "Análisis impulsado por IA de tendencias macroeconómicas y sentimiento de mercado.",
+      "feature1": "Análisis de indicadores económicos",
+      "feature2": "Conocimientos de rotación sectorial",
+      "feature3": "Evaluación de impacto geopolítico",
+      "feature4": "Correlaciones entre activos"
+    },
+    "reports": {
+      "title": "Informes Integrales",
+      "description": "Genera informes de investigación detallados sobre cualquier activo o mercado.",
+      "feature1": "Análisis fundamental y técnico",
+      "feature2": "Datos de ganancias y financieros",
+      "feature3": "Métricas de rendimiento histórico",
+      "feature4": "Exportar a PDF o correo electrónico"
+    }
+  },
+  "aiSetup": {
+    "title": "Configuración de AI Trade Setup",
+    "step1Title": "1. Selecciona Tu Activo",
+    "step1Desc": "Busca acciones, pares de divisas, criptomonedas o commodities usando la barra de búsqueda.",
+    "step2Title": "2. Elige Marco Temporal",
+    "step2Desc": "Selecciona de marcos temporales 1m, 5m, 15m, 1h, 4h, 1D o 1W según tu estilo de trading.",
+    "step3Title": "3. Establece Parámetros",
+    "step3Desc": "Ajusta la tolerancia al riesgo, tamaño de posición y profundidad de análisis para que coincida con tu estrategia.",
+    "step4Title": "4. Genera Configuración",
+    "step4Desc": "Haz clic en \"Generar Configuración IA\" y recibe tu idea de trading personalizada en segundos."
+  },
+  "portfolio": {
+    "title": "Gestión de Cartera",
+    "description": "Construye y gestiona tu cartera de inversión con conocimientos impulsados por IA.",
+    "feature1": "Agrega posiciones con precio de entrada y cantidad",
+    "feature2": "Seguimiento de P&L en tiempo real y valoración",
+    "feature3": "Recomendaciones de IA para optimización de cartera",
+    "feature4": "Evaluación de riesgo y análisis de diversificación",
+    "feature5": "Seguimiento de rendimiento histórico"
+  },
+  "api": {
+    "title": "Acceso a API",
+    "description": "Los planes Enterprise y Professional incluyen acceso a API para integración con tus propios sistemas.",
+    "contact": "Para documentación de API y credenciales de acceso, contáctanos en",
+    "email": "research@albaricg.com"
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "q1Title": "¿Qué tan precisas son las predicciones de IA?",
+    "q1Answer": "Nuestra IA analiza múltiples fuentes de datos e indicadores técnicos, pero el trading involucra riesgo. Siempre usa nuestras ideas como una entrada en tu proceso de toma de decisiones.",
+    "q2Title": "¿Puedo cancelar mi suscripción en cualquier momento?",
+    "q2Answer": "Sí, puedes cancelar tu suscripción en cualquier momento desde la configuración de tu cuenta. Mantendrás el acceso hasta el final de tu período de facturación.",
+    "q3Title": "¿Qué mercados soportan?",
+    "q3Answer": "Soportamos forex, criptomonedas y commodities. La cobertura se está expandiendo continuamente.",
+    "q4Title": "¿Son seguros mis datos?",
+    "q4Answer": "Sí, utilizamos cifrado estándar de la industria y prácticas de seguridad. Nunca vendemos tus datos a terceros."
+  },
+  "footer": {
+    "copyright": "© 2025 alphaLens.ai. Todos los derechos reservados."
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "title": "Generador de Configuración de Trading IA",
+  "subtitle": "Configuraciones de trading IA de nivel institucional con entrada, stop loss y niveles de take profit",
+  "backToDashboard": "Volver al Panel",
+  "parameters": {
+    "title": "Parámetros de Trading",
+    "instrument": "Instrumento",
+    "instrumentPlaceholder": "Buscar instrumento (ej., EUR/USD, Bitcoin)",
+    "timeframe": "Marco Temporal",
+    "riskLevel": "Nivel de Riesgo",
+    "positionSize": "Tamaño de Posición (%)",
+    "strategy": "Estrategia",
+    "customNotes": "Notas Personalizadas (Opcional)",
+    "customNotesPlaceholder": "Agregue requisitos específicos o vistas del mercado...",
+    "generate": "Generar Configuración IA",
+    "generating": "Generando...",
+    "reset": "Restablecer"
+  },
+  "timeframes": {
+    "1m": "1 Minuto",
+    "5m": "5 Minutos",
+    "15m": "15 Minutos",
+    "1h": "1 Hora",
+    "4h": "4 Horas",
+    "1d": "Diario",
+    "1w": "Semanal"
+  },
+  "riskLevels": {
+    "low": "Conservador",
+    "medium": "Moderado",
+    "high": "Agresivo"
+  },
+  "strategies": {
+    "breakout": "Ruptura",
+    "momentum": "Momentum",
+    "reversal": "Reversión",
+    "range": "Trading de Rango",
+    "trend": "Seguimiento de Tendencia"
+  },
+  "results": {
+    "title": "Configuración de Trading IA",
+    "marketCommentary": "Comentario de Mercado",
+    "keyDrivers": "Impulsores Clave del Mercado",
+    "tradeSetup": "Configuración de Trading",
+    "setup": "Configuración",
+    "direction": "Dirección",
+    "horizon": "Horizonte Temporal",
+    "confidence": "Confianza",
+    "entryPrice": "Precio de Entrada",
+    "stopLoss": "Stop Loss",
+    "takeProfit": "Take Profit",
+    "takeProfits": "Niveles de Take Profit",
+    "riskReward": "Riesgo/Recompensa",
+    "supports": "Niveles de Soporte",
+    "resistances": "Niveles de Resistencia",
+    "context": "Contexto del Trade",
+    "riskNotes": "Gestión de Riesgo",
+    "indicators": "Indicadores Técnicos",
+    "atrMultiple": "Múltiplo ATR (SL)",
+    "disclaimer": "Aviso Legal",
+    "applyToPortfolio": "Aplicar a Cartera",
+    "copySetup": "Copiar Configuración",
+    "saveSetup": "Guardar Configuración",
+    "long": "LARGO",
+    "short": "CORTO",
+    "noData": "No hay datos disponibles"
+  },
+  "tools": {
+    "title": "Herramientas de Análisis",
+    "pnlCalculator": "Calculadora de P&L",
+    "tradingChart": "Gráfico de Trading"
+  },
+  "toasts": {
+    "insufficientCredits": "Créditos Insuficientes",
+    "insufficientCreditsDesc": "No puede lanzar esta solicitud.",
+    "tradeSetupGenerated": "Configuración de Trading Generada",
+    "tradeSetupGeneratedDesc": "Configuración de trading IA generada exitosamente.",
+    "noSetupsReturned": "Sin Configuraciones Devueltas",
+    "noSetupsReturnedDesc": "La respuesta no contiene configuraciones.",
+    "errorTitle": "Error",
+    "errorReservingCredit": "Error al reservar crédito. Por favor intente de nuevo.",
+    "setupCopied": "Configuración Copiada",
+    "setupCopiedDesc": "Configuración de trading copiada al portapapeles.",
+    "setupSaved": "Configuración Guardada",
+    "setupSavedDesc": "Configuración de trading guardada exitosamente.",
+    "processingTimeout": "Solicitud agotó el tiempo. Por favor intente de nuevo.",
+    "processingError": "Error al procesar solicitud. Por favor intente de nuevo."
+  }
+}
