@@ -18,6 +18,7 @@ import AURA from "./AURA";
 import { useLocation } from "react-router-dom";
 import { useMemo } from "react";
 import { useAURAContext } from "@/contexts/AURAContextProvider";
+import { useTranslation } from "react-i18next";
 interface LayoutProps {
   children: React.ReactNode;
   activeModule?: string;
@@ -34,6 +35,7 @@ export default function Layout({
   onResetJobsCount,
   activeJobsCount = 0
 }: LayoutProps) {
+  const { t } = useTranslation('common');
   const [selectedAsset, setSelectedAsset] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("4h");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -113,7 +115,7 @@ export default function Layout({
               markResultsAsSeen();
             }} className="relative h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 hidden md:inline-flex">
                     <History className="h-4 w-4" />
-                    <span className="hidden sm:inline ml-2">History</span>
+                    <span className="hidden sm:inline ml-2">{t('nav.history', { defaultValue: 'History' })}</span>
                     {completedJobsCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[1.25rem]">
                         {completedJobsCount > 9 ? '9+' : completedJobsCount}
                       </span>}
@@ -123,39 +125,39 @@ export default function Layout({
               {user ? <div className="flex items-center gap-2">
                   {(isAdmin || isSuperUser) && <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="hidden sm:flex items-center gap-2 h-8 px-3">
                       <Shield className="h-4 w-4" />
-                      <span className="text-sm">Admin</span>
+                      <span className="text-sm">{t('nav.admin', { defaultValue: 'Admin' })}</span>
                     </Button>}
                   <div className="hidden sm:block">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 px-3 text-sm">
-                          About Us
+                          {t('nav.aboutUs', { defaultValue: 'About Us' })}
                           <ChevronDown className="ml-1 h-3 w-3" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="w-48 bg-white">
                         <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
-                          About
+                          {t('nav.about')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate("/features")} className="cursor-pointer">
-                          Features
+                          {t('nav.features')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate("/pricing")} className="cursor-pointer">
-                          Pricing
+                          {t('nav.pricing')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate("/contact")} className="cursor-pointer">
-                          Contact
+                          {t('nav.contact')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                   <Button variant="ghost" size="sm" onClick={signOut} className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2">
                     <LogOut className="h-4 w-4" />
-                    <span className="hidden sm:inline ml-2">Sign Out</span>
+                    <span className="hidden sm:inline ml-2">{t('actions.signOut')}</span>
                   </Button>
                 </div> : <Button variant="outline" size="sm" onClick={() => navigate('/auth')} className="h-8 px-3">
                   <User className="h-4 w-4 mr-2" />
-                  <span className="text-sm">Sign In</span>
+                  <span className="text-sm">{t('actions.signIn')}</span>
                 </Button>}
 
               {/* Mobile Menu Button */}
@@ -166,7 +168,7 @@ export default function Layout({
               {/* Status Indicator - Always visible but adapted */}
               <div className="flex items-center gap-1 text-xs text-muted-foreground bg-card/50 px-2 py-1 rounded-full border border-border/50">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                <span className="hidden sm:inline whitespace-nowrap">Live Markets</span>
+                <span className="hidden sm:inline whitespace-nowrap">{t('status.liveMarkets')}</span>
                 <span className="sm:hidden">●</span>
               </div>
             </div>
@@ -182,28 +184,28 @@ export default function Layout({
                 setIsMobileMenuOpen(false);
               }} className="justify-start text-sm">
                     <Building2 className="h-4 w-4 mr-2" />
-                    About
+                    {t('nav.about')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                 navigate('/features');
                 setIsMobileMenuOpen(false);
               }} className="justify-start text-sm">
                     <Zap className="h-4 w-4 mr-2" />
-                    Features
+                    {t('nav.features')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                 navigate('/pricing');
                 setIsMobileMenuOpen(false);
               }} className="justify-start text-sm">
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Pricing
+                    {t('nav.pricing')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                 navigate('/contact');
                 setIsMobileMenuOpen(false);
               }} className="justify-start text-sm">
                     <FileText className="h-4 w-4 mr-2" />
-                    Contact
+                    {t('nav.contact')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                 navigate('/alphalens-labs');
@@ -220,7 +222,7 @@ export default function Layout({
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm">
                         <Activity className="h-4 w-4 mr-2" />
-                        Trading Dashboard
+                        {t('nav.dashboard')}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                   navigate('/history');
@@ -228,35 +230,35 @@ export default function Layout({
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm relative">
                         <History className="h-4 w-4 mr-2" />
-                        History
+                        {t('nav.history', { defaultValue: 'History' })}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                   navigate('/macro-analysis');
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm">
                         <TrendingUp className="h-4 w-4 mr-2" />
-                        Macro Analysis
+                        {t('nav.macroAnalysis', { defaultValue: 'Macro Analysis' })}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                   navigate('/reports');
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm">
                         <Activity className="h-4 w-4 mr-2" />
-                        Reports
+                        {t('nav.reports', { defaultValue: 'Reports' })}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
                   onModuleChange?.("ai-setup");
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm">
                         <Zap className="h-4 w-4 mr-2" />
-                        AI Setup
+                        {t('nav.aiSetup', { defaultValue: 'AI Setup' })}
                       </Button>
                       {(isAdmin || isSuperUser) && <Button variant="outline" size="sm" onClick={() => {
                   navigate('/admin');
                   setIsMobileMenuOpen(false);
                 }} className="justify-start text-sm">
                           <Shield className="h-4 w-4 mr-2" />
-                          Admin Panel
+                          {t('nav.adminPanel', { defaultValue: 'Admin Panel' })}
                         </Button>}
                     </>}
                 </div>

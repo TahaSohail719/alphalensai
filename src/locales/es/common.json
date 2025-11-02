@@ -51,6 +51,34 @@
     "terms": "Términos de Servicio",
     "copyright": "© 2025 alphaLens AI. Todos los derechos reservados."
   },
+  "status": {
+    "liveMarkets": "Mercados en Vivo",
+    "online": "En Línea",
+    "offline": "Desconectado"
+  },
+  "actions": {
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "backToDashboard": "Volver al Panel",
+    "viewDetails": "Ver Detalles",
+    "getStarted": "Comenzar",
+    "explore": "Explorar",
+    "loading": "Cargando...",
+    "processing": "Procesando...",
+    "upgradePlan": "Actualizar Plan",
+    "refresh": "Actualizar",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "export": "Exportar",
+    "import": "Importar",
+    "search": "Buscar",
+    "filter": "Filtrar"
+  },
   "seo": {
     "defaultTitle": "alphaLens AI - Plataforma de Investigación Financiera Inteligente",
     "defaultDescription": "Análisis avanzado de FX, cripto y macroeconomía con información de nivel institucional, configuraciones de trading impulsadas por IA y reportes de investigación integrales.",

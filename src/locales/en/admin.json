@@ -1,0 +1,66 @@
+{
+  "title": "Admin Dashboard",
+  "subtitle": "Manage users, approvals, and system permissions",
+  "brokerSubtitle": "Manage users and approvals for {{brokerName}}",
+  "brokerNotAssigned": "Broker not assigned. Please contact a super user to assign a broker.",
+  "stats": {
+    "totalUsers": "Total Users",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "users": "Users",
+    "admins": "Admins",
+    "superUsers": "Super Users"
+  },
+  "stripe": {
+    "title": "Stripe Environment",
+    "subtitle": "Current payment processing mode",
+    "testMode": "Test Mode",
+    "liveMode": "Live Mode",
+    "testModeDescription": "Payments are in test mode - no real transactions",
+    "liveModeDescription": "⚠️ LIVE MODE ACTIVE - Processing real payments",
+    "switchTo": "Switch to {{mode}} Mode",
+    "confirmSwitch": "Confirm Environment Switch",
+    "confirmMessage": "Are you sure you want to switch Stripe to {{mode}} mode?",
+    "warning": "This will affect all payment processing across the platform.",
+    "testWarning": "Test mode uses test cards and doesn't process real payments.",
+    "liveWarning": "LIVE mode processes REAL payments with REAL money. Only activate in production."
+  },
+  "actions": {
+    "createUser": "Create User",
+    "refresh": "Refresh",
+    "updateStatus": "Update Status",
+    "deleteUser": "Delete User",
+    "viewDetails": "View Details",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "tabs": {
+    "users": "Users",
+    "jobs": "Jobs",
+    "costs": "Costs",
+    "brokers": "Brokers",
+    "plans": "Plans",
+    "subscriptions": "Subscriptions",
+    "credits": "Credits",
+    "realtime": "Realtime",
+    "import": "Import"
+  },
+  "costs": {
+    "title": "Cost Analysis",
+    "period": "Period",
+    "last7days": "Last 7 days",
+    "last30days": "Last 30 days",
+    "last90days": "Last 90 days",
+    "totalRequests": "Total Requests",
+    "totalCost": "Total Cost",
+    "aiTradeSetup": "AI Trade Setup",
+    "macroCommentary": "Macro Commentary",
+    "reports": "Reports",
+    "dailyTrend": "Daily Cost Trend",
+    "userBreakdown": "User Breakdown",
+    "user": "User",
+    "requests": "Requests",
+    "cost": "Cost"
+  }
+}

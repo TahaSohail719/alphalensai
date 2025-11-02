@@ -17,5 +17,72 @@
   "filter": "فیلتر",
   "search": "جستجو",
   "export": "خروجی",
-  "import": "وارد کردن"
+  "import": "وارد کردن",
+  "trading": {
+    "title": "داشبورد معاملات",
+    "subtitle": "تحلیل هوش مصنوعی در زمان واقعی و اجرای معاملات",
+    "aiTradeSetup": "راه‌اندازی معاملات هوش مصنوعی",
+    "macroCommentary": "تفسیر ماکرو",
+    "selectAsset": "یک دارایی انتخاب کنید",
+    "generateSetup": "تولید راه‌اندازی",
+    "intelligentTradeSetups": "تولید راه‌اندازی‌های معاملاتی هوشمند با تحلیل هوش مصنوعی",
+    "inDepthAnalysis": "تحلیل عمیق اقتصاد کلان و بینش بازار",
+    "comprehensiveReports": "گزارش‌های جامع بازار و چشم‌انداز استراتژیک"
+  },
+  "macro": {
+    "title": "تحلیل ماکرو",
+    "subtitle": "بینش‌های عمیق اقتصاد کلان و تحلیل بازار",
+    "analysisCompleted": "تحلیل کامل شد",
+    "analysisCompletedDescription": "تحلیل ماکرو شما آماده است",
+    "analysisError": "خطای تحلیل",
+    "analysisErrorDescription": "تکمیل تحلیل امکان‌پذیر نیست. لطفاً دوباره امتحان کنید.",
+    "selectAsset": "یک دارایی انتخاب کنید",
+    "generateAnalysis": "تولید تحلیل",
+    "enterQuery": "سوال بازار خود را وارد کنید",
+    "queryPlaceholder": "چه چیزی باعث رشد EUR/USD می‌شود؟"
+  },
+  "reports": {
+    "title": "گزارش‌ها",
+    "subtitle": "تولید گزارش‌های جامع معاملاتی",
+    "reportGenerated": "گزارش تولید شد",
+    "reportGeneratedDescription": "گزارش شما با موفقیت تولید شد",
+    "reportError": "خطای گزارش",
+    "exportReport": "خروجی گزارش",
+    "reportTitle": "عنوان گزارش",
+    "customNotes": "یادداشت‌های سفارشی",
+    "selectSections": "انتخاب بخش‌ها",
+    "exportFormat": "فرمت خروجی",
+    "generateReport": "تولید گزارش"
+  },
+  "portfolio": {
+    "title": "پرتفوی",
+    "subtitle": "مدیریت پرتفوی معاملاتی شما",
+    "addPosition": "افزودن موقعیت",
+    "totalValue": "ارزش کل",
+    "totalPnL": "P&L کل",
+    "performance": "عملکرد"
+  },
+  "history": {
+    "title": "تاریخچه تعاملات هوش مصنوعی",
+    "subtitle": "مشاهده تاریخچه کامل تعاملات شما در تمام ویژگی‌های هوش مصنوعی",
+    "noHistory": "هنوز تاریخچه تعاملی وجود ندارد",
+    "viewDetails": "مشاهده جزئیات"
+  },
+  "credits": {
+    "title": "نمای کلی اعتبارات",
+    "subtitle": "پیگیری استفاده و اعتبارات باقی‌مانده شما",
+    "activePlan": "پلن فعال",
+    "creditsRemaining": "اعتبارات باقی‌مانده",
+    "nextRenewal": "تمدید بعدی",
+    "macroCommentary": "تفسیر ماکرو",
+    "aiTrade": "معاملات هوش مصنوعی",
+    "usedThisPeriod": "استفاده شده در این دوره",
+    "available": "در دسترس",
+    "depleted": "تمام شده",
+    "usageSummary": "خلاصه استفاده",
+    "totalMacroUsed": "کل تفسیرهای ماکرو استفاده شده",
+    "totalAITradeUsed": "کل معاملات هوش مصنوعی تولید شده",
+    "totalReportsUsed": "کل گزارش‌های ایجاد شده",
+    "viewDetailedHistory": "مشاهده تاریخچه تفصیلی"
+  }
 }

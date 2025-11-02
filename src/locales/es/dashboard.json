@@ -17,5 +17,72 @@
   "filter": "Filtrar",
   "search": "Buscar",
   "export": "Exportar",
-  "import": "Importar"
+  "import": "Importar",
+  "trading": {
+    "title": "Panel de Trading",
+    "subtitle": "Análisis AI en tiempo real y ejecución de operaciones",
+    "aiTradeSetup": "Configuración de Trading IA",
+    "macroCommentary": "Comentario Macro",
+    "selectAsset": "Seleccionar un activo",
+    "generateSetup": "Generar Configuración",
+    "intelligentTradeSetups": "Genere configuraciones de trading inteligentes con análisis impulsado por IA",
+    "inDepthAnalysis": "Análisis macroeconómico profundo e información del mercado",
+    "comprehensiveReports": "Informes de mercado completos y perspectiva estratégica"
+  },
+  "macro": {
+    "title": "Análisis Macro",
+    "subtitle": "Perspectivas macroeconómicas profundas y análisis de mercado",
+    "analysisCompleted": "Análisis Completado",
+    "analysisCompletedDescription": "Su análisis macro está listo",
+    "analysisError": "Error de Análisis",
+    "analysisErrorDescription": "No se pudo completar el análisis. Por favor, inténtelo de nuevo.",
+    "selectAsset": "Seleccionar un activo",
+    "generateAnalysis": "Generar Análisis",
+    "enterQuery": "Ingrese su pregunta de mercado",
+    "queryPlaceholder": "¿Qué está impulsando el rally EUR/USD?"
+  },
+  "reports": {
+    "title": "Informes",
+    "subtitle": "Genere informes de trading completos",
+    "reportGenerated": "Informe Generado",
+    "reportGeneratedDescription": "Su informe se ha generado exitosamente",
+    "reportError": "Error de Informe",
+    "exportReport": "Exportar Informe",
+    "reportTitle": "Título del Informe",
+    "customNotes": "Notas Personalizadas",
+    "selectSections": "Seleccionar Secciones",
+    "exportFormat": "Formato de Exportación",
+    "generateReport": "Generar Informe"
+  },
+  "portfolio": {
+    "title": "Cartera",
+    "subtitle": "Administre su cartera de trading",
+    "addPosition": "Agregar Posición",
+    "totalValue": "Valor Total",
+    "totalPnL": "P&L Total",
+    "performance": "Rendimiento"
+  },
+  "history": {
+    "title": "Historial de Interacciones AI",
+    "subtitle": "Vea su historial completo de interacciones en todas las funciones de AI",
+    "noHistory": "Aún no hay historial de interacciones",
+    "viewDetails": "Ver Detalles"
+  },
+  "credits": {
+    "title": "Resumen de Créditos",
+    "subtitle": "Rastree su uso y créditos restantes",
+    "activePlan": "Plan Activo",
+    "creditsRemaining": "Créditos Restantes",
+    "nextRenewal": "Próxima Renovación",
+    "macroCommentary": "Comentario Macro",
+    "aiTrade": "Trading IA",
+    "usedThisPeriod": "Usado en este período",
+    "available": "Disponible",
+    "depleted": "Agotado",
+    "usageSummary": "Resumen de Uso",
+    "totalMacroUsed": "Total de Comentarios Macro Usados",
+    "totalAITradeUsed": "Total de Trading IA Generado",
+    "totalReportsUsed": "Total de Informes Creados",
+    "viewDetailedHistory": "Ver Historial Detallado"
+  }
 }

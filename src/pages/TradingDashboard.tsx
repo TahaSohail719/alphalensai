@@ -15,6 +15,7 @@ import { getSymbolForAsset, getNormalizedSymbol } from "@/lib/assetMapping";
 import AssetInfoCard from "@/components/AssetInfoCard";
 import { JobStatusCard } from "@/components/JobStatusCard";
 import { useJobStatusManager } from "@/hooks/useJobStatusManager";
+import { useTranslation } from "react-i18next";
 
 interface PriceData {
   symbol: string;
@@ -24,6 +25,7 @@ interface PriceData {
 }
 
 export default function TradingDashboard() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const jobManager = useJobStatusManager();
   
@@ -210,10 +212,10 @@ export default function TradingDashboard() {
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight break-words">
-                Trading Dashboard
+                {t('dashboard:trading.title')}
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground break-words">
-                Real-time AI analysis and trade execution
+                {t('dashboard:trading.subtitle')}
               </p>
             </div>
           </div>
@@ -247,7 +249,7 @@ export default function TradingDashboard() {
                         onClick={() => navigate(`/asset/${selectedAssetProfile.symbol}`)}
                         className="shrink-0"
                       >
-                        View Details
+                        {t('common:actions.viewDetails')}
                       </Button>
                       <Button 
                         size="sm" 
@@ -372,12 +374,12 @@ export default function TradingDashboard() {
                 <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
                   <Zap className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">AI Trade Setup</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.aiTradeSetup')}</h3>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  Generate intelligent trade setups with AI-powered analysis
+                  {t('dashboard:trading.intelligentTradeSetups')}
                 </p>
                 <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  Get Started
+                  {t('dashboard:getStarted')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>
@@ -392,12 +394,12 @@ export default function TradingDashboard() {
                 <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
                   <Activity className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Macro Commentary</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.macroCommentary')}</h3>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  In-depth macroeconomic analysis and market insights
+                  {t('dashboard:trading.inDepthAnalysis')}
                 </p>
                 <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  Explore
+                  {t('common:actions.explore')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>
@@ -412,12 +414,12 @@ export default function TradingDashboard() {
                 <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
                   <Activity className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Reports</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:reports')}</h3>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  Generate comprehensive market reports and analysis
+                  {t('dashboard:trading.comprehensiveReports')}
                 </p>
                 <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  Create Report
+                  {t('common:actions.explore')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>

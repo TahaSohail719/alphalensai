@@ -10,12 +10,79 @@
   "logout": "Logout",
   "viewAll": "View All",
   "getStarted": "Get Started",
-  "learn more": "Learn More",
+  "learnMore": "Learn More",
   "noDataAvailable": "No data available",
   "loading": "Loading...",
   "refresh": "Refresh",
   "filter": "Filter",
   "search": "Search",
   "export": "Export",
-  "import": "Import"
+  "import": "Import",
+  "trading": {
+    "title": "Trading Dashboard",
+    "subtitle": "Real-time AI analysis and trade execution",
+    "aiTradeSetup": "AI Trade Setup",
+    "macroCommentary": "Macro Commentary",
+    "selectAsset": "Select an asset",
+    "generateSetup": "Generate Setup",
+    "intelligentTradeSetups": "Generate intelligent trade setups with AI-powered analysis",
+    "inDepthAnalysis": "In-depth macroeconomic analysis and market insights",
+    "comprehensiveReports": "Comprehensive market reports and strategic outlook"
+  },
+  "macro": {
+    "title": "Macro Analysis",
+    "subtitle": "Deep macroeconomic insights and market analysis",
+    "analysisCompleted": "Analysis Completed",
+    "analysisCompletedDescription": "Your macro analysis is ready",
+    "analysisError": "Analysis Error",
+    "analysisErrorDescription": "Unable to complete analysis. Please retry.",
+    "selectAsset": "Select an asset",
+    "generateAnalysis": "Generate Analysis",
+    "enterQuery": "Enter your market question",
+    "queryPlaceholder": "What's driving the EUR/USD rally?"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Generate comprehensive trading reports",
+    "reportGenerated": "Report Generated",
+    "reportGeneratedDescription": "Your report has been successfully generated",
+    "reportError": "Report Error",
+    "exportReport": "Export Report",
+    "reportTitle": "Report Title",
+    "customNotes": "Custom Notes",
+    "selectSections": "Select Sections",
+    "exportFormat": "Export Format",
+    "generateReport": "Generate Report"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Manage your trading portfolio",
+    "addPosition": "Add Position",
+    "totalValue": "Total Value",
+    "totalPnL": "Total P&L",
+    "performance": "Performance"
+  },
+  "history": {
+    "title": "AI Interaction History",
+    "subtitle": "View your complete interaction history across all AI features",
+    "noHistory": "No interaction history yet",
+    "viewDetails": "View Details"
+  },
+  "credits": {
+    "title": "Credits Overview",
+    "subtitle": "Track your usage and remaining credits",
+    "activePlan": "Active Plan",
+    "creditsRemaining": "Credits Remaining",
+    "nextRenewal": "Next Renewal",
+    "macroCommentary": "Macro Commentary",
+    "aiTrade": "AI Trade",
+    "usedThisPeriod": "Used this period",
+    "available": "Available",
+    "depleted": "Depleted",
+    "usageSummary": "Usage Summary",
+    "totalMacroUsed": "Total Macro Commentary Used",
+    "totalAITradeUsed": "Total AI Trade Generated",
+    "totalReportsUsed": "Total Reports Created",
+    "viewDetailedHistory": "View Detailed History"
+  }
 }

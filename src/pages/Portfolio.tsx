@@ -6,6 +6,7 @@ import PortfolioManager from '@/components/PortfolioManager';
 import PortfolioHeader from '@/components/portfolio/PortfolioHeader';
 import PositionsList from '@/components/portfolio/PositionsList';
 import RecommendationsList from '@/components/portfolio/RecommendationsList';
+import { useTranslation } from 'react-i18next';
 
 interface Portfolio {
   id: string;
@@ -16,6 +17,7 @@ interface Portfolio {
 }
 
 export default function Portfolio() {
+  const { t } = useTranslation('common');
   const { user, loading } = useAuth();
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [totalValue, setTotalValue] = useState(0);
@@ -34,7 +36,7 @@ export default function Portfolio() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Loading...</p>
+            <p className="mt-4 text-muted-foreground">{t('actions.loading')}</p>
           </div>
         </div>
       </Layout>

@@ -5,8 +5,10 @@ import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { AIInteractionHistory } from "@/components/AIInteractionHistory";
 import { useResultNotifications } from "@/hooks/useResultNotifications";
+import { useTranslation } from "react-i18next";
 
 export default function History() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const { markResultsAsSeen } = useResultNotifications();
 
@@ -30,10 +32,10 @@ export default function History() {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">
-              AI Interaction History
+              {t('dashboard:history.title')}
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground break-words">
-              View your complete interaction history across all AI features
+              {t('dashboard:history.subtitle')}
             </p>
           </div>
         </div>

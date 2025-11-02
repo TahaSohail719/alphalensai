@@ -12,6 +12,7 @@ import enPricing from '@/locales/en/pricing.json';
 import enContact from '@/locales/en/contact.json';
 import enHelp from '@/locales/en/help.json';
 import enToasts from '@/locales/en/toasts.json';
+import enAdmin from '@/locales/en/admin.json';
 
 import esCommon from '@/locales/es/common.json';
 import esAuth from '@/locales/es/auth.json';
@@ -23,6 +24,7 @@ import esPricing from '@/locales/es/pricing.json';
 import esContact from '@/locales/es/contact.json';
 import esHelp from '@/locales/es/help.json';
 import esToasts from '@/locales/es/toasts.json';
+import esAdmin from '@/locales/es/admin.json';
 
 import faCommon from '@/locales/fa/common.json';
 import faAuth from '@/locales/fa/auth.json';
@@ -34,6 +36,7 @@ import faPricing from '@/locales/fa/pricing.json';
 import faContact from '@/locales/fa/contact.json';
 import faHelp from '@/locales/fa/help.json';
 import faToasts from '@/locales/fa/toasts.json';
+import faAdmin from '@/locales/fa/admin.json';
 
 export const supportedLanguages = ['en', 'es', 'fa'] as const;
 export type SupportedLanguage = typeof supportedLanguages[number];
@@ -42,47 +45,50 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: {
-        common: enCommon,
-        auth: enAuth,
-        dashboard: enDashboard,
-        errors: enErrors,
-        about: enAbout,
-        features: enFeatures,
-        pricing: enPricing,
-        contact: enContact,
-        help: enHelp,
-        toasts: enToasts,
-      },
-      es: {
-        common: esCommon,
-        auth: esAuth,
-        dashboard: esDashboard,
-        errors: esErrors,
-        about: esAbout,
-        features: esFeatures,
-        pricing: esPricing,
-        contact: esContact,
-        help: esHelp,
-        toasts: esToasts,
-      },
-      fa: {
-        common: faCommon,
-        auth: faAuth,
-        dashboard: faDashboard,
-        errors: faErrors,
-        about: faAbout,
-        features: faFeatures,
-        pricing: faPricing,
-        contact: faContact,
-        help: faHelp,
-        toasts: faToasts,
-      },
+  resources: {
+    en: {
+      common: enCommon,
+      auth: enAuth,
+      dashboard: enDashboard,
+      errors: enErrors,
+      about: enAbout,
+      features: enFeatures,
+      pricing: enPricing,
+      contact: enContact,
+      help: enHelp,
+      toasts: enToasts,
+      admin: enAdmin,
     },
-    fallbackLng: 'en',
-    defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'errors', 'about', 'features', 'pricing', 'contact', 'help', 'toasts'],
+    es: {
+      common: esCommon,
+      auth: esAuth,
+      dashboard: esDashboard,
+      errors: esErrors,
+      about: esAbout,
+      features: esFeatures,
+      pricing: esPricing,
+      contact: esContact,
+      help: esHelp,
+      toasts: esToasts,
+      admin: esAdmin,
+    },
+    fa: {
+      common: faCommon,
+      auth: faAuth,
+      dashboard: faDashboard,
+      errors: faErrors,
+      about: faAbout,
+      features: faFeatures,
+      pricing: faPricing,
+      contact: faContact,
+      help: faHelp,
+      toasts: faToasts,
+      admin: faAdmin,
+    },
+  },
+  fallbackLng: 'en',
+  defaultNS: 'common',
+  ns: ['common', 'auth', 'dashboard', 'errors', 'about', 'features', 'pricing', 'contact', 'help', 'toasts', 'admin'],
     interpolation: {
       escapeValue: false,
     },

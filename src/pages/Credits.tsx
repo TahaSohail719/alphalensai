@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useTranslation } from 'react-i18next';
 
 interface JobUsageStats {
   queries: number;
@@ -18,6 +19,7 @@ interface JobUsageStats {
 }
 
 export default function Credits() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const { credits, loading, fetchCredits } = useCreditManager();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -154,11 +156,11 @@ export default function Credits() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate('/dashboard')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              {t('common:actions.backToDashboard')}
             </Button>
           </div>
           <div className="text-center py-8">
-            <div className="text-muted-foreground">Loading credits...</div>
+            <div className="text-muted-foreground">{t('common:actions.loading')}</div>
           </div>
         </div>
       </Layout>
@@ -172,11 +174,11 @@ export default function Credits() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate('/dashboard')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              {t('common:actions.backToDashboard')}
             </Button>
           </div>
           <div className="text-center py-8">
-            <div className="text-muted-foreground">Unable to load credits information.</div>
+            <div className="text-muted-foreground">{t('dashboard:noDataAvailable')}</div>
           </div>
         </div>
       </Layout>
@@ -213,7 +215,7 @@ export default function Credits() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            {t('common:actions.backToDashboard')}
           </Button>
         </div>
 
@@ -223,10 +225,10 @@ export default function Credits() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">
-              Credits Overview
+              {t('dashboard:credits.title')}
             </h1>
             <p className="text-muted-foreground">
-              Track your usage and remaining credits
+              {t('dashboard:credits.subtitle')}
             </p>
           </div>
         </div>
@@ -234,12 +236,12 @@ export default function Credits() {
         {/* Current Plan */}
         <Card>
           <CardHeader>
-            <CardTitle>Plan Details</CardTitle>
+            <CardTitle>{t('dashboard:credits.activePlan')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <div className="text-sm text-muted-foreground mb-1">Plan actif</div>
+                <div className="text-sm text-muted-foreground mb-1">{t('dashboard:credits.activePlan')}</div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-base">
                     {planDisplayName}
@@ -248,16 +250,16 @@ export default function Credits() {
               </div>
               
               <div>
-                <div className="text-sm text-muted-foreground mb-1">Crédits restants</div>
+                <div className="text-sm text-muted-foreground mb-1">{t('dashboard:credits.creditsRemaining')}</div>
                 <div className="text-2xl font-bold text-foreground">
                   {totalCredits}
                 </div>
               </div>
               
               <div>
-                <div className="text-sm text-muted-foreground mb-1">Prochain renouvellement</div>
+                <div className="text-sm text-muted-foreground mb-1">{t('dashboard:credits.nextRenewal')}</div>
                 <div className="text-base font-medium text-foreground">
-                  {renewalDate || 'Chargement...'}
+                  {renewalDate || t('common:actions.loading')}
                 </div>
               </div>
 
@@ -267,7 +269,7 @@ export default function Credits() {
                   onClick={() => navigate('/pricing')}
                   className="w-full"
                 >
-                  Upgrade Plan
+                  {t('common:actions.upgradePlan')}
                 </Button>
               </div>
             </div>
@@ -280,7 +282,7 @@ export default function Credits() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                Macro Commentary
+                {t('dashboard:credits.macroCommentary')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -289,10 +291,10 @@ export default function Credits() {
                   {credits.credits_queries_remaining}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Used this period: {usageStats.queries}
+                  {t('dashboard:credits.usedThisPeriod')}: {usageStats.queries}
                 </div>
                 <Badge variant={credits.credits_queries_remaining > 0 ? "default" : "destructive"} className="w-fit">
-                  {credits.credits_queries_remaining > 0 ? "Available" : "Depleted"}
+                  {credits.credits_queries_remaining > 0 ? t('dashboard:credits.available') : t('dashboard:credits.depleted')}
                 </Badge>
               </div>
             </CardContent>
@@ -302,7 +304,7 @@ export default function Credits() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
-                AI Trade
+                {t('dashboard:credits.aiTrade')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -311,10 +313,10 @@ export default function Credits() {
                   {credits.credits_ideas_remaining}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Used this period: {usageStats.ideas}
+                  {t('dashboard:credits.usedThisPeriod')}: {usageStats.ideas}
                 </div>
                 <Badge variant={credits.credits_ideas_remaining > 0 ? "default" : "destructive"} className="w-fit">
-                  {credits.credits_ideas_remaining > 0 ? "Available" : "Depleted"}
+                  {credits.credits_ideas_remaining > 0 ? t('dashboard:credits.available') : t('dashboard:credits.depleted')}
                 </Badge>
               </div>
             </CardContent>
@@ -324,7 +326,7 @@ export default function Credits() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Reports
+                {t('dashboard:reports')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -333,10 +335,10 @@ export default function Credits() {
                   {credits.credits_reports_remaining}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Used this period: {usageStats.reports}
+                  {t('dashboard:credits.usedThisPeriod')}: {usageStats.reports}
                 </div>
                 <Badge variant={credits.credits_reports_remaining > 0 ? "default" : "destructive"} className="w-fit">
-                  {credits.credits_reports_remaining > 0 ? "Available" : "Depleted"}
+                  {credits.credits_reports_remaining > 0 ? t('dashboard:credits.available') : t('dashboard:credits.depleted')}
                 </Badge>
               </div>
             </CardContent>
@@ -348,7 +350,7 @@ export default function Credits() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
-              Usage Summary
+              {t('dashboard:credits.usageSummary')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -359,7 +361,7 @@ export default function Credits() {
                     {usageStats.queries}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Total Macro Commentary Used
+                    {t('dashboard:credits.totalMacroUsed')}
                   </div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -367,7 +369,7 @@ export default function Credits() {
                     {usageStats.ideas}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Total AI Trade Generated
+                    {t('dashboard:credits.totalAITradeUsed')}
                   </div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -375,7 +377,7 @@ export default function Credits() {
                     {usageStats.reports}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Total Reports Created
+                    {t('dashboard:credits.totalReportsUsed')}
                   </div>
                 </div>
               </div>
@@ -387,7 +389,7 @@ export default function Credits() {
                   className="w-full"
                 >
                   <History className="h-4 w-4 mr-2" />
-                  View Detailed History
+                  {t('dashboard:credits.viewDetailedHistory')}
                 </Button>
               </div>
             </div>

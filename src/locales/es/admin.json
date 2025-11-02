@@ -1,0 +1,66 @@
+{
+  "title": "Panel de Administración",
+  "subtitle": "Administrar usuarios, aprobaciones y permisos del sistema",
+  "brokerSubtitle": "Administrar usuarios y aprobaciones para {{brokerName}}",
+  "brokerNotAssigned": "Broker no asignado. Contacte a un superusuario para asignar un broker.",
+  "stats": {
+    "totalUsers": "Total de Usuarios",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "users": "Usuarios",
+    "admins": "Administradores",
+    "superUsers": "Superusuarios"
+  },
+  "stripe": {
+    "title": "Entorno de Stripe",
+    "subtitle": "Modo de procesamiento de pagos actual",
+    "testMode": "Modo de Prueba",
+    "liveMode": "Modo En Vivo",
+    "testModeDescription": "Los pagos están en modo de prueba - sin transacciones reales",
+    "liveModeDescription": "⚠️ MODO EN VIVO ACTIVO - Procesando pagos reales",
+    "switchTo": "Cambiar a Modo {{mode}}",
+    "confirmSwitch": "Confirmar Cambio de Entorno",
+    "confirmMessage": "¿Está seguro de que desea cambiar Stripe al modo {{mode}}?",
+    "warning": "Esto afectará todo el procesamiento de pagos en la plataforma.",
+    "testWarning": "El modo de prueba usa tarjetas de prueba y no procesa pagos reales.",
+    "liveWarning": "El modo EN VIVO procesa pagos REALES con dinero REAL. Solo active en producción."
+  },
+  "actions": {
+    "createUser": "Crear Usuario",
+    "refresh": "Actualizar",
+    "updateStatus": "Actualizar Estado",
+    "deleteUser": "Eliminar Usuario",
+    "viewDetails": "Ver Detalles",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "tabs": {
+    "users": "Usuarios",
+    "jobs": "Trabajos",
+    "costs": "Costos",
+    "brokers": "Brokers",
+    "plans": "Planes",
+    "subscriptions": "Suscripciones",
+    "credits": "Créditos",
+    "realtime": "Tiempo Real",
+    "import": "Importar"
+  },
+  "costs": {
+    "title": "Análisis de Costos",
+    "period": "Período",
+    "last7days": "Últimos 7 días",
+    "last30days": "Últimos 30 días",
+    "last90days": "Últimos 90 días",
+    "totalRequests": "Solicitudes Totales",
+    "totalCost": "Costo Total",
+    "aiTradeSetup": "Configuración de Trading IA",
+    "macroCommentary": "Comentario Macro",
+    "reports": "Informes",
+    "dailyTrend": "Tendencia Diaria de Costos",
+    "userBreakdown": "Desglose por Usuario",
+    "user": "Usuario",
+    "requests": "Solicitudes",
+    "cost": "Costo"
+  }
+}

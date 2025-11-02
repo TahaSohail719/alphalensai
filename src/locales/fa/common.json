@@ -51,6 +51,34 @@
     "terms": "شرایط خدمات",
     "copyright": "© ۲۰۲۵ alphaLens AI. تمامی حقوق محفوظ است."
   },
+  "status": {
+    "liveMarkets": "بازارهای زنده",
+    "online": "آنلاین",
+    "offline": "آفلاین"
+  },
+  "actions": {
+    "signIn": "ورود",
+    "signOut": "خروج",
+    "backToDashboard": "بازگشت به داشبورد",
+    "viewDetails": "مشاهده جزئیات",
+    "getStarted": "شروع کنید",
+    "explore": "کاوش",
+    "loading": "در حال بارگذاری...",
+    "processing": "در حال پردازش...",
+    "upgradePlan": "ارتقای پلن",
+    "refresh": "بارگذاری مجدد",
+    "close": "بستن",
+    "cancel": "لغو",
+    "save": "ذخیره",
+    "delete": "حذف",
+    "edit": "ویرایش",
+    "create": "ایجاد",
+    "update": "به‌روزرسانی",
+    "export": "خروجی",
+    "import": "وارد کردن",
+    "search": "جستجو",
+    "filter": "فیلتر"
+  },
   "seo": {
     "defaultTitle": "alphaLens AI - پلتفرم تحقیقات مالی هوشمند",
     "defaultDescription": "تحلیل پیشرفته فارکس، کریپتو و ماکرو با بینش‌های سطح سازمانی، تنظیمات معاملاتی هوش مصنوعی و گزارش‌های تحقیقاتی جامع.",
