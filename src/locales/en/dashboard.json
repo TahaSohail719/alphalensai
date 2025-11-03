@@ -145,6 +145,13 @@
     "title": "Market News",
     "searchPlaceholder": "Search news...",
     "noNews": "No news available",
+    "liveNews": "Live News",
+    "all": "All",
+    "trending": "Trending",
+    "newItems": "{{count}} new",
+    "justNow": "Just now",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
     "categories": {
       "general": "General",
       "forex": "Forex",

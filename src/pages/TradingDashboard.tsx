@@ -196,8 +196,10 @@ export default function TradingDashboard() {
   }, [allAssets, currentAsset]);
 
   return (
-    <Layout 
-      activeModule="trading" 
+    <>
+      <MarketNewsCollapsible defaultOpen={false} />
+      <Layout 
+        activeModule="trading"
       onModuleChange={() => {}}
       completedJobsCount={jobManager.completedJobsCount}
       onResetJobsCount={jobManager.resetCompletedCount}
@@ -221,7 +223,6 @@ export default function TradingDashboard() {
                 </p>
               </div>
             </div>
-            <MarketNewsCollapsible defaultOpen={false} />
           </div>
 
           {/* Price widget - Affiche uniquement l'actif sélectionné */}
@@ -462,5 +463,6 @@ export default function TradingDashboard() {
         }}
       />
     </Layout>
+    </>
   );
 }
