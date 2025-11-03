@@ -210,8 +210,8 @@ export default function TradingDashboard() {
         className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-8 my-8"
       >
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-stretch max-w-[1920px] mx-auto">
-          {/* Chart with integrated dashboard header - 2/3 */}
-          <div className="min-w-0 space-y-4">
+          {/* Col gauche - Rangée 1 : Trading Dashboard */}
+          <div className="min-w-0 order-1">
             <CandlestickChart 
               asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
               showHeader={true}
@@ -238,17 +238,19 @@ export default function TradingDashboard() {
               timeframe={timeframe}
               onTimeframeChange={setTimeframe}
             />
-            
-            {/* Asset Info Card moved here */}
+          </div>
+          
+          {/* Col droite - Rangée 1 : Market News */}
+          <div className="lg:sticky lg:top-6 lg:self-stretch order-3 lg:order-2">
+            <MarketNewsCollapsible />
+          </div>
+
+          {/* Col gauche - Rangée 2 : Asset Info */}
+          <div className="min-w-0 mt-4 order-2 lg:order-3">
             <AssetInfoCard 
               symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} 
               className="w-full" 
             />
-          </div>
-          
-          {/* Market News - 1/3 */}
-          <div className="lg:sticky lg:top-6 lg:self-stretch">
-            <MarketNewsCollapsible />
           </div>
         </div>
       </section>
