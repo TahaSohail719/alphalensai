@@ -257,7 +257,7 @@ export default function TradingDashboard() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start max-w-[1920px] mx-auto">
           {/* Col gauche - Rangée 1 : Trading Dashboard */}
-          <div ref={chartRef} className="min-w-0 min-h-0 order-1">
+          <div ref={chartRef} className="min-w-0 min-h-0 order-1 my-0">
             <CandlestickChart
               forceMode={sessionChartMode}
               asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
@@ -289,14 +289,14 @@ export default function TradingDashboard() {
           
           {/* Col droite - Rangée 1 : Market News */}
           <div 
-            className="min-w-0 min-h-0 order-3 lg:order-2"
+            className="min-w-0 min-h-0 order-3 lg:order-2 my-0"
             style={chartHeight ? { height: `${chartHeight}px` } : undefined}
           >
             <MarketNewsCollapsible className="h-full" />
           </div>
 
           {/* Col gauche - Rangée 2 : Asset Info */}
-          <div className="min-w-0 mt-4 order-2 lg:order-3">
+          <div className="min-w-0 mt-4 mb-0 order-2 lg:order-3">
             <AssetInfoCard 
               symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset} 
               className="w-full" 
