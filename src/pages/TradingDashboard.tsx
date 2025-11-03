@@ -196,9 +196,7 @@ export default function TradingDashboard() {
   }, [allAssets, currentAsset]);
 
   return (
-    <>
-      <MarketNewsCollapsible defaultOpen={false} />
-      <Layout 
+    <Layout
         activeModule="trading"
       onModuleChange={() => {}}
       completedJobsCount={jobManager.completedJobsCount}
@@ -317,6 +315,8 @@ export default function TradingDashboard() {
           timeframe={timeframe}
         />
 
+        {/* Market News Panel */}
+        <MarketNewsCollapsible className="mb-8" />
 
         {/* Popular assets - Mobile-first horizontal scroll */}
         <div className="w-full -mx-2 sm:mx-0">
@@ -463,6 +463,5 @@ export default function TradingDashboard() {
         }}
       />
     </Layout>
-    </>
   );
 }

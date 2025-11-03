@@ -142,14 +142,12 @@
     "created": "ایجاد شده"
   },
   "news": {
-    "title": "اخبار بازار",
-    "searchPlaceholder": "جستجوی اخبار...",
-    "noNews": "خبری موجود نیست",
-    "categories": {
-      "general": "عمومی",
-      "forex": "فارکس",
-      "crypto": "کریپتو",
-      "merger": "ادغام و تملک"
-    }
+    "marketNews": "اخبار بازار",
+    "search": "جستجوی اخبار...",
+    "all": "همه",
+    "general": "عمومی",
+    "forex": "فارکس",
+    "crypto": "رمزارز",
+    "merger": "ادغام"
   }
 }

@@ -142,21 +142,12 @@
     "created": "Created"
   },
   "news": {
-    "title": "Market News",
-    "searchPlaceholder": "Search news...",
-    "noNews": "No news available",
-    "liveNews": "Live News",
+    "marketNews": "Market News",
+    "search": "Search news...",
     "all": "All",
-    "trending": "Trending",
-    "newItems": "{{count}} new",
-    "justNow": "Just now",
-    "hoursAgo": "{{count}}h ago",
-    "daysAgo": "{{count}}d ago",
-    "categories": {
-      "general": "General",
-      "forex": "Forex",
-      "crypto": "Crypto",
-      "merger": "M&A"
-    }
+    "general": "General",
+    "forex": "Forex",
+    "crypto": "Crypto",
+    "merger": "Merger"
   }
 }

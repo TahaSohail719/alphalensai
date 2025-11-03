@@ -142,14 +142,12 @@
     "created": "Creado"
   },
   "news": {
-    "title": "Noticias del Mercado",
-    "searchPlaceholder": "Buscar noticias...",
-    "noNews": "No hay noticias disponibles",
-    "categories": {
-      "general": "General",
-      "forex": "Forex",
-      "crypto": "Cripto",
-      "merger": "Fusiones"
-    }
+    "marketNews": "Noticias del Mercado",
+    "search": "Buscar noticias...",
+    "all": "Todo",
+    "general": "General",
+    "forex": "Forex",
+    "crypto": "Cripto",
+    "merger": "Fusión"
   }
 }

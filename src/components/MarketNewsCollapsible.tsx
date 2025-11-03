@@ -1,37 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNewsFeed } from '@/hooks/useNewsFeed';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronDown, ChevronUp, MessageCircle, Share, Bookmark } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 interface MarketNewsCollapsibleProps {
   className?: string;
-  defaultOpen?: boolean;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  general: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  forex: "bg-green-500/10 text-green-500 border-green-500/20",
-  crypto: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  merger: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  general: "border-blue-500/50 text-blue-400",
+  forex: "border-green-500/50 text-green-400",
+  crypto: "border-purple-500/50 text-purple-400",
+  merger: "border-orange-500/50 text-orange-400",
 };
 
-const highlightKeywords = (text: string) => {
-  const keywords = ['POWELL', 'INFLATION', 'FED', 'LABOR', 'DOWNSIDE', 'RISK', 'RATE', 'ECONOMY', 'MARKET'];
-  let highlighted = text;
-  
-  keywords.forEach(keyword => {
-    const regex = new RegExp(`(${keyword})`, 'gi');
-    highlighted = highlighted.replace(regex, '<span class="text-purple-500 font-bold">$1</span>');
-  });
-  
-  return <span dangerouslySetInnerHTML={{ __html: highlighted }} />;
-};
-
+// Format timestamp (e.g., "3d ago", "14h ago")
 const formatTime = (datetime: string) => {
   const now = Date.now();
   const itemTime = new Date(datetime).getTime();
@@ -44,178 +33,119 @@ const formatTime = (datetime: string) => {
   return 'Just now';
 };
 
-export function MarketNewsCollapsible({ defaultOpen = false }: MarketNewsCollapsibleProps) {
+export function MarketNewsCollapsible({ className }: MarketNewsCollapsibleProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [selectedTab, setSelectedTab] = useState<'all' | 'trending'>('all');
-  const [unreadCount, setUnreadCount] = useState(0);
-  
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { news, isLoading } = useNewsFeed();
 
-  // Calculate unread count
-  useEffect(() => {
-    const lastReadTime = localStorage.getItem('lastNewsReadTime');
-    if (lastReadTime && news.length > 0) {
-      const unread = news.filter(item => 
-        item.datetime && new Date(item.datetime).getTime() > parseInt(lastReadTime)
-      ).length;
-      setUnreadCount(unread);
-    }
-  }, [news]);
-
-  // Update last read time when opening
-  const handleToggle = () => {
-    if (!isOpen) {
-      localStorage.setItem('lastNewsReadTime', Date.now().toString());
-      setUnreadCount(0);
-    }
-    setIsOpen(!isOpen);
-  };
-
-  // Filter news based on tab
-  const filteredNews = selectedTab === 'trending' 
-    ? news.filter(item => {
-        const hoursSincePublished = (Date.now() - new Date(item.datetime).getTime()) / (1000 * 60 * 60);
-        return hoursSincePublished < 2;
-      })
-    : news;
+  // Filter by category and search
+  const filteredNews = news.filter(item => {
+    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      item.headline?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.summary?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-[380px] max-sm:w-[320px] max-sm:bottom-4 max-sm:top-auto">
-      <Card className="shadow-2xl border-primary/20 backdrop-blur-sm bg-background/95">
-        {/* Header - Always visible, clickable to toggle */}
-        <CardHeader 
-          className="cursor-pointer hover:bg-accent/50 transition-colors pb-3"
-          onClick={handleToggle}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <CardTitle className="text-base">{t('dashboard:news.liveNews')}</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              {!isOpen && unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {t('dashboard:news.newItems', { count: unreadCount })}
-                </Badge>
-              )}
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+    <Card className={cn("border border-border/50", className)}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <CardTitle className="text-lg font-semibold">{t('dashboard:news.marketNews')}</CardTitle>
           
-          {/* Tabs - Only visible when open */}
-          {isOpen && (
-            <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as 'all' | 'trending')} className="mt-3">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="all">{t('dashboard:news.all')}</TabsTrigger>
-                <TabsTrigger value="trending">{t('dashboard:news.trending')}</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
-        </CardHeader>
+          {/* Search bar */}
+          <div className="relative w-64">
+            <Input 
+              placeholder={t('dashboard:news.search')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 pr-8"
+            />
+            <Search className="absolute right-2 top-2 h-5 w-5 text-muted-foreground" />
+          </div>
+        </div>
 
-        {/* Content - Only visible when open */}
-        {isOpen && (
-          <CardContent className="pt-0">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                {t('dashboard:loading')}
-              </div>
-            ) : filteredNews.length === 0 ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                {t('dashboard:noDataAvailable')}
-              </div>
-            ) : (
-              <ScrollArea className="h-[600px] max-sm:h-[400px] pr-4">
-                <div className="space-y-3">
-                  {filteredNews.map((item) => (
-                    <Card 
-                      key={item.id}
-                      className="cursor-pointer hover:border-primary/40 transition-all hover:shadow-md"
-                      onClick={() => item.url && window.open(item.url, '_blank')}
-                    >
-                      <CardContent className="p-4">
-                        {/* Timestamp + HOT badge */}
-                        <div className="flex items-center gap-2 mb-2">
-                          {item.datetime && (Date.now() - new Date(item.datetime).getTime()) < 2 * 60 * 60 * 1000 && (
-                            <Badge variant="destructive" className="text-xs">HOT 🔥</Badge>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {item.datetime ? formatTime(item.datetime) : t('dashboard:news.justNow')}
-                          </span>
+        {/* Category tabs inline */}
+        <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+          <TabsList className="grid w-full grid-cols-5 bg-muted/30">
+            <TabsTrigger value="all">{t('dashboard:news.all')}</TabsTrigger>
+            <TabsTrigger value="general">{t('dashboard:news.general')}</TabsTrigger>
+            <TabsTrigger value="forex">{t('dashboard:news.forex')}</TabsTrigger>
+            <TabsTrigger value="crypto">{t('dashboard:news.crypto')}</TabsTrigger>
+            <TabsTrigger value="merger">{t('dashboard:news.merger')}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </CardHeader>
+
+      <CardContent>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
+            {t('dashboard:loading')}
+          </div>
+        ) : filteredNews.length === 0 ? (
+          <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
+            {t('dashboard:noDataAvailable')}
+          </div>
+        ) : (
+          <ScrollArea className="h-[500px]">
+            <div className="space-y-3 pr-4">
+              {filteredNews.map((item) => (
+                <div 
+                  key={item.id}
+                  className="border border-border/30 rounded-lg p-4 hover:border-primary/30 hover:bg-accent/5 transition-colors cursor-pointer"
+                  onClick={() => item.url && window.open(item.url, '_blank')}
+                >
+                  <div className="flex gap-3">
+                    {/* Image thumbnail (if available) */}
+                    {item.image && (
+                      <img 
+                        src={item.image} 
+                        alt="" 
+                        className="w-20 h-20 object-cover rounded-md shrink-0"
+                      />
+                    )}
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {/* Title */}
+                      <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                        {item.headline}
+                      </h3>
+
+                      {/* Meta: Time + Category */}
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        <span>{formatTime(item.datetime)}</span>
+                        <span>•</span>
+                        <Badge 
+                          variant="outline" 
+                          className={cn("text-xs", CATEGORY_COLORS[item.category])}
+                        >
+                          {item.category}
+                        </Badge>
+                      </div>
+
+                      {/* Summary */}
+                      {item.summary && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {item.summary}
+                        </p>
+                      )}
+
+                      {/* Source */}
+                      {item.source && (
+                        <div className="text-xs text-muted-foreground">
+                          Source: <span className="font-medium">{item.source}</span>
                         </div>
-
-                        {/* Title with highlighted keywords */}
-                        <h3 className="font-semibold mb-2 text-sm leading-tight">
-                          {highlightKeywords(item.headline || '')}
-                        </h3>
-
-                        {/* Summary if available */}
-                        {item.summary && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {item.summary}
-                          </p>
-                        )}
-
-                        {/* Category badges */}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {item.category && (
-                            <Badge 
-                              variant="outline" 
-                              className={CATEGORY_COLORS[item.category] || CATEGORY_COLORS.general}
-                            >
-                              {item.category}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Action icons */}
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Share className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Bookmark className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-
-                        {/* Source */}
-                        {item.source && (
-                          <div className="mt-2 pt-2 border-t border-border/50">
-                            <span className="text-xs text-muted-foreground">
-                              Source: {item.source}
-                            </span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </ScrollArea>
-            )}
-          </CardContent>
+              ))}
+            </div>
+          </ScrollArea>
         )}
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
