@@ -594,6 +594,42 @@ export type Database = {
         }
         Relationships: []
       }
+      news_feed: {
+        Row: {
+          category: string
+          created_at: string | null
+          datetime: string
+          headline: string
+          id: number
+          image: string | null
+          source: string
+          summary: string | null
+          url: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          datetime: string
+          headline: string
+          id: number
+          image?: string | null
+          source: string
+          summary?: string | null
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          datetime?: string
+          headline?: string
+          id?: number
+          image?: string | null
+          source?: string
+          summary?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       normalized_trade_setups: {
         Row: {
           ai_generated_at: string | null
