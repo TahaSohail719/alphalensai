@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Newspaper, Search, X } from "lucide-react";
+import { Newspaper, Search, X, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,25 @@ export function MarketNewsCollapsible({ className, defaultOpen = false }: Market
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const { news, isLoading, setCategory } = useNewsFeed(selectedCategory);
+
+  // Auto-scroll carousel in reduced state
+  useEffect(() => {
+    if (isOpen || news.length === 0) return;
+    
+    const carousel = document.getElementById('news-carousel');
+    if (!carousel) return;
+    
+    const scrollInterval = setInterval(() => {
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      if (carousel.scrollLeft >= maxScroll) {
+        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        carousel.scrollBy({ left: 200, behavior: 'smooth' });
+      }
+    }, 5000);
+    
+    return () => clearInterval(scrollInterval);
+  }, [isOpen, news]);
 
   // Persist collapsed state
   useEffect(() => {
@@ -81,38 +100,67 @@ export function MarketNewsCollapsible({ className, defaultOpen = false }: Market
   );
 
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
       <Collapsible open={isOpen} onOpenChange={handleOpen}>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="gap-2 relative">
-            <Newspaper className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("dashboard:news.title")}</span>
-            {unreadCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse"
+        {!isOpen && (
+          <CollapsibleTrigger asChild>
+            <div className="flex items-center gap-2 h-12 overflow-hidden border rounded-lg px-3 bg-card/50 hover:bg-card transition-colors cursor-pointer group">
+              <div 
+                id="news-carousel"
+                className="flex gap-3 flex-1 overflow-x-auto scroll-smooth"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {unreadCount}
-              </Badge>
-            )}
-          </Button>
-        </CollapsibleTrigger>
+                <style>{`
+                  #news-carousel::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+                {news.slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 shrink-0">
+                    <Badge variant="outline" className={`${CATEGORY_COLORS[item.category]} text-[10px] px-1.5 py-0`}>
+                      {t(`dashboard:news.categories.${item.category}`, item.category)}
+                    </Badge>
+                    <span className="text-xs truncate max-w-[150px] sm:max-w-[200px]">
+                      {item.headline}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="h-5 px-1.5 text-xs shrink-0 animate-pulse">
+                  {unreadCount}
+                </Badge>
+              )}
+              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </div>
+          </CollapsibleTrigger>
+        )}
 
-        <CollapsibleContent className="absolute top-full left-0 right-0 mt-2 z-50 px-4 sm:px-0">
+        <CollapsibleContent className="relative mt-2 z-50">
           <Card className="w-full sm:max-w-4xl mx-auto shadow-2xl border-2">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-xl font-bold flex items-center gap-2">
                 <Newspaper className="h-5 w-5" />
                 {t("dashboard:news.title")}
               </CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleOpen(false)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleOpen(false)}
+                  className="h-8 w-8"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleOpen(false)}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
