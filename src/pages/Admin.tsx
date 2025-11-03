@@ -46,6 +46,7 @@ import { BrokersManagement } from "@/components/admin/BrokersManagement";
 import { PlanParametersManagement } from "@/components/admin/PlanParametersManagement";
 import { SubscriptionPlanOverview } from "@/components/admin/SubscriptionPlanOverview";
 import { UserCreditsOverview } from "@/components/admin/UserCreditsOverview";
+import { ChartProviderSettings } from "@/components/admin/ChartProviderSettings";
 import ImportABCGPortfolio from "@/components/admin/ImportABCGPortfolio";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
