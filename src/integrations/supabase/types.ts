@@ -1018,6 +1018,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_news_preferences: {
+        Row: {
+          last_viewed_at: string | null
+          preferred_category: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          last_viewed_at?: string | null
+          preferred_category?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          last_viewed_at?: string | null
+          preferred_category?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_requests: {
         Row: {
           completed_at: string | null

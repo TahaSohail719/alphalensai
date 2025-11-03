@@ -95,13 +95,17 @@
     "search": "Buscar noticias...",
     "categories": {
       "all": "Todas",
+      "general": "General",
       "forex": "Forex",
       "stocks": "Acciones",
       "crypto": "Cripto",
-      "commodities": "Materias Primas"
+      "commodities": "Materias Primas",
+      "merger": "Fusiones"
     },
     "noNews": "No hay noticias disponibles",
     "loading": "Cargando noticias...",
-    "readMore": "Leer Más"
+    "readMore": "Leer Más",
+    "keyboardHint": "Presiona N para abrir/cerrar • ESC para cerrar",
+    "newItems": "Nuevos artículos disponibles"
   }
 }

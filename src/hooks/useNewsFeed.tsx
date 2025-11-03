@@ -13,17 +13,37 @@ interface NewsItem {
   created_at: string;
 }
 
-export function useNewsFeed() {
+interface NewsCache {
+  data: NewsItem[];
+  timestamp: number;
+}
+
+export function useNewsFeed(initialCategory: string = 'general') {
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsCache, setNewsCache] = useState<Map<string, NewsCache>>(new Map());
+  const [currentCategory, setCurrentCategory] = useState(initialCategory);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNews = useCallback(async () => {
+  const fetchNews = useCallback(async (category: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('refresh-news-feed');
+      const { data, error } = await supabase.functions.invoke('refresh-news-feed', {
+        body: { category }
+      });
       
       if (error) throw error;
+      
+      // Update cache Map for this category
+      setNewsCache(prev => {
+        const newCache = new Map(prev);
+        newCache.set(category, {
+          data: data?.data || [],
+          timestamp: Date.now()
+        });
+        return newCache;
+      });
+      
       setNews(data?.data || []);
     } catch (err: any) {
       console.error('Error fetching news:', err);
@@ -34,7 +54,16 @@ export function useNewsFeed() {
   }, []);
 
   useEffect(() => {
-    fetchNews();
+    const cached = newsCache.get(currentCategory);
+    
+    // If cache exists and is less than 30min old, use it
+    const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+      console.log(`✅ Using cached news for ${currentCategory}`);
+      setNews(cached.data);
+    } else {
+      fetchNews(currentCategory);
+    }
 
     // Realtime subscription for updates
     const channel = supabase
@@ -45,14 +74,21 @@ export function useNewsFeed() {
         table: 'news_feed'
       }, () => {
         console.log('📰 News feed updated');
-        fetchNews();
+        fetchNews(currentCategory);
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchNews]);
+  }, [currentCategory, newsCache, fetchNews]);
 
-  return { news, isLoading, error, refetch: fetchNews };
+  return { 
+    news, 
+    isLoading, 
+    error, 
+    refetch: fetchNews,
+    setCategory: setCurrentCategory,
+    currentCategory
+  };
 }

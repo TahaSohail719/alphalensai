@@ -95,13 +95,17 @@
     "search": "Search news...",
     "categories": {
       "all": "All",
+      "general": "General",
       "forex": "Forex",
       "stocks": "Stocks",
       "crypto": "Crypto",
-      "commodities": "Commodities"
+      "commodities": "Commodities",
+      "merger": "M&A"
     },
     "noNews": "No news available",
     "loading": "Loading news...",
-    "readMore": "Read More"
+    "readMore": "Read More",
+    "keyboardHint": "Press N to toggle • ESC to close",
+    "newItems": "New items available"
   }
 }

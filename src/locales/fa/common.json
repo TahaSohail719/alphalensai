@@ -95,13 +95,17 @@
     "search": "جستجوی اخبار...",
     "categories": {
       "all": "همه",
+      "general": "عمومی",
       "forex": "فارکس",
       "stocks": "سهام",
       "crypto": "کریپتو",
-      "commodities": "کالاها"
+      "commodities": "کالاها",
+      "merger": "ادغام"
     },
     "noNews": "هیچ خبری موجود نیست",
     "loading": "در حال بارگذاری اخبار...",
-    "readMore": "ادامه مطلب"
+    "readMore": "ادامه مطلب",
+    "keyboardHint": "N برای باز/بسته کردن • ESC برای بستن",
+    "newItems": "اخبار جدید موجود است"
   }
 }
