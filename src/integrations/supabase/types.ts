@@ -1203,6 +1203,7 @@ export type Database = {
           updated_count: number
         }[]
       }
+      cleanup_stale_engaged_credits: { Args: never; Returns: undefined }
       decrement_credit: {
         Args: { credit_type: string; target_user_id: string }
         Returns: boolean

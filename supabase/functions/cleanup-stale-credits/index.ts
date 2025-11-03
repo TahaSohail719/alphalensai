@@ -18,38 +18,32 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Delete engaged credits older than 24 hours
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    
-    const { data: deletedCredits, error } = await supabase
-      .from('credits_engaged')
-      .delete()
-      .lt('engaged_at', twentyFourHoursAgo)
-      .select('id');
+    console.log('[Cleanup] Starting stale credits cleanup...');
+
+    // Call the cleanup function
+    const { error } = await supabase.rpc('cleanup_stale_engaged_credits');
 
     if (error) {
-      console.error('[Cleanup] Error deleting stale credits:', error);
+      console.error('[Cleanup] Error calling cleanup function:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to cleanup stale credits', details: error.message }),
+        JSON.stringify({ success: false, error: error.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const cleanedCount = deletedCredits?.length || 0;
-    console.log(`[Cleanup] Successfully cleaned up ${cleanedCount} stale engaged credits`);
+    console.log('[Cleanup] Stale credits cleanup completed successfully');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        cleaned: cleanedCount,
-        message: `Cleaned ${cleanedCount} stale engaged credits older than 24 hours`
+        message: 'Stale engaged credits cleaned up successfully'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
     console.error('[Cleanup] Unexpected error:', err);
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }),
+      JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

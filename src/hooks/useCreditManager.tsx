@@ -81,7 +81,7 @@ export function useCreditManager() {
       });
 
       if (error) {
-        console.error('Error decrementing credit:', error);
+        console.error('⚠️ [CreditSystem] Error decrementing credit:', error);
         toast({
           title: "Error",
           description: "Failed to process credit usage",
@@ -102,30 +102,64 @@ export function useCreditManager() {
       // Force immediate refresh of credits
       await fetchCredits();
       
+      console.log(`✅ [CreditSystem] Deducted 1 credit for ${creditType}`);
+      
       // Trigger global credit refresh event for other components
       window.dispatchEvent(new Event('creditsUpdated'));
       
       return true;
     } catch (err) {
-      console.error('Error decrementing credit:', err);
+      console.error('⚠️ [CreditSystem] Error decrementing credit:', err);
       return false;
     }
   }, [user?.id, toast, fetchCredits]);
 
-  const checkCredits = useCallback((creditType: CreditType): boolean => {
-    if (!credits) return false;
+  const checkCredits = useCallback(async (creditType: CreditType): Promise<boolean> => {
+    if (!credits || !user?.id) return false;
     
-    switch (creditType) {
-      case 'queries':
-        return credits.credits_queries_remaining > 0;
-      case 'ideas':
-        return credits.credits_ideas_remaining > 0;
-      case 'reports':
-        return credits.credits_reports_remaining > 0;
-      default:
+    try {
+      // 1. Obtenir les crédits totaux
+      const creditColumn = {
+        'queries': 'credits_queries_remaining',
+        'ideas': 'credits_ideas_remaining',
+        'reports': 'credits_reports_remaining'
+      }[creditType];
+      
+      const totalCredits = credits[creditColumn as keyof typeof credits] as number || 0;
+      
+      // 2. Obtenir les crédits engagés
+      const featureMap = {
+        'queries': 'queries',
+        'ideas': 'ideas',
+        'reports': 'reports'
+      };
+      
+      const { data: engaged, error } = await supabase
+        .from('credits_engaged')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('feature', featureMap[creditType]);
+      
+      if (error) {
+        console.error('[CreditManager] Error fetching engaged credits:', error);
         return false;
+      }
+      
+      const engagedCount = engaged?.length || 0;
+      const availableCredits = totalCredits - engagedCount;
+      
+      console.log(`✅ [CreditSystem] Credit check for ${creditType}:`, {
+        total: totalCredits,
+        engaged: engagedCount,
+        available: availableCredits
+      });
+      
+      return availableCredits > 0;
+    } catch (err) {
+      console.error('[CreditManager] Error checking credits:', err);
+      return false;
     }
-  }, [credits]);
+  }, [credits, user?.id]);
 
   useEffect(() => {
     if (user?.id) {
