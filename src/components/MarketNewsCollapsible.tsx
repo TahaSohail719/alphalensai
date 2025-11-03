@@ -37,7 +37,7 @@ export function MarketNewsCollapsible({ className }: MarketNewsCollapsibleProps)
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const { news, isLoading } = useNewsFeed();
+  const { news, isLoading, setCategory } = useNewsFeed('general');
 
   // Filter by category and search
   const filteredNews = news.filter(item => {
@@ -67,7 +67,16 @@ export function MarketNewsCollapsible({ className }: MarketNewsCollapsibleProps)
         </div>
 
         {/* Category tabs inline */}
-        <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+        <Tabs value={selectedCategory} onValueChange={(value) => {
+          setSelectedCategory(value);
+          // Trigger API fetch for specific category
+          if (value !== 'all') {
+            setCategory(value);
+          } else {
+            // For 'all', load general and let frontend filtering handle the rest
+            setCategory('general');
+          }
+        }}>
           <TabsList className="grid w-full grid-cols-5 bg-muted/30">
             <TabsTrigger value="all">{t('dashboard:news.all')}</TabsTrigger>
             <TabsTrigger value="general">{t('dashboard:news.general')}</TabsTrigger>

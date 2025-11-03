@@ -37,6 +37,12 @@ export default function TradingDashboard() {
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : true
   );
   
+  // Read session-based chart mode for super users (default: tradingview)
+  const [sessionChartMode, setSessionChartMode] = useState<'tradingview' | 'light'>(() => {
+    const stored = sessionStorage.getItem('dashboard_chart_mode');
+    return (stored === 'light' || stored === 'tradingview') ? stored : 'tradingview';
+  });
+  
   // Hardcoded list of major assets compatible with Binance and TradingView
   const allAssets = [
     // G10 Forex (principales paires)
@@ -242,6 +248,7 @@ export default function TradingDashboard() {
           {/* Col gauche - Rangée 1 : Trading Dashboard */}
           <div ref={chartRef} className="min-w-0 order-1">
             <CandlestickChart
+              forceMode={sessionChartMode}
               asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
               showHeader={true}
               height={500}

@@ -45,6 +45,7 @@ interface CandlestickChartProps {
   tradeLevels?: TradeLevels | null;
   onLevelUpdate?: (type: 'entry' | 'stopLoss' | 'takeProfit', value: number) => void;
   historicalData?: any[];
+  forceMode?: 'tradingview' | 'light'; // Admin-only chart mode override
   
   // New props for integrated dashboard header
   dashboardTitle?: string;
@@ -96,6 +97,7 @@ export function CandlestickChart({
   tradeLevels,
   onLevelUpdate,
   historicalData,
+  forceMode,
   dashboardTitle,
   dashboardSubtitle,
   priceData,
@@ -149,6 +151,20 @@ export function CandlestickChart({
       setLocalTimeframe(newTimeframe);
     }
   };
+  
+  // Determine effective chart mode based on forceMode (admin override)
+  const effectiveUseFallback = forceMode === 'tradingview' 
+    ? true 
+    : forceMode === 'light' 
+      ? false 
+      : useFallback;
+  
+  const effectiveProvider = forceMode === 'tradingview'
+    ? 'tradingview'
+    : forceMode === 'light'
+      ? 'twelvedata'
+      : globalProvider;
+
   return <>
       {/* Chart Section - Full Width with integrated header */}
       <div className="w-full">
@@ -275,7 +291,7 @@ export function CandlestickChart({
           
           <CardContent className="pb-4 sm:pb-6 pt-4 sm:pt-6 flex-1">
             <div className="relative overflow-hidden isolate z-0 h-full flex flex-col">
-              {!useFallback && globalProvider === 'twelvedata' ? (
+              {!effectiveUseFallback && effectiveProvider === 'twelvedata' ? (
                 <LightweightChartWidget
                   selectedSymbol={asset}
                   timeframe={timeframe}
@@ -363,7 +379,7 @@ export function CandlestickChart({
             </div>
             
             {showHeader && <div className="mt-3 text-xs text-muted-foreground text-center">
-                {!useFallback ? 'Powered by TwelveData' : (hasRealTimeData ? `Real-time data from TradingView` : `Historical data • ${asset} chart`)}
+                {!effectiveUseFallback ? 'Powered by TwelveData' : (hasRealTimeData ? `Real-time data from TradingView` : `Historical data • ${asset} chart`)}
               </div>}
           </CardContent>
         </Card>
