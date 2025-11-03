@@ -855,7 +855,7 @@ export default function Admin() {
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
           <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-5 min-w-[800px]' : 'grid-cols-2'} sm:min-w-full`}>
+            <TabsList className={`grid w-full ${isSuperUser ? 'grid-cols-6 min-w-[900px]' : 'grid-cols-2'} sm:min-w-full`}>
               <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
                 <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">User Management</span>
@@ -884,6 +884,13 @@ export default function Admin() {
                   <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Portfolio Import</span>
                   <span className="sm:hidden">Import</span>
+                </TabsTrigger>
+              )}
+              {isSuperUser && (
+                <TabsTrigger value="chart-provider" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px]">
+                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Chart Settings</span>
+                  <span className="sm:hidden">Chart</span>
                 </TabsTrigger>
               )}
               {isSuperUser && (

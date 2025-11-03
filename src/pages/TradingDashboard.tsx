@@ -228,7 +228,7 @@ export default function TradingDashboard() {
     });
     ro.observe(chartRef.current);
     return () => ro.disconnect();
-  }, []);
+  }, [sessionChartMode]);
 
   return (
     <Layout
