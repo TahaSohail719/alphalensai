@@ -228,7 +228,7 @@ export default function TradingDashboard() {
     });
     ro.observe(chartRef.current);
     return () => ro.disconnect();
-  }, [sessionChartMode]);
+  }, [sessionChartMode, isLg]);
 
   return (
     <Layout
@@ -278,7 +278,7 @@ export default function TradingDashboard() {
           
           {/* Col droite - Rangée 1 : Market News */}
           <div
-            className="min-w-0 order-3 lg:order-2"
+            className="min-w-0 min-h-0 order-3 lg:order-2"
             style={isLg && chartHeight ? { height: chartHeight } : undefined}
           >
             <MarketNewsCollapsible className="h-full" />
