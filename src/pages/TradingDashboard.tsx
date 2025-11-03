@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,13 @@ export default function TradingDashboard() {
   const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const jobManager = useJobStatusManager();
+  
+  // Refs and state for height synchronization
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [chartHeight, setChartHeight] = useState<number>(0);
+  const [isLg, setIsLg] = useState<boolean>(() => 
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : true
+  );
   
   // Hardcoded list of major assets compatible with Binance and TradingView
   const allAssets = [
@@ -195,6 +202,28 @@ export default function TradingDashboard() {
     }
   }, [allAssets, currentAsset]);
 
+  // Track lg breakpoint changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsLg(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  // Observe chart height for exact alignment with Market News
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const ro = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const h = Math.ceil(entry.contentRect.height);
+        setChartHeight(h);
+      }
+    });
+    ro.observe(chartRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <Layout
         activeModule="trading"
@@ -211,8 +240,8 @@ export default function TradingDashboard() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-stretch max-w-[1920px] mx-auto">
           {/* Col gauche - Rangée 1 : Trading Dashboard */}
-          <div className="min-w-0 order-1">
-            <CandlestickChart 
+          <div ref={chartRef} className="min-w-0 order-1">
+            <CandlestickChart
               asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
               showHeader={true}
               height={500}
@@ -241,8 +270,11 @@ export default function TradingDashboard() {
           </div>
           
           {/* Col droite - Rangée 1 : Market News */}
-          <div className="lg:sticky lg:top-6 lg:self-stretch order-3 lg:order-2">
-            <MarketNewsCollapsible />
+          <div
+            className="min-w-0 order-3 lg:order-2"
+            style={isLg && chartHeight ? { height: chartHeight } : undefined}
+          >
+            <MarketNewsCollapsible className="h-full" />
           </div>
 
           {/* Col gauche - Rangée 2 : Asset Info */}
