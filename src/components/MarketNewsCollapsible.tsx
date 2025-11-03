@@ -19,14 +19,14 @@ const CATEGORIES = [
   { id: "general", label: "General", color: "bg-blue-500/10 text-blue-500" },
   { id: "forex", label: "Forex", color: "bg-emerald-500/10 text-emerald-500" },
   { id: "crypto", label: "Crypto", color: "bg-purple-500/10 text-purple-500" },
-  { id: "merger_and_acquisition", label: "M&A", color: "bg-orange-500/10 text-orange-500" },
+  { id: "merger", label: "M&A", color: "bg-orange-500/10 text-orange-500" },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
   general: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   forex: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   crypto: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  merger_and_acquisition: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  merger: "bg-orange-500/10 text-orange-500 border-orange-500/20",
 };
 
 export function MarketNewsCollapsible({ className, defaultOpen = false }: MarketNewsCollapsibleProps) {
