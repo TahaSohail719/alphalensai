@@ -50,12 +50,12 @@ export function MarketNewsCollapsible({ className }: MarketNewsCollapsibleProps)
 
   return (
     <Card className={cn("border border-border/50 rounded-lg h-full flex flex-col", className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between mb-3">
+      <CardHeader className="pb-3 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
           <CardTitle className="text-lg font-semibold">{t('dashboard:news.marketNews')}</CardTitle>
           
           {/* Search bar */}
-          <div className="relative w-64">
+          <div className="relative w-full sm:w-64">
             <Input 
               placeholder={t('dashboard:news.search')}
               value={searchQuery}
@@ -77,12 +77,12 @@ export function MarketNewsCollapsible({ className }: MarketNewsCollapsibleProps)
             setCategory('general');
           }
         }}>
-          <TabsList className="grid w-full grid-cols-5 bg-muted/30">
-            <TabsTrigger value="all">{t('dashboard:news.all')}</TabsTrigger>
-            <TabsTrigger value="general">{t('dashboard:news.general')}</TabsTrigger>
-            <TabsTrigger value="forex">{t('dashboard:news.forex')}</TabsTrigger>
-            <TabsTrigger value="crypto">{t('dashboard:news.crypto')}</TabsTrigger>
-            <TabsTrigger value="merger">{t('dashboard:news.merger')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-muted/30 overflow-x-auto">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">{t('dashboard:news.all')}</TabsTrigger>
+            <TabsTrigger value="general" className="text-xs sm:text-sm">{t('dashboard:news.general')}</TabsTrigger>
+            <TabsTrigger value="forex" className="text-xs sm:text-sm">{t('dashboard:news.forex')}</TabsTrigger>
+            <TabsTrigger value="crypto" className="text-xs sm:text-sm">{t('dashboard:news.crypto')}</TabsTrigger>
+            <TabsTrigger value="merger" className="text-xs sm:text-sm">{t('dashboard:news.merger')}</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardHeader>

@@ -148,6 +148,9 @@
     "general": "General",
     "forex": "Forex",
     "crypto": "Crypto",
-    "merger": "Merger"
+    "merger": "Merger",
+    "openNews": "Open Market News",
+    "closeNews": "Close Market News",
+    "newsLabel": "News"
   }
 }

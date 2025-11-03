@@ -17,6 +17,8 @@ import { JobStatusCard } from "@/components/JobStatusCard";
 import { useJobStatusManager } from "@/hooks/useJobStatusManager";
 import { useTranslation } from "react-i18next";
 import { MarketNewsCollapsible } from "@/components/MarketNewsCollapsible";
+import { MobileNewsBadge } from "@/components/MobileNewsBadge";
+import { MobileNewsDrawer } from "@/components/MobileNewsDrawer";
 
 interface PriceData {
   symbol: string;
@@ -85,6 +87,9 @@ export default function TradingDashboard() {
   
   // Selected asset from search bar
   const [selectedAssetProfile, setSelectedAssetProfile] = useState<any>(null);
+  
+  // Mobile news drawer state
+  const [isMobileNewsOpen, setIsMobileNewsOpen] = useState(false);
 
   // Handle asset profile selection and synchronize with chart
   const handleAssetProfileSelect = (asset: any) => {
@@ -287,9 +292,9 @@ export default function TradingDashboard() {
             />
           </div>
           
-          {/* Col droite - Rangée 1 : Market News */}
+          {/* Col droite - Rangée 1 : Market News (desktop only) */}
           <div 
-            className="min-w-0 min-h-0 order-3 lg:order-2 my-0"
+            className="min-w-0 min-h-0 order-3 lg:order-2 my-0 hidden lg:block"
             style={chartHeight ? { height: `${chartHeight}px` } : undefined}
           >
             <MarketNewsCollapsible className="h-full" />
@@ -404,6 +409,20 @@ export default function TradingDashboard() {
           setActiveTradeLevels(levels);
         }}
       />
+
+      {/* Mobile News Badge - floating button (mobile only) */}
+      <MobileNewsBadge 
+        onClick={() => setIsMobileNewsOpen(true)}
+        hasNewItems={false}
+      />
+
+      {/* Mobile News Drawer */}
+      <MobileNewsDrawer 
+        isOpen={isMobileNewsOpen}
+        onClose={() => setIsMobileNewsOpen(false)}
+      >
+        <MarketNewsCollapsible className="h-full" />
+      </MobileNewsDrawer>
     </Layout>
   );
 }
