@@ -253,7 +253,7 @@ export default function TradingDashboard() {
       {/* SECTION 2: Full-width row with Chart (2/3) + Market News (1/3) */}
       <section 
         aria-label="Market chart and news" 
-        className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-8 my-8"
+        className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-8 my-4"
       >
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start max-w-[1920px] mx-auto">
           {/* Col gauche - Rangée 1 : Trading Dashboard */}
