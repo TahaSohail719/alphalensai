@@ -103,11 +103,13 @@ Deno.serve(async (req) => {
       url: item.url,
     }));
 
-    const { error: insertError } = await supabase.from('news_feed').insert(newsToInsert);
+    const { error: upsertError } = await supabase
+      .from('news_feed')
+      .upsert(newsToInsert, { onConflict: 'id' });
     
-    if (insertError) {
-      console.error('Insert error:', insertError);
-      throw insertError;
+    if (upsertError) {
+      console.error('Upsert error:', upsertError);
+      throw upsertError;
     }
 
     const { data } = await supabase
