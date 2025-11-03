@@ -152,13 +152,13 @@ export function CandlestickChart({
   return <>
       {/* Chart Section - Full Width with integrated header */}
       <div className="w-full">
-        <Card className="gradient-card border-border-light shadow-medium lg:rounded-none lg:border-0">
+        <Card className="gradient-card border border-border/50 shadow-medium rounded-lg min-h-[800px] flex flex-col">
           {/* Header Section - Integrated dashboard header */}
           {showHeader && (
-            <CardHeader className="pb-6 border-b border-border/50 space-y-6">
-              {/* Row 1: Trading Dashboard Title + Price Widget */}
+            <CardHeader className="pb-6 border-b border-border/50 space-y-4">
+              {/* Row 1: Trading Dashboard Title + Trading Controls & Price Widget */}
               {dashboardTitle && (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-col lg:flex-row items-start lg:items-start justify-between gap-4">
                   {/* Left: Dashboard Title */}
                   <div className="flex items-center gap-3">
                     <div className="gradient-primary p-2 sm:p-3 rounded-xl shadow-glow-primary shrink-0">
@@ -176,32 +176,60 @@ export function CandlestickChart({
                     </div>
                   </div>
                   
-                  {/* Right: Price Widget */}
-                  {priceData && (
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl sm:text-2xl font-bold text-foreground font-mono">
-                          ${priceData.price.toFixed(selectedAsset?.includes('JPY') ? 2 : 4)}
-                        </span>
-                        <div className={cn(
-                          "w-2 h-2 rounded-full animate-pulse shrink-0",
-                          isConnectedProp ? "bg-success" : "bg-danger"
-                        )} />
-                      </div>
-                      {priceData.change24h !== undefined && (
-                        <div className={cn(
-                          "flex items-center gap-1 text-sm font-medium",
-                          priceData.change24h >= 0 ? "text-success" : "text-danger"
-                        )}>
-                          {priceData.change24h >= 0 ? 
-                            <TrendingUp className="h-3 w-3" /> : 
-                            <TrendingDown className="h-3 w-3" />
-                          }
-                          {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(2)}%
-                        </div>
-                      )}
+                  {/* Right: Trading Controls + Price Widget */}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {/* Top row: Instrument + Connection + Timeframe */}
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-primary/20 text-primary">
+                        {asset}
+                      </Badge>
+                      <Badge variant="outline" className={cn(
+                        isConnected && hasRealTimeData ? "border-success/20 text-success" : "border-warning/20 text-warning"
+                      )}>
+                        {isConnected && hasRealTimeData ? <Wifi className="h-3 w-3 mr-1" /> : <WifiOff className="h-3 w-3 mr-1" />}
+                        {isConnected && hasRealTimeData ? 'Live' : hasRealTimeData ? 'Disconnected' : 'Historical'}
+                      </Badge>
+                      <Select value={timeframe} onValueChange={handleTimeframeChange}>
+                        <SelectTrigger className="w-28 h-8 bg-background/50 border-border-light text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeframes.map(tf => 
+                            <SelectItem key={tf.value} value={tf.value}>
+                              {tf.label}
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                    
+                    {/* Bottom row: Price Widget */}
+                    {priceData && (
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl sm:text-2xl font-bold text-foreground font-mono">
+                            ${priceData.price.toFixed(selectedAsset?.includes('JPY') ? 2 : 4)}
+                          </span>
+                          <div className={cn(
+                            "w-2 h-2 rounded-full animate-pulse shrink-0",
+                            isConnectedProp ? "bg-success" : "bg-danger"
+                          )} />
+                        </div>
+                        {priceData.change24h !== undefined && (
+                          <div className={cn(
+                            "flex items-center gap-1 text-sm font-medium",
+                            priceData.change24h >= 0 ? "text-success" : "text-danger"
+                          )}>
+                            {priceData.change24h >= 0 ? 
+                              <TrendingUp className="h-3 w-3" /> : 
+                              <TrendingDown className="h-3 w-3" />
+                            }
+                            {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(2)}%
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -242,35 +270,10 @@ export function CandlestickChart({
                 </div>
               )}
 
-              {/* Row 4: Original Chart Controls (Asset Badge, Connection Status, Timeframe) */}
-              <div className="flex items-center justify-between pt-4 border-t border-border/30">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/20 text-primary">
-                    {asset}
-                  </Badge>
-                  <Badge variant="outline" className={`border-${isConnected && hasRealTimeData ? 'success' : 'warning'}/20 text-${isConnected && hasRealTimeData ? 'success' : 'warning'}`}>
-                    {isConnected && hasRealTimeData ? <Wifi className="h-3 w-3 mr-1" /> : <WifiOff className="h-3 w-3 mr-1" />}
-                    {isConnected && hasRealTimeData ? 'Live' : hasRealTimeData ? 'Disconnected' : 'Historical'}
-                  </Badge>
-                </div>
-                
-                <Select value={timeframe} onValueChange={handleTimeframeChange}>
-                  <SelectTrigger className="w-32 bg-background/50 border-border-light">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeframes.map(tf => 
-                      <SelectItem key={tf.value} value={tf.value}>
-                        {tf.label}
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
             </CardHeader>
           )}
           
-          <CardContent className="pb-4 sm:pb-6 pt-4 sm:pt-6">
+          <CardContent className="pb-4 sm:pb-6 pt-4 sm:pt-6 flex-1">
             <div className="relative overflow-hidden isolate z-0">
               {!useFallback && globalProvider === 'twelvedata' ? (
                 <LightweightChartWidget
