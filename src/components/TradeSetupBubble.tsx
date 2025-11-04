@@ -7,6 +7,7 @@ import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-
 import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { useRealtimeResponseInjector } from "@/hooks/useRealtimeResponseInjector";
 import { dualResponseHandler } from "@/lib/dual-response-handler";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +63,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
   const { toast } = useToast();
   const { createJob } = useRealtimeJobManager();
   const { logInteraction } = useAIInteractionLogger();
+  const { tryEngageCredit } = useCreditEngagement();
 
   // Set up automatic response injection from Supabase
   useRealtimeResponseInjector({
@@ -87,15 +89,50 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
     setIsGenerating(true);
     
     try {
+      // Step 1: Create job
+      const jobId = await createJob('tradesetup', parameters.instrument, {
+        type: "tradesetup",
+        instrument: parameters.instrument
+      });
+      console.log('[Credit] 📝 Job created:', { jobId, feature: 'ideas' });
+
+      // Step 2: Atomic credit engagement
+      console.log('[Credit] 🔐 Attempting atomic engagement:', {
+        feature: 'ideas',
+        jobId,
+        timestamp: new Date().toISOString()
+      });
+
+      const creditResult = await tryEngageCredit('ideas', jobId);
+      
+      if (!creditResult.success) {
+        console.log('[Credit] ❌ Engagement failed:', {
+          message: creditResult.message,
+          available: creditResult.available
+        });
+
+        setIsGenerating(false);
+        toast({
+          title: "Insufficient Credits",
+          description: "You've run out of credits. Please recharge to continue using AlphaLens.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('[Credit] ✅ Engagement succeeded:', {
+        before: creditResult.available + 1,
+        after: creditResult.available
+      });
+
+      // Step 3: Proceed with request
       const payload = {
         type: "tradesetup",
         question: `Generate trade setup for ${parameters.instrument} with ${parameters.strategy} strategy, ${parameters.riskAppetite} risk, position size ${parameters.positionSize}. ${parameters.customNotes}`,
         instrument: parameters.instrument,
-        timeframe: parameters.timeframe
+        timeframe: parameters.timeframe,
+        job_id: jobId
       };
-
-      // Create job for realtime tracking
-      const jobId = await createJob('tradesetup', parameters.instrument, payload);
       
       // Register dual response handler
       dualResponseHandler.registerHandler(jobId, async (data, source) => {
@@ -110,9 +147,7 @@ export function TradeSetupBubble({ instrument, timeframe, onClose, onTradeLevels
         'https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1',
         payload,
         {
-          enableJobTracking: true,
-          jobType: 'tradesetup',
-          instrument: parameters.instrument,
+          enableJobTracking: false,
           jobId
         }
       );

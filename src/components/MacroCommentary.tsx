@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { enhancedPostRequest, handleResponseWithFallback } from "@/lib/enhanced-request";
 import { useRealtimeJobManager } from "@/hooks/useRealtimeJobManager";
 import { useRealtimeResponseInjector } from "@/hooks/useRealtimeResponseInjector";
+import { useCreditEngagement } from "@/hooks/useCreditEngagement";
 import { TradingViewWidget } from "@/components/TradingViewWidget";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -157,6 +158,7 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
   const { toast } = useToast();
   const { logInteraction } = useAIInteractionLogger();
   const { createJob } = useRealtimeJobManager();
+  const { tryEngageCredit } = useCreditEngagement();
   const isMobile = useIsMobile();
 
   // Set up automatic response injection from Supabase
@@ -270,17 +272,53 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
     setError(null);
     
     try {
+      // Step 1: Create job
+      const jobId = await createJob('macro_commentary', instrument || 'markets', {
+        type: activeMode === "article_analysis" ? "article_analysis" : "RAG",
+        query: inputText
+      });
+      console.log('[Credit] 📝 Job created:', { jobId, feature: 'queries' });
+
+      // Step 2: Atomic credit engagement
+      console.log('[Credit] 🔐 Attempting atomic engagement:', {
+        feature: 'queries',
+        jobId,
+        timestamp: new Date().toISOString()
+      });
+
+      const creditResult = await tryEngageCredit('queries', jobId);
+      
+      if (!creditResult.success) {
+        console.log('[Credit] ❌ Engagement failed:', {
+          message: creditResult.message,
+          available: creditResult.available
+        });
+
+        setIsLoading(false);
+        toast({
+          title: "Insufficient Credits",
+          description: "You've run out of credits. Please recharge to continue using AlphaLens.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('[Credit] ✅ Engagement succeeded:', {
+        before: creditResult.available + 1,
+        after: creditResult.available
+      });
+
+      // Step 3: Proceed with request
       let payload;
       
       if (activeMode === "article_analysis") {
-        // Send EXACTLY the specified JSON structure for Article Analysis - NOTHING ELSE
         payload = {
           type: "article_analysis",
           query: inputText,
-          user_id: "12345"
+          user_id: "12345",
+          job_id: jobId
         };
       } else {
-        // Keep existing structure for other modes
         payload = {
           type: "RAG",
           question: inputText,
@@ -295,15 +333,14 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
             timestamp: new Date().toISOString(),
             impact_mapping: activeMode !== "custom_analysis" ? impactMapping : undefined
           },
-          user_id: "default_user"
+          user_id: "default_user",
+          job_id: jobId
         };
       }
 
-      const { response, jobId } = await enhancedPostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload, {
-        enableJobTracking: true,
-        jobType: 'macro_commentary',
-        instrument: instrument || 'markets',
-        feature: 'Macro Commentary'
+      const { response } = await enhancedPostRequest('https://dorian68.app.n8n.cloud/webhook/4572387f-700e-4987-b768-d98b347bd7f1', payload, {
+        enableJobTracking: false,
+        jobId
       });
 
       console.log('📊 [MacroCommentary] Job created with ID:', jobId);
