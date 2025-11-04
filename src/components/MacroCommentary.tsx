@@ -289,10 +289,13 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
       const creditResult = await tryEngageCredit('queries', jobId);
       
       if (!creditResult.success) {
-        console.log('[Credit] ❌ Engagement failed:', {
-          message: creditResult.message,
-          available: creditResult.available
-        });
+        console.log('[Credit] ❌ Engagement failed, cleaning up job:', jobId);
+        
+        // Nettoyer le job orphelin
+        await supabase
+          .from('jobs')
+          .delete()
+          .eq('id', jobId);
 
         setIsLoading(false);
         toast({
@@ -302,6 +305,8 @@ export function MacroCommentary({ instrument, timeframe, onClose }: MacroComment
         });
         return;
       }
+      
+      console.log('✅ [MacroCommentary] Credit engaged successfully. Available:', creditResult.available);
 
       console.log('[Credit] ✅ Engagement succeeded:', {
         before: creditResult.available + 1,
