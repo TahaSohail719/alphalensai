@@ -59,7 +59,7 @@ interface AdminUser {
 
 interface UsersTableProps {
   users: AdminUser[];
-  onUpdateStatus: (userId: string, status: 'pending' | 'approved' | 'rejected') => Promise<{ success: boolean }>;
+  onUpdateStatus: (userId: string, status: 'pending' | 'approved' | 'rejected', userEmail?: string) => Promise<{ success: boolean }>;
   onUpdateRole: (userId: string, role: 'user' | 'admin' | 'super_user') => Promise<{ success: boolean }>;
   onDeleteUser: (userId: string) => Promise<{ success: boolean }>;
   loading: boolean;

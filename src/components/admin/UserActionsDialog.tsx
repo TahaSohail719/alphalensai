@@ -46,7 +46,7 @@ interface UserActionsDialogProps {
     status: 'pending' | 'approved' | 'rejected';
     role?: 'user' | 'admin' | 'super_user';
   } | null;
-  onUpdateStatus: (userId: string, status: 'pending' | 'approved' | 'rejected') => Promise<{ success: boolean }>;
+  onUpdateStatus: (userId: string, status: 'pending' | 'approved' | 'rejected', userEmail?: string) => Promise<{ success: boolean }>;
   onUpdateRole: (userId: string, role: 'user' | 'admin' | 'super_user') => Promise<{ success: boolean }>;
   onDeleteUser: (userId: string) => Promise<{ success: boolean }>;
   loading: boolean;
@@ -123,7 +123,7 @@ export function UserActionsDialog({
 
   const handleUpdateStatus = async () => {
     if (!selectedStatus) return;
-    const result = await onUpdateStatus(user.user_id, selectedStatus);
+    const result = await onUpdateStatus(user.user_id, selectedStatus, user.email);
     if (result.success) {
       onClose();
     }

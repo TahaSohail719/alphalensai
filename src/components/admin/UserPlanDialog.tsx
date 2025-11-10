@@ -200,9 +200,40 @@ export function UserPlanDialog({
         return;
       }
 
+      // Send credits update notification email
+      if (user.email) {
+        // Fire-and-forget email notification (non-blocking)
+        supabase.functions.invoke('send-admin-notification', {
+          body: {
+            to: user.email,
+            notificationType: 'credits_updated',
+            userName: user.email,
+            metadata: {
+              previousCredits: {
+                queries: userCredits?.credits_queries_remaining || 0,
+                ideas: userCredits?.credits_ideas_remaining || 0,
+                reports: userCredits?.credits_reports_remaining || 0
+              },
+              newCredits: {
+                queries: queriesCredit,
+                ideas: ideasCredit,
+                reports: reportsCredit
+              },
+              planType: selectedPlan
+            }
+          }
+        }).then(({ error: emailError }) => {
+          if (emailError) {
+            console.error('❌ Failed to send credits notification:', emailError);
+          } else {
+            console.log('✅ Credits notification email sent to:', user.email);
+          }
+        });
+      }
+
       toast({
         title: "Success",
-        description: `User plan updated to ${selectedPlan} with ${queriesCredit} queries, ${ideasCredit} ideas, and ${reportsCredit} reports.`,
+        description: `User plan updated to ${selectedPlan} with ${queriesCredit} queries, ${ideasCredit} ideas, and ${reportsCredit} reports. Notification email sent.`,
       });
 
       onRefresh();

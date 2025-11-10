@@ -58,7 +58,7 @@ export function useAdminActions() {
     }
   };
 
-  const updateUserStatus = async (userId: string, status: 'pending' | 'approved' | 'rejected') => {
+  const updateUserStatus = async (userId: string, status: 'pending' | 'approved' | 'rejected', userEmail?: string) => {
     setLoading(true);
     try {
       const { error } = await supabase
@@ -68,9 +68,28 @@ export function useAdminActions() {
 
       if (error) throw error;
 
+      // Send email notification ONLY for approved/rejected
+      if ((status === 'approved' || status === 'rejected') && userEmail) {
+        // Fire-and-forget email notification (non-blocking)
+        supabase.functions.invoke('send-admin-notification', {
+          body: {
+            to: userEmail,
+            notificationType: status === 'approved' ? 'status_approved' : 'status_rejected',
+            userName: userEmail,
+            metadata: { newStatus: status }
+          }
+        }).then(({ error: emailError }) => {
+          if (emailError) {
+            console.error('❌ Failed to send notification email:', emailError);
+          } else {
+            console.log('✅ Notification email sent to:', userEmail);
+          }
+        });
+      }
+
       toast({
         title: "Success",
-        description: `User ${status} successfully`,
+        description: `User ${status} successfully${(status === 'approved' || status === 'rejected') && userEmail ? ' (notification email sent)' : ''}`,
       });
 
       return { success: true };
