@@ -23,8 +23,19 @@ export function useAdminActions() {
 
   const fetchUsers = async (): Promise<AdminUser[]> => {
     try {
+      // Get current session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('User not authenticated');
+      }
+
       // Utiliser la Edge Function pour récupérer les utilisateurs avec leurs emails
-      const { data, error } = await supabase.functions.invoke('fetch-users-with-emails');
+      const { data, error } = await supabase.functions.invoke('fetch-users-with-emails', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (error) {
         console.error('Edge function error:', error);
