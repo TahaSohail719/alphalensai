@@ -53,6 +53,46 @@ export default function Auth() {
     }
   }, [searchParams]);
 
+  // Diagnostic: parse OAuth errors and set fallback timer when returning from Google
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const urlError = url.searchParams.get('error');
+      const urlErrorDesc = url.searchParams.get('error_description');
+
+      if (urlError) {
+        console.error('[Google Auth] OAuth error returned:', { urlError, urlErrorDesc });
+        toast({
+          title: t('errors.googleOAuthFailed') || 'Échec de la connexion Google',
+          description: urlErrorDesc || urlError,
+          variant: 'destructive',
+        });
+        setProcessingOAuth(false);
+        setGoogleLoading(false);
+      }
+
+      const hasOAuthParams = !!url.searchParams.get('code') || window.location.hash.includes('access_token');
+      if (window.location.pathname === '/auth' && hasOAuthParams) {
+        const timer = setTimeout(async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            console.error('[Google Auth] CONFIG WARNING: No session after OAuth redirect. Check Supabase Auth URL Configuration and Google Provider.');
+            toast({
+              title: t('errors.oauthIncomplete') || 'Connexion Google incomplète',
+              description: t('errors.checkAuthConfig') || 'Vérifiez la configuration Supabase (URL/Redirects & Google) puis réessayez.',
+              variant: 'destructive',
+            });
+            setProcessingOAuth(false);
+            setGoogleLoading(false);
+          }
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      console.warn('[Google Auth] Diagnostic effect error:', e);
+    }
+  }, [searchParams, t, toast]);
+
   // Validate password confirmation in real-time
   useEffect(() => {
     if (confirmPassword && password !== confirmPassword) {
@@ -456,8 +496,10 @@ export default function Auth() {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    setProcessingOAuth(true);
     
     const redirectUrl = `${window.location.origin}/auth`;
+    console.log('[Google Sign In] Starting OAuth redirect', { redirectTo: redirectUrl });
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -477,6 +519,7 @@ export default function Auth() {
         variant: "destructive"
       });
       setGoogleLoading(false);
+      setProcessingOAuth(false);
     }
   };
 
@@ -492,6 +535,7 @@ export default function Auth() {
     }
     
     setGoogleLoading(true);
+    setProcessingOAuth(true);
     
     const selectedBroker = activeBrokers.find((b: any) => b.id === selectedBrokerId);
     const redirectUrl = `${window.location.origin}/auth`;
@@ -504,6 +548,7 @@ export default function Auth() {
     };
     localStorage.setItem('oauth_pending_broker', JSON.stringify(brokerData));
     console.log('[Google Sign Up] Stored broker in localStorage:', brokerData);
+    console.log('[Google Sign Up] Starting OAuth redirect', { redirectTo: redirectUrl });
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -523,6 +568,7 @@ export default function Auth() {
         variant: "destructive"
       });
       setGoogleLoading(false);
+      setProcessingOAuth(false);
       // Clear stored broker info
       localStorage.removeItem('oauth_pending_broker');
     }
