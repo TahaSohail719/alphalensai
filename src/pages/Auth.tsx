@@ -39,6 +39,19 @@ export default function Auth() {
   const { activateFreeTrial } = useCreditManager();
   const intent = searchParams.get('intent');
   const { fetchActiveBrokers } = useBrokerActions();
+  
+  // ✅ Controlled tab state synchronized with URL query param
+  const [tabValue, setTabValue] = useState<'signin' | 'signup'>(
+    searchParams.get('tab') === 'signup' ? 'signup' : 'signin'
+  );
+
+  // Sync tabValue with URL query param changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'signup' || tab === 'signin') {
+      setTabValue(tab);
+    }
+  }, [searchParams]);
 
   // Validate password confirmation in real-time
   useEffect(() => {
@@ -142,22 +155,24 @@ export default function Auth() {
         if (isNewUser) {
           console.log('[Google Auth] New user detected, waiting for trigger profile creation');
           
-          // No broker selected during signup
+          // No broker selected during signup - guide user to Sign Up tab
           if (!pendingBrokerId) {
-            console.error('[Google Auth] No broker selected - user should have signed up, not signed in');
+            console.error('[Google Auth] No broker selected - redirecting to Sign Up tab');
             // ✅ FIX 4: Add detailed logout logging
             console.error('[Google Auth] LOGOUT TRIGGERED:', {
-              reason: 'no_broker_selected',
+              reason: 'no_broker_selected_redirect_signup',
               userId: session.user.id,
               timestamp: new Date().toISOString()
             });
             toast({
               title: t('errors.selectBrokerFirst'),
               description: t('errors.selectBrokerBeforeSignup'),
-              variant: 'destructive'
+              variant: 'default'
             });
             await supabase.auth.signOut();
             setProcessingOAuth(false);
+            setGoogleLoading(false);
+            navigate('/auth?tab=signup');
             return;
           }
 
@@ -178,22 +193,39 @@ export default function Auth() {
             retries++;
           }
 
+          // ✅ FIX 3: Fallback - manually create profile if trigger failed
           if (!profile) {
-            console.error('[Google Auth] Profile creation timed out after 10 seconds');
-            // ✅ FIX 4: Add detailed logout logging
-            console.error('[Google Auth] LOGOUT TRIGGERED:', {
-              reason: 'profile_creation_timeout',
-              userId: session.user.id,
-              timestamp: new Date().toISOString()
-            });
-            toast({
-              title: t('errors.accountCreationFailed'),
-              description: 'Profile creation timed out. Please try again.',
-              variant: 'destructive'
-            });
-            await supabase.auth.signOut();
-            setProcessingOAuth(false);
-            return;
+            console.warn('[Google Auth] Profile not created by trigger, creating manually...');
+            const { data: newProfile, error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: session.user.id,
+                email: session.user.email,
+                status: 'pending'
+              })
+              .select()
+              .single();
+            
+            if (insertError) {
+              console.error('[Google Auth] Failed to create profile manually:', insertError);
+              console.error('[Google Auth] LOGOUT TRIGGERED:', {
+                reason: 'profile_creation_failed',
+                userId: session.user.id,
+                timestamp: new Date().toISOString()
+              });
+              toast({
+                title: t('errors.accountCreationFailed'),
+                description: 'Profile creation failed. Please try again.',
+                variant: 'destructive'
+              });
+              await supabase.auth.signOut();
+              setProcessingOAuth(false);
+              setGoogleLoading(false);
+              return;
+            }
+            
+            profile = newProfile;
+            console.log('[Google Auth] Profile created manually:', profile);
           }
 
           // Update profile with broker
@@ -595,7 +627,11 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs 
+            value={tabValue} 
+            onValueChange={(v) => setTabValue(v as 'signin' | 'signup')} 
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
               <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
