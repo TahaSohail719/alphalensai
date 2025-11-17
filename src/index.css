@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Professional Trading Platform Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* PERFORMANCE: Font loading moved to index.html with preconnect for faster load */
 
 @layer base {
   :root {

@@ -1,8 +1,4 @@
-import * as React from "react";
-const {
-  useState,
-  useEffect
-} = React;
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Menu, X, ChevronRight, ChevronDown, Activity, Zap, User, LogOut, Building2, Shield, FileText, History, Calculator } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -16,7 +12,6 @@ import { CreditsNavbar } from "./CreditsNavbar";
 import { usePersistentNotifications } from "./PersistentNotificationProvider";
 import AURA from "./AURA";
 import { useLocation } from "react-router-dom";
-import { useMemo } from "react";
 import { useAURAContext } from "@/contexts/AURAContextProvider";
 import { useTranslation } from "react-i18next";
 interface LayoutProps {

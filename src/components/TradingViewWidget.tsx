@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,8 @@ const mapToTwelveDataSymbol = (asset: string): string => {
   return mappings[asset] || asset;
 };
 
-export function TradingViewWidget({
+// PERFORMANCE: Memoized component to prevent unnecessary re-renders
+const TradingViewWidget = memo(function TradingViewWidget({
   selectedSymbol,
   timeframe: propTimeframe,
   onSymbolChange,
@@ -368,4 +369,10 @@ export function TradingViewWidget({
         </div>
       </CardContent>
     </Card>;
-}
+}, (prevProps, nextProps) => {
+  // Only re-render if symbol or timeframe changes
+  return prevProps.selectedSymbol === nextProps.selectedSymbol && 
+         prevProps.timeframe === nextProps.timeframe;
+});
+
+export { TradingViewWidget };
