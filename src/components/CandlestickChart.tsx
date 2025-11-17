@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,9 +9,6 @@ import { TradingViewWidget } from './TradingViewWidget';
 import LightweightChartWidget from './LightweightChartWidget';
 import { supabase } from '@/integrations/supabase/client';
 import { HybridSearchBar } from './HybridSearchBar';
-const {
-  useState
-} = React;
 interface TradeLevels {
   entry: number;
   stopLoss: number;
@@ -89,7 +86,8 @@ const timeframes = [{
   value: 'M',
   label: '1 Month'
 }];
-export function CandlestickChart({
+// PERFORMANCE: Memoized component to prevent unnecessary re-renders
+const CandlestickChart = memo(function CandlestickChart({
   asset,
   title,
   showHeader = true,
@@ -122,7 +120,7 @@ export function CandlestickChart({
   // Use controlled timeframe if provided, otherwise use local state
   const timeframe = timeframeProp || localTimeframe;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProvider = async () => {
       const { data } = await supabase.from('chart_provider_settings').select('provider').single();
       if (data) {
@@ -134,12 +132,12 @@ export function CandlestickChart({
   }, []);
 
   // Reset fallback when asset or timeframe changes - give TwelveData another try
-  React.useEffect(() => {
+  useEffect(() => {
     setUseFallback(false);
   }, [asset, timeframe]);
 
   // Prix de fallback mis à jour (utilisés seulement en attendant WebSocket)
-  React.useEffect(() => {
+  useEffect(() => {
     const basePrice = asset === 'Bitcoin' || asset === 'BTC' ? 67500.00 : asset === 'EUR/USD' ? 1.0850 : asset === 'GBP/USD' ? 1.2650 : asset === 'GOLD' || asset === 'Gold' ? 2650.00 : asset === 'USD/JPY' ? 150.50 : asset === 'Ethereum' || asset === 'ETH' ? 3500.00 : asset === 'SILVER' || asset === 'Silver' ? 31.50 : asset === 'CRUDE' || asset === 'Crude Oil' ? 75.00 : asset === 'AUD/USD' ? 0.6650 : asset === 'NZD/USD' ? 0.6100 : 1.0000;
     setCurrentPrice(basePrice.toString());
   }, [asset]);
@@ -385,4 +383,11 @@ export function CandlestickChart({
         </Card>
       </div>
     </>;
-}
+}, (prevProps, nextProps) => {
+  // Only re-render if key props change
+  return prevProps.asset === nextProps.asset && 
+         prevProps.timeframe === nextProps.timeframe &&
+         prevProps.forceMode === nextProps.forceMode;
+});
+
+export { CandlestickChart };
