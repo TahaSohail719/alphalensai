@@ -33,10 +33,10 @@ serve(async (req) => {
 
     // Forward the request body to EC2
     const body = await req.text();
-    console.log("[forecast-proxy] Forwarding request to:", `${apiUrl}/forecast`);
+    console.log("[forecast-proxy] Forwarding request to:", apiUrl);
     console.log("[forecast-proxy] Request body:", body);
 
-    const response = await fetch(`${apiUrl}/forecast`, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,
