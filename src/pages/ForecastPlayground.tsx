@@ -437,6 +437,8 @@ function ForecastPlaygroundContent() {
   const [tradeMode, setTradeMode] = useState<'spot' | 'forward'>('spot'); // NEW: Trade mode selector
   const [useMonteCarlo, setUseMonteCarlo] = useState(true);
   const [paths, setPaths] = useState(3000);
+  // Skew parameter for Surface API: 0 = symmetric, >0 = right skew (bullish), <0 = left skew (bearish)
+  const [skew, setSkew] = useState(0.0);
   const [includePredictions, setIncludePredictions] = useState(true);
   const [includeMetadata, setIncludeMetadata] = useState(false);
   const [includeModelInfo, setIncludeModelInfo] = useState(false);
@@ -511,6 +513,7 @@ function ForecastPlaygroundContent() {
         symbol,
         timeframe,
         horizon_hours: parsedHorizons,
+        skew, // Skew parameter: 0 = symmetric, >0 = right skew, <0 = left skew
         paths: 1000,
         dof: 3.0,
         target_prob: { min: 0.05, max: 0.95, steps: 30 },
@@ -819,6 +822,29 @@ function ForecastPlaygroundContent() {
                     onCheckedChange={setIncludeModelInfo}
                   />
                   <Label htmlFor="includeModelInfo">Include Model Info</Label>
+                </div>
+                
+                {/* Skew parameter for Surface API */}
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <Label htmlFor="skew" className="flex items-center gap-2">
+                    Skew (σ asymmetry)
+                    <Badge variant="outline" className="text-xs">
+                      {skew === 0 ? "Symmetric" : skew > 0 ? "Right skew" : "Left skew"}
+                    </Badge>
+                  </Label>
+                  <Input
+                    id="skew"
+                    type="number"
+                    step="0.1"
+                    min={-2}
+                    max={2}
+                    value={skew}
+                    onChange={(e) => setSkew(parseFloat(e.target.value) || 0)}
+                    className="w-full max-w-[200px]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    0 = symmetric distribution, &gt;0 = bullish fat tail, &lt;0 = bearish fat tail
+                  </p>
                 </div>
               </CollapsibleContent>
             </Collapsible>
