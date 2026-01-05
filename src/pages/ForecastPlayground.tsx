@@ -267,64 +267,72 @@ function RiskProfilesPanel({
 
   const formatPrice = (val: number) => val.toFixed(5);
 
+  // Profile badge colors - institutional look
+  const getProfileStyles = (key: string) => {
+    switch (key) {
+      case "conservative":
+        return "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400";
+      case "moderate":
+        return "bg-violet-500/10 border-violet-500/30 text-violet-600 dark:text-violet-400";
+      case "aggressive":
+        return "bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div className="p-4 space-y-3 bg-muted/20">
+    <div className="p-4 space-y-3 bg-gradient-to-b from-muted/30 to-muted/10 animate-in slide-in-from-top-2 duration-200">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Layers className="h-4 w-4" />
-          Risk Profiles for {horizonData.h}
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Suggested TP/SL based on risk appetite</span>
         </div>
-        <Badge variant="outline" className="text-xs">
-          σ source: {sigmaSource}
+        <Badge variant="outline" className="text-xs font-mono">
+          σ: {sigmaSource}
         </Badge>
       </div>
-      <div className="rounded-lg border overflow-x-auto bg-background">
+      <div className="rounded-lg border overflow-x-auto bg-background/80 backdrop-blur-sm">
         <Table className="text-sm">
           <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="text-xs font-semibold">Profile</TableHead>
-              <TableHead className="text-xs font-semibold">Target Prob</TableHead>
-              <TableHead className="text-xs font-semibold text-right">SL (σ)</TableHead>
-              <TableHead className="text-xs font-semibold text-right">TP (σ)</TableHead>
-              <TableHead className="text-xs font-semibold text-right">SL Price</TableHead>
-              <TableHead className="text-xs font-semibold text-right">TP Price</TableHead>
-              <TableHead className="text-xs font-semibold text-right">SL ({pipUnit})</TableHead>
-              <TableHead className="text-xs font-semibold text-right">TP ({pipUnit})</TableHead>
-              <TableHead className="text-xs font-semibold text-right">R/R</TableHead>
+            <TableRow className="bg-muted/30 border-b">
+              <TableHead className="text-xs font-semibold uppercase tracking-wide">Profile</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-center">Target Prob</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">SL (σ)</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">TP (σ)</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">SL Price</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">TP Price</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">SL ({pipUnit})</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">TP ({pipUnit})</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">R/R</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {profiles.map((p) => (
-              <TableRow key={p.key}>
+              <TableRow key={p.key} className="hover:bg-muted/30 transition-colors">
                 <TableCell className="font-medium">
                   <Badge 
                     variant="outline" 
-                    className={
-                      p.key === "conservative" 
-                        ? "border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950/30"
-                        : p.key === "moderate"
-                          ? "border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30"
-                          : "border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/30"
-                    }
+                    className={getProfileStyles(p.key)}
                   >
                     {p.name}
                   </Badge>
                 </TableCell>
-                <TableCell className="font-mono">{(p.targetProb * 100).toFixed(0)}%</TableCell>
-                <TableCell className="text-right font-mono text-rose-600">{p.slSigma.toFixed(2)}</TableCell>
-                <TableCell className="text-right font-mono text-emerald-600">{p.tpSigma.toFixed(2)}</TableCell>
-                <TableCell className="text-right font-mono text-rose-600">{formatPrice(p.slPrice)}</TableCell>
-                <TableCell className="text-right font-mono text-emerald-600">{formatPrice(p.tpPrice)}</TableCell>
-                <TableCell className="text-right font-mono text-rose-600">{p.slPips.toFixed(1)}</TableCell>
-                <TableCell className="text-right font-mono text-emerald-600">{p.tpPips.toFixed(1)}</TableCell>
-                <TableCell className="text-right font-mono font-semibold">{p.riskReward.toFixed(2)}</TableCell>
+                <TableCell className="font-mono text-center">{(p.targetProb * 100).toFixed(0)}%</TableCell>
+                <TableCell className="text-right font-mono text-rose-600 dark:text-rose-400">{p.slSigma.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-mono text-emerald-600 dark:text-emerald-400">{p.tpSigma.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-mono text-rose-600 dark:text-rose-400">{formatPrice(p.slPrice)}</TableCell>
+                <TableCell className="text-right font-mono text-emerald-600 dark:text-emerald-400">{formatPrice(p.tpPrice)}</TableCell>
+                <TableCell className="text-right font-mono font-semibold text-rose-600 dark:text-rose-400">{p.slPips.toFixed(1)}</TableCell>
+                <TableCell className="text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">{p.tpPips.toFixed(1)}</TableCell>
+                <TableCell className="text-right font-mono font-bold">{p.riskReward.toFixed(2)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {direction === "long" ? "LONG" : "SHORT"}: TP {direction === "long" ? "above" : "below"} entry, SL {direction === "long" ? "below" : "above"} entry
+      <p className="text-xs text-muted-foreground italic">
+        {direction === "long" ? "LONG" : "SHORT"} position: TP {direction === "long" ? "above" : "below"} entry, SL {direction === "long" ? "below" : "above"} entry
       </p>
     </div>
   );
@@ -399,52 +407,64 @@ function ForecastSummaryTable({
   };
 
   return (
-    <div className="rounded-lg border overflow-x-auto">
-      <Table className="min-w-[1100px]">
-        <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead className="font-semibold text-xs whitespace-nowrap w-8"></TableHead>
-            <TableHead className="font-semibold text-xs whitespace-nowrap">Horizon</TableHead>
-            <TableHead className="font-semibold text-xs whitespace-nowrap">Direction</TableHead>
-            <TableHead className="font-semibold text-xs whitespace-nowrap">Trade Mode</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">Entry Price</TableHead>
-            <TableHead className="font-semibold text-xs whitespace-nowrap">Entry Type</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">Forecast (Med)</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">TP</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">SL</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">R/R</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">Confidence</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">Prob TP&gt;SL</TableHead>
-            <TableHead className="font-semibold text-xs text-right whitespace-nowrap">Pos. Size</TableHead>
-            <TableHead className="font-semibold text-xs whitespace-nowrap">Model</TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-3">
+      {/* Table Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          <h3 className="text-base font-semibold">Forecast Summary by Horizon</h3>
+        </div>
+        <Badge variant="outline" className="text-xs font-mono">
+          {entries.length} horizon{entries.length > 1 ? 's' : ''}
+        </Badge>
+      </div>
+      
+      <div className="rounded-lg border overflow-x-auto bg-card">
+        <Table className="min-w-[1100px]">
+          <TableHeader>
+            <TableRow className="bg-muted/30 border-b hover:bg-muted/30">
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap w-8"></TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap">Horizon</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap">Direction</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap">Trade Mode</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">Entry Price</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap">Entry Type</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">Forecast</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">TP</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">SL</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">R/R</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">Conf.</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">Prob TP</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide text-right whitespace-nowrap">Size</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wide whitespace-nowrap">Model</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
-          {entries.map(([horizon, data]) => {
+          {entries.map(([horizon, data], idx) => {
             const rowKey = data.h || horizon;
             const isExpanded = expandedRows.has(rowKey);
             
             return (
               <React.Fragment key={rowKey}>
-                <TableRow>
-                  {/* NEW: Expand/Collapse Button */}
+                <TableRow className={`hover:bg-muted/50 transition-colors ${idx % 2 === 0 ? 'bg-transparent' : 'bg-muted/20'}`}>
+                  {/* Expand/Collapse Button */}
                   <TableCell className="text-center p-1">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-6 w-6 p-0"
+                      className="h-6 w-6 p-0 hover:bg-primary/10"
                       onClick={() => toggleRow(rowKey)}
                       title="Show Risk Profiles"
                     >
                       {isExpanded 
-                        ? <ChevronDown className="h-4 w-4" /> 
+                        ? <ChevronDown className="h-4 w-4 text-primary" /> 
                         : <ChevronRight className="h-4 w-4" />
                       }
                     </Button>
                   </TableCell>
                   
                   {/* Horizon */}
-                  <TableCell className="font-medium">{data.h || horizon}</TableCell>
+                  <TableCell className="font-medium font-mono">{data.h || horizon}</TableCell>
                   
                   {/* Direction Badge */}
                   <TableCell>
@@ -452,9 +472,9 @@ function ForecastSummaryTable({
                       variant="outline" 
                       className={
                         data.direction?.toLowerCase() === "long" 
-                          ? "border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30" 
+                          ? "border-emerald-500/50 text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" 
                           : data.direction?.toLowerCase() === "short"
-                            ? "border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/30"
+                            ? "border-rose-500/50 text-rose-600 bg-rose-500/10 dark:text-rose-400"
                             : ""
                       }
                     >
@@ -553,7 +573,8 @@ function ForecastSummaryTable({
             );
           })}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 }
@@ -881,204 +902,214 @@ function ForecastPlaygroundContent() {
           </Badge>
         </div>
 
-        {/* Configuration Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings2 className="h-5 w-5" />
-              Forecast Configuration
-            </CardTitle>
-            <CardDescription>
-              Configure the forecast request parameters
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Main form fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Asset selector */}
-              <div className="space-y-2">
-                <Label htmlFor="asset">Asset</Label>
-                <Select value={symbol} onValueChange={setSymbol}>
-                  <SelectTrigger id="asset">
-                    <SelectValue placeholder="Select asset" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALLOWED_ASSETS.map((asset) => (
-                      <SelectItem key={asset} value={asset}>
-                        {asset}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Timeframe selector */}
-              <div className="space-y-2">
-                <Label htmlFor="timeframe">Timeframe</Label>
-                <Select value={timeframe} onValueChange={setTimeframe}>
-                  <SelectTrigger id="timeframe">
-                    <SelectValue placeholder="Select timeframe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIMEFRAMES.map((tf) => (
-                      <SelectItem key={tf} value={tf}>
-                        {tf}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {/* Configuration Form - Grouped into logical sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Market Context Card */}
+          <Card className="border bg-card/50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Market Context</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Asset & Timeframe Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="asset" className="text-xs font-medium">Symbol</Label>
+                  <Select value={symbol} onValueChange={setSymbol}>
+                    <SelectTrigger id="asset" className="h-9">
+                      <SelectValue placeholder="Select asset" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALLOWED_ASSETS.map((asset) => (
+                        <SelectItem key={asset} value={asset}>
+                          {asset}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timeframe" className="text-xs font-medium">Timeframe</Label>
+                  <Select value={timeframe} onValueChange={setTimeframe}>
+                    <SelectTrigger id="timeframe" className="h-9">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIMEFRAMES.map((tf) => (
+                        <SelectItem key={tf} value={tf}>
+                          {tf}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Horizons input */}
               <div className="space-y-2">
-                <Label htmlFor="horizons">Horizons (comma-separated)</Label>
+                <Label htmlFor="horizons" className="text-xs font-medium">Horizons</Label>
                 <Input
                   id="horizons"
                   value={horizons}
                   onChange={(e) => setHorizons(e.target.value)}
                   placeholder="1, 3, 6"
+                  className="h-9 font-mono"
                 />
+                <p className="text-xs text-muted-foreground">Forecast horizons in hours (comma-separated)</p>
               </div>
 
-              {/* Trade Mode Selector - NEW */}
+              {/* Trade Mode */}
               <div className="space-y-2">
-                <Label>Trade Mode</Label>
+                <Label className="text-xs font-medium">Trade Mode</Label>
                 <RadioGroup
                   value={tradeMode}
                   onValueChange={(value) => setTradeMode(value as 'spot' | 'forward')}
-                  className="flex flex-col sm:flex-row gap-2 sm:gap-4"
+                  className="flex flex-col sm:flex-row gap-3"
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:border-primary/50 transition-colors cursor-pointer">
                     <RadioGroupItem value="spot" id="spot" />
-                    <Label htmlFor="spot" className="flex items-center gap-1.5 cursor-pointer font-normal">
+                    <Label htmlFor="spot" className="flex items-center gap-1.5 cursor-pointer font-normal text-sm">
                       <Zap className="h-3.5 w-3.5 text-blue-500" />
                       Spot (Market)
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:border-primary/50 transition-colors cursor-pointer">
                     <RadioGroupItem value="forward" id="forward" />
-                    <Label htmlFor="forward" className="flex items-center gap-1.5 cursor-pointer font-normal">
+                    <Label htmlFor="forward" className="flex items-center gap-1.5 cursor-pointer font-normal text-sm">
                       <Target className="h-3.5 w-3.5 text-violet-500" />
                       Forward (Conditional)
                     </Label>
                   </div>
                 </RadioGroup>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Monte Carlo toggle and paths */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="montecarlo"
-                  checked={useMonteCarlo}
-                  onCheckedChange={setUseMonteCarlo}
-                />
-                <Label htmlFor="montecarlo">Use Monte Carlo</Label>
+          {/* Model Assumptions Card */}
+          <Card className="border bg-card/50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Settings2 className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Model Assumptions</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Monte Carlo toggle and paths */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="montecarlo"
+                    checked={useMonteCarlo}
+                    onCheckedChange={setUseMonteCarlo}
+                  />
+                  <Label htmlFor="montecarlo" className="text-sm font-medium cursor-pointer">Use Monte Carlo</Label>
+                </div>
+                {useMonteCarlo && (
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="paths" className="text-xs text-muted-foreground">Paths:</Label>
+                    <Input
+                      id="paths"
+                      type="number"
+                      value={paths}
+                      onChange={(e) => setPaths(parseInt(e.target.value, 10) || 0)}
+                      className="w-24 h-8 text-sm font-mono"
+                      min={100}
+                      max={10000}
+                    />
+                  </div>
+                )}
               </div>
+              <p className="text-xs text-muted-foreground -mt-2 ml-1">Higher paths = more precise, slower</p>
 
-              {useMonteCarlo && (
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="paths" className="whitespace-nowrap">
-                    Paths:
-                  </Label>
-                  <Input
-                    id="paths"
-                    type="number"
-                    value={paths}
-                    onChange={(e) => setPaths(parseInt(e.target.value, 10) || 0)}
-                    className="w-28"
-                    min={100}
-                    max={10000}
-                  />
-                </div>
-              )}
-            </div>
+              {/* Advanced options */}
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2 w-full justify-start hover:bg-muted/50">
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        advancedOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                    <span className="text-xs font-medium">Advanced Options</span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3 pl-2 border-l-2 border-primary/20 ml-2">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="includePredictions"
+                      checked={includePredictions}
+                      onCheckedChange={setIncludePredictions}
+                    />
+                    <Label htmlFor="includePredictions" className="text-sm cursor-pointer">Include Predictions</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="includeMetadata"
+                      checked={includeMetadata}
+                      onCheckedChange={setIncludeMetadata}
+                    />
+                    <Label htmlFor="includeMetadata" className="text-sm cursor-pointer">Include Metadata</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="includeModelInfo"
+                      checked={includeModelInfo}
+                      onCheckedChange={setIncludeModelInfo}
+                    />
+                    <Label htmlFor="includeModelInfo" className="text-sm cursor-pointer">Include Model Info</Label>
+                  </div>
+                  
+                  {/* Skew parameter */}
+                  <div className="space-y-2 pt-3 border-t border-border/50">
+                    <Label htmlFor="skew" className="flex items-center gap-2 text-sm" title="Controls distribution asymmetry. 0 = symmetric, >0 = bullish tail, <0 = bearish tail">
+                      Skew (σ asymmetry)
+                      <Badge variant="outline" className="text-xs font-mono">
+                        {skew === 0 ? "Symmetric" : skew > 0 ? "Right" : "Left"}
+                      </Badge>
+                    </Label>
+                    <Input
+                      id="skew"
+                      type="number"
+                      step="0.1"
+                      min={-2}
+                      max={2}
+                      value={skew}
+                      onChange={(e) => setSkew(parseFloat(e.target.value) || 0)}
+                      className="w-full max-w-[140px] h-8 font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Controls tail risk assumptions
+                    </p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Advanced options */}
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      advancedOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                  Advanced Options
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4 space-y-4 pl-4 border-l-2 border-border">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="includePredictions"
-                    checked={includePredictions}
-                    onCheckedChange={setIncludePredictions}
-                  />
-                  <Label htmlFor="includePredictions">Include Predictions</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="includeMetadata"
-                    checked={includeMetadata}
-                    onCheckedChange={setIncludeMetadata}
-                  />
-                  <Label htmlFor="includeMetadata">Include Metadata</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="includeModelInfo"
-                    checked={includeModelInfo}
-                    onCheckedChange={setIncludeModelInfo}
-                  />
-                  <Label htmlFor="includeModelInfo">Include Model Info</Label>
-                </div>
-                
-                {/* Skew parameter for Surface API */}
-                <div className="space-y-2 pt-2 border-t border-border">
-                  <Label htmlFor="skew" className="flex items-center gap-2">
-                    Skew (σ asymmetry)
-                    <Badge variant="outline" className="text-xs">
-                      {skew === 0 ? "Symmetric" : skew > 0 ? "Right skew" : "Left skew"}
-                    </Badge>
-                  </Label>
-                  <Input
-                    id="skew"
-                    type="number"
-                    step="0.1"
-                    min={-2}
-                    max={2}
-                    value={skew}
-                    onChange={(e) => setSkew(parseFloat(e.target.value) || 0)}
-                    className="w-full max-w-[200px]"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    0 = symmetric distribution, &gt;0 = bullish fat tail, &lt;0 = bearish fat tail
-                  </p>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Submit button */}
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full sm:w-auto"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  Running Forecast...
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-2" />
-                  Run Forecast
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Run Action - Prominent CTA */}
+        <div className={`transition-opacity duration-200 ${loading ? 'opacity-70' : 'opacity-100'}`}>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full sm:w-auto min-w-[200px] h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                <span className="animate-pulse">Simulating scenarios...</span>
+              </>
+            ) : (
+              <>
+                <Play className="h-5 w-5 mr-2" />
+                Run Forecast
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Error display */}
         {error && (
@@ -1216,18 +1247,12 @@ function ForecastPlaygroundContent() {
                 <div className="space-y-4">
                   {/* Forecast Summary Table */}
                   {payloadHorizons.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        Trade Forecast Summary
-                      </h4>
-                      <ForecastSummaryTable 
-                        horizons={payloadHorizons} 
-                        symbol={symbol}
-                        sigmaRef={surfaceResult?.sigma_ref}
-                        timeframe={timeframe}
-                      />
-                    </div>
+                    <ForecastSummaryTable 
+                      horizons={payloadHorizons} 
+                      symbol={symbol}
+                      sigmaRef={surfaceResult?.sigma_ref}
+                      timeframe={timeframe}
+                    />
                   )}
 
                   {/* Metadata Table */}
