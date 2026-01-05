@@ -36,10 +36,15 @@ Deno.serve(async (req) => {
     }
 
     // Build the request payload for the Surface API
+    // Note: horizon_hours expects a single float, not an array
+    const horizonHours = Array.isArray(body.horizon_hours) 
+      ? body.horizon_hours[0] 
+      : (body.horizon_hours ?? 1);
+
     const surfacePayload = {
       symbol: body.symbol,
       timeframe: body.timeframe,
-      horizon_hours: body.horizon_hours || [1, 3, 6],
+      horizon_hours: horizonHours,
       paths: body.paths ?? 1000,
       dof: body.dof ?? 3.0,
       target_prob: body.target_prob ?? { min: 0.05, max: 0.95, steps: 30 },
