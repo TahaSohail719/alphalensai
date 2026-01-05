@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
       symbol: body.symbol,
       timeframe: body.timeframe,
       horizon_hours: horizonHours,
+      skew: body.skew ?? 0.0, // Skew parameter: 0 = symmetric, >0 = right skew, <0 = left skew
       paths: body.paths ?? 1000,
       dof: body.dof ?? 3.0,
       target_prob: body.target_prob ?? { min: 0.05, max: 0.95, steps: 30 },
