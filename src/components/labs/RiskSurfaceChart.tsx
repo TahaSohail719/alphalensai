@@ -251,25 +251,30 @@ export function RiskSurfaceChart({
   const formatPercent = (prob: number) => `${(prob * 100).toFixed(1)}%`;
 
   return (
-    <div className="space-y-4">
-      {/* Header with Entry Info */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-lg">
+    <div className="space-y-6">
+      {/* Header with Entry Info - Institutional Grade */}
+      <Card className="border-0 bg-gradient-to-r from-card to-muted/20">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                 <Target className="h-5 w-5 text-primary" />
-                Risk / Reward Probability Surface
+                Risk / Reward Surface
               </CardTitle>
-              <CardDescription>
-                Interactive 3D visualization of SL/TP relationships
+              <CardDescription className="text-sm max-w-md">
+                Probability-adjusted take-profit as a function of stop-loss intensity
               </CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="font-mono">
+              {symbol && (
+                <Badge variant="outline" className="font-mono text-xs">
+                  {symbol}
+                </Badge>
+              )}
+              <Badge variant="secondary" className="font-mono text-xs" title="Entry price for scenario calculations">
                 Entry: {formatPrice(data.entry_price)}
               </Badge>
-              <Badge variant="secondary" className="font-mono">
+              <Badge variant="outline" className="font-mono text-xs" title="Reference volatility (standard deviation)">
                 σ ref: {data.sigma_ref.toFixed(6)}
               </Badge>
             </div>
@@ -277,95 +282,108 @@ export function RiskSurfaceChart({
         </CardHeader>
       </Card>
 
-      {/* 3D Surface Chart */}
-      <Card>
-        <CardContent className="p-2 sm:p-4">
-          <div className="relative w-full" style={{ height: "450px" }}>
-            <Plot
-              data={plotData}
-              layout={layout}
-              config={{
-                responsive: true,
-                displayModeBar: true,
-                modeBarButtonsToRemove: ["toImage", "sendDataToCloud"],
-                displaylogo: false,
-              }}
-              style={{ width: "100%", height: "100%" }}
-              onClick={handlePlotClick}
-              useResizeHandler
-            />
+      {/* 3D Surface Chart - Enhanced Container */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <div className="bg-gradient-to-b from-background to-muted/10 p-4 sm:p-6">
+            <div className="relative w-full rounded-lg overflow-hidden" style={{ height: "480px" }}>
+              <Plot
+                data={plotData}
+                layout={layout}
+                config={{
+                  responsive: true,
+                  displayModeBar: true,
+                  modeBarButtonsToRemove: ["toImage", "sendDataToCloud"],
+                  displaylogo: false,
+                }}
+                style={{ width: "100%", height: "100%" }}
+                onClick={handlePlotClick}
+                useResizeHandler
+              />
+            </div>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-muted-foreground">
-            <MousePointer className="h-3 w-3" />
-            <span>Click on the surface to select a trade scenario</span>
+          <div className="flex items-center justify-center gap-2 py-3 border-t bg-muted/20">
+            <MousePointer className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Click on the surface to select a trade scenario</span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Selected Point Panel */}
+      {/* Selected Point Panel - Professional Scenario Insight */}
       {selectedPoint && (
-        <Card className="border-primary/50 bg-primary/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MousePointer className="h-4 w-4 text-primary" />
+        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent animate-in fade-in-50 duration-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
               Selected Trade Scenario
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {/* Main Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Stop-Loss */}
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                <div className="flex items-center gap-2 mb-1">
+              {/* Stop-Loss Card */}
+              <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-2">
+                <div className="flex items-center gap-2">
                   <TrendingDown className="h-4 w-4 text-rose-500" />
-                  <span className="text-sm font-medium text-rose-600 dark:text-rose-400">Stop-Loss</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">Stop-Loss</span>
                 </div>
-                <div className="font-mono text-lg font-bold">
+                <div className="font-mono text-xl font-bold" title="Stop-loss in standard deviations">
                   {formatSigma(selectedPoint.slSigma)}σ
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  SL Price: {formatPrice(selectedPoint.slPrice)}
-                </div>
-                {/* NEW: Pips display */}
-                {selectedPoint.slPips != null && (
-                  <div className="text-sm font-mono font-semibold text-rose-600 dark:text-rose-400 mt-1">
-                    {selectedPoint.slPips.toFixed(1)} {selectedPoint.pipUnit}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground">
+                    SL Price: <span className="font-mono">{formatPrice(selectedPoint.slPrice)}</span>
                   </div>
-                )}
+                  {selectedPoint.slPips != null && (
+                    <div className="text-base font-mono font-bold text-rose-600 dark:text-rose-400">
+                      {selectedPoint.slPips.toFixed(1)} <span className="text-xs font-normal">{selectedPoint.pipUnit}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Take-Profit */}
-              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <div className="flex items-center gap-2 mb-1">
+              {/* Take-Profit Card */}
+              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
+                <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-emerald-500" />
-                  <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Take-Profit</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Take-Profit</span>
                 </div>
-                <div className="font-mono text-lg font-bold">
+                <div className="font-mono text-xl font-bold" title="Take-profit in standard deviations">
                   {formatSigma(selectedPoint.tpSigma)}σ
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  TP Price: {formatPrice(selectedPoint.tpPrice)}
-                </div>
-                {/* NEW: Pips display */}
-                {selectedPoint.tpPips != null && (
-                  <div className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                    {selectedPoint.tpPips.toFixed(1)} {selectedPoint.pipUnit}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground">
+                    TP Price: <span className="font-mono">{formatPrice(selectedPoint.tpPrice)}</span>
                   </div>
-                )}
+                  {selectedPoint.tpPips != null && (
+                    <div className="text-base font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      {selectedPoint.tpPips.toFixed(1)} <span className="text-xs font-normal">{selectedPoint.pipUnit}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Probability */}
-              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-1">
+              {/* Probability Card */}
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+                <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">Implied Probability</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-primary">Target Probability</span>
                 </div>
-                <div className="font-mono text-lg font-bold">
+                <div className="font-mono text-xl font-bold" title="Probability of hitting TP before SL">
                   {formatPercent(selectedPoint.targetProb)}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  R/R: {(selectedPoint.tpSigma / selectedPoint.slSigma).toFixed(2)}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground">
+                    R/R Ratio: <span className="font-mono font-semibold">{(selectedPoint.tpSigma / selectedPoint.slSigma).toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Footer with Entry Context */}
+            <div className="flex items-center justify-between pt-3 border-t border-border/50 text-xs text-muted-foreground">
+              <span>Entry Price: <span className="font-mono font-medium text-foreground">{formatPrice(data.entry_price)}</span></span>
+              {symbol && <span>Symbol: <span className="font-medium text-foreground">{symbol}</span></span>}
             </div>
           </CardContent>
         </Card>
