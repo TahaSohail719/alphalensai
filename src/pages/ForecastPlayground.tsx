@@ -424,9 +424,7 @@ function ForecastSummaryTable({
   // Get entry type label
   const getEntryTypeLabel = (data: HorizonForecast): string => {
     if (data.entry_type) return data.entry_type;
-    if (data.trade_mode === "forward") return "Conditional Entry";
-    if (data.trade_mode === "spot") return "Market Entry";
-    return "Market Entry"; // Default
+    return "Conditional Entry"; // Forward mode only
   };
 
   return (
@@ -532,23 +530,13 @@ function ForecastSummaryTable({
                       </Badge>
                     </TableCell>
 
-                    {/* Trade Mode Badge */}
+                    {/* Trade Mode Badge - Always Forward */}
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={
-                          data.trade_mode === "spot"
-                            ? "border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950/30"
-                            : data.trade_mode === "forward"
-                              ? "border-violet-500 text-violet-600 bg-violet-50 dark:bg-violet-950/30"
-                              : "border-muted-foreground/50"
-                        }
+                        className="border-violet-500 text-violet-600 bg-violet-50 dark:bg-violet-950/30"
                       >
-                        {data.trade_mode === "spot"
-                          ? "Spot"
-                          : data.trade_mode === "forward"
-                            ? "Forward"
-                            : data.trade_mode || "—"}
+                        Forward
                       </Badge>
                     </TableCell>
 
@@ -714,7 +702,7 @@ function ForecastPlaygroundContent() {
   const [symbol, setSymbol] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("15min");
   const [horizons, setHorizons] = useState("1, 3, 6");
-  const [tradeMode, setTradeMode] = useState<"spot" | "forward">("spot"); // NEW: Trade mode selector
+  
   const [useMonteCarlo, setUseMonteCarlo] = useState(true);
   const [paths, setPaths] = useState(3000);
   // Skew parameter for Surface API: 0 = symmetric, >0 = right skew (bullish), <0 = left skew (bearish)
@@ -768,7 +756,7 @@ function ForecastPlaygroundContent() {
       symbol,
       timeframe,
       horizons: parsedHorizons,
-      trade_mode: tradeMode, // NEW: Include trade mode in request
+      trade_mode: "forward", // Always forward mode
       use_montecarlo: useMonteCarlo,
       include_predictions: includePredictions,
       include_metadata: includeMetadata,
@@ -1035,30 +1023,6 @@ function ForecastPlaygroundContent() {
                 <p className="text-xs text-muted-foreground">Forecast horizons in hours (comma-separated)</p>
               </div>
 
-              {/* Trade Mode */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium">Trade Mode</Label>
-                <RadioGroup
-                  value={tradeMode}
-                  onValueChange={(value) => setTradeMode(value as "spot" | "forward")}
-                  className="flex flex-col sm:flex-row gap-3"
-                >
-                  <div className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:border-primary/50 transition-colors cursor-pointer">
-                    <RadioGroupItem value="spot" id="spot" />
-                    <Label htmlFor="spot" className="flex items-center gap-1.5 cursor-pointer font-normal text-sm">
-                      <Zap className="h-3.5 w-3.5 text-blue-500" />
-                      Spot (Market)
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:border-primary/50 transition-colors cursor-pointer">
-                    <RadioGroupItem value="forward" id="forward" />
-                    <Label htmlFor="forward" className="flex items-center gap-1.5 cursor-pointer font-normal text-sm">
-                      <Target className="h-3.5 w-3.5 text-violet-500" />
-                      Forward (Conditional)
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
             </CardContent>
           </Card>
 
