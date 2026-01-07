@@ -44,7 +44,7 @@ import {
   sigmaHProxyFromQuantiles,
   sigmaHFromSigmaRef,
   tpSlFromSigmas,
-  tpSlFromATR,  // NEW: ATR-based TP/SL calculation
+  tpSlFromATR, // NEW: ATR-based TP/SL calculation
   priceDistanceToPips,
   computeSteps,
 } from "@/lib/forecastUtils";
@@ -214,13 +214,13 @@ function RiskProfilesPanel({
   symbol,
   sigmaRef,
   timeframe,
-  atr,  // NEW: ATR from surface API (optional)
+  atr, // NEW: ATR from surface API (optional)
 }: {
   horizonData: HorizonForecast;
   symbol?: string;
   sigmaRef?: number;
   timeframe?: string;
-  atr?: number;  // NEW: ATR(14) in price units
+  atr?: number; // NEW: ATR(14) in price units
 }) {
   const entryPrice = horizonData.entry_price;
   const direction = (horizonData.direction?.toLowerCase() || "long") as "long" | "short";
@@ -271,8 +271,8 @@ function RiskProfilesPanel({
         entryPrice,
         direction,
         atr as number,
-        profile.tpSigma,  // Use same multipliers as sigma (k_TP)
-        profile.slSigma   // k_SL
+        profile.tpSigma, // Use same multipliers as sigma (k_TP)
+        profile.slSigma, // k_SL
       );
       tpPrice = result.tpPrice;
       slPrice = result.slPrice;
@@ -280,13 +280,7 @@ function RiskProfilesPanel({
       slDistance = result.slDistance;
     } else {
       // FALLBACK: Existing sigma-based logic (unchanged)
-      const result = tpSlFromSigmas(
-        entryPrice,
-        direction,
-        sigmaH as number,
-        profile.tpSigma,
-        profile.slSigma,
-      );
+      const result = tpSlFromSigmas(entryPrice, direction, sigmaH as number, profile.tpSigma, profile.slSigma);
       tpPrice = result.tpPrice;
       slPrice = result.slPrice;
       tpDistance = result.tpDistance;
@@ -325,9 +319,7 @@ function RiskProfilesPanel({
   };
 
   // Calculation source label for display
-  const calculationLabel = useATR 
-    ? `ATR: ${atr?.toFixed(5)}` 
-    : `σ: ${sigmaSource}`;
+  const calculationLabel = useATR ? `ATR: ${atr?.toFixed(5)}` : `σ: ${sigmaSource}`;
 
   return (
     <div className="p-4 space-y-3 bg-gradient-to-b from-muted/30 to-muted/10 animate-in slide-in-from-top-2 duration-200">
@@ -337,7 +329,10 @@ function RiskProfilesPanel({
           <span className="text-sm font-semibold">Suggested TP/SL based on risk appetite</span>
         </div>
         {useATR ? (
-          <Badge className="text-xs font-mono bg-emerald-600 hover:bg-emerald-700" title="Using ATR(14) for TP/SL calculation">
+          <Badge
+            className="text-xs font-mono bg-emerald-600 hover:bg-emerald-700"
+            title="Using ATR(14) for TP/SL calculation"
+          >
             {calculationLabel}
           </Badge>
         ) : (
@@ -408,13 +403,13 @@ function ForecastSummaryTable({
   symbol,
   sigmaRef,
   timeframe,
-  atr,  // NEW: ATR from surface API (optional)
+  atr, // NEW: ATR from surface API (optional)
 }: {
   horizons: HorizonForecast[] | Record<string, HorizonForecast>;
   symbol?: string;
   sigmaRef?: number;
   timeframe?: string;
-  atr?: number;  // NEW: ATR(14) in price units
+  atr?: number; // NEW: ATR(14) in price units
 }) {
   // NEW: Expandable rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -746,7 +741,7 @@ function ForecastPlaygroundContent() {
   const [symbol, setSymbol] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("15min");
   const [horizons, setHorizons] = useState("1, 3, 6");
-  
+
   const [useMonteCarlo, setUseMonteCarlo] = useState(true);
   const [paths, setPaths] = useState(3000);
   // Skew parameter for Surface API: 0 = symmetric, >0 = right skew (bullish), <0 = left skew (bearish)
@@ -878,7 +873,7 @@ function ForecastPlaygroundContent() {
     if (!result?.data || typeof result.data !== "object") return { series: [], allPoints: [] };
 
     const responseData = result.data as Record<string, unknown>;
-    
+
     // DEBUG: Log actual data structure to diagnose
     console.log("[ForecastPlayground] result.data structure:", {
       hasData: !!responseData,
@@ -886,9 +881,9 @@ function ForecastPlaygroundContent() {
       hasPredictions: !!responseData.predictions,
       hasPayloadPredictions: !!(responseData.payload as any)?.predictions,
     });
-    
+
     // Try multiple possible paths for predictions
-    const predictions = 
+    const predictions =
       (responseData.predictions as Record<string, PredictionDataPoint[]>) ||
       ((responseData.payload as Record<string, unknown>)?.predictions as Record<string, PredictionDataPoint[]>) ||
       null;
@@ -1061,12 +1056,11 @@ function ForecastPlaygroundContent() {
                   id="horizons"
                   value={horizons}
                   onChange={(e) => setHorizons(e.target.value)}
-                  placeholder="1, 3, 6"
+                  placeholder="3"
                   className="h-9 font-mono"
                 />
                 <p className="text-xs text-muted-foreground">Forecast horizons in hours (comma-separated)</p>
               </div>
-
             </CardContent>
           </Card>
 
@@ -1396,9 +1390,9 @@ function ForecastPlaygroundContent() {
                   <ScrollArea className="h-[400px] rounded-md border p-4">
                     {(() => {
                       const responseData = result.data as Record<string, unknown>;
-                      const predictions = responseData?.predictions || 
-                        (responseData?.payload as Record<string, unknown>)?.predictions;
-                      
+                      const predictions =
+                        responseData?.predictions || (responseData?.payload as Record<string, unknown>)?.predictions;
+
                       if (predictions) {
                         return (
                           <pre className="text-sm font-mono whitespace-pre-wrap break-words">
