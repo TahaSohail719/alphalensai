@@ -55,6 +55,10 @@ import {
   FRICTION_TOOLTIP,
 } from "@/lib/marketFrictions";
 import {
+  interpolateProbability,
+  getInterpolationDescription,
+} from "@/lib/surfaceInterpolation";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -270,12 +274,14 @@ function RiskProfilesPanel({
   sigmaRef,
   timeframe,
   atr, // NEW: ATR from surface API (optional)
+  surface, // NEW: Risk surface data for probability interpolation
 }: {
   horizonData: HorizonForecast;
   symbol?: string;
   sigmaRef?: number;
   timeframe?: string;
   atr?: number; // NEW: ATR(14) in price units
+  surface?: SurfaceApiResponse['surface']; // NEW: For probability interpolation
 }) {
   const entryPrice = horizonData.entry_price;
   const direction = (horizonData.direction?.toLowerCase() || "long") as "long" | "short";
@@ -355,6 +361,14 @@ function RiskProfilesPanel({
     const slPips = priceDistanceToPips(slDistance, pipSize);
     const riskReward = slDistance > 0 ? tpDistance / slDistance : 0;
 
+    // NEW: Interpolate probability from Risk Surface with effective SL
+    const interpolationResult = interpolateProbability(surface, slSigmaWithFriction, profile.tpSigma);
+    
+    // Use interpolated probability if available, otherwise fall back to strategic
+    const effectiveProb = interpolationResult.isInterpolated 
+      ? interpolationResult.probability 
+      : profile.targetProb;
+    
     return {
       key,
       ...profile,
@@ -365,6 +379,9 @@ function RiskProfilesPanel({
       tpPips,
       slPips,
       riskReward,
+      effectiveProb,
+      isInterpolated: interpolationResult.isInterpolated,
+      interpolationDescription: getInterpolationDescription(interpolationResult),
     };
   });
 
@@ -432,7 +449,19 @@ function RiskProfilesPanel({
           <TableHeader>
             <TableRow className="bg-muted/30 border-b">
               <TableHead className="text-xs font-semibold uppercase tracking-wide">Profile</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wide text-center">Target Prob</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wide text-center">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="flex items-center gap-1 justify-center">
+                      Prob (eff.)
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-xs">Probability recalculated from risk surface using effective SL (with friction). ✓ = interpolated, ⚠ = strategic fallback.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">SL Base (σ)</TableHead>
               {frictionInfo.enabled && frictionSigma > 0 && (
                 <TableHead className="text-xs font-semibold uppercase tracking-wide text-right">
@@ -466,7 +495,28 @@ function RiskProfilesPanel({
                     {p.name}
                   </Badge>
                 </TableCell>
-                <TableCell className="font-mono text-center">{(p.targetProb * 100).toFixed(0)}%</TableCell>
+                <TableCell className="font-mono text-center">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="flex items-center gap-1 justify-center">
+                        <span className={p.isInterpolated ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
+                          {(p.effectiveProb * 100).toFixed(0)}%
+                        </span>
+                        {p.isInterpolated ? (
+                          <span className="text-emerald-500 text-xs">✓</span>
+                        ) : (
+                          <span className="text-amber-500 text-xs">⚠</span>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-xs">{p.interpolationDescription}</p>
+                        {!p.isInterpolated && (
+                          <p className="text-xs text-muted-foreground mt-1">Strategic: {(p.targetProb * 100).toFixed(0)}%</p>
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
                 <TableCell className="text-right font-mono text-muted-foreground">
                   {p.slSigmaBase.toFixed(2)}
                 </TableCell>
@@ -503,6 +553,7 @@ function RiskProfilesPanel({
         {direction === "long" ? "LONG" : "SHORT"} position: TP {direction === "long" ? "above" : "below"} entry, SL{" "}
         {direction === "long" ? "below" : "above"} entry
         {frictionInfo.enabled && frictionSigma > 0 && ` • SL includes +${frictionSigma.toFixed(2)}σ market friction buffer`}
+        {surface && " • Probability interpolated from risk surface"}
       </p>
     </div>
   );
@@ -515,12 +566,14 @@ function ForecastSummaryTable({
   sigmaRef,
   timeframe,
   atr, // NEW: ATR from surface API (optional)
+  surface, // NEW: Risk surface data for probability interpolation
 }: {
   horizons: HorizonForecast[] | Record<string, HorizonForecast>;
   symbol?: string;
   sigmaRef?: number;
   timeframe?: string;
   atr?: number; // NEW: ATR(14) in price units
+  surface?: SurfaceApiResponse['surface']; // NEW: For probability interpolation
 }) {
   // NEW: Expandable rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -763,6 +816,7 @@ function ForecastSummaryTable({
                           sigmaRef={sigmaRef}
                           timeframe={timeframe}
                           atr={atr}
+                          surface={surface}
                         />
                       </TableCell>
                     </TableRow>
@@ -1631,6 +1685,7 @@ function ForecastPlaygroundContent() {
                       sigmaRef={surfaceResult?.sigma_ref}
                       timeframe={timeframe}
                       atr={surfaceResult?.atr}
+                      surface={surfaceResult?.surface}
                     />
                   )}
 

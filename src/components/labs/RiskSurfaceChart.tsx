@@ -520,13 +520,34 @@ export function RiskSurfaceChart({
 
                 {/* Probability & R/R Card */}
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-primary/10">
-                      <Target className="h-4 w-4 text-primary" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-md bg-primary/10">
+                        <Target className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary">Probability</span>
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-primary">Probability</span>
+                    {selectedPoint.frictionSigma > 0 && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className="text-[10px] bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400">
+                              <Info className="h-3 w-3 mr-1" />
+                              Base SL
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs text-sm">
+                            <p className="font-medium mb-1">Surface Probability</p>
+                            <p className="text-muted-foreground">
+                              This probability corresponds to the base SL ({selectedPoint.slSigma.toFixed(2)}σ) from the surface. 
+                              The effective SL ({selectedPoint.slSigmaFinal.toFixed(2)}σ) with friction provides a wider stop.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
-                  <div className="font-mono text-2xl font-bold text-foreground" title="Probability of hitting TP before SL">
+                  <div className="font-mono text-2xl font-bold text-foreground" title="Probability of hitting TP before SL (based on surface click)">
                     {formatPercent(selectedPoint.targetProb)}
                   </div>
                   <div className="space-y-1 pt-2 border-t border-primary/10">
