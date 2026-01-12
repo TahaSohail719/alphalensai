@@ -194,4 +194,4 @@ export function getFrictionDisplayString(symbol: string, timeframe: string): str
  * Tooltip content explaining market frictions
  */
 export const FRICTION_TOOLTIP = 
-  "Market Frictions Adjustment accounts for spread, slippage, and intrabar market noise to avoid premature stop-outs.";
+  "This adjustment accounts for spread, slippage, and market noise. It is fully reflected in the probability via the risk surface, ensuring consistency between execution and forecast.";
