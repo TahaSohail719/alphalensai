@@ -37,8 +37,8 @@ import { LabsComingSoon } from "@/components/labs/LabsComingSoon";
 
 const { useState, useEffect } = React;
 
-// Hardcoded webhook for this Forecast Playground copy (requested)
-const FORECAST_PLAYGROUND_MACRO_WEBHOOK_URL = "http://3.137.115.96:9000/run";
+// Use HTTPS Edge Function proxy to avoid Mixed Content / Failed to fetch in https preview
+const FORECAST_PLAYGROUND_MACRO_WEBHOOK_URL = "https://jqrlegdulnnrpiixiecf.supabase.co/functions/v1/macro-lab-proxy";
 
 interface AnalysisSection {
   title: string;
