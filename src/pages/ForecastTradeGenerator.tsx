@@ -158,10 +158,39 @@ function normalizeN8n(raw: unknown): N8nTradeResult | null {
   }
 }
 
-function getPayloadHorizons(tradeSetup: TradeSetupResponse | undefined): ForecastHorizon[] {
-  if (!tradeSetup?.payload?.horizons) return [];
-  const horizons = tradeSetup.payload.horizons;
+function getPayloadHorizons(responseData: unknown): ForecastHorizon[] {
+  // Try multiple paths to find horizons data
+  const data = responseData as Record<string, unknown>;
+  
+  // Path 1: data.payload.horizons (current API response format)
+  let horizons: ForecastHorizon[] | Record<string, ForecastHorizon> | undefined;
+  
+  if (data?.data && typeof data.data === "object") {
+    const innerData = data.data as Record<string, unknown>;
+    if (innerData?.payload && typeof innerData.payload === "object") {
+      const payload = innerData.payload as Record<string, unknown>;
+      horizons = payload.horizons as ForecastHorizon[] | Record<string, ForecastHorizon>;
+    }
+  }
+  
+  // Path 2: trade_setup.payload.horizons (expected combined format)
+  if (!horizons && data?.trade_setup && typeof data.trade_setup === "object") {
+    const tradeSetup = data.trade_setup as Record<string, unknown>;
+    if (tradeSetup?.payload && typeof tradeSetup.payload === "object") {
+      const payload = tradeSetup.payload as Record<string, unknown>;
+      horizons = payload.horizons as ForecastHorizon[] | Record<string, ForecastHorizon>;
+    }
+  }
+  
+  // Path 3: Direct payload.horizons
+  if (!horizons && data?.payload && typeof data.payload === "object") {
+    const payload = data.payload as Record<string, unknown>;
+    horizons = payload.horizons as ForecastHorizon[] | Record<string, ForecastHorizon>;
+  }
+  
+  if (!horizons) return [];
   if (Array.isArray(horizons)) return horizons;
+  
   // Object-style horizons
   return Object.entries(horizons).map(([key, val]) => ({
     ...val,
@@ -519,18 +548,21 @@ function ForecastTradeGeneratorContent() {
         throw new Error(`Backend error: ${response.status} ${response.statusText}`);
       }
 
-      const data: CombinedResponse = await response.json();
+      const data = await response.json();
       setRawResponse(data);
       setRequestDuration(performance.now() - startTime);
 
-      // Parse AI Setup data (root level)
+      // Parse AI Setup data (root level or from setups field)
       const normalized = normalizeN8n(data);
-      if (normalized) {
+      if (normalized && normalized.setups && normalized.setups.length > 0) {
         setAiSetupResult(normalized);
+      } else {
+        // No AI Setup data in response yet (backend might not support combined mode)
+        setAiSetupResult(null);
       }
 
-      // Parse Forecast data (trade_setup field)
-      const horizonsData = getPayloadHorizons(data.trade_setup);
+      // Parse Forecast data - try multiple paths
+      const horizonsData = getPayloadHorizons(data);
       setForecastHorizons(horizonsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
