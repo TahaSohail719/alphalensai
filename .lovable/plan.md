@@ -1,252 +1,192 @@
 
 
-# Plan: Améliorer le Styling du Debug HTTP
+# Plan: Debug HTTP Premium - Style Institutionnel AlphaLens
 
-## Contexte
+## Objectif
 
-Actuellement, les deux pages affichent le debug HTTP de manière différente:
-- **Trade Generator**: utilise `StyledJsonViewer` avec syntax highlighting coloré et niveaux collapsibles
-- **Macro Lab**: affiche le JSON en texte brut (plain text) dans une simple div
-
-L'objectif est d'harmoniser l'affichage avec un styling professionnel sur les deux pages.
+Transformer l'affichage debug HTTP d'un simple texte coloré vers une interface de grade professionnel alignée avec le design system AlphaLens (cards avec gradients, badges, bordures colorées, organisation visuelle structurée).
 
 ---
 
-## Solution Technique
+## Analyse du Style AlphaLens Existant
 
-### 1. Créer un Composant Partagé `StyledJsonViewer`
+Le site utilise un design "Institutional Grade" caractérisé par:
 
-Extraire le composant dans un fichier partagé pour éviter la duplication:
+- **Cards avec gradients subtils**: `bg-gradient-to-r from-card via-card to-muted/30`
+- **Badges indicateurs**: petites cartes avec icônes, labels uppercase, valeurs en `font-mono`
+- **Bordures colorées sémantiques**: `border-primary/20`, `border-emerald-500/20`, `border-amber-500/20`
+- **Effets hover**: transitions `hover:bg-primary/10 hover:border-primary/30`
+- **Ombres douces**: `shadow-soft`, `shadow-sm`, `ring-1 ring-primary/20`
+- **Structure hiérarchique**: Headers avec icônes dans conteneurs arrondis `p-2 rounded-lg bg-primary/10`
 
-**Fichier:** `src/components/ui/styled-json-viewer.tsx`
+---
 
+## Nouveau Design du JSON Viewer
+
+### 1. Conteneur Principal (JSON Debug Panel)
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  ┌────┐  HTTP Response                                    [Copy]  │
+│  │ {} │  Macro Lab Proxy • 200 OK • 1.2s                          │
+│  └────┘                                                            │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌─ Request ─────────────────────────────────────────────────────┐ │
+│  │  ▸ headers    Object(3)                                       │ │
+│  │  ▸ body       Object(5)                                       │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+│                                                                    │
+│  ┌─ Response ────────────────────────────────────────────────────┐ │
+│  │  ┌ statusCode ─────────────────────────────────────┐          │ │
+│  │  │ 200                                    [number] │          │ │
+│  │  └─────────────────────────────────────────────────┘          │ │
+│  │                                                               │ │
+│  │  ▾ body                                      Object(2)        │ │
+│  │    │                                                          │ │
+│  │    ├── message ─────────────────────────────────────────────┤ │ │
+│  │    │   ┌ status ────────────────────────────────┐           │ │ │
+│  │    │   │ "done"                        [string] │           │ │ │
+│  │    │   └────────────────────────────────────────┘           │ │ │
+│  │    │                                                        │ │ │
+│  │    └── ▸ content                          Object(3)         │ │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### 2. Composants Visuels Clés
+
+**A. Noeud Primitif (string/number/boolean/null)**
+- Affichage dans une mini-card avec bordure colorée à gauche
+- Badge type sur la droite `[string]`, `[number]`, etc.
+- Background subtil selon le type
+
+```tsx
+<div className="flex items-center justify-between p-2 rounded-md bg-muted/30 border-l-2 border-emerald-500/50">
+  <span className="font-mono text-sm text-emerald-600">"value"</span>
+  <Badge variant="outline" className="text-[10px] px-1.5 text-muted-foreground">string</Badge>
+</div>
+```
+
+**B. Noeud Object/Array (Collapsible)**
+- Header cliquable avec chevron animé
+- Badge count: `Object(5)` ou `Array(3)`
+- Ligne verticale de connexion pour l'indentation
+- Background léger au hover
+
+```tsx
+<div className="group">
+  <button className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-muted/50 transition-colors">
+    <ChevronRight className={cn("h-4 w-4 transition-transform", expanded && "rotate-90")} />
+    <span className="font-medium text-primary">"keyName"</span>
+    <Badge variant="outline" className="ml-auto text-xs">Object(5)</Badge>
+  </button>
+  {expanded && (
+    <div className="ml-4 pl-4 border-l-2 border-border/50 space-y-1">
+      {/* Children nodes */}
+    </div>
+  )}
+</div>
+```
+
+**C. Palette de Couleurs par Type**
+
+| Type | Bordure gauche | Texte | Badge |
+|------|----------------|-------|-------|
+| String | `border-emerald-500/50` | `text-emerald-600` | string |
+| Number | `border-amber-500/50` | `text-amber-600` | number |
+| Boolean | `border-sky-500/50` | `text-sky-600` | boolean |
+| Null | `border-slate-400/50` | `text-slate-500 italic` | null |
+| Object | `border-violet-500/50` | `text-primary` | Object(n) |
+| Array | `border-blue-500/50` | `text-blue-600` | Array(n) |
+
+---
+
+## Modifications Techniques
+
+### Fichier: `src/components/ui/styled-json-viewer.tsx`
+
+Refonte complète du composant avec:
+
+1. **Interface enrichie**:
 ```typescript
-import React, { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
-
 interface StyledJsonViewerProps {
   data: unknown;
   depth?: number;
   initialExpanded?: boolean;
-}
-
-export function StyledJsonViewer({ 
-  data, 
-  depth = 0, 
-  initialExpanded = true 
-}: StyledJsonViewerProps) {
-  const [collapsed, setCollapsed] = useState(depth > 1 && !initialExpanded);
-
-  // null
-  if (data === null) {
-    return <span className="text-muted-foreground italic">null</span>;
-  }
-
-  // boolean
-  if (typeof data === "boolean") {
-    return (
-      <span className={data ? "text-emerald-500" : "text-rose-500"}>
-        {String(data)}
-      </span>
-    );
-  }
-
-  // number
-  if (typeof data === "number") {
-    return <span className="text-amber-500">{data}</span>;
-  }
-
-  // string
-  if (typeof data === "string") {
-    // Long strings: truncate with tooltip
-    const isLong = data.length > 80;
-    const displayText = isLong ? data.slice(0, 80) + "..." : data;
-    return (
-      <span className="text-emerald-400" title={isLong ? data : undefined}>
-        "{displayText}"
-      </span>
-    );
-  }
-
-  // Array
-  if (Array.isArray(data)) {
-    if (data.length === 0) {
-      return <span className="text-muted-foreground">[]</span>;
-    }
-    return (
-      <div className="inline">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="inline-flex items-center text-muted-foreground 
-                     hover:text-foreground transition-colors"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-3 w-3" />
-          ) : (
-            <ChevronDown className="h-3 w-3" />
-          )}
-          <span className="ml-1 text-xs text-sky-400">
-            Array({data.length})
-          </span>
-        </button>
-        {!collapsed && (
-          <div className="ml-4 border-l border-border/50 pl-3">
-            {data.map((item, index) => (
-              <div key={index} className="py-0.5">
-                <span className="text-muted-foreground mr-2 text-xs">
-                  {index}:
-                </span>
-                <StyledJsonViewer data={item} depth={depth + 1} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Object
-  if (typeof data === "object") {
-    const entries = Object.entries(data);
-    if (entries.length === 0) {
-      return <span className="text-muted-foreground">{"{}"}</span>;
-    }
-    return (
-      <div className="inline">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="inline-flex items-center text-muted-foreground 
-                     hover:text-foreground transition-colors"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-3 w-3" />
-          ) : (
-            <ChevronDown className="h-3 w-3" />
-          )}
-          <span className="ml-1 text-xs text-violet-400">
-            Object({entries.length})
-          </span>
-        </button>
-        {!collapsed && (
-          <div className="ml-4 border-l border-border/50 pl-3">
-            {entries.map(([key, value]) => (
-              <div key={key} className="py-0.5">
-                <span className="text-primary font-medium">"{key}"</span>
-                <span className="text-muted-foreground">: </span>
-                <StyledJsonViewer data={value} depth={depth + 1} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return <span>{String(data)}</span>;
+  maxDepth?: number;           // Limite d'expansion auto
+  showTypeLabels?: boolean;    // Afficher les badges de type
+  compactMode?: boolean;       // Mode condensé pour petits conteneurs
 }
 ```
 
----
+2. **Composants internes modulaires**:
+- `JsonPrimitive` - Pour string/number/boolean/null
+- `JsonObject` - Pour les objets avec collapse
+- `JsonArray` - Pour les tableaux avec collapse
+- `JsonKey` - Pour les clés avec style primary
 
-### 2. Mise à Jour de Macro Lab (`ForecastMacroLab.tsx`)
+3. **Nouveaux éléments visuels**:
+- Mini-cards pour chaque valeur primitive
+- Badges de type alignés à droite
+- Bordure gauche colorée selon le type
+- Animation rotate sur les chevrons
+- Ligne verticale pour l'indentation (tree line)
+- Hover states avec `bg-muted/50`
 
-Remplacer l'affichage brut par le composant stylé:
-
-**Avant (lignes 659-667):**
-```tsx
-{"error" in lastHttpDebug ? (
-  <div className="whitespace-pre-wrap rounded-lg border bg-muted/20 p-3 text-foreground">
-    {lastHttpDebug.error}
-  </div>
-) : (
-  <div className="max-h-44 overflow-auto whitespace-pre-wrap rounded-lg border bg-muted/20 p-3 text-foreground">
-    {lastHttpDebug.bodyText?.trim() ? lastHttpDebug.bodyText : "(empty body)"}
-  </div>
-)}
-```
-
-**Après:**
-```tsx
-import { StyledJsonViewer } from "@/components/ui/styled-json-viewer";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-// Dans le JSX:
-{"error" in lastHttpDebug ? (
-  <div className="whitespace-pre-wrap rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-rose-600">
-    {lastHttpDebug.error}
-  </div>
-) : (
-  <ScrollArea className="h-[250px]">
-    <div className="font-mono text-xs p-3 bg-muted/30 rounded-lg">
-      {(() => {
-        try {
-          const parsed = JSON.parse(lastHttpDebug.bodyText || "{}");
-          return <StyledJsonViewer data={parsed} />;
-        } catch {
-          // Fallback to raw text if not valid JSON
-          return (
-            <pre className="whitespace-pre-wrap text-muted-foreground">
-              {lastHttpDebug.bodyText?.trim() || "(empty body)"}
-            </pre>
-          );
-        }
-      })()}
-    </div>
-  </ScrollArea>
-)}
-```
+4. **Amélioration UX**:
+- Troncature intelligente des longues strings avec tooltip
+- Bouton "Expand All" / "Collapse All" en header
+- Compteur d'éléments pour objets/arrays
+- Support du copier-coller par noeud
 
 ---
 
-### 3. Mise à Jour de Trade Generator (`ForecastTradeGenerator.tsx`)
-
-Remplacer le composant local par l'import du composant partagé:
-
-**Avant (ligne 539-594):**
-```tsx
-function StyledJsonViewer({ data, depth = 0 }: { data: unknown; depth?: number }) {
-  // ... local implementation
-}
-```
-
-**Après:**
-```tsx
-import { StyledJsonViewer } from "@/components/ui/styled-json-viewer";
-
-// Supprimer la définition locale du composant
-```
-
----
-
-### 4. Améliorations Visuelles Appliquées
-
-| Element | Style |
-|---------|-------|
-| Clés JSON | `text-primary` (bleu AlphaLens) |
-| Strings | `text-emerald-400` (vert) |
-| Numbers | `text-amber-500` (orange) |
-| Booleans | `text-emerald-500` / `text-rose-500` |
-| Array label | `text-sky-400` + count |
-| Object label | `text-violet-400` + count |
-| Collapse icons | Chevrons interactifs |
-| Nesting | Bordure verticale `border-l` |
-
----
-
-## Fichiers Modifiés
+### Fichiers Modifiés
 
 | Fichier | Changements |
 |---------|-------------|
-| `src/components/ui/styled-json-viewer.tsx` | **NOUVEAU** - Composant partagé |
-| `src/pages/ForecastMacroLab.tsx` | Import + utilisation du StyledJsonViewer |
-| `src/pages/ForecastTradeGenerator.tsx` | Suppression du composant local, import du partagé |
+| `src/components/ui/styled-json-viewer.tsx` | Refonte complète avec design AlphaLens premium |
+| `src/pages/ForecastMacroLab.tsx` | Ajustement du conteneur (déjà utilise le composant) |
+| `src/pages/ForecastTradeGenerator.tsx` | Ajustement du conteneur (déjà utilise le composant) |
+
+---
+
+## Rendu Visuel Attendu
+
+### Avant (Texte brut coloré)
+```
+"statusCode": 200
+▸ Object(2)
+  "message": "done"
+  ▸ body Object(3)
+```
+
+### Après (Cards structurées style AlphaLens)
+```text
+┌──────────────────────────────────────────┐
+│ ● statusCode                    [number] │
+│   200                                    │
+└──────────────────────────────────────────┘
+
+┌ message ─────────────────────────────────┐
+│ ▾  body                       Object(3)  │
+│    │                                     │
+│    ├── ● status                 [string] │
+│    │   "done"                            │
+│    │                                     │
+│    └── ▸ content               Object(4) │
+└──────────────────────────────────────────┘
+```
 
 ---
 
 ## Garanties
 
-1. **Zero Régression**: Les fonctionnalités debug existantes restent intactes
-2. **Fallback Sécurisé**: Si le JSON est invalide, affichage en texte brut
-3. **Performance**: Collapsible nodes pour les gros objets
-4. **Cohérence**: Même style sur les deux pages
+1. **Zero Régression**: Fallback texte brut si JSON invalide
+2. **Performance**: Lazy rendering avec virtualisation pour gros objets
+3. **Cohérence**: Style aligné avec RiskSurfaceChart, TradeSetupDisplay, BacktesterSummary
+4. **Responsive**: Adapté mobile avec mode compact
+5. **Accessibilité**: Navigation clavier supportée
 
