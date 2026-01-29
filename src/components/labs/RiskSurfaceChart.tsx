@@ -183,8 +183,8 @@ export function RiskSurfaceChart({
     });
     
     // Also populate editable inputs and open panel
-    setEditableSlSigma(slSigma.toFixed(2));
-    setEditableTpSigma(tpSigma.toFixed(2));
+    setEditableSlSigma(slSigma != null ? slSigma.toFixed(2) : "");
+    setEditableTpSigma(tpSigma != null ? tpSigma.toFixed(2) : "");
     setIsPanelOpen(true);
   }, [data, calculatePrice, symbol, timeframe, horizonHours]);
 
@@ -460,9 +460,20 @@ export function RiskSurfaceChart({
     );
   }
 
-  const formatPrice = (price: number | undefined | null) => price != null ? price.toFixed(5) : "—";
-  const formatSigma = (sigma: number | undefined | null) => sigma != null ? sigma.toFixed(2) : "—";
-  const formatPercent = (prob: number | undefined | null) => prob != null ? `${(prob * 100).toFixed(1)}%` : "—";
+  // Null-safe formatters to prevent toFixed errors
+  const fmt = {
+    price: (v: number | undefined | null) => v != null ? v.toFixed(5) : "—",
+    price6: (v: number | undefined | null) => v != null ? v.toFixed(6) : "—",
+    sigma: (v: number | undefined | null) => v != null ? v.toFixed(2) : "—",
+    pips: (v: number | undefined | null) => v != null ? v.toFixed(1) : "—",
+    percent: (v: number | undefined | null) => v != null ? `${(v * 100).toFixed(1)}%` : "—",
+    percentRaw: (v: number | undefined | null) => v != null ? (v * 100).toFixed(1) : "—",
+  };
+  
+  // Keep old names for backward compatibility
+  const formatPrice = fmt.price;
+  const formatSigma = fmt.sigma;
+  const formatPercent = fmt.percent;
 
   return (
     <div className="space-y-6">
@@ -504,7 +515,7 @@ export function RiskSurfaceChart({
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">ATR(14)</span>
                   <div className="flex items-center gap-1.5">
                     <Activity className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="font-mono text-base font-bold text-foreground">{data.atr.toFixed(5)}</span>
+                    <span className="font-mono text-base font-bold text-foreground">{fmt.price(data.atr)}</span>
                   </div>
                 </div>
               )}
@@ -512,7 +523,7 @@ export function RiskSurfaceChart({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">σ Ref</span>
                 <div className="flex items-center gap-1.5">
                   <Sigma className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
-                  <span className="font-mono text-base font-bold text-foreground">{data.sigma_ref.toFixed(6)}</span>
+                  <span className="font-mono text-base font-bold text-foreground">{fmt.price6(data.sigma_ref)}</span>
                 </div>
               </div>
             </div>
@@ -655,13 +666,13 @@ export function RiskSurfaceChart({
                           </Tooltip>
                         </TooltipProvider>
                         <span className="font-mono text-amber-600 dark:text-amber-400">
-                          +{liveInterpolation.slFriction.toFixed(2)}σ
+                          +{fmt.sigma(liveInterpolation.slFriction)}σ
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-rose-600 dark:text-rose-400">SL Eff.</span>
                         <span className="font-mono text-xl font-bold text-foreground">
-                          {liveInterpolation.slFinal.toFixed(2)}σ
+                          {fmt.sigma(liveInterpolation.slFinal)}σ
                         </span>
                       </div>
                     </div>
@@ -671,11 +682,11 @@ export function RiskSurfaceChart({
                   {liveInterpolation && (
                     <div className="space-y-1 pt-2 border-t border-rose-500/10">
                       <div className="text-xs text-muted-foreground">
-                        Price: <span className="font-mono font-medium text-foreground">{liveInterpolation.slPrice.toFixed(5)}</span>
+                        Price: <span className="font-mono font-medium text-foreground">{fmt.price(liveInterpolation.slPrice)}</span>
                       </div>
                       {liveInterpolation.slPips != null && (
                         <div className="text-base font-mono font-bold text-rose-600 dark:text-rose-400">
-                          {liveInterpolation.slPips.toFixed(1)} <span className="text-xs font-normal opacity-70">{liveInterpolation.pipUnit}</span>
+                          {fmt.pips(liveInterpolation.slPips)} <span className="text-xs font-normal opacity-70">{liveInterpolation.pipUnit}</span>
                         </div>
                       )}
                     </div>
@@ -723,13 +734,13 @@ export function RiskSurfaceChart({
                           </Tooltip>
                         </TooltipProvider>
                         <span className="font-mono text-amber-600 dark:text-amber-400">
-                          +{liveInterpolation.tpFriction.toFixed(2)}σ
+                          +{fmt.sigma(liveInterpolation.tpFriction)}σ
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-emerald-600 dark:text-emerald-400">TP Eff.</span>
                         <span className="font-mono text-xl font-bold text-foreground">
-                          {liveInterpolation.tpFinal.toFixed(2)}σ
+                          {fmt.sigma(liveInterpolation.tpFinal)}σ
                         </span>
                       </div>
                     </div>
@@ -739,11 +750,11 @@ export function RiskSurfaceChart({
                   {liveInterpolation && (
                     <div className="space-y-1 pt-2 border-t border-emerald-500/10">
                       <div className="text-xs text-muted-foreground">
-                        Price: <span className="font-mono font-medium text-foreground">{liveInterpolation.tpPrice.toFixed(5)}</span>
+                        Price: <span className="font-mono font-medium text-foreground">{fmt.price(liveInterpolation.tpPrice)}</span>
                       </div>
                       {liveInterpolation.tpPips != null && (
                         <div className="text-base font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                          {liveInterpolation.tpPips.toFixed(1)} <span className="text-xs font-normal opacity-70">{liveInterpolation.pipUnit}</span>
+                          {fmt.pips(liveInterpolation.tpPips)} <span className="text-xs font-normal opacity-70">{liveInterpolation.pipUnit}</span>
                         </div>
                       )}
                     </div>
@@ -786,7 +797,7 @@ export function RiskSurfaceChart({
                   
                   {liveInterpolation?.result ? (
                     <div className="font-mono text-2xl font-bold text-foreground">
-                      {(liveInterpolation.result.probability * 100).toFixed(1)}%
+                      {fmt.percentRaw(liveInterpolation.result.probability)}%
                     </div>
                   ) : (
                     <div className="text-muted-foreground text-sm italic">
@@ -794,11 +805,11 @@ export function RiskSurfaceChart({
                     </div>
                   )}
                   
-                  {liveInterpolation?.rrRatio && (
+                  {liveInterpolation?.rrRatio != null && (
                     <div className="space-y-1 pt-2 border-t border-primary/10">
                       <div className="text-xs text-muted-foreground">Risk/Reward Ratio</div>
                       <div className="text-base font-mono font-bold text-primary">
-                        {liveInterpolation.rrRatio.toFixed(2)} <span className="text-xs font-normal opacity-70">R/R</span>
+                        {fmt.sigma(liveInterpolation.rrRatio)} <span className="text-xs font-normal opacity-70">R/R</span>
                       </div>
                     </div>
                   )}
