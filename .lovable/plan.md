@@ -1,135 +1,81 @@
 
+# Plan: Afficher le champ "content" avec StyledJsonViewer dans Macro Commentary
 
-# Plan: Aligner trade_generator avec ForecastPlaygroundTool + Corrections Macro Lab
+## Analyse du Problème
 
-## Résumé des Demandes
+Actuellement dans la page `/forecast-playground/macro-commentary` :
 
-1. **Forecast Summary by Horizon (trade_generator)** : Utiliser exactement la même méthodologie et colonnes que "Suggested TP/SL based on risk appetite" de ForecastPlaygroundTool
-2. **Supprimer la carte "AI Market Analysis"** : Uniquement cette carte (lignes 1721-1751), sans régression
-3. **Macro Commentary et Trade Section** : Full-width avec rigueur UX
-4. **Page /forecast-playground/macro-commentary uniquement** : Attendre la réponse HTTP directe au lieu de l'événement Supabase Realtime
+1. Le **HTTP Debug panel** affiche le JSON brut complet via `StyledJsonViewer` ✓
+2. Le **contenu extrait** depuis `body.message.message.content.content` est converti en string puis affiché en texte brut avec `whitespace-pre-wrap`
+3. Le problème : si `content` est un objet JSON structuré, il est affiché comme une chaîne de caractères au lieu d'utiliser le visualiseur JSON premium
 
----
-
-## 1. Aligner RiskProfilesPanel avec ForecastPlaygroundTool
-
-### Fichier: `src/pages/ForecastTradeGenerator.tsx`
-
-La version actuelle de `RiskProfilesPanel` (lignes 866-1057) est une version simplifiée. Il faut l'aligner avec la version complète de `ForecastPlaygroundTool.tsx` (lignes 271-586) qui inclut :
-
-**Colonnes manquantes à ajouter :**
-- `Prob (eff.)` avec indicateur d'interpolation (✓ / ⚠)
-- `SL Base (σ)` - sigma de base avant friction
-- `+SL Friction` - colonne conditionnelle avec friction
-- `SL Eff. (σ)` - sigma effectif après friction
-- `TP Base (σ)` - sigma de base avant friction
-- `+TP Friction` - colonne conditionnelle avec friction
-- `TP Eff. (σ)` - sigma effectif après friction
-
-**Logique d'interpolation de probabilité** à ajouter :
-- Utiliser `interpolateProbability()` sur les niveaux de base (sans friction)
-- Afficher indicateur visuel ✓ (interpolé) ou ⚠ (stratégique fallback)
-- Tooltip explicatif pour chaque probabilité
-
-**Changements dans le TableHeader et TableBody** pour matcher exactement le layout de ForecastPlaygroundTool.
-
----
-
-## 2. Supprimer la carte "AI Market Analysis"
-
-### Fichier: `src/pages/ForecastTradeGenerator.tsx`
-
-Supprimer uniquement les lignes 1721-1751 :
-
-```tsx
-// SUPPRIMER CE BLOC :
-{/* AI Market Analysis Card - Final Answer with Confidence Note */}
-{finalAnswer && !loading && (
-  <Card className="rounded-xl border shadow-sm">
-    ...
-  </Card>
-)}
-```
-
-**Variables associées à nettoyer** (si non utilisées ailleurs) :
-- `finalAnswer` state
-- `confidenceNote` state  
-- La logique d'extraction de `final_answer` dans `handleSubmit`
-
-**Vérification** : S'assurer que ces variables ne sont pas utilisées dans d'autres parties de l'UI avant de les supprimer.
-
----
-
-## 3. Full-Width UX pour Macro Commentary et Trade Section
-
-### Fichier: `src/pages/ForecastTradeGenerator.tsx`
-
-Actuellement les cartes de résultats sont dans un conteneur avec padding. Modifier le layout pour que :
-
-- La section "Trade Setup" et "Forecast Data" occupent toute la largeur
-- Supprimer les marges latérales excessives
-- Appliquer une grille responsive cohérente
-
-**Changements CSS** :
-- Remplacer `max-w-*` constraints par `w-full`
-- Utiliser `container-fluid` pattern
-- Appliquer spacing cohérent `gap-6`
-
----
-
-## 4. Page Macro Commentary : Réponse HTTP Directe
+## Solution Technique
 
 ### Fichier: `src/pages/ForecastMacroLab.tsx`
 
-**Problème actuel** (lignes 391-427) : La page écoute Supabase Realtime pour obtenir la réponse, même si la réponse HTTP contient déjà les données.
+#### 1. Modifier le type de `AnalysisSection.content` pour accepter JSON
 
-**Solution** : Modifier `generateAnalysis()` pour :
-
-1. Faire la requête HTTP et attendre la réponse
-2. Parser directement le body de la réponse HTTP
-3. Extraire le contenu depuis `body.message.message.content.content`
-4. NE PAS écouter Supabase Realtime (supprimer le channel subscription)
-5. Appeler `handleRealtimeResponse()` directement avec les données HTTP
-
-**Logique de parsing** :
+Changer le type de `string` à `string | object` pour permettre le stockage d'objets JSON :
 
 ```typescript
-// Après fetch réussi
-const bodyText = await response.text();
-const json = JSON.parse(bodyText);
-
-// Extraction du contenu (chemin profond)
-const content = json?.body?.message?.message?.content?.content;
-if (content) {
-  handleRealtimeResponse({ message: { content: { content } } }, responseJobId);
-} else {
-  throw new Error("No content found in response");
+interface AnalysisSection {
+  title: string;
+  content: string | object;  // Modifié pour accepter JSON
+  type: "overview" | "technical" | "fundamental" | "outlook";
+  expanded: boolean;
 }
 ```
 
-**Suppression du code Realtime** :
-- Supprimer `supabase.channel()` subscription
-- Supprimer les handlers `postgres_changes`
-- Garder `createJob()` pour le tracking (optionnel)
+#### 2. Modifier `handleRealtimeResponse` pour conserver le format original
+
+Au lieu de toujours convertir en string, garder l'objet JSON si c'est un objet :
+
+```typescript
+// Dans handleRealtimeResponse (vers ligne 180-186)
+if (Array.isArray(responsePayload) && responsePayload.length > 0) {
+  const deepContent = (responsePayload as any)[0]?.message?.message?.content?.content;
+  // Garder l'objet original au lieu de convertir en string
+  analysisContent = deepContent;
+} else if (responsePayload?.message?.content?.content) {
+  analysisContent = responsePayload.message.content.content;
+} else {
+  analysisContent = responsePayload;
+}
+```
+
+#### 3. Modifier le rendu des sections pour utiliser `StyledJsonViewer`
+
+Remplacer l'affichage texte par un rendu conditionnel (vers lignes 778-780) :
+
+```typescript
+<CollapsibleContent className="animate-accordion-down">
+  <div className="bg-muted/20 p-4 rounded-lg border">
+    {typeof section.content === "object" ? (
+      <StyledJsonViewer data={section.content} initialExpanded={true} maxDepth={4} />
+    ) : (
+      <div className="whitespace-pre-wrap text-foreground text-sm leading-relaxed">
+        {section.content}
+      </div>
+    )}
+  </div>
+</CollapsibleContent>
+```
 
 ---
 
-## Résumé des Fichiers à Modifier
+## Résumé des Modifications
 
-| Fichier | Action |
-|---------|--------|
-| `src/pages/ForecastTradeGenerator.tsx` | Aligner RiskProfilesPanel, supprimer AI Market Analysis card, full-width layout |
-| `src/pages/ForecastMacroLab.tsx` | Basculer vers réponse HTTP directe, supprimer Realtime listener |
+| Ligne(s) | Changement |
+|----------|------------|
+| ~47 | Modifier `AnalysisSection.content` : `string` → `string \| object` |
+| ~151-187 | Modifier `handleRealtimeResponse` pour conserver le format JSON |
+| ~778-780 | Affichage conditionnel : `StyledJsonViewer` si objet, texte sinon |
 
 ---
 
 ## Garanties Zero Régression
 
-1. **ForecastPlaygroundTool.tsx** : AUCUNE modification (référence)
-2. **Autres pages** : Non impactées (changements isolés)
-3. **API calls** : Endpoints inchangés
-4. **State management** : Variables nettoyées proprement
-5. **Tests manuels recommandés** :
-   - Trade Generator : Vérifier que le tableau affiche toutes les colonnes
-   - Macro Lab : Vérifier que la réponse s'affiche immédiatement après le fetch HTTP
-
+1. **Fallback texte** : Si le contenu est une string, l'affichage texte actuel est conservé
+2. **Autres pages** : Cette modification est isolée à `ForecastMacroLab.tsx`
+3. **HTTP Debug** : Inchangé (fonctionne déjà avec `StyledJsonViewer`)
+4. **Copie** : La fonction de copie continuera à fonctionner (conversion en string si besoin)
