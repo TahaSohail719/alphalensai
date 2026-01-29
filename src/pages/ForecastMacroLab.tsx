@@ -145,6 +145,62 @@ export default function ForecastMacroLab() {
     adresse: "",
   });
 
+  // Parser function to convert text content to structured object for MacroCommentaryDisplay
+  const parseMacroContentToStructured = (textContent: string): object | null => {
+    if (!textContent || typeof textContent !== 'string') return null;
+    
+    const result: any = {};
+    
+    // Extract Executive Summary
+    const execMatch = textContent.match(/Executive Summary:\s*([^]*?)(?=\n\n|\nFundamental Analysis:|$)/i);
+    if (execMatch) {
+      result.executive_summary = execMatch[1].trim();
+    }
+    
+    // Extract Fundamental Analysis (bullet points)
+    const fundMatch = textContent.match(/Fundamental Analysis:\s*([^]*?)(?=\n\nDirectional Bias:|Directional Bias:|$)/i);
+    if (fundMatch) {
+      const points = fundMatch[1].split(/\n-\s*/).filter(p => p.trim());
+      result.fundamental_analysis = points.map(p => p.trim().replace(/^-\s*/, '')).filter(p => p.length > 0);
+    }
+    
+    // Extract Directional Bias and Confidence
+    const biasMatch = textContent.match(/Directional Bias:\s*(\w+),?\s*Confidence:\s*"?(\d+)%?"?/i);
+    if (biasMatch) {
+      result.directional_bias = biasMatch[1];
+      result.confidence = parseInt(biasMatch[2], 10);
+    } else {
+      // Try alternative format: "Directional Bias: Bullish" without confidence
+      const simpleBiasMatch = textContent.match(/Directional Bias:\s*(\w+)/i);
+      if (simpleBiasMatch) {
+        result.directional_bias = simpleBiasMatch[1];
+      }
+    }
+    
+    // Extract Key Levels
+    const supportMatch = textContent.match(/Support:\s*\n?([\d.,\s\n]+?)(?=Resistance:|$)/i);
+    const resistanceMatch = textContent.match(/Resistance:\s*\n?([\d.,\s\n]+?)(?=\n\n|AI Insights|Toggle|$)/i);
+    if (supportMatch || resistanceMatch) {
+      result.key_levels = {
+        support: supportMatch ? supportMatch[1].trim().split(/[\n,]/).map(l => l.trim()).filter(l => l && /[\d.]/.test(l)) : [],
+        resistance: resistanceMatch ? resistanceMatch[1].trim().split(/[\n,]/).map(l => l.trim()).filter(l => l && /[\d.]/.test(l)) : []
+      };
+    }
+    
+    // Extract AI Insights
+    const gptMatch = textContent.match(/Toggle GPT:\s*([^]*?)(?=Toggle Curated:|Fundamentals:|$)/i);
+    const curatedMatch = textContent.match(/Toggle Curated:\s*([^]*?)(?=\n\nFundamentals:|$)/i);
+    if (gptMatch || curatedMatch) {
+      result.ai_insights_breakdown = {
+        toggle_gpt: gptMatch ? gptMatch[1].trim() : null,
+        toggle_curated: curatedMatch ? curatedMatch[1].trim() : null
+      };
+    }
+    
+    console.log("🔍 [Parser] Extracted structured data:", result);
+    return Object.keys(result).length > 0 ? result : null;
+  };
+
   // Handler functions for Realtime responses
   const handleRealtimeResponse = async (responsePayload: any, jobId: string) => {
     console.log("📩 [Realtime] Processing response payload:", responsePayload);
@@ -200,13 +256,40 @@ export default function ForecastMacroLab() {
       }
     }
     
-    // If parsedContent is an object with a "content" field, extract it for MacroCommentaryDisplay
-    if (parsedContent && typeof parsedContent === "object" && parsedContent.content !== undefined) {
-      // Keep the whole object for MacroCommentaryDisplay (it expects executive_summary, key_levels, etc.)
-      analysisContent = parsedContent;
+    // If parsedContent.content is a string (raw text), parse it to structured object
+    if (parsedContent && typeof parsedContent === "object" && typeof parsedContent.content === "string") {
+      const structuredData = parseMacroContentToStructured(parsedContent.content);
+      if (structuredData) {
+        analysisContent = structuredData;
+        console.log("✅ [Realtime] Parsed text content to structured object:", structuredData);
+      } else {
+        // Fallback: keep the raw string
+        analysisContent = parsedContent.content;
+      }
     } else if (parsedContent && typeof parsedContent === "object") {
-      // Object without nested content field - use as-is for MacroCommentaryDisplay
-      analysisContent = parsedContent;
+      // Object without nested content field - check if it already has structured fields
+      if (parsedContent.executive_summary || parsedContent.fundamental_analysis || parsedContent.directional_bias) {
+        analysisContent = parsedContent;
+      } else {
+        // Try to extract content string and parse it
+        const contentStr = extractStringContent(parsedContent);
+        const structuredData = parseMacroContentToStructured(contentStr);
+        if (structuredData) {
+          analysisContent = structuredData;
+          console.log("✅ [Realtime] Parsed extracted content to structured object:", structuredData);
+        } else {
+          analysisContent = parsedContent;
+        }
+      }
+    } else if (typeof parsedContent === "string") {
+      // Raw string - try to parse it
+      const structuredData = parseMacroContentToStructured(parsedContent);
+      if (structuredData) {
+        analysisContent = structuredData;
+        console.log("✅ [Realtime] Parsed string content to structured object:", structuredData);
+      } else {
+        analysisContent = parsedContent;
+      }
     } else {
       analysisContent = extractStringContent(rawContent);
     }
