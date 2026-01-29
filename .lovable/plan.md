@@ -1,168 +1,135 @@
 
 
-# Plan : Corriger l'extraction de trade_setup et risk_surface dans le Trade Generator
+# Plan: Aligner trade_generator avec ForecastPlaygroundTool + Corrections Macro Lab
 
-## Analyse du Problème
+## Résumé des Demandes
 
-### Problème 1 : trade_setup - Navigation de structure incorrecte
+1. **Forecast Summary by Horizon (trade_generator)** : Utiliser exactement la même méthodologie et colonnes que "Suggested TP/SL based on risk appetite" de ForecastPlaygroundTool
+2. **Supprimer la carte "AI Market Analysis"** : Uniquement cette carte (lignes 1721-1751), sans régression
+3. **Macro Commentary et Trade Section** : Full-width avec rigueur UX
+4. **Page /forecast-playground/macro-commentary uniquement** : Attendre la réponse HTTP directe au lieu de l'événement Supabase Realtime
 
-La réponse API retourne `trade_setup` comme un tableau de strings JSON :
-```json
-"trade_setup": ["{ \"status\": \"success\", \"data\": { \"data\": { \"payload\": { \"horizons\": [...] } } } }"]
+---
+
+## 1. Aligner RiskProfilesPanel avec ForecastPlaygroundTool
+
+### Fichier: `src/pages/ForecastTradeGenerator.tsx`
+
+La version actuelle de `RiskProfilesPanel` (lignes 866-1057) est une version simplifiée. Il faut l'aligner avec la version complète de `ForecastPlaygroundTool.tsx` (lignes 271-586) qui inclut :
+
+**Colonnes manquantes à ajouter :**
+- `Prob (eff.)` avec indicateur d'interpolation (✓ / ⚠)
+- `SL Base (σ)` - sigma de base avant friction
+- `+SL Friction` - colonne conditionnelle avec friction
+- `SL Eff. (σ)` - sigma effectif après friction
+- `TP Base (σ)` - sigma de base avant friction
+- `+TP Friction` - colonne conditionnelle avec friction
+- `TP Eff. (σ)` - sigma effectif après friction
+
+**Logique d'interpolation de probabilité** à ajouter :
+- Utiliser `interpolateProbability()` sur les niveaux de base (sans friction)
+- Afficher indicateur visuel ✓ (interpolé) ou ⚠ (stratégique fallback)
+- Tooltip explicatif pour chaque probabilité
+
+**Changements dans le TableHeader et TableBody** pour matcher exactement le layout de ForecastPlaygroundTool.
+
+---
+
+## 2. Supprimer la carte "AI Market Analysis"
+
+### Fichier: `src/pages/ForecastTradeGenerator.tsx`
+
+Supprimer uniquement les lignes 1721-1751 :
+
+```tsx
+// SUPPRIMER CE BLOC :
+{/* AI Market Analysis Card - Final Answer with Confidence Note */}
+{finalAnswer && !loading && (
+  <Card className="rounded-xl border shadow-sm">
+    ...
+  </Card>
+)}
 ```
 
-Après parsing, la structure est :
-```text
-{
-  status: "success",
-  data: {              ← 1er niveau
-    data: {            ← 2ème niveau  
-      payload: {       ← Le payload est ici !
-        horizons: [...]
-      }
-    }
-  }
+**Variables associées à nettoyer** (si non utilisées ailleurs) :
+- `finalAnswer` state
+- `confidenceNote` state  
+- La logique d'extraction de `final_answer` dans `handleSubmit`
+
+**Vérification** : S'assurer que ces variables ne sont pas utilisées dans d'autres parties de l'UI avant de les supprimer.
+
+---
+
+## 3. Full-Width UX pour Macro Commentary et Trade Section
+
+### Fichier: `src/pages/ForecastTradeGenerator.tsx`
+
+Actuellement les cartes de résultats sont dans un conteneur avec padding. Modifier le layout pour que :
+
+- La section "Trade Setup" et "Forecast Data" occupent toute la largeur
+- Supprimer les marges latérales excessives
+- Appliquer une grille responsive cohérente
+
+**Changements CSS** :
+- Remplacer `max-w-*` constraints par `w-full`
+- Utiliser `container-fluid` pattern
+- Appliquer spacing cohérent `gap-6`
+
+---
+
+## 4. Page Macro Commentary : Réponse HTTP Directe
+
+### Fichier: `src/pages/ForecastMacroLab.tsx`
+
+**Problème actuel** (lignes 391-427) : La page écoute Supabase Realtime pour obtenir la réponse, même si la réponse HTTP contient déjà les données.
+
+**Solution** : Modifier `generateAnalysis()` pour :
+
+1. Faire la requête HTTP et attendre la réponse
+2. Parser directement le body de la réponse HTTP
+3. Extraire le contenu depuis `body.message.message.content.content`
+4. NE PAS écouter Supabase Realtime (supprimer le channel subscription)
+5. Appeler `handleRealtimeResponse()` directement avec les données HTTP
+
+**Logique de parsing** :
+
+```typescript
+// Après fetch réussi
+const bodyText = await response.text();
+const json = JSON.parse(bodyText);
+
+// Extraction du contenu (chemin profond)
+const content = json?.body?.message?.message?.content?.content;
+if (content) {
+  handleRealtimeResponse({ message: { content: { content } } }, responseJobId);
+} else {
+  throw new Error("No content found in response");
 }
 ```
 
-Mais le code actuel dans `getHorizonsFromTradeSetup()` cherche directement `setup?.payload?.horizons`, ce qui retourne `undefined`.
-
-### Problème 2 : risk_surface - Absent de la réponse API
-
-L'inspection de la réponse réseau montre que le backend ne retourne **pas** de champ `risk_surface` dans `body.message.message.content.content`. Seuls `final_answer` et `trade_setup` sont présents.
-
-**Solution** : Extraire les données nécessaires pour le RiskSurfaceChart depuis les métadonnées contenues dans `trade_setup.data.data.metadata` (qui contient `sigma_last`, `vol_model`, etc.).
+**Suppression du code Realtime** :
+- Supprimer `supabase.channel()` subscription
+- Supprimer les handlers `postgres_changes`
+- Garder `createJob()` pour le tracking (optionnel)
 
 ---
 
-## Solution Technique
+## Résumé des Fichiers à Modifier
 
-### Fichier : `src/pages/ForecastTradeGenerator.tsx`
-
-#### 1. Corriger `getHorizonsFromTradeSetup()` (lignes 607-616)
-
-Ajouter la navigation vers `data.data.payload.horizons` :
-
-```typescript
-function getHorizonsFromTradeSetup(setup: TradeSetupResponse): ForecastHorizon[] {
-  // Path 1: Direct payload (expected structure)
-  let horizons = setup?.payload?.horizons;
-  
-  // Path 2: Nested data.data.payload (actual API response)
-  if (!horizons) {
-    const innerData = (setup as any)?.data?.data?.payload;
-    horizons = innerData?.horizons;
-  }
-  
-  // Path 3: Double-nested via data.data (alternative structure)
-  if (!horizons) {
-    const altData = (setup as any)?.data?.payload;
-    horizons = altData?.horizons;
-  }
-  
-  if (!horizons) return [];
-  if (Array.isArray(horizons)) return horizons;
-  
-  // Object format
-  return Object.entries(horizons).map(([key, val]) => ({
-    ...val,
-    h: (val as any).h || key,
-  }));
-}
-```
-
-#### 2. Corriger `extractRiskSurface()` pour construire depuis trade_setup metadata
-
-Puisque `risk_surface` n'est pas retourné par le backend, construire les données minimales depuis les métadonnées de forecast :
-
-```typescript
-function extractRiskSurface(raw: unknown): SurfaceApiResponse | null {
-  console.log("[extractRiskSurface] Starting extraction...");
-  
-  // ... code existant pour chercher risk_surface directement ...
-  
-  // Path FALLBACK: Build surface data from trade_setup metadata
-  try {
-    const tradeSetup = extractTradeSetup(raw);
-    if (tradeSetup) {
-      const innerData = (tradeSetup as any)?.data?.data;
-      const metadata = innerData?.metadata;
-      const payload = innerData?.payload;
-      
-      if (metadata && payload) {
-        console.log("[extractRiskSurface] Building from trade_setup metadata");
-        
-        // Extract required fields for RiskSurfaceChart
-        const sigmaRef = metadata.sigma_last || metadata.residual_std;
-        const entryPrice = payload.entry_price;
-        const horizonData = payload.horizons?.[0];
-        
-        if (sigmaRef && entryPrice) {
-          // Construct minimal surface response
-          return {
-            sigma_ref: sigmaRef,
-            entry_price: entryPrice,
-            symbol: metadata.symbol,
-            timeframe: metadata.timeframe,
-            // Indicate surface data not available
-            surface: null,
-            atr: null,
-            metadata: {
-              vol_model: metadata.vol_model,
-              sigma_path_min: metadata.sigma_path_min,
-              sigma_path_max: metadata.sigma_path_max
-            }
-          } as SurfaceApiResponse;
-        }
-      }
-    }
-  } catch (e) {
-    console.log("[extractRiskSurface] Fallback from trade_setup failed:", e);
-  }
-  
-  console.log("[extractRiskSurface] No valid risk_surface found in any path");
-  return null;
-}
-```
-
-#### 3. Ajouter des logs de debug détaillés dans handleSubmit
-
-```typescript
-// Après extractTradeSetup
-console.log("[handleSubmit] trade_setup structure:", {
-  hasPayload: !!tradeSetup?.payload,
-  hasDataData: !!(tradeSetup as any)?.data?.data,
-  keys: tradeSetup ? Object.keys(tradeSetup) : []
-});
-```
+| Fichier | Action |
+|---------|--------|
+| `src/pages/ForecastTradeGenerator.tsx` | Aligner RiskProfilesPanel, supprimer AI Market Analysis card, full-width layout |
+| `src/pages/ForecastMacroLab.tsx` | Basculer vers réponse HTTP directe, supprimer Realtime listener |
 
 ---
 
-## Résumé des Modifications
+## Garanties Zero Régression
 
-| Fichier | Fonction | Changement |
-|---------|----------|------------|
-| `ForecastTradeGenerator.tsx` | `getHorizonsFromTradeSetup` | Ajouter navigation `data.data.payload.horizons` |
-| `ForecastTradeGenerator.tsx` | `extractRiskSurface` | Fallback: construire depuis `trade_setup.metadata` |
-| `ForecastTradeGenerator.tsx` | `handleSubmit` | Logs de debug enrichis |
-
----
-
-## Garanties
-
-1. **Zero Régression** : Les chemins existants (`setup?.payload?.horizons`) restent en priorité
-2. **Fallback Chain** : Si le chemin direct échoue, les alternatives sont testées
-3. **Logs Détaillés** : Permettent de diagnostiquer quel chemin a réussi
-4. **Risk Surface Partielle** : Si le backend ne retourne pas `risk_surface`, les métadonnées de forecast fournissent les données de base (sigma_ref, entry_price)
-
----
-
-## Notes pour le Backend (Optionnel)
-
-Pour une solution complète du Risk Surface Chart, le backend devrait inclure `risk_surface` dans la réponse avec :
-- `surface.target_probs[]`
-- `surface.sl_sigma[]` 
-- `surface.tp_sigma[]`
-- `atr`
-- `sigma_ref`
+1. **ForecastPlaygroundTool.tsx** : AUCUNE modification (référence)
+2. **Autres pages** : Non impactées (changements isolés)
+3. **API calls** : Endpoints inchangés
+4. **State management** : Variables nettoyées proprement
+5. **Tests manuels recommandés** :
+   - Trade Generator : Vérifier que le tableau affiche toutes les colonnes
+   - Macro Lab : Vérifier que la réponse s'affiche immédiatement après le fetch HTTP
 
