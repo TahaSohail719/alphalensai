@@ -149,7 +149,7 @@ export default function ForecastMacroLab() {
   const handleRealtimeResponse = async (responsePayload: any, jobId: string) => {
     console.log("📩 [Realtime] Processing response payload:", responsePayload);
 
-    let analysisContent = "";
+    let analysisContent: string | object = "";
     const extractStringContent = (obj: any): string => {
       if (typeof obj === "string") return obj;
       if (obj && typeof obj === "object") {
@@ -188,9 +188,25 @@ export default function ForecastMacroLab() {
       rawContent = responsePayload;
     }
     
-    // If rawContent is an object with a "content" field, extract it
-    if (rawContent && typeof rawContent === "object" && rawContent.content !== undefined) {
-      analysisContent = rawContent.content;
+    // Parse JSON string if needed, then extract the "content" field
+    let parsedContent: any = rawContent;
+    if (typeof rawContent === "string") {
+      try {
+        parsedContent = JSON.parse(rawContent);
+        console.log("✅ [Realtime] Parsed JSON string to object");
+      } catch {
+        // Not valid JSON, keep as string
+        parsedContent = rawContent;
+      }
+    }
+    
+    // If parsedContent is an object with a "content" field, extract it for MacroCommentaryDisplay
+    if (parsedContent && typeof parsedContent === "object" && parsedContent.content !== undefined) {
+      // Keep the whole object for MacroCommentaryDisplay (it expects executive_summary, key_levels, etc.)
+      analysisContent = parsedContent;
+    } else if (parsedContent && typeof parsedContent === "object") {
+      // Object without nested content field - use as-is for MacroCommentaryDisplay
+      analysisContent = parsedContent;
     } else {
       analysisContent = extractStringContent(rawContent);
     }
