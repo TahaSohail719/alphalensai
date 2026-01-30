@@ -66,12 +66,12 @@ export default function Layout({
   }, [location.pathname]);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 overflow-x-hidden">
     {/* Mobile-First Responsive Header */}
-    <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-sm">
+    <header className="sticky top-[calc(env(safe-area-inset-top))] z-40 border-b border-white/5 bg-background shadow-sm h-14 sm:h-16">
       <div className="h-full px-4 sm:px-6 max-w-screen-lg mx-auto">
         <div className="flex items-center h-full">
           {/* Logo - Mobile optimized */}
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1 sm:gap-2 hover:opacity-90 transition-all duration-200 group">
-            <img src="/logo_v2.png" alt="alphaLens.ai" className="h-10 sm:h-14 w-auto object-contain" />
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 hover:opacity-90 transition-all duration-200 group">
+            <img src="/header_logo.png" alt="alphaLens.ai" className="h-10 sm:h-14 w-auto object-contain" />
           </button>
 
           {/* Credits Display - Rapproché des logos */}

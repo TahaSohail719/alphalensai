@@ -37,22 +37,18 @@ export default function Homepage() {
     <PublicNavbar />
 
     {/* Hero Section */}
-    <section className="relative pt-6 pb-8 px-4 text-center bg-background">
+    <section className="relative pt-0 pb-24 px-4 text-center bg-background">
       <div className="container mx-auto max-w-6xl">
-        <div className="flex flex-col items-center mb-8">
-          {/* White line above the logo */}
-          <div className="w-48 h-1 bg-white mb-6 rounded-full opacity-90" />
-
+        <div className="flex flex-col items-center mb-0">
           <div className="flex items-center gap-4">
             <img
-              src="/logo_v2.png"
+              src="/alphalens_logo_new.png"
               alt="alphaLens.ai logo"
-              className="h-12 w-auto object-contain"
+              className="h-72 w-auto object-contain"
             />
-            <span className="text-xl text-gray-400 font-light hidden sm:inline">AI Trading Intelligence</span>
           </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight -mt-16">
           {t('hero.title')}
           <span className="text-primary"> {t('hero.subtitle')}</span>
         </h1>
@@ -60,10 +56,10 @@ export default function Homepage() {
           {t('hero.description')}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="text-lg px-8 py-3 bg-primary hover:bg-primary/90" onClick={handleFreeTrialClick}>
+          <Button size="lg" className="text-lg px-8 py-3 bg-primary text-white hover:bg-accent hover:text-white hover:border-accent transition-colors duration-300" onClick={handleFreeTrialClick}>
             {t('hero.tryDemo')} <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <Button variant="outline" size="lg" className="text-lg px-8 py-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={() => navigate("/auth")}>
+          <Button variant="outline" size="lg" className="text-lg px-8 py-3 border-primary text-primary hover:bg-accent hover:text-white hover:border-accent transition-colors duration-300" onClick={() => navigate("/auth")}>
             {t('hero.getStarted')}
           </Button>
         </div>
@@ -150,7 +146,7 @@ export default function Homepage() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <img src="/logo_v2.png" alt="alphaLens.ai" className="h-12 w-auto" />
+              <img src="/footer_logo.png" alt="alphaLens.ai" className="h-10 w-auto" />
             </div>
             <p className="text-muted-foreground text-sm">
               {t('footer.description')}

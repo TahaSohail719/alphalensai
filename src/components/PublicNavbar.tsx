@@ -41,7 +41,7 @@ export default function PublicNavbar() {
             className="flex items-center gap-2 hover:opacity-90 transition-all duration-200 group min-w-0"
           >
             <img
-              src="/logo_v2.png"
+              src="/header_logo.png"
               alt="alphaLens.ai"
               className="h-10 sm:h-14 w-auto object-contain"
             />

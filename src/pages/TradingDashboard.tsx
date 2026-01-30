@@ -258,16 +258,16 @@ export default function TradingDashboard() {
       {/* SECTION 2: Full-width row with Chart (2/3) + Market News (1/3) */}
       <section
         aria-label="Market chart and news"
-        className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-8 my-4"
+        className="relative left-1/2 -translate-x-1/2 w-screen px-4 sm:px-6 lg:px-8 my-2"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 items-start max-w-[1920px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-2 items-stretch max-w-[1920px] mx-auto">
           {/* Col gauche - Rangée 1 : Trading Dashboard */}
-          <div ref={chartRef} className="min-w-0 min-h-0 order-1 my-0">
+          <div ref={chartRef} className="min-w-0 min-h-0 order-1 my-0 h-full">
             <CandlestickChart
               forceMode={sessionChartMode}
               asset={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
               showHeader={true}
-              height={500}
+              height={350}
               tradeLevels={activeTradeLevels}
               onLevelUpdate={(type, value) => {
                 if (activeTradeLevels) {
@@ -292,90 +292,90 @@ export default function TradingDashboard() {
             />
           </div>
 
-          {/* Col droite - Rangée 1 : Market News (desktop only) */}
-          <div
-            className="min-w-0 min-h-0 order-3 lg:order-2 my-0 hidden lg:block"
-            style={chartHeight ? { height: `${chartHeight}px` } : undefined}
-          >
-            <MarketNewsCollapsible className="h-full" />
-          </div>
+          {/* Col droite - Rangée 1 : Navigation Cards Vertical Stack */}
+          <div className="min-w-0 min-h-0 order-2 my-0 hidden lg:flex flex-col gap-2 h-full">
+            <Card
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden flex-1 flex flex-col justify-center"
+              onClick={() => navigate('/ai-setup')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center gap-4 text-center h-full">
+                <div className="gradient-primary p-3 rounded-2xl shadow-glow-primary shrink-0">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xl font-bold text-foreground mb-2">{t('dashboard:trading.aiTradeSetup')}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 px-2 mb-2">
+                    {t('dashboard:trading.intelligentTradeSetups')}
+                  </p>
+                  <div className="text-primary text-sm font-semibold flex items-center justify-center gap-2">
+                    {t('dashboard:getStarted')} <ArrowRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Col gauche - Rangée 2 : Asset Info */}
-          <div className="min-w-0 mt-4 mb-0 order-2 lg:order-3">
-            <AssetInfoCard
-              symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
-              className="w-full"
-            />
+            <Card
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden flex-1 flex flex-col justify-center"
+              onClick={() => navigate('/macro-analysis')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center gap-4 text-center h-full">
+                <div className="gradient-primary p-3 rounded-2xl shadow-glow-primary shrink-0">
+                  <Activity className="h-8 w-8 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xl font-bold text-foreground mb-2">{t('dashboard:trading.macroCommentary')}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 px-2 mb-2">
+                    {t('dashboard:trading.inDepthAnalysis')}
+                  </p>
+                  <div className="text-primary text-sm font-semibold flex items-center justify-center gap-2">
+                    {t('common:actions.explore')} <ArrowRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden flex-1 flex flex-col justify-center"
+              onClick={() => navigate('/reports')}
+              style={{ minHeight: '44px' }}
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center gap-4 text-center h-full">
+                <div className="gradient-primary p-3 rounded-2xl shadow-glow-primary shrink-0">
+                  <Activity className="h-8 w-8 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xl font-bold text-foreground mb-2">{t('dashboard:trading.reports')}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 px-2 mb-2">
+                    {t('dashboard:trading.comprehensiveReports')}
+                  </p>
+                  <div className="text-primary text-sm font-semibold flex items-center justify-center gap-2">
+                    {t('common:actions.explore')} <ArrowRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+        </div>
+
+        {/* SECTION 3: Asset Info + Market News */}
+        <div className="max-w-[1920px] mx-auto mt-4 space-y-4">
+          {/* Asset Info Card */}
+          <AssetInfoCard
+            symbol={selectedAssetProfile ? selectedAssetProfile.symbol : selectedAsset}
+            className="w-full"
+          />
+
+          {/* Market News */}
+          <MarketNewsCollapsible className="w-full" />
         </div>
       </section>
 
       {/* SECTION 3: Normal width - Navigation Cards, Job Status */}
       <div className="space-y-4 sm:space-y-6">
         {/* Navigation Cards */}
-        <section aria-label="Quick navigation" className="mt-6 md:mt-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card
-              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden"
-              onClick={() => navigate('/ai-setup')}
-              style={{ minHeight: '44px' }}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                  <Zap className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.aiTradeSetup')}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {t('dashboard:trading.intelligentTradeSetups')}
-                </p>
-                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  {t('dashboard:getStarted')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
 
-            <Card
-              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden"
-              onClick={() => navigate('/macro-analysis')}
-              style={{ minHeight: '44px' }}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                  <Activity className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.macroCommentary')}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {t('dashboard:trading.inDepthAnalysis')}
-                </p>
-                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  {t('common:actions.explore')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="gradient-card border-primary/20 shadow-glow-primary cursor-pointer hover:scale-105 transition-smooth touch-manipulation overflow-hidden"
-              onClick={() => navigate('/reports')}
-              style={{ minHeight: '44px' }}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="gradient-primary p-3 rounded-xl shadow-glow-primary mx-auto w-fit mb-4">
-                  <Activity className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{t('dashboard:trading.reports')}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {t('dashboard:trading.comprehensiveReports')}
-                </p>
-                <Button size="sm" className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                  {t('common:actions.explore')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
 
         {/* Job Status Card */}
         {jobManager.activeJobs.length > 0 && (

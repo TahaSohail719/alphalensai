@@ -12,9 +12,9 @@ export function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <img
-                src="/logo_v2.png"
+                src="/footer_logo.png"
                 alt="alphaLens.ai"
-                className="h-12 w-auto"
+                className="h-10 w-auto object-contain"
               />
             </div>
             <p className="text-muted-foreground text-sm">
